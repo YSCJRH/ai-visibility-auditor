@@ -1,0 +1,8 @@
+﻿User-agent: *
+Disallow: /
+
+User-agent: OAI-SearchBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /

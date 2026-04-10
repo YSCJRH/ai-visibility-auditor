@@ -1,0 +1,19 @@
+name: Docs improvement
+description: Improve setup, architecture, scoring, or contributor docs.
+title: "[docs] "
+labels:
+  - "kind:docs"
+  - "area:docs"
+body:
+  - type: textarea
+    id: gap
+    attributes:
+      label: Documentation gap
+      description: What is unclear, outdated, or missing?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Suggested improvement
+

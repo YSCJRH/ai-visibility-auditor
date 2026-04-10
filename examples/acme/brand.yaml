@@ -1,0 +1,30 @@
+﻿brand:
+  name: "Acme"
+  domain: "acme.test"
+  category: "developer analytics platform"
+  one_liner: "Acme helps product and engineering teams understand onboarding, adoption, and time-to-value."
+  target_personas:
+    - "product managers"
+    - "developer experience teams"
+  key_use_cases:
+    - "analyze onboarding friction"
+    - "measure feature adoption"
+    - "reduce time-to-value"
+  competitors:
+    - "Mixpanel"
+    - "Amplitude"
+    - "PostHog"
+  canonical_facts:
+    - id: "positioning"
+      type: "positioning"
+      text: "Acme is a developer analytics platform for product and engineering teams."
+    - id: "features"
+      type: "features"
+      text: "Acme supports event analytics, funnels, and activation tracking."
+    - id: "evidence"
+      type: "evidence"
+      text: "Acme provides public docs, self-serve onboarding, and transparent pricing."
+  trusted_domains:
+    - "acme.test"
+    - "docs.acme.test"
+    - "github.com/acme"

@@ -1,0 +1,32 @@
+name: Bug report
+description: Report a confirmed bug in crawl, audit, scoring, or reporting behavior.
+title: "[bug] "
+labels:
+  - "kind:bug"
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is broken?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include the command, config, and fixture or site details.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: artifacts
+    attributes:
+      label: Logs or artifacts
+      description: Paste a stack trace or link a report artifact.
+

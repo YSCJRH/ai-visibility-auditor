@@ -1,0 +1,10 @@
+﻿User-agent: *
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://fixture.local/sitemap.xml

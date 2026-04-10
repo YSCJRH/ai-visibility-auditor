@@ -1,0 +1,30 @@
+﻿name: Demo Audit
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'examples/**'
+      - 'apps/**'
+      - 'packages/**'
+      - '.github/workflows/demo-audit.yml'
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm demo:fixture
+      - uses: actions/upload-artifact@v4
+        with:
+          name: answerlens-demo-audit
+          path: runs/static-good

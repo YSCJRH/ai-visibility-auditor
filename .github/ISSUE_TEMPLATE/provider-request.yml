@@ -1,0 +1,28 @@
+name: Provider request
+description: Propose or improve an eval provider adapter.
+title: "[provider] "
+labels:
+  - "kind:feature"
+  - "area:providers"
+body:
+  - type: input
+    id: provider
+    attributes:
+      label: Provider name
+      placeholder: "OpenAI, Perplexity, Azure, Anthropic..."
+    validations:
+      required: true
+  - type: textarea
+    id: api
+    attributes:
+      label: API details
+      description: Link the official docs and call out the response fields that matter.
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Why this adapter matters
+    validations:
+      required: true
+

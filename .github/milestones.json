@@ -1,0 +1,15 @@
+[
+  {
+    "title": "v0.1-audit",
+    "description": "CLI-first audit MVP with fixtures, reports, and GitHub scaffolding."
+  },
+  {
+    "title": "v0.2-eval",
+    "description": "Experimental OpenAI and Perplexity eval adapters with normalized citations."
+  },
+  {
+    "title": "v0.3-connectors",
+    "description": "Search Console, Bing Webmaster, IndexNow, and manual import extensions."
+  }
+]
+

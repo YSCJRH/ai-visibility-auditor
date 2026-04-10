@@ -1,0 +1,29 @@
+name: Rule proposal
+description: Propose a new deterministic audit rule or a meaningful rule enhancement.
+title: "[rule-proposal] "
+labels:
+  - "kind:feature"
+  - "area:core"
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What user problem does this rule catch?
+    validations:
+      required: true
+  - type: textarea
+    id: signal
+    attributes:
+      label: Deterministic signal
+      description: What stable site signal should the rule inspect?
+    validations:
+      required: true
+  - type: textarea
+    id: remediation
+    attributes:
+      label: Expected fix hint
+      description: What should the recommendation tell users to do?
+    validations:
+      required: true
+

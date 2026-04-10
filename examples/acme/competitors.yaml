@@ -1,0 +1,10 @@
+﻿competitors:
+  - name: "Mixpanel"
+    domain: "mixpanel.com"
+    category: "product analytics"
+  - name: "Amplitude"
+    domain: "amplitude.com"
+    category: "product analytics"
+  - name: "PostHog"
+    domain: "posthog.com"
+    category: "product analytics"

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://fixture.local/</loc></url>
+  <url><loc>https://fixture.local/product</loc></url>
+  <url><loc>https://fixture.local/pricing</loc></url>
+  <url><loc>https://fixture.local/security</loc></url>
+  <url><loc>https://fixture.local/docs</loc></url>
+  <url><loc>https://fixture.local/faq</loc></url>
+  <url><loc>https://fixture.local/compare</loc></url>
+  <url><loc>https://fixture.local/integrations</loc></url>
+  <url><loc>https://fixture.local/use-case/fintech</loc></url>
+  <url><loc>https://fixture.local/use-case/platform</loc></url>
+  <url><loc>https://fixture.local/use-case/enterprise</loc></url>
+</urlset>

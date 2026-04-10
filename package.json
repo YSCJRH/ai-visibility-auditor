@@ -1,0 +1,30 @@
+{
+  "name": "answerlens-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Open-source AI visibility auditor for product websites.",
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "audit": "node --experimental-strip-types apps/cli/src/index.ts audit",
+    "eval": "node --experimental-strip-types apps/cli/src/index.ts eval",
+    "demo:fixture": "node --experimental-strip-types apps/cli/src/index.ts audit ./examples/fixtures/static-good --brand ./examples/acme/brand.yaml --competitors ./examples/acme/competitors.yaml --prompts ./examples/acme/prompts.yaml --out ./runs/static-good",
+    "test": "node --experimental-strip-types --experimental-test-isolation=none --test packages/core/src/audit.test.ts packages/report/src/index.test.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.base.json"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "fast-xml-parser": "^4.5.0",
+    "yaml": "^2.7.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "typescript": "^5.7.3"
+  }
+}
+
+
