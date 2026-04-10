@@ -1,4 +1,4 @@
-import { mkdir } from "node:fs/promises";
+﻿import { mkdir } from "node:fs/promises";
 
 export async function ensureDir(dirPath: string): Promise<void> {
   await mkdir(dirPath, { recursive: true });
@@ -64,3 +64,10 @@ export function normalizeUrlPathname(url: string): string {
   }
 }
 
+export function normalizeDomain(value: string): string {
+  try {
+    return new URL(value.startsWith("http") ? value : `https://${value}`).hostname.replace(/^www\./, "").toLowerCase();
+  } catch {
+    return value.replace(/^www\./, "").toLowerCase();
+  }
+}

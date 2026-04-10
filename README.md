@@ -1,4 +1,4 @@
-# AnswerLens
+﻿# AnswerLens
 
 > Open-source AI visibility auditor for product websites.
 
@@ -15,8 +15,8 @@ AnswerLens helps product and growth teams understand whether a site is ready to 
 - `audit` command for AI-readiness checks against a product site or local fixture
 - Structured config contracts for `brand.yaml`, `competitors.yaml`, and `prompts.yaml`
 - Markdown, JSON, and static HTML reports
+- OpenAI-backed experimental `eval` workflow with normalized citations and raw payload persistence
 - Community health files and GitHub issue / PR scaffolding
-- Experimental provider contracts for the upcoming `eval` workflow
 
 ## What this is not
 
@@ -56,6 +56,26 @@ pnpm run audit -- https://example.com \
   --out ./runs/example
 ```
 
+## Experimental eval
+
+Set `OPENAI_API_KEY` and run:
+
+```bash
+pnpm run eval -- https://example.com \
+  --brand ./examples/acme/brand.yaml \
+  --competitors ./examples/acme/competitors.yaml \
+  --prompts ./examples/acme/prompts.yaml \
+  --provider openai \
+  --out ./runs/example-eval
+```
+
+`eval` reuses the audit baseline, writes raw provider payloads, and adds:
+
+- `eval-results.json`
+- `eval-summary.md`
+- `before-after-diff.md`
+- `briefs/*.md` when FAQ / compare / use-case gaps are detected
+
 ## Output contract
 
 `audit` writes:
@@ -65,11 +85,12 @@ pnpm run audit -- https://example.com \
 - `scorecard.md`
 - `index.html`
 
-`eval` is scaffolded as an experimental command and will eventually add:
+`eval` additionally writes:
 
 - `eval-results.json`
 - `eval-summary.md`
 - `before-after-diff.md`
+- `raw/<provider>/<promptId>.json`
 
 ## Development
 
@@ -86,7 +107,7 @@ pnpm typecheck
 
 ## Contributing
 
-Start with [CONTRIBUTING.md](/D:/SEO/CONTRIBUTING.md). Questions and open-ended ideas should go to GitHub Discussions once the remote repo is enabled. Actionable changes should come through Issues and PRs.
+Start with [CONTRIBUTING.md](/D:/SEO/CONTRIBUTING.md). Questions and open-ended ideas should go to GitHub Discussions. Actionable changes should come through Issues and PRs.
 
 ## License
 

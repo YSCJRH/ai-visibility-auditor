@@ -30,4 +30,12 @@ export interface EvalRequest {
   prompt: string;
   brandDomain: string;
   trustedDomains: string[];
+  expectedSignal?: string;
+}
+
+export interface ProviderRunOptions {
+  apiKey?: string;
+  model?: string;
+  baseUrl?: string;
+  timeoutMs?: number;
 }
