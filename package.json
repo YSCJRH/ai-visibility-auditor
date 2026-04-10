@@ -12,7 +12,7 @@
     "audit": "node --experimental-strip-types apps/cli/src/index.ts audit",
     "eval": "node --experimental-strip-types apps/cli/src/index.ts eval",
     "demo:fixture": "node --experimental-strip-types apps/cli/src/index.ts audit ./examples/fixtures/static-good --brand ./examples/acme/brand.yaml --competitors ./examples/acme/competitors.yaml --prompts ./examples/acme/prompts.yaml --out ./runs/static-good",
-    "test": "node --experimental-strip-types --experimental-test-isolation=none --test packages/core/src/audit.test.ts packages/report/src/index.test.ts",
+    "test": "node --experimental-strip-types --experimental-test-isolation=none --test packages/core/src/audit.test.ts packages/core/src/eval.test.ts packages/providers/src/openai.test.ts packages/report/src/index.test.ts apps/cli/src/index.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.base.json"
   },
   "dependencies": {
@@ -26,5 +26,3 @@
     "typescript": "^5.7.3"
   }
 }
-
-

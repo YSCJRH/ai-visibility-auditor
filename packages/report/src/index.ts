@@ -1,8 +1,14 @@
-﻿import { writeFile } from "node:fs/promises";
+﻿import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { AuditResult } from "../../core/src/types.ts";
+import type { ContentBrief, EvalResult } from "../../core/src/eval.ts";
 import { BUCKET_LABELS } from "../../core/src/audit.ts";
+import { summarizeEvalDiff } from "../../core/src/eval.ts";
 import { ensureDir } from "../../core/src/utils.ts";
+
+function renderVavr(value: number | null): string {
+  return value === null ? "pending eval" : `${value}`;
+}
 
 export function renderScorecardMarkdown(result: AuditResult): string {
   const scores = Object.entries(result.scores)
@@ -14,10 +20,7 @@ export function renderScorecardMarkdown(result: AuditResult): string {
 
   const topIssues = result.issues
     .slice(0, 10)
-    .map(
-      (issue) =>
-        `| ${issue.severity} | ${issue.title} | ${issue.pageUrl ?? "site"} | ${issue.fixHint} |`
-    )
+    .map((issue) => `| ${issue.severity} | ${issue.title} | ${issue.pageUrl ?? "site"} | ${issue.fixHint} |`)
     .join("\n");
 
   const pages = result.pages
@@ -49,7 +52,7 @@ export function renderScorecardMarkdown(result: AuditResult): string {
 - Site: ${result.site.input}
 - Generated: ${result.site.generatedAt}
 - Overall score: ${result.summary.overallScore}
-- VAVR: pending eval
+- VAVR: ${renderVavr(result.summary.vavr)}
 - Crawled pages: ${result.summary.crawledPages}
 - Discovered URLs: ${result.summary.discoveredUrls}
 
@@ -188,7 +191,7 @@ export function renderScorecardHtml(result: AuditResult): string {
       <section class="hero">
         <p>AnswerLens scorecard</p>
         <h1>${result.site.input}</h1>
-        <p>Overall score: <strong>${result.summary.overallScore}</strong> · VAVR: <strong>pending eval</strong></p>
+        <p>Overall score: <strong>${result.summary.overallScore}</strong> · VAVR: <strong>${renderVavr(result.summary.vavr)}</strong></p>
         <p>${result.site.generatedAt}</p>
       </section>
       <section class="grid">${bucketCards}</section>
@@ -214,6 +217,100 @@ export function renderScorecardHtml(result: AuditResult): string {
 </html>`;
 }
 
+export function renderEvalSummaryMarkdown(result: EvalResult): string {
+  const promptRows = result.prompts
+    .map(
+      (promptResult) =>
+        `| ${promptResult.promptId} | ${promptResult.category} | ${Math.round(promptResult.scores.vavr * 100)} | ${promptResult.scores.mention === 1 ? "yes" : "no"} | ${promptResult.citations.length} | ${promptResult.recommended ? "yes" : "no"} |`
+    )
+    .join("\n");
+
+  const briefList =
+    result.briefs.length > 0
+      ? result.briefs.map((brief) => `- ${brief.type}: ${brief.title}`).join("\n")
+      : "- none";
+
+  return `# AnswerLens Eval Summary
+
+## Overview
+
+- Site: ${result.site.input}
+- Provider: ${result.provider.name}
+- Model: ${result.provider.model}
+- Generated: ${result.generatedAt}
+- Prompt count: ${result.summary.promptCount}
+- VAVR: ${result.summary.vavr}
+
+## Metrics
+
+- Mention rate: ${result.summary.mentionRate}
+- Owned citation rate: ${result.summary.ownedCitationRate}
+- Trusted citation rate: ${result.summary.trustedCitationRate}
+- Recommendation rate: ${result.summary.recommendationRate}
+- Accuracy rate: ${result.summary.accuracyRate}
+
+## Prompt results
+
+| Prompt | Category | VAVR | Mention | Citations | Recommended |
+| --- | --- | ---: | --- | ---: | --- |
+${promptRows}
+
+## Generated briefs
+
+${briefList}
+`;
+}
+
+export function renderEvalDiffMarkdown(current: EvalResult, previous: EvalResult | null): string {
+  if (!previous) {
+    return `# AnswerLens Before/After Diff\n\nNo previous eval-results.json was found in this output directory, so this run becomes the baseline.\n`;
+  }
+
+  const rows = summarizeEvalDiff(current, previous)
+    .map(
+      (metric) =>
+        `| ${metric.label} | ${metric.previous ?? "n/a"} | ${metric.current} | ${metric.delta === null ? "n/a" : metric.delta > 0 ? `+${metric.delta}` : `${metric.delta}`} |`
+    )
+    .join("\n");
+
+  return `# AnswerLens Before/After Diff
+
+| Metric | Before | After | Delta |
+| --- | ---: | ---: | ---: |
+${rows}
+`;
+}
+
+export function renderBriefMarkdown(brief: ContentBrief): string {
+  const outline = brief.outline.map((entry) => `- ${entry}`).join("\n");
+  const claims = brief.claims.map((entry) => `- ${entry}`).join("\n");
+
+  return `# ${brief.title}
+
+- Type: ${brief.type}
+- Audience: ${brief.audience}
+- Angle: ${brief.angle}
+- CTA: ${brief.cta}
+
+## Outline
+
+${outline}
+
+## Claims to support
+
+${claims}
+`;
+}
+
+export async function readEvalResults(filePath: string): Promise<EvalResult | null> {
+  try {
+    const raw = await readFile(filePath, "utf8");
+    return JSON.parse(raw) as EvalResult;
+  } catch {
+    return null;
+  }
+}
+
 export async function writeAuditOutputs(outDir: string, result: AuditResult): Promise<void> {
   await ensureDir(outDir);
   await writeFile(path.join(outDir, "site-audit.json"), `${JSON.stringify(result, null, 2)}\n`, "utf8");
@@ -221,3 +318,19 @@ export async function writeAuditOutputs(outDir: string, result: AuditResult): Pr
   await writeFile(path.join(outDir, "scorecard.md"), renderScorecardMarkdown(result), "utf8");
   await writeFile(path.join(outDir, "index.html"), renderScorecardHtml(result), "utf8");
 }
+
+export async function writeEvalOutputs(outDir: string, result: EvalResult, previous: EvalResult | null): Promise<void> {
+  await ensureDir(outDir);
+  await writeFile(path.join(outDir, "eval-results.json"), `${JSON.stringify(result, null, 2)}\n`, "utf8");
+  await writeFile(path.join(outDir, "eval-summary.md"), renderEvalSummaryMarkdown(result), "utf8");
+  await writeFile(path.join(outDir, "before-after-diff.md"), renderEvalDiffMarkdown(result, previous), "utf8");
+
+  if (result.briefs.length > 0) {
+    const briefsDir = path.join(outDir, "briefs");
+    await mkdir(briefsDir, { recursive: true });
+    for (const brief of result.briefs) {
+      await writeFile(path.join(briefsDir, `${brief.id}.md`), renderBriefMarkdown(brief), "utf8");
+    }
+  }
+}
+
