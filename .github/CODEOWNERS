@@ -1,8 +1,1 @@
-# Replace @your-github-handle with the real maintainer before enabling owner-required reviews.
-# * @your-github-handle
-# /packages/core/ @your-github-handle
-# /packages/providers/ @your-github-handle
-# /packages/report/ @your-github-handle
-# /.github/ @your-github-handle
-# /docs/ @your-github-handle
-
+@YSCJRH

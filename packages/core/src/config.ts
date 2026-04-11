@@ -44,7 +44,11 @@ const promptsSchema = z.object({
         category: z.string().min(1),
         template: z.string().min(1),
         expected_signal: z.string().min(1),
-        priority: z.enum(["high", "medium", "low"]).optional()
+        priority: z.enum(["high", "medium", "low"]).optional(),
+        intent: z.string().optional(),
+        holdout: z.boolean().optional(),
+        variables: z.array(z.string().min(1)).optional(),
+        locale: z.string().optional()
       })
     )
     .default([])
@@ -77,5 +81,3 @@ export async function loadCompetitorsConfig(filePath: string): Promise<Competito
 export async function loadPromptsConfig(filePath: string): Promise<PromptsConfig> {
   return (await loadYamlFile(filePath, promptsSchema)) as PromptsConfig;
 }
-
-

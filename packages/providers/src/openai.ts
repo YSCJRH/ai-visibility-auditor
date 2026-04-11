@@ -1,15 +1,18 @@
-import type { Citation, EvalRequest, ProviderResponse, ProviderRunOptions, SearchResult } from "./contracts.ts";
+﻿import type { Citation, EvalRequest, ProviderResponse, ProviderRunOptions, SearchResult } from "./contracts.ts";
 import { normalizeDomain, unique } from "../../core/src/utils.ts";
 
 const DEFAULT_BASE_URL = "https://api.openai.com/v1";
 const DEFAULT_MODEL = "gpt-5";
 
-function buildInput(prompt: string): string {
+function buildInput(prompt: string, locale?: string): string {
   return [
     "You are evaluating public-web AI visibility for a product website.",
     "Answer concisely, compare products when relevant, and rely on public web sources.",
+    locale ? `Preferred locale: ${locale}.` : null,
     `Question: ${prompt}`
-  ].join("\n\n");
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 function normalizeCitation(raw: { url?: string; title?: string }, brandDomain: string, trustedDomains: string[]): Citation | null {
@@ -47,7 +50,14 @@ function parseSearchResults(payload: any): SearchResult[] {
     return {
       url,
       title: typeof source?.title === "string" ? source.title : undefined,
-      date: typeof source?.date === "string" ? source.date : typeof source?.published_at === "string" ? source.published_at : undefined
+      date:
+        typeof source?.date === "string"
+          ? source.date
+          : typeof source?.published_at === "string"
+            ? source.published_at
+            : undefined,
+      snippet: typeof source?.snippet === "string" ? source.snippet : undefined,
+      source: "web"
     } satisfies SearchResult;
   });
 }
@@ -105,6 +115,10 @@ export async function runOpenAIEval(request: EvalRequest, options: ProviderRunOp
   const baseUrl = (options.baseUrl ?? process.env.ANSWERLENS_OPENAI_BASE_URL ?? process.env.OPENAI_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/$/, "");
   const model = options.model ?? process.env.ANSWERLENS_OPENAI_MODEL ?? DEFAULT_MODEL;
   const timeoutMs = options.timeoutMs ?? 60_000;
+  const locale = options.locale ?? request.locale ?? null;
+  const sampleIndex = options.sampleIndex ?? request.sampleIndex ?? 0;
+  const runCount = options.runCount ?? request.runCount ?? 1;
+  const holdout = options.holdout ?? request.holdout ?? false;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -117,7 +131,7 @@ export async function runOpenAIEval(request: EvalRequest, options: ProviderRunOp
       },
       body: JSON.stringify({
         model,
-        input: buildInput(request.prompt),
+        input: buildInput(request.prompt, locale ?? undefined),
         reasoning: {
           effort: "low"
         },
@@ -140,7 +154,12 @@ export async function runOpenAIEval(request: EvalRequest, options: ProviderRunOp
       citations: parseCitations(rawPayload, brandDomain, trustedDomains),
       searchResults: parseSearchResults(rawPayload),
       rawPayload,
-      requestedAt: new Date().toISOString()
+      requestedAt: new Date().toISOString(),
+      locale,
+      sampleIndex,
+      runCount,
+      holdout,
+      rankPosition: null
     };
   } finally {
     clearTimeout(timer);

@@ -1,0 +1,62 @@
+﻿<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Artifact preview</title>
+  <desc id="desc">AnswerLens artifact preview showing run outputs, recommendations, and manifest metadata from the fixture demo.</desc>
+  <defs>
+    <linearGradient id="bg" x1="120" y1="100" x2="1320" y2="820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#081426"/>
+      <stop offset="1" stop-color="#132B4D"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="180" y1="210" x2="650" y2="760" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#132642"/>
+      <stop offset="1" stop-color="#0C1B30"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="22" stdDeviation="28" flood-color="#020914" flood-opacity="0.42"/>
+    </filter>
+  </defs>
+
+  <rect width="1440" height="900" rx="40" fill="url(#bg)"/>
+  <circle cx="220" cy="182" r="150" fill="#74C6FF" fill-opacity="0.09"/>
+  <circle cx="1264" cy="742" r="220" fill="#91FFD7" fill-opacity="0.06"/>
+
+  <text x="120" y="116" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="52" font-weight="760">Artifact preview</text>
+  <text x="120" y="160" fill="#BBD5F0" font-family="Segoe UI, Arial, sans-serif" font-size="24">Shareable files that land in `runs/&lt;name&gt;/` after an audit or eval run</text>
+
+  <g filter="url(#shadow)">
+    <rect x="112" y="212" width="482" height="580" rx="30" fill="url(#panel)" stroke="#88B8FF" stroke-opacity="0.22"/>
+    <text x="156" y="276" fill="#8CF8D5" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">runs/static-good/</text>
+    <g font-family="Consolas, 'Courier New', monospace" font-size="22">
+      <text x="156" y="336" fill="#D7E8FF">site-audit.json</text>
+      <text x="156" y="378" fill="#D7E8FF">issues.json</text>
+      <text x="156" y="420" fill="#D7E8FF">recommendations.md</text>
+      <text x="156" y="462" fill="#D7E8FF">scorecard.md</text>
+      <text x="156" y="504" fill="#D7E8FF">index.html</text>
+      <text x="156" y="546" fill="#D7E8FF">normalized-pages.json</text>
+      <text x="156" y="588" fill="#D7E8FF">competitor-diff.md</text>
+      <text x="156" y="630" fill="#D7E8FF">run.json</text>
+      <text x="156" y="688" fill="#7FB0E1">eval-results.json</text>
+      <text x="156" y="730" fill="#7FB0E1">citation-gap-matrix.json</text>
+    </g>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="638" y="212" width="690" height="268" rx="30" fill="#F8FBFF"/>
+    <text x="682" y="278" fill="#0A1E35" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">recommendations.md</text>
+    <text x="682" y="332" fill="#4E667F" font-family="Segoe UI, Arial, sans-serif" font-size="18">Tighten structure and schema alignment on key pages</text>
+    <text x="682" y="374" fill="#4E667F" font-family="Segoe UI, Arial, sans-serif" font-size="18">Add citable pricing, trust, and documentation proof</text>
+    <text x="682" y="416" fill="#4E667F" font-family="Segoe UI, Arial, sans-serif" font-size="18">Close FAQ, compare, integrations, and use-case gaps</text>
+    <rect x="682" y="438" width="252" height="12" rx="6" fill="#DDE8F6"/>
+    <rect x="682" y="438" width="182" height="12" rx="6" fill="#2E63FF"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="638" y="512" width="690" height="280" rx="30" fill="#F8FBFF"/>
+    <text x="682" y="578" fill="#0A1E35" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">run.json</text>
+    <g font-family="Consolas, 'Courier New', monospace" font-size="20">
+      <text x="682" y="628" fill="#37506A">{"kind": "audit", "id": "ccacc8ca-..."}</text>
+      <text x="682" y="668" fill="#37506A">{"artifacts": ["site-audit.json", "issues.json", ...]}</text>
+      <text x="682" y="708" fill="#37506A">{"summary": {"overallScore": 78, "vavr": null}}</text>
+      <text x="682" y="748" fill="#37506A">{"site": "./examples/fixtures/static-good"}</text>
+    </g>
+  </g>
+</svg>

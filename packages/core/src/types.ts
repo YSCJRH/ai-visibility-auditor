@@ -1,6 +1,7 @@
-export type Severity = "error" | "warn" | "info";
+﻿export type Severity = "error" | "warn" | "info";
 export type Scope = "site" | "page";
 export type SiteKind = "remote" | "local";
+export type RunMode = "audit" | "eval" | "manual-import";
 export type PageType =
   | "home"
   | "product"
@@ -63,12 +64,18 @@ export interface CompetitorsConfig {
   competitors: CompetitorEntry[];
 }
 
+export type PromptPriority = "high" | "medium" | "low";
+
 export interface PromptCase {
   id: string;
   category: string;
   template: string;
   expected_signal: string;
-  priority?: "high" | "medium" | "low";
+  priority?: PromptPriority;
+  intent?: string;
+  holdout?: boolean;
+  variables?: string[];
+  locale?: string;
 }
 
 export interface PromptsConfig {
@@ -166,7 +173,20 @@ export interface AuditSummary {
   keyPageCount: number;
 }
 
+export interface RunMetadata {
+  id: string;
+  mode: RunMode;
+  createdAt: string;
+  completedAt: string;
+  artifactVersion: string;
+  ruleVersion: string;
+  configHash: string;
+  sampleCount: number;
+  locale: string | null;
+}
+
 export interface AuditResult {
+  run: RunMetadata;
   site: {
     kind: SiteKind;
     input: string;
@@ -185,6 +205,7 @@ export interface AuditResult {
       "name" | "domain" | "category" | "target_personas" | "key_use_cases" | "trusted_domains"
     >;
     competitors: number;
+    competitorNames: string[];
     prompts: number;
   };
 }

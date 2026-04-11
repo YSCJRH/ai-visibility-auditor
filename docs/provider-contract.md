@@ -11,7 +11,7 @@ Provider adapters belong in `packages/providers`.
 
 ## Normalized output
 
-Every provider should return:
+Every provider response should return:
 
 - `provider`
 - `model`
@@ -21,6 +21,11 @@ Every provider should return:
 - `searchResults[]`
 - `rawPayload`
 - `requestedAt`
+- `locale`
+- `sampleIndex`
+- `runCount`
+- `holdout`
+- `rankPosition`
 
 Each citation should include:
 
@@ -32,9 +37,11 @@ Each citation should include:
 
 ## Runtime expectations
 
-- `openai` is the first live adapter in this repo
-- `perplexity` remains scaffolded until its parser and scorer parity are ready
+- `openai` is a live adapter
+- `perplexity` is a live adapter
+- `manual` is reserved for normalized imported responses
 - raw payloads are written to `runs/<name>/raw/<provider>/<promptId>.json`
+- provider-specific parsing belongs in adapters, not the core scorer
 
 ## Rules
 

@@ -1,4 +1,4 @@
-﻿export type ProviderName = "openai" | "perplexity";
+﻿export type ProviderName = "openai" | "perplexity" | "manual";
 
 export interface Citation {
   url: string;
@@ -12,6 +12,8 @@ export interface SearchResult {
   url: string;
   title?: string;
   date?: string;
+  snippet?: string;
+  source?: string;
 }
 
 export interface ProviderResponse {
@@ -23,6 +25,11 @@ export interface ProviderResponse {
   searchResults: SearchResult[];
   rawPayload: unknown;
   requestedAt: string;
+  locale: string | null;
+  sampleIndex: number;
+  runCount: number;
+  holdout: boolean;
+  rankPosition: number | null;
 }
 
 export interface EvalRequest {
@@ -31,6 +38,10 @@ export interface EvalRequest {
   brandDomain: string;
   trustedDomains: string[];
   expectedSignal?: string;
+  locale?: string;
+  sampleIndex?: number;
+  runCount?: number;
+  holdout?: boolean;
 }
 
 export interface ProviderRunOptions {
@@ -38,4 +49,8 @@ export interface ProviderRunOptions {
   model?: string;
   baseUrl?: string;
   timeoutMs?: number;
+  locale?: string;
+  sampleIndex?: number;
+  runCount?: number;
+  holdout?: boolean;
 }

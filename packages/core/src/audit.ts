@@ -1,8 +1,35 @@
-﻿import { BUCKET_LABELS, KEY_PAGE_TYPES, REQUIRED_PAGE_TYPES, SEVERITY_PENALTIES } from "./constants.ts";
+import { createHash, randomUUID } from "node:crypto";
+import {
+  ARTIFACT_VERSION,
+  BUCKET_LABELS,
+  KEY_PAGE_TYPES,
+  REQUIRED_PAGE_TYPES,
+  RULE_VERSION,
+  SEVERITY_PENALTIES
+} from "./constants.ts";
 import { crawlSite } from "./crawl.ts";
 import { normalizePages } from "./extract.ts";
-import type { AuditInput, AuditResult, BucketScore, Issue, PageRecord, Recommendation, ScoreBucketId } from "./types.ts";
+import type {
+  AuditInput,
+  AuditResult,
+  BucketScore,
+  Issue,
+  PageRecord,
+  PageType,
+  Recommendation,
+  ScoreBucketId
+} from "./types.ts";
 import { clamp, keywordCoverage, slugify } from "./utils.ts";
+
+type AuditContext = {
+  input: AuditInput;
+  crawl: Awaited<ReturnType<typeof crawlSite>>;
+  pages: PageRecord[];
+  issues: Issue[];
+  pageTypes: Map<PageType, PageRecord[]>;
+  byUrl: Map<string, PageRecord>;
+  incomingLinkCounts: Map<string, number>;
+};
 
 function createIssue(issue: Omit<Issue, "id">): Issue {
   const pagePart = issue.pageUrl ? `-${slugify(issue.pageUrl)}` : "";
@@ -12,8 +39,16 @@ function createIssue(issue: Omit<Issue, "id">): Issue {
   };
 }
 
+function addIssue(issues: Issue[], issue: Omit<Issue, "id">): void {
+  issues.push(createIssue(issue));
+}
+
 function isKeyPage(page: PageRecord): boolean {
   return KEY_PAGE_TYPES.includes(page.pageType);
+}
+
+function pageText(page: PageRecord): string {
+  return `${page.title} ${page.h1} ${page.textSnippet}`.trim();
 }
 
 function computeBucketScore(issues: Issue[], bucket: ScoreBucketId): BucketScore {
@@ -52,9 +87,9 @@ function summarizeRecommendations(issues: Issue[], missingPageTypes: string[]): 
   if (structure.length > 0) {
     recommendations.push({
       id: "tighten-page-structure",
-      title: "Tighten structure on key pages",
-      rationale: "Thin, weakly segmented pages are harder to summarize and cite accurately.",
-      expectedOutcome: "Higher extraction quality and more stable page-level interpretation.",
+      title: "Tighten structure and schema alignment on key pages",
+      rationale: "Thin, weakly segmented pages and mismatched schema make assistants less likely to interpret pages consistently.",
+      expectedOutcome: "Higher extraction quality and fewer ambiguous summaries.",
       relatedIssues: structure.map((issue) => issue.id)
     });
   }
@@ -73,7 +108,7 @@ function summarizeRecommendations(issues: Issue[], missingPageTypes: string[]): 
     recommendations.push({
       id: "add-citable-evidence",
       title: "Add citable pricing, trust, and documentation proof",
-      rationale: "Pricing, security, and documentation pages create the structured evidence that answers can cite.",
+      rationale: "Pricing, security, documentation, and outcome details create the evidence that grounded answers can cite.",
       expectedOutcome: "More reliable evidence signals and stronger future citation coverage.",
       relatedIssues: evidence.map((issue) => issue.id)
     });
@@ -92,425 +127,615 @@ function summarizeRecommendations(issues: Issue[], missingPageTypes: string[]): 
   return recommendations;
 }
 
-export async function runAudit(input: AuditInput): Promise<AuditResult> {
-  const crawl = await crawlSite({
-    siteInput: input.siteInput,
-    sitemapUrl: input.sitemapUrl,
-    includePatterns: input.includePatterns ?? [],
-    excludePatterns: input.excludePatterns ?? [],
-    maxPages: input.maxPages ?? 20
-  });
-  const pages = normalizePages(crawl.source, crawl.pages, input.brand.brand);
-  const issues: Issue[] = [];
-
-  if (!crawl.robots.exists) {
-    issues.push(
-      createIssue({
-        severity: "warn",
-        scope: "site",
-        category: "crawlability",
-        bucket: "access",
-        title: "Missing robots.txt",
-        message: "No robots.txt file was discovered at the site root.",
-        fixHint: "Add robots.txt and advertise your sitemap."
-      })
-    );
-  }
-
-  if (crawl.discoveredUrls.length === 0) {
-    issues.push(
-      createIssue({
-        severity: "warn",
-        scope: "site",
-        category: "crawlability",
-        bucket: "access",
-        title: "Missing sitemap discovery",
-        message: "No crawl targets were discovered from a sitemap or fallback scan.",
-        fixHint: "Publish a sitemap.xml or expose crawlable HTML entrypoints."
-      })
-    );
-  }
-
-  if (crawl.robots.blockedAll) {
-    issues.push(
-      createIssue({
-        severity: "error",
-        scope: "site",
-        category: "crawlability",
-        bucket: "access",
-        title: "Robots blocks all crawlers",
-        message: "robots.txt blocks the entire site for the wildcard user agent.",
-        fixHint: "Allow public product and docs content to be crawled."
-      })
-    );
-  }
-
-  for (const bot of crawl.robots.blockedAiBots) {
-    issues.push(
-      createIssue({
-        severity: "warn",
-        scope: "site",
-        category: "crawlability",
-        bucket: "access",
-        title: `${bot} is blocked`,
-        message: `${bot} is explicitly blocked in robots.txt.`,
-        fixHint: `Allow ${bot} if you want discoverability on that answer surface.`
-      })
-    );
-  }
-
-  const pageTypes = new Map<string, PageRecord[]>();
+function mapPageTypes(pages: PageRecord[]): Map<PageType, PageRecord[]> {
+  const pageTypes = new Map<PageType, PageRecord[]>();
   for (const page of pages) {
     const current = pageTypes.get(page.pageType) ?? [];
     current.push(page);
     pageTypes.set(page.pageType, current);
+  }
+  return pageTypes;
+}
 
-    if (page.fetchError || page.status === 0) {
-      issues.push(
-        createIssue({
-          severity: "error",
-          scope: "page",
-          category: "crawlability",
-          bucket: "access",
-          title: "Page fetch failed",
-          message: page.fetchError ?? "The page could not be fetched.",
-          fixHint: "Make the page reachable without a browser-only session.",
-          pageUrl: page.url
-        })
-      );
-      continue;
-    }
+function mapIncomingLinkCounts(pages: PageRecord[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  const knownUrls = new Set(pages.map((page) => page.url));
 
-    if (page.noindex && isKeyPage(page)) {
-      issues.push(
-        createIssue({
-          severity: "error",
-          scope: "page",
-          category: "indexability",
-          bucket: "access",
-          title: "Key page is noindex",
-          message: "A key page contains a noindex directive.",
-          fixHint: "Remove noindex from pages that should earn discovery and citations.",
-          pageUrl: page.url
-        })
-      );
-    }
-
-    if (isKeyPage(page) && !page.title) {
-      issues.push(
-        createIssue({
-          severity: "error",
-          scope: "page",
-          category: "structure",
-          bucket: "structure",
-          title: "Missing page title",
-          message: "A key page is missing a title element.",
-          fixHint: "Add a descriptive page title.",
-          pageUrl: page.url
-        })
-      );
-    }
-
-    if (isKeyPage(page) && page.title.length > 0 && page.title.length < 20) {
-      issues.push(
-        createIssue({
-          severity: "warn",
-          scope: "page",
-          category: "structure",
-          bucket: "structure",
-          title: "Short page title",
-          message: "A key page title is unusually short and low-context.",
-          fixHint: "Expand the title with page purpose and product context.",
-          pageUrl: page.url
-        })
-      );
-    }
-
-    if (isKeyPage(page) && !page.metaDescription) {
-      issues.push(
-        createIssue({
-          severity: "warn",
-          scope: "page",
-          category: "structure",
-          bucket: "structure",
-          title: "Missing meta description",
-          message: "A key page is missing a meta description.",
-          fixHint: "Add a clear summary of who the page serves and what it proves.",
-          pageUrl: page.url
-        })
-      );
-    }
-
-    if (isKeyPage(page) && !page.h1) {
-      issues.push(
-        createIssue({
-          severity: "error",
-          scope: "page",
-          category: "structure",
-          bucket: "structure",
-          title: "Missing H1",
-          message: "A key page does not have a primary heading.",
-          fixHint: "Add one descriptive H1 per key page.",
-          pageUrl: page.url
-        })
-      );
-    }
-
-    if (isKeyPage(page) && page.h1Count > 1) {
-      issues.push(
-        createIssue({
-          severity: "warn",
-          scope: "page",
-          category: "structure",
-          bucket: "structure",
-          title: "Multiple H1 headings",
-          message: "A key page contains more than one H1.",
-          fixHint: "Use a single H1 and demote the rest to lower-level headings.",
-          pageUrl: page.url
-        })
-      );
-    }
-
-    if (isKeyPage(page) && page.wordCount < 150) {
-      issues.push(
-        createIssue({
-          severity: "warn",
-          scope: "page",
-          category: "structure",
-          bucket: "structure",
-          title: "Thin key page",
-          message: "A key page has little extractable body text.",
-          fixHint: "Add plain-language explanations, evidence blocks, and stronger sections.",
-          pageUrl: page.url
-        })
-      );
-    }
-
-    if (isKeyPage(page) && page.headings.length < 2) {
-      issues.push(
-        createIssue({
-          severity: "warn",
-          scope: "page",
-          category: "structure",
-          bucket: "structure",
-          title: "Weak heading structure",
-          message: "A key page does not have enough H2/H3 sections to segment meaning clearly.",
-          fixHint: "Break the page into sections with scannable headings.",
-          pageUrl: page.url
-        })
-      );
-    }
-
-    if (isKeyPage(page) && page.jsHeavy) {
-      issues.push(
-        createIssue({
-          severity: "warn",
-          scope: "page",
-          category: "structure",
-          bucket: "structure",
-          title: "JavaScript-heavy thin page",
-          message: "A key page appears script-heavy with limited extractable HTML text.",
-          fixHint: "Render critical content server-side or include HTML fallback text.",
-          pageUrl: page.url
-        })
-      );
-    }
-
-    if (page.pageType === "home" && !page.hasJsonLd) {
-      issues.push(
-        createIssue({
-          severity: "info",
-          scope: "page",
-          category: "schema",
-          bucket: "structure",
-          title: "Homepage lacks JSON-LD",
-          message: "The homepage has no JSON-LD structured data.",
-          fixHint: "Add Organization or Product JSON-LD that matches visible text.",
-          pageUrl: page.url
-        })
-      );
-    }
-
-    if (page.interactiveControls > 0 && page.ariaLabeledControls / page.interactiveControls < 0.5) {
-      issues.push(
-        createIssue({
-          severity: "info",
-          scope: "page",
-          category: "accessibility",
-          bucket: "structure",
-          title: "Low ARIA coverage on controls",
-          message: "Interactive controls are present but few expose aria-label metadata.",
-          fixHint: "Add accessible labels to critical controls and buttons.",
-          pageUrl: page.url
-        })
-      );
-    }
-
-    if (page.pageType === "pricing" && (!page.hasNumbers || page.tables === 0)) {
-      issues.push(
-        createIssue({
-          severity: "warn",
-          scope: "page",
-          category: "evidence",
-          bucket: "evidence",
-          title: "Pricing page lacks citable detail",
-          message: "The pricing page has limited numeric or tabular evidence.",
-          fixHint: "Add concrete plan details, ranges, or tables that can be cited.",
-          pageUrl: page.url
-        })
-      );
-    }
-
-    if (page.pageType === "security" && !page.hasTrustSignals) {
-      issues.push(
-        createIssue({
-          severity: "warn",
-          scope: "page",
-          category: "evidence",
-          bucket: "evidence",
-          title: "Security page lacks trust signals",
-          message: "The security page does not mention common trust markers.",
-          fixHint: "Add concrete compliance, deployment, and control statements.",
-          pageUrl: page.url
-        })
-      );
-    }
-
-    if (page.pageType === "docs" && !page.hasDate && !page.hasVersion) {
-      issues.push(
-        createIssue({
-          severity: "info",
-          scope: "page",
-          category: "evidence",
-          bucket: "evidence",
-          title: "Docs page lacks freshness markers",
-          message: "The docs page does not expose last updated dates or versions.",
-          fixHint: "Add updated timestamps or version markers to key docs.",
-          pageUrl: page.url
-        })
-      );
+  for (const page of pages) {
+    for (const link of page.internalLinks) {
+      if (!knownUrls.has(link)) {
+        continue;
+      }
+      counts.set(link, (counts.get(link) ?? 0) + 1);
     }
   }
 
-  const homepage = pageTypes.get("home")?.[0];
-  if (homepage) {
-    const homeText = `${homepage.title} ${homepage.h1} ${homepage.textSnippet}`;
+  return counts;
+}
 
-    if (keywordCoverage(homeText, input.brand.brand.category) < 0.5) {
-      issues.push(
-        createIssue({
-          severity: "warn",
-          scope: "page",
-          category: "positioning",
-          bucket: "entityClarity",
-          title: "Homepage category signal is weak",
-          message: "The homepage does not clearly reinforce the declared product category.",
-          fixHint: "Name the category directly in the hero or early supporting copy.",
-          pageUrl: homepage.url
-        })
-      );
-    }
-
-    if (
-      input.brand.brand.target_personas.length > 0 &&
-      !input.brand.brand.target_personas.some((persona) => keywordCoverage(homeText, persona) >= 0.5)
-    ) {
-      issues.push(
-        createIssue({
-          severity: "info",
-          scope: "page",
-          category: "positioning",
-          bucket: "entityClarity",
-          title: "Homepage persona fit is implicit",
-          message: "Target personas are not clearly named on the homepage.",
-          fixHint: "Call out the primary team or buyer in visible homepage text.",
-          pageUrl: homepage.url
-        })
-      );
-    }
-
-    if (
-      input.brand.brand.key_use_cases.length > 0 &&
-      !input.brand.brand.key_use_cases.some((useCase) => keywordCoverage(homeText, useCase) >= 0.5)
-    ) {
-      issues.push(
-        createIssue({
-          severity: "info",
-          scope: "page",
-          category: "positioning",
-          bucket: "entityClarity",
-          title: "Homepage use cases are underspecified",
-          message: "The homepage does not clearly mention the product's primary jobs to be done.",
-          fixHint: "Add use-case language near the hero and supporting sections.",
-          pageUrl: homepage.url
-        })
-      );
-    }
-
-    const linkedTypes = new Set(
-      homepage.internalLinks
-        .map((url) => pages.find((candidate) => candidate.url === url)?.pageType)
-        .filter((pageType) => pageType !== undefined && pageType !== "home")
-    );
-
-    if (linkedTypes.size < 3) {
-      issues.push(
-        createIssue({
-          severity: "warn",
-          scope: "page",
-          category: "coverage",
-          bucket: "comparativeReadiness",
-          title: "Homepage under-links key proof pages",
-          message: "The homepage links to too few key proof pages to drive strong downstream discovery.",
-          fixHint: "Link from the homepage to pricing, docs, security, FAQ, or compare pages.",
-          pageUrl: homepage.url
-        })
-      );
-    }
-  } else {
-    issues.push(
-      createIssue({
-        severity: "error",
-        scope: "site",
-        category: "coverage",
-        bucket: "access",
-        title: "Homepage was not crawled",
-        message: "The crawl did not yield a homepage record.",
-        fixHint: "Ensure the homepage is public and discoverable."
+function createConfigHash(input: AuditInput): string {
+  return createHash("sha256")
+    .update(
+      JSON.stringify({
+        siteInput: input.siteInput,
+        sitemapUrl: input.sitemapUrl ?? null,
+        includePatterns: input.includePatterns ?? [],
+        excludePatterns: input.excludePatterns ?? [],
+        maxPages: input.maxPages ?? 20,
+        brand: input.brand,
+        competitors: input.competitors,
+        prompts: input.prompts
       })
-    );
+    )
+    .digest("hex")
+    .slice(0, 16);
+}
+
+function applySiteAccessRules(context: AuditContext): void {
+  const { crawl, issues } = context;
+
+  if (!crawl.robots.exists) {
+    addIssue(issues, {
+      severity: "warn",
+      scope: "site",
+      category: "crawlability",
+      bucket: "access",
+      title: "Missing robots.txt",
+      message: "No robots.txt file was discovered at the site root.",
+      fixHint: "Add robots.txt and advertise your sitemap."
+    });
   }
 
+  if (crawl.discoveredUrls.length === 0) {
+    addIssue(issues, {
+      severity: "warn",
+      scope: "site",
+      category: "crawlability",
+      bucket: "access",
+      title: "Missing sitemap discovery",
+      message: "No crawl targets were discovered from a sitemap or fallback scan.",
+      fixHint: "Publish a sitemap.xml or expose crawlable HTML entrypoints."
+    });
+  }
+
+  if (crawl.robots.blockedAll) {
+    addIssue(issues, {
+      severity: "error",
+      scope: "site",
+      category: "crawlability",
+      bucket: "access",
+      title: "Robots blocks all crawlers",
+      message: "robots.txt blocks the entire site for the wildcard user agent.",
+      fixHint: "Allow public product and docs content to be crawled."
+    });
+  }
+
+  for (const bot of crawl.robots.blockedAiBots) {
+    addIssue(issues, {
+      severity: "warn",
+      scope: "site",
+      category: "crawlability",
+      bucket: "access",
+      title: `${bot} is blocked`,
+      message: `${bot} is explicitly blocked in robots.txt.`,
+      fixHint: `Allow ${bot} if you want discoverability on that answer surface.`
+    });
+  }
+}
+
+function applyKeyPageStructureRules(context: AuditContext, page: PageRecord): void {
+  const { issues } = context;
+
+  if (page.noindex && isKeyPage(page)) {
+    addIssue(issues, {
+      severity: "error",
+      scope: "page",
+      category: "indexability",
+      bucket: "access",
+      title: "Key page is noindex",
+      message: "A key page contains a noindex directive.",
+      fixHint: "Remove noindex from pages that should earn discovery and citations.",
+      pageUrl: page.url
+    });
+  }
+
+  if (!isKeyPage(page)) {
+    return;
+  }
+
+  if (!page.title) {
+    addIssue(issues, {
+      severity: "error",
+      scope: "page",
+      category: "structure",
+      bucket: "structure",
+      title: "Missing page title",
+      message: "A key page is missing a title element.",
+      fixHint: "Add a descriptive page title.",
+      pageUrl: page.url
+    });
+  }
+
+  if (page.title.length > 0 && page.title.length < 20) {
+    addIssue(issues, {
+      severity: "warn",
+      scope: "page",
+      category: "structure",
+      bucket: "structure",
+      title: "Short page title",
+      message: "A key page title is unusually short and low-context.",
+      fixHint: "Expand the title with page purpose and product context.",
+      pageUrl: page.url
+    });
+  }
+
+  if (!page.metaDescription) {
+    addIssue(issues, {
+      severity: "warn",
+      scope: "page",
+      category: "structure",
+      bucket: "structure",
+      title: "Missing meta description",
+      message: "A key page is missing a meta description.",
+      fixHint: "Add a clear summary of who the page serves and what it proves.",
+      pageUrl: page.url
+    });
+  }
+
+  if (!page.h1) {
+    addIssue(issues, {
+      severity: "error",
+      scope: "page",
+      category: "structure",
+      bucket: "structure",
+      title: "Missing H1",
+      message: "A key page does not have a primary heading.",
+      fixHint: "Add one descriptive H1 per key page.",
+      pageUrl: page.url
+    });
+  }
+
+  if (page.h1Count > 1) {
+    addIssue(issues, {
+      severity: "warn",
+      scope: "page",
+      category: "structure",
+      bucket: "structure",
+      title: "Multiple H1 headings",
+      message: "A key page contains more than one H1.",
+      fixHint: "Use a single H1 and demote the rest to lower-level headings.",
+      pageUrl: page.url
+    });
+  }
+
+  const proofHeavyPage = ["home", "product", "pricing", "security", "docs"].includes(page.pageType);
+  const compactReferencePage = ["faq", "compare", "integrations", "use-case"].includes(page.pageType);
+
+  if ((proofHeavyPage && page.wordCount < 150) || (compactReferencePage && page.wordCount < 80 && page.lists === 0 && page.tables === 0)) {
+    addIssue(issues, {
+      severity: proofHeavyPage ? "warn" : "info",
+      scope: "page",
+      category: "structure",
+      bucket: "structure",
+      title: "Thin key page",
+      message: "A key page has little extractable body text.",
+      fixHint: "Add plain-language explanations, evidence blocks, and stronger sections.",
+      pageUrl: page.url
+    });
+  }
+
+  if (page.headings.length < 2) {
+    addIssue(issues, {
+      severity: "warn",
+      scope: "page",
+      category: "structure",
+      bucket: "structure",
+      title: "Weak heading structure",
+      message: "A key page does not have enough H2/H3 sections to segment meaning clearly.",
+      fixHint: "Break the page into sections with scannable headings.",
+      pageUrl: page.url
+    });
+  }
+
+  if (page.jsHeavy) {
+    addIssue(issues, {
+      severity: "warn",
+      scope: "page",
+      category: "structure",
+      bucket: "structure",
+      title: "JavaScript-heavy thin page",
+      message: "A key page appears script-heavy with limited extractable HTML text.",
+      fixHint: "Render critical content server-side or include HTML fallback text.",
+      pageUrl: page.url
+    });
+  }
+
+  if (page.interactiveControls > 0 && page.ariaLabeledControls / page.interactiveControls < 0.5) {
+    addIssue(issues, {
+      severity: "info",
+      scope: "page",
+      category: "accessibility",
+      bucket: "structure",
+      title: "Low ARIA coverage on controls",
+      message: "Interactive controls are present but few expose aria-label metadata.",
+      fixHint: "Add accessible labels to critical controls and buttons.",
+      pageUrl: page.url
+    });
+  }
+}
+
+function applySchemaConsistencyRules(context: AuditContext, page: PageRecord): void {
+  const { issues, input } = context;
+  const visible = pageText(page);
+  const faqSchema = page.jsonLdTypes.some((type) => type.toLowerCase() === "faqpage");
+  const hasProductSchema = page.jsonLdTypes.some((type) => ["product", "softwareapplication", "service"].includes(type.toLowerCase()));
+  const questionSignals = page.headings.filter((heading) => heading.includes("?")).length;
+
+  if (page.pageType === "home" && !page.hasJsonLd) {
+    addIssue(issues, {
+      severity: "info",
+      scope: "page",
+      category: "schema",
+      bucket: "structure",
+      title: "Homepage lacks JSON-LD",
+      message: "The homepage has no JSON-LD structured data.",
+      fixHint: "Add Organization or Product JSON-LD that matches visible text.",
+      pageUrl: page.url
+    });
+  }
+
+  if (page.pageType === "faq" && !faqSchema) {
+    addIssue(issues, {
+      severity: "info",
+      scope: "page",
+      category: "schema",
+      bucket: "structure",
+      title: "FAQ page lacks FAQ schema",
+      message: "A discovered FAQ page does not expose FAQPage structured data.",
+      fixHint: "Add FAQPage JSON-LD that mirrors visible questions and answers.",
+      pageUrl: page.url
+    });
+  }
+
+  if (faqSchema && questionSignals === 0 && page.lists === 0) {
+    addIssue(issues, {
+      severity: "warn",
+      scope: "page",
+      category: "schema",
+      bucket: "structure",
+      title: "FAQ schema is not reinforced by visible Q&A structure",
+      message: "FAQPage schema is present, but the page does not visibly read like a scannable FAQ.",
+      fixHint: "Expose visible questions, headings, and answer sections that match the structured data.",
+      pageUrl: page.url
+    });
+  }
+
+  if ((page.pageType === "home" || page.pageType === "product") && hasProductSchema && keywordCoverage(visible, input.brand.brand.category) < 0.4) {
+    addIssue(issues, {
+      severity: "info",
+      scope: "page",
+      category: "schema",
+      bucket: "structure",
+      title: "Structured data is not reinforced by visible category text",
+      message: "Product-like schema exists, but visible copy does not clearly restate the product category.",
+      fixHint: "Repeat the product category and positioning in visible headings and supporting copy.",
+      pageUrl: page.url
+    });
+  }
+}
+
+function applyEvidenceRules(context: AuditContext, page: PageRecord): void {
+  const { issues } = context;
+
+  if (page.pageType === "pricing") {
+    if (!page.hasNumbers || page.tables === 0) {
+      addIssue(issues, {
+        severity: "warn",
+        scope: "page",
+        category: "evidence",
+        bucket: "evidence",
+        title: "Pricing page lacks citable detail",
+        message: "The pricing page has limited numeric or tabular evidence.",
+        fixHint: "Add concrete plan details, ranges, or tables that can be cited.",
+        pageUrl: page.url
+      });
+    }
+
+    if (page.wordCount < 180) {
+      addIssue(issues, {
+        severity: "info",
+        scope: "page",
+        category: "evidence",
+        bucket: "evidence",
+        title: "Pricing page evidence is thin",
+        message: "The pricing page is short relative to the amount of proof buyers usually need.",
+        fixHint: "Add pricing qualifiers, packaging notes, and proof-oriented FAQ or comparison context.",
+        pageUrl: page.url
+      });
+    }
+  }
+
+  if (page.pageType === "security") {
+    if (!page.hasTrustSignals) {
+      addIssue(issues, {
+        severity: "warn",
+        scope: "page",
+        category: "evidence",
+        bucket: "evidence",
+        title: "Security page lacks trust signals",
+        message: "The security page does not mention common trust markers.",
+        fixHint: "Add concrete compliance, deployment, and control statements.",
+        pageUrl: page.url
+      });
+    }
+
+    if (page.wordCount < 140) {
+      addIssue(issues, {
+        severity: "info",
+        scope: "page",
+        category: "evidence",
+        bucket: "evidence",
+        title: "Security page is light on implementation detail",
+        message: "The security page is short and may not provide enough citable proof.",
+        fixHint: "Add controls, architecture details, and customer-facing answers to common security objections.",
+        pageUrl: page.url
+      });
+    }
+  }
+
+  if (page.pageType === "docs") {
+    if (!page.hasDate && !page.hasVersion) {
+      addIssue(issues, {
+        severity: "info",
+        scope: "page",
+        category: "evidence",
+        bucket: "evidence",
+        title: "Docs page lacks freshness markers",
+        message: "The docs page does not expose last updated dates or versions.",
+        fixHint: "Add updated timestamps or version markers to key docs.",
+        pageUrl: page.url
+      });
+    }
+
+    if (page.wordCount < 120) {
+      addIssue(issues, {
+        severity: "info",
+        scope: "page",
+        category: "evidence",
+        bucket: "evidence",
+        title: "Docs page is too thin to cite confidently",
+        message: "The docs page has limited explanatory text for grounded answers to rely on.",
+        fixHint: "Add setup steps, reference details, and example-driven explanations.",
+        pageUrl: page.url
+      });
+    }
+  }
+
+  if (page.pageType === "compare" && page.tables === 0 && page.wordCount < 180) {
+    addIssue(issues, {
+      severity: "info",
+      scope: "page",
+      category: "evidence",
+      bucket: "evidence",
+      title: "Compare page lacks citable proof blocks",
+      message: "The compare page is short and does not include a clear table or equivalent evidence block.",
+      fixHint: "Add comparison tables, decision criteria, or proof-oriented bullet lists.",
+      pageUrl: page.url
+    });
+  }
+
+  if (page.pageType === "use-case" && !page.hasNumbers && page.wordCount < 160) {
+    addIssue(issues, {
+      severity: "info",
+      scope: "page",
+      category: "evidence",
+      bucket: "evidence",
+      title: "Use-case page lacks outcome detail",
+      message: "The use-case page is light on concrete metrics, workflows, or proof points.",
+      fixHint: "Add before/after outcomes, workflow steps, or measurable success criteria.",
+      pageUrl: page.url
+    });
+  }
+}
+
+function applyComparativeRules(context: AuditContext, page: PageRecord): void {
+  const { issues, input } = context;
+  const visible = pageText(page).toLowerCase();
+
+  if (page.pageType === "faq") {
+    const faqSignals = page.headings.filter((heading) => heading.includes("?")).length;
+    if (faqSignals < 2 && page.lists === 0) {
+      addIssue(issues, {
+        severity: "info",
+        scope: "page",
+        category: "coverage",
+        bucket: "comparativeReadiness",
+        title: "FAQ page lacks scannable question structure",
+        message: "The FAQ page exists, but it is not strongly organized around visible questions and answers.",
+        fixHint: "Use explicit question headings and concise answer blocks for recurring buyer concerns.",
+        pageUrl: page.url
+      });
+    }
+  }
+
+  if (page.pageType === "compare") {
+    const mentionsCompetitor = input.competitors.competitors.some((competitor) => visible.includes(competitor.name.toLowerCase()));
+
+    if (!mentionsCompetitor) {
+      addIssue(issues, {
+        severity: "warn",
+        scope: "page",
+        category: "comparison",
+        bucket: "comparativeReadiness",
+        title: "Compare page does not name declared competitors",
+        message: "A compare-oriented page exists, but it does not explicitly mention any declared competitors.",
+        fixHint: "Name the highest-priority competitors and explain fit differences directly on the page.",
+        pageUrl: page.url
+      });
+    }
+
+    if (page.headings.length < 2) {
+      addIssue(issues, {
+        severity: "info",
+        scope: "page",
+        category: "comparison",
+        bucket: "comparativeReadiness",
+        title: "Compare page lacks decision-making structure",
+        message: "The compare page should segment trade-offs, fit guidance, and evidence into clear sections.",
+        fixHint: "Add sections for buyer fit, trade-offs, migration paths, and decision criteria.",
+        pageUrl: page.url
+      });
+    }
+  }
+
+  if (page.pageType === "use-case" && page.headings.length < 2) {
+    addIssue(issues, {
+      severity: "info",
+      scope: "page",
+      category: "coverage",
+      bucket: "comparativeReadiness",
+      title: "Use-case page lacks contextual structure",
+      message: "A use-case page should explain problem, workflow, and outcomes in separate sections.",
+      fixHint: "Add sections for the problem, the recommended workflow, and expected outcomes.",
+      pageUrl: page.url
+    });
+  }
+}
+
+function applyConnectivityRules(context: AuditContext): void {
+  const { issues, pages, incomingLinkCounts } = context;
+  const keyPages = pages.filter((page) => isKeyPage(page) && page.pageType !== "home");
+
+  for (const page of keyPages) {
+    const incoming = incomingLinkCounts.get(page.url) ?? 0;
+    if (incoming === 0) {
+      const criticalProofPage = ["pricing", "security", "docs", "faq", "compare"].includes(page.pageType);
+      addIssue(issues, {
+        severity: criticalProofPage ? "warn" : "info",
+        scope: "page",
+        category: "coverage",
+        bucket: "comparativeReadiness",
+        title: "Key proof page is weakly linked",
+        message: "A key page is discovered, but other pages do not link to it within the crawled site.",
+        fixHint: "Link to this page from the homepage, docs, or related buyer-path pages.",
+        pageUrl: page.url
+      });
+    }
+  }
+}
+
+function applyHomepageRules(context: AuditContext): void {
+  const { issues, input, pages } = context;
+  const homepage = context.pageTypes.get("home")?.[0];
+  if (!homepage) {
+    addIssue(issues, {
+      severity: "error",
+      scope: "site",
+      category: "coverage",
+      bucket: "access",
+      title: "Homepage was not crawled",
+      message: "The crawl did not yield a homepage record.",
+      fixHint: "Ensure the homepage is public and discoverable."
+    });
+    return;
+  }
+
+  const homeText = pageText(homepage);
+
+  if (keywordCoverage(homeText, input.brand.brand.category) < 0.5) {
+    addIssue(issues, {
+      severity: "warn",
+      scope: "page",
+      category: "positioning",
+      bucket: "entityClarity",
+      title: "Homepage category signal is weak",
+      message: "The homepage does not clearly reinforce the declared product category.",
+      fixHint: "Name the category directly in the hero or early supporting copy.",
+      pageUrl: homepage.url
+    });
+  }
+
+  if (
+    input.brand.brand.target_personas.length > 0 &&
+    !input.brand.brand.target_personas.some((persona) => keywordCoverage(homeText, persona) >= 0.5)
+  ) {
+    addIssue(issues, {
+      severity: "info",
+      scope: "page",
+      category: "positioning",
+      bucket: "entityClarity",
+      title: "Homepage persona fit is implicit",
+      message: "Target personas are not clearly named on the homepage.",
+      fixHint: "Call out the primary team or buyer in visible homepage text.",
+      pageUrl: homepage.url
+    });
+  }
+
+  if (
+    input.brand.brand.key_use_cases.length > 0 &&
+    !input.brand.brand.key_use_cases.some((useCase) => keywordCoverage(homeText, useCase) >= 0.5)
+  ) {
+    addIssue(issues, {
+      severity: "info",
+      scope: "page",
+      category: "positioning",
+      bucket: "entityClarity",
+      title: "Homepage use cases are underspecified",
+      message: "The homepage does not clearly mention the product's primary jobs to be done.",
+      fixHint: "Add use-case language near the hero and supporting sections.",
+      pageUrl: homepage.url
+    });
+  }
+
+  const linkedTypes = new Set(
+    homepage.internalLinks
+      .map((url) => pages.find((candidate) => candidate.url === url)?.pageType)
+      .filter((pageType) => pageType !== undefined && pageType !== "home")
+  );
+
+  if (linkedTypes.size < 3) {
+    addIssue(issues, {
+      severity: "warn",
+      scope: "page",
+      category: "coverage",
+      bucket: "comparativeReadiness",
+      title: "Homepage under-links key proof pages",
+      message: "The homepage links to too few key proof pages to drive strong downstream discovery.",
+      fixHint: "Link from the homepage to pricing, docs, security, FAQ, or compare pages.",
+      pageUrl: homepage.url
+    });
+  }
+}
+
+function applyCoverageRules(context: AuditContext): string[] {
+  const { issues, pageTypes, input } = context;
   const missingPageTypes: string[] = [];
+
   for (const requirement of REQUIRED_PAGE_TYPES) {
     if ((pageTypes.get(requirement.pageType) ?? []).length === 0) {
       missingPageTypes.push(requirement.pageType);
-      issues.push(
-        createIssue({
-          severity: requirement.severity,
-          scope: "site",
-          category: "coverage",
-          bucket: requirement.bucket,
-          title: `Missing ${requirement.title}`,
-          message: `No ${requirement.pageType} page was discovered.`,
-          fixHint: `Add a dedicated ${requirement.pageType} page with clear, citable content.`
-        })
-      );
+      addIssue(issues, {
+        severity: requirement.severity,
+        scope: "site",
+        category: "coverage",
+        bucket: requirement.bucket,
+        title: `Missing ${requirement.title}`,
+        message: `No ${requirement.pageType} page was discovered.`,
+        fixHint: `Add a dedicated ${requirement.pageType} page with clear, citable content.`
+      });
     }
   }
 
   if ((pageTypes.get("use-case") ?? []).length < 3) {
-    issues.push(
-      createIssue({
-        severity: "info",
-        scope: "site",
-        category: "coverage",
-        bucket: "comparativeReadiness",
-        title: "Use-case coverage is thin",
-        message: "Fewer than three use-case pages were discovered.",
-        fixHint: "Add more use-case or solution pages for distinct buyer contexts."
-      })
-    );
+    addIssue(issues, {
+      severity: "info",
+      scope: "site",
+      category: "coverage",
+      bucket: "comparativeReadiness",
+      title: "Use-case coverage is thin",
+      message: "Fewer than three use-case pages were discovered.",
+      fixHint: "Add more use-case or solution pages for distinct buyer contexts."
+    });
   }
 
   const comparePages = pageTypes.get("compare") ?? [];
@@ -521,19 +746,71 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
     );
 
     if (!mentionsCompetitor) {
-      issues.push(
-        createIssue({
-          severity: "info",
-          scope: "site",
-          category: "comparison",
-          bucket: "comparativeReadiness",
-          title: "Compare pages do not mention declared competitors",
-          message: "Compare-oriented pages exist, but they do not name any declared competitors.",
-          fixHint: "Add explicit alternatives or versus pages for the highest-priority competitors."
-        })
-      );
+      addIssue(issues, {
+        severity: "info",
+        scope: "site",
+        category: "comparison",
+        bucket: "comparativeReadiness",
+        title: "Compare pages do not mention declared competitors",
+        message: "Compare-oriented pages exist, but they do not name any declared competitors.",
+        fixHint: "Add explicit alternatives or versus pages for the highest-priority competitors."
+      });
     }
   }
+
+  return missingPageTypes;
+}
+
+export async function runAudit(input: AuditInput): Promise<AuditResult> {
+  const createdAt = new Date().toISOString();
+  const crawl = await crawlSite({
+    siteInput: input.siteInput,
+    sitemapUrl: input.sitemapUrl,
+    includePatterns: input.includePatterns ?? [],
+    excludePatterns: input.excludePatterns ?? [],
+    maxPages: input.maxPages ?? 20
+  });
+  const pages = normalizePages(crawl.source, crawl.pages, input.brand.brand);
+  const issues: Issue[] = [];
+  const pageTypes = mapPageTypes(pages);
+  const byUrl = new Map(pages.map((page) => [page.url, page]));
+  const incomingLinkCounts = mapIncomingLinkCounts(pages);
+  const context: AuditContext = {
+    input,
+    crawl,
+    pages,
+    issues,
+    pageTypes,
+    byUrl,
+    incomingLinkCounts
+  };
+
+  applySiteAccessRules(context);
+
+  for (const page of pages) {
+    if (page.fetchError || page.status === 0) {
+      addIssue(issues, {
+        severity: "error",
+        scope: "page",
+        category: "crawlability",
+        bucket: "access",
+        title: "Page fetch failed",
+        message: page.fetchError ?? "The page could not be fetched.",
+        fixHint: "Make the page reachable without a browser-only session.",
+        pageUrl: page.url
+      });
+      continue;
+    }
+
+    applyKeyPageStructureRules(context, page);
+    applySchemaConsistencyRules(context, page);
+    applyEvidenceRules(context, page);
+    applyComparativeRules(context, page);
+  }
+
+  applyHomepageRules(context);
+  applyConnectivityRules(context);
+  const missingPageTypes = applyCoverageRules(context);
 
   const scores = {
     access: computeBucketScore(issues, "access"),
@@ -546,13 +823,25 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
   const overallScore = Math.round(
     Object.values(scores).reduce((sum, bucket) => sum + bucket.score, 0) / Object.keys(scores).length
   );
+  const completedAt = new Date().toISOString();
 
   return {
+    run: {
+      id: randomUUID(),
+      mode: "audit",
+      createdAt,
+      completedAt,
+      artifactVersion: ARTIFACT_VERSION,
+      ruleVersion: RULE_VERSION,
+      configHash: createConfigHash(input),
+      sampleCount: 0,
+      locale: null
+    },
     site: {
       kind: crawl.source.kind,
       input: input.siteInput,
       baseUrl: crawl.source.baseUrl,
-      generatedAt: new Date().toISOString()
+      generatedAt: completedAt
     },
     summary: {
       overallScore,
@@ -577,10 +866,10 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
         trusted_domains: input.brand.brand.trusted_domains
       },
       competitors: input.competitors.competitors.length,
+      competitorNames: input.competitors.competitors.map((competitor) => competitor.name),
       prompts: input.prompts.prompts.length
     }
   };
 }
 
 export { BUCKET_LABELS };
-

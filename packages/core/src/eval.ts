@@ -1,14 +1,18 @@
-﻿import path from "node:path";
+import path from "node:path";
 import type { ProviderResponse } from "../../providers/src/contracts.ts";
-import type { AuditResult, BrandConfig, CompetitorsConfig, PromptCase, PromptsConfig } from "./types.ts";
-import { clamp, keywordCoverage } from "./utils.ts";
+import type { AuditResult, BrandConfig, CompetitorsConfig, PromptCase, PromptsConfig, RunMetadata, RunMode } from "./types.ts";
+import { clamp, keywordCoverage, unique } from "./utils.ts";
 
 export interface EvalPromptScores {
   mention: number;
+  accurateMention: number;
   ownedCitation: number;
   trustedCitation: number;
   recommendation: number;
   accuracy: number;
+  factCoverage: number;
+  misrepresented: number;
+  competitorExcluded: number;
   signalAlignment: number;
   vavr: number;
 }
@@ -19,23 +23,37 @@ export interface EvalPromptResult {
   priority: "high" | "medium" | "low";
   prompt: string;
   expectedSignal: string;
+  intent: string | null;
+  holdout: boolean;
   provider: ProviderResponse["provider"];
   model: string;
+  locale: string | null;
+  sampleIndex: number;
+  rankPosition: number | null;
   answerText: string;
   citations: ProviderResponse["citations"];
   searchResults: ProviderResponse["searchResults"];
   rawPayloadFile: string;
   matchedFacts: string[];
+  competitorMentions: string[];
   recommended: boolean;
+  misrepresented: boolean;
   scores: EvalPromptScores;
 }
 
 export interface EvalSummary {
   promptCount: number;
+  holdoutPromptCount: number;
+  sampleCount: number;
+  locale: string | null;
   mentionRate: number;
+  accurateMentionRate: number;
   ownedCitationRate: number;
   trustedCitationRate: number;
   recommendationRate: number;
+  misrepresentationRate: number;
+  competitorExclusionGap: number;
+  factCoverageScore: number;
   accuracyRate: number;
   vavr: number;
 }
@@ -52,9 +70,10 @@ export interface ContentBrief {
 }
 
 export interface EvalResult {
+  run: RunMetadata;
   site: AuditResult["site"];
   provider: {
-    name: ProviderResponse["provider"];
+    name: string;
     model: string;
   };
   generatedAt: string;
@@ -75,6 +94,7 @@ export interface ScoreEvalInput {
   audit: AuditResult;
   responses: ProviderResponse[];
   rawPayloadRoot: string;
+  mode?: Extract<RunMode, "eval" | "manual-import">;
 }
 
 const PRIORITY_WEIGHTS: Record<"high" | "medium" | "low", number> = {
@@ -112,7 +132,7 @@ function factStrings(brand: BrandConfig): string[] {
   ];
 }
 
-function computeAccuracy(answerText: string, brand: BrandConfig): { score: number; matchedFacts: string[] } {
+function computeAccuracy(answerText: string, brand: BrandConfig): { score: number; matchedFacts: string[]; factCoverage: number } {
   const facts = factStrings(brand);
   const ranked = facts
     .map((fact) => ({
@@ -124,52 +144,89 @@ function computeAccuracy(answerText: string, brand: BrandConfig): { score: numbe
   const matchedFacts = ranked.filter((entry) => entry.coverage >= 0.5).map((entry) => entry.fact);
   const strongest = ranked.slice(0, 2);
   if (strongest.length === 0) {
-    return { score: 0, matchedFacts };
+    return { score: 0, matchedFacts, factCoverage: 0 };
   }
 
   return {
     score: clamp(strongest.reduce((sum, entry) => sum + entry.coverage, 0) / strongest.length, 0, 1),
-    matchedFacts
+    matchedFacts,
+    factCoverage: clamp(matchedFacts.length / Math.max(facts.length, 1), 0, 1)
   };
+}
+
+function mentionedCompetitors(answerText: string, competitors: CompetitorsConfig): string[] {
+  const haystack = answerText.toLowerCase();
+  return competitors.competitors
+    .map((competitor) => competitor.name)
+    .filter((name) => haystack.includes(name.toLowerCase()));
 }
 
 function scoreSignalAlignment(promptCase: PromptCase, scores: EvalPromptScores): number {
   if (promptCase.expected_signal === "mention_or_recommend") {
-    return (scores.mention + scores.recommendation) / 2;
+    return (scores.accurateMention + scores.recommendation) / 2;
   }
 
   if (promptCase.expected_signal === "mention_position_accuracy") {
-    return (scores.mention + scores.accuracy) / 2;
+    return (scores.accurateMention + scores.accuracy) / 2;
   }
 
-  return (scores.mention + scores.ownedCitation + scores.recommendation) / 3;
+  if (promptCase.expected_signal === "citation_and_presence" || promptCase.expected_signal === "mention_or_citation") {
+    return (scores.accurateMention + Math.max(scores.ownedCitation, scores.trustedCitation)) / 2;
+  }
+
+  if (promptCase.expected_signal === "brand_accuracy" || promptCase.expected_signal === "brand_accuracy_balance") {
+    return (scores.accurateMention + scores.factCoverage + (1 - scores.misrepresented)) / 3;
+  }
+
+  return (scores.accurateMention + Math.max(scores.ownedCitation, scores.trustedCitation) + scores.recommendation) / 3;
 }
 
-function computePromptScores(promptCase: PromptCase, response: ProviderResponse, brand: BrandConfig): Omit<EvalPromptScores, "signalAlignment"> & {
+function rawPayloadFilePath(rawPayloadRoot: string, response: ProviderResponse): string {
+  const suffix = response.sampleIndex > 0 ? `--sample-${response.sampleIndex + 1}` : "";
+  return path.join(rawPayloadRoot, response.provider, `${response.promptId}${suffix}.json`);
+}
+
+function computePromptScores(
+  promptCase: PromptCase,
+  response: ProviderResponse,
+  brand: BrandConfig,
+  competitors: CompetitorsConfig
+): {
+  scores: Omit<EvalPromptScores, "signalAlignment">;
   matchedFacts: string[];
   recommended: boolean;
+  misrepresented: boolean;
+  competitorMentions: string[];
 } {
   const mention = mentionBrand(response.answerText, brand.brand.name) ? 1 : 0;
   const ownedCitation = response.citations.some((citation) => citation.owned) ? 1 : 0;
   const trustedCitation = response.citations.some((citation) => citation.trusted) ? 1 : 0;
   const recommended = mention === 1 && hasRecommendation(response.answerText);
   const recommendation = recommended ? 1 : 0;
-  const accuracyResult = mention === 0 ? { score: 0, matchedFacts: [] } : computeAccuracy(response.answerText, brand);
-  const vavr = clamp(
-    mention * 0.3 + ownedCitation * 0.25 + trustedCitation * 0.15 + recommendation * 0.15 + accuracyResult.score * 0.15,
-    0,
-    1
-  );
+  const accuracyResult = mention === 0 ? { score: 0, matchedFacts: [], factCoverage: 0 } : computeAccuracy(response.answerText, brand);
+  const accurateMention = mention === 1 && accuracyResult.score >= 0.5 ? 1 : 0;
+  const misrepresented = mention === 1 && accuracyResult.score < 0.35;
+  const competitorMentions = mentionedCompetitors(response.answerText, competitors);
+  const competitorExcluded = mention === 0 && competitorMentions.length > 0 ? 1 : 0;
+  const vavr = accurateMention === 1 && (ownedCitation === 1 || trustedCitation === 1) ? 1 : 0;
 
   return {
-    mention,
-    ownedCitation,
-    trustedCitation,
-    recommendation,
-    accuracy: accuracyResult.score,
-    vavr,
+    scores: {
+      mention,
+      accurateMention,
+      ownedCitation,
+      trustedCitation,
+      recommendation,
+      accuracy: accuracyResult.score,
+      factCoverage: accuracyResult.factCoverage,
+      misrepresented: misrepresented ? 1 : 0,
+      competitorExcluded,
+      vavr
+    },
     matchedFacts: accuracyResult.matchedFacts,
-    recommended
+    recommended,
+    misrepresented,
+    competitorMentions
   };
 }
 
@@ -270,6 +327,28 @@ export function buildContentBriefs(
   return briefs;
 }
 
+function averagePromptGroup(results: EvalPromptResult[], promptCase: PromptCase): { weight: number; values: EvalPromptScores } {
+  const average = (selector: (result: EvalPromptResult) => number) =>
+    results.reduce((sum, result) => sum + selector(result), 0) / Math.max(results.length, 1);
+
+  return {
+    weight: PRIORITY_WEIGHTS[promptCase.priority ?? "medium"],
+    values: {
+      mention: average((result) => result.scores.mention),
+      accurateMention: average((result) => result.scores.accurateMention),
+      ownedCitation: average((result) => result.scores.ownedCitation),
+      trustedCitation: average((result) => result.scores.trustedCitation),
+      recommendation: average((result) => result.scores.recommendation),
+      accuracy: average((result) => result.scores.accuracy),
+      factCoverage: average((result) => result.scores.factCoverage),
+      misrepresented: average((result) => result.scores.misrepresented),
+      competitorExcluded: average((result) => result.scores.competitorExcluded),
+      signalAlignment: average((result) => result.scores.signalAlignment),
+      vavr: average((result) => result.scores.vavr)
+    }
+  };
+}
+
 export function scoreEvalResponses(input: ScoreEvalInput): EvalResult {
   const promptLookup = new Map(input.prompts.prompts.map((promptCase) => [promptCase.id, promptCase]));
   const promptResults = input.responses.map((response) => {
@@ -278,15 +357,10 @@ export function scoreEvalResponses(input: ScoreEvalInput): EvalResult {
       throw new Error(`No prompt config found for provider response ${response.promptId}`);
     }
 
-    const computed = computePromptScores(promptCase, response, input.brand);
+    const computed = computePromptScores(promptCase, response, input.brand, input.competitors);
     const scores: EvalPromptScores = {
-      mention: computed.mention,
-      ownedCitation: computed.ownedCitation,
-      trustedCitation: computed.trustedCitation,
-      recommendation: computed.recommendation,
-      accuracy: computed.accuracy,
-      signalAlignment: 0,
-      vavr: computed.vavr
+      ...computed.scores,
+      signalAlignment: 0
     };
     scores.signalAlignment = scoreSignalAlignment(promptCase, scores);
 
@@ -296,40 +370,74 @@ export function scoreEvalResponses(input: ScoreEvalInput): EvalResult {
       priority: promptCase.priority ?? "medium",
       prompt: promptCase.template,
       expectedSignal: promptCase.expected_signal,
+      intent: promptCase.intent ?? null,
+      holdout: promptCase.holdout ?? false,
       provider: response.provider,
       model: response.model,
+      locale: response.locale ?? promptCase.locale ?? null,
+      sampleIndex: response.sampleIndex,
+      rankPosition: response.rankPosition,
       answerText: response.answerText,
       citations: response.citations,
       searchResults: response.searchResults,
-      rawPayloadFile: path.join(input.rawPayloadRoot, response.provider, `${promptCase.id}.json`),
+      rawPayloadFile: rawPayloadFilePath(input.rawPayloadRoot, response),
       matchedFacts: computed.matchedFacts,
+      competitorMentions: computed.competitorMentions,
       recommended: computed.recommended,
+      misrepresented: computed.misrepresented,
       scores
     } satisfies EvalPromptResult;
   });
 
-  const weighted = promptResults.map((result) => ({
-    weight: PRIORITY_WEIGHTS[result.priority],
-    result
-  }));
+  const promptGroups = new Map<string, EvalPromptResult[]>();
+  for (const result of promptResults) {
+    const current = promptGroups.get(result.promptId) ?? [];
+    current.push(result);
+    promptGroups.set(result.promptId, current);
+  }
+
+  const activeGroups = [...promptGroups.entries()]
+    .map(([promptId, results]) => ({ promptId, results, promptCase: promptLookup.get(promptId)! }))
+    .filter((entry) => !entry.promptCase.holdout);
+  const holdoutGroups = [...promptGroups.entries()]
+    .map(([promptId, results]) => ({ promptId, results, promptCase: promptLookup.get(promptId)! }))
+    .filter((entry) => entry.promptCase.holdout);
+  const weighted = activeGroups.map((entry) => averagePromptGroup(entry.results, entry.promptCase));
+  const localeCandidates = unique(promptResults.map((result) => result.locale).filter((value): value is string => Boolean(value)));
 
   const summary: EvalSummary = {
-    promptCount: promptResults.length,
-    mentionRate: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.result.scores.mention, weight: entry.weight })))),
-    ownedCitationRate: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.result.scores.ownedCitation, weight: entry.weight })))),
-    trustedCitationRate: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.result.scores.trustedCitation, weight: entry.weight })))),
-    recommendationRate: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.result.scores.recommendation, weight: entry.weight })))),
-    accuracyRate: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.result.scores.accuracy, weight: entry.weight })))),
-    vavr: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.result.scores.vavr, weight: entry.weight }))))
+    promptCount: activeGroups.length,
+    holdoutPromptCount: holdoutGroups.length,
+    sampleCount: promptResults.length,
+    locale: localeCandidates.length === 1 ? localeCandidates[0] : localeCandidates.length > 1 ? "mixed" : null,
+    mentionRate: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.mention, weight: entry.weight })))),
+    accurateMentionRate: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.accurateMention, weight: entry.weight })))),
+    ownedCitationRate: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.ownedCitation, weight: entry.weight })))),
+    trustedCitationRate: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.trustedCitation, weight: entry.weight })))),
+    recommendationRate: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.recommendation, weight: entry.weight })))),
+    misrepresentationRate: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.misrepresented, weight: entry.weight })))),
+    competitorExclusionGap: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.competitorExcluded, weight: entry.weight })))),
+    factCoverageScore: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.factCoverage, weight: entry.weight })))),
+    accuracyRate: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.accuracy, weight: entry.weight })))),
+    vavr: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.vavr, weight: entry.weight }))))
   };
 
+  const generatedAt = new Date().toISOString();
+
   return {
+    run: {
+      ...input.audit.run,
+      mode: input.mode ?? "eval",
+      completedAt: generatedAt,
+      sampleCount: promptResults.length,
+      locale: summary.locale
+    },
     site: input.audit.site,
     provider: {
-      name: promptResults[0]?.provider ?? "openai",
-      model: promptResults[0]?.model ?? "unknown"
+      name: unique(promptResults.map((result) => result.provider)).join(", ") || "openai",
+      model: unique(promptResults.map((result) => result.model)).join(", ") || "unknown"
     },
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     audit: {
       overallScore: input.audit.summary.overallScore,
       scores: input.audit.scores,
@@ -350,9 +458,13 @@ export function summarizeEvalDiff(current: EvalResult, previous: EvalResult | nu
   const metrics = [
     ["VAVR", current.summary.vavr, previous?.summary.vavr ?? null],
     ["Mention rate", current.summary.mentionRate, previous?.summary.mentionRate ?? null],
+    ["Accurate mention rate", current.summary.accurateMentionRate, previous?.summary.accurateMentionRate ?? null],
     ["Owned citation rate", current.summary.ownedCitationRate, previous?.summary.ownedCitationRate ?? null],
     ["Trusted citation rate", current.summary.trustedCitationRate, previous?.summary.trustedCitationRate ?? null],
     ["Recommendation rate", current.summary.recommendationRate, previous?.summary.recommendationRate ?? null],
+    ["Misrepresentation rate", current.summary.misrepresentationRate, previous?.summary.misrepresentationRate ?? null],
+    ["Competitor exclusion gap", current.summary.competitorExclusionGap, previous?.summary.competitorExclusionGap ?? null],
+    ["Fact coverage score", current.summary.factCoverageScore, previous?.summary.factCoverageScore ?? null],
     ["Accuracy rate", current.summary.accuracyRate, previous?.summary.accuracyRate ?? null]
   ] as const;
 
@@ -364,12 +476,23 @@ export function summarizeEvalDiff(current: EvalResult, previous: EvalResult | nu
   }));
 }
 
-export function applyEvalSummaryToAudit(audit: AuditResult, vavr: number): AuditResult {
+export function applyEvalSummaryToAudit(
+  audit: AuditResult,
+  summary: Pick<EvalSummary, "vavr" | "sampleCount" | "locale">,
+  mode: Extract<RunMode, "eval" | "manual-import"> = "eval"
+): AuditResult {
   return {
     ...audit,
+    run: {
+      ...audit.run,
+      mode,
+      sampleCount: summary.sampleCount,
+      locale: summary.locale,
+      completedAt: new Date().toISOString()
+    },
     summary: {
       ...audit.summary,
-      vavr
+      vavr: summary.vavr
     }
   };
 }
