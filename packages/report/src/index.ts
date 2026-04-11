@@ -48,6 +48,39 @@ interface EvalSummaryJson {
   briefs: Array<Pick<ContentBrief, "id" | "type" | "title" | "audience" | "angle" | "cta">>;
 }
 
+interface ShareSummary {
+  project: "AnswerLens";
+  tagline: "CI for AI discoverability.";
+  positioning: string;
+  disclaimer: string;
+  run: {
+    id: string;
+    mode: RunKind;
+    generatedAt: string;
+    artifactVersion: string;
+    ruleVersion: string;
+    sampleCount: number;
+    locale: string | null;
+  };
+  site: AuditResult["site"];
+  metrics: Record<string, number | string | null>;
+  topIssues: Array<{
+    severity: string;
+    title: string;
+    scope: string;
+    fixHint: string;
+  }>;
+  topRecommendations: Array<{
+    title: string;
+    rationale: string;
+    expectedOutcome: string;
+  }>;
+  artifacts: string[];
+}
+
+const SHARE_DISCLAIMER =
+  "AnswerLens does not scrape consumer AI UIs, auto-post content, or guarantee answer-surface rankings.";
+
 function renderVavr(value: number | null): string {
   return value === null ? "pending eval" : `${value}`;
 }
@@ -65,6 +98,250 @@ function escapeTableCell(value: string | number | boolean | null | undefined): s
 function compactText(value: string): string {
   return value.toLowerCase().replace(/\s+/g, " ").trim();
 }
+
+function topIssues(result: AuditResult): ShareSummary["topIssues"] {
+  const seen = new Set<string>();
+  const diverseIssues = result.issues.filter((issue) => {
+    const key = `${issue.title}:${issue.fixHint}`;
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+
+  return diverseIssues.slice(0, 3).map((issue) => ({
+    severity: issue.severity,
+    title: issue.title,
+    scope: issue.pageUrl ?? "site",
+    fixHint: issue.fixHint
+  }));
+}
+
+function topRecommendations(result: AuditResult): ShareSummary["topRecommendations"] {
+  return result.recommendations.slice(0, 3).map((recommendation) => ({
+    title: recommendation.title,
+    rationale: recommendation.rationale,
+    expectedOutcome: recommendation.expectedOutcome
+  }));
+}
+
+function auditArtifacts(): string[] {
+  return [
+    "share-summary.md",
+    "share-summary.json",
+    "pr-snippet.md",
+    "scorecard.md",
+    "recommendations.md",
+    "issues.json",
+    "site-audit.json",
+    "index.html",
+    "normalized-pages.json",
+    "competitor-diff.md",
+    "run.json"
+  ];
+}
+
+function evalArtifacts(): string[] {
+  return [
+    ...auditArtifacts(),
+    "eval-summary.md",
+    "eval-summary.json",
+    "eval-results.json",
+    "before-after-diff.md",
+    "citation-gap-matrix.md",
+    "citation-gap-matrix.json"
+  ];
+}
+
+function buildAuditShareSummary(result: AuditResult): ShareSummary {
+  return {
+    project: "AnswerLens",
+    tagline: "CI for AI discoverability.",
+    positioning: "Audit whether a product site can be read, cited, compared, and recommended by AI systems.",
+    disclaimer: SHARE_DISCLAIMER,
+    run: {
+      id: result.run.id,
+      mode: result.run.mode === "eval" || result.run.mode === "manual-import" ? result.run.mode : "audit",
+      generatedAt: result.site.generatedAt,
+      artifactVersion: result.run.artifactVersion,
+      ruleVersion: result.run.ruleVersion,
+      sampleCount: result.run.sampleCount,
+      locale: result.run.locale
+    },
+    site: result.site,
+    metrics: {
+      overallScore: result.summary.overallScore,
+      vavr: result.summary.vavr,
+      crawledPages: result.summary.crawledPages,
+      discoveredUrls: result.summary.discoveredUrls,
+      keyPageCount: result.summary.keyPageCount,
+      missingPageTypes: result.summary.missingPageTypes.join(", ") || "none"
+    },
+    topIssues: topIssues(result),
+    topRecommendations: topRecommendations(result),
+    artifacts: auditArtifacts()
+  };
+}
+
+function buildEvalShareSummary(result: EvalResult, previous: ShareSummary | null): ShareSummary {
+  return {
+    project: "AnswerLens",
+    tagline: "CI for AI discoverability.",
+    positioning: "Audit whether a product site can be read, cited, compared, and recommended by AI systems.",
+    disclaimer: SHARE_DISCLAIMER,
+    run: {
+      id: result.run.id,
+      mode: result.run.mode === "manual-import" ? "manual-import" : "eval",
+      generatedAt: result.generatedAt,
+      artifactVersion: result.run.artifactVersion,
+      ruleVersion: result.run.ruleVersion,
+      sampleCount: result.run.sampleCount,
+      locale: result.run.locale
+    },
+    site: result.site,
+    metrics: {
+      overallScore: result.audit.overallScore,
+      vavr: result.summary.vavr,
+      promptCount: result.summary.promptCount,
+      holdoutPromptCount: result.summary.holdoutPromptCount,
+      sampleCount: result.summary.sampleCount,
+      mentionRate: result.summary.mentionRate,
+      accurateMentionRate: result.summary.accurateMentionRate,
+      ownedCitationRate: result.summary.ownedCitationRate,
+      trustedCitationRate: result.summary.trustedCitationRate,
+      recommendationRate: result.summary.recommendationRate,
+      misrepresentationRate: result.summary.misrepresentationRate,
+      competitorExclusionGap: result.summary.competitorExclusionGap,
+      factCoverageScore: result.summary.factCoverageScore
+    },
+    topIssues: previous?.topIssues ?? [],
+    topRecommendations: previous?.topRecommendations ?? [],
+    artifacts: evalArtifacts()
+  };
+}
+
+function renderMetricValue(value: number | string | null): string {
+  if (value === null) {
+    return "pending eval";
+  }
+
+  return String(value);
+}
+
+function renderShareSummaryMarkdown(summary: ShareSummary): string {
+  const metricRows = Object.entries(summary.metrics)
+    .map(([key, value]) => `| ${escapeTableCell(key)} | ${escapeTableCell(renderMetricValue(value))} |`)
+    .join("\n");
+
+  const issues =
+    summary.topIssues.length > 0
+      ? summary.topIssues.map((issue) => `- **${issue.title}** (${issue.severity}, ${issue.scope}): ${issue.fixHint}`).join("\n")
+      : "- none";
+
+  const recommendations =
+    summary.topRecommendations.length > 0
+      ? summary.topRecommendations
+          .map((recommendation) => `- **${recommendation.title}**: ${recommendation.expectedOutcome}`)
+          .join("\n")
+      : "- none";
+
+  const artifacts = summary.artifacts.map((artifact) => `- [${artifact}](${artifact})`).join("\n");
+
+  return `# AnswerLens Share Summary
+
+> ${summary.tagline}
+
+${summary.positioning}
+
+## Run
+
+- Site: ${summary.site.input}
+- Mode: ${summary.run.mode}
+- Run ID: ${summary.run.id}
+- Generated: ${summary.run.generatedAt}
+- Rule version: ${summary.run.ruleVersion}
+
+## Metrics
+
+| Metric | Value |
+| --- | --- |
+${metricRows}
+
+## AI may miss this product because
+
+${issues}
+
+## Top fixes
+
+${recommendations}
+
+## Shareable artifacts
+
+${artifacts}
+
+## Guardrails
+
+${summary.disclaimer}
+`;
+}
+
+function renderPrSnippetMarkdown(summary: ShareSummary): string {
+  const topIssues =
+    summary.topIssues.length > 0
+      ? summary.topIssues.map((issue) => `- ${issue.title}: ${issue.fixHint}`).join("\n")
+      : "- none";
+
+  const topFixes =
+    summary.topRecommendations.length > 0
+      ? summary.topRecommendations.map((recommendation) => `- ${recommendation.title}`).join("\n")
+      : "- none";
+
+  const score = renderMetricValue(summary.metrics.overallScore);
+  const vavr = renderMetricValue(summary.metrics.vavr ?? null);
+
+  return `## AnswerLens audit
+
+**${summary.tagline}** Readiness: **${score}/100**. VAVR: **${vavr}**.
+
+### AI may miss this product because
+
+${topIssues}
+
+### Recommended next fixes
+
+${topFixes}
+
+<details>
+<summary>Artifacts and guardrails</summary>
+
+- Scorecard: \`scorecard.md\`
+- Recommendations: \`recommendations.md\`
+- Share summary: \`share-summary.md\`
+- Machine-readable summary: \`share-summary.json\`
+
+${summary.disclaimer}
+
+</details>
+`;
+}
+
+async function readShareSummary(outDir: string): Promise<ShareSummary | null> {
+  try {
+    const raw = await readFile(path.join(outDir, "share-summary.json"), "utf8");
+    return JSON.parse(raw) as ShareSummary;
+  } catch {
+    return null;
+  }
+}
+
+async function writeShareOutputs(outDir: string, summary: ShareSummary): Promise<void> {
+  await writeJson(path.join(outDir, "share-summary.json"), summary);
+  await writeFile(path.join(outDir, "share-summary.md"), renderShareSummaryMarkdown(summary), "utf8");
+  await writeFile(path.join(outDir, "pr-snippet.md"), renderPrSnippetMarkdown(summary), "utf8");
+}
+
 function renderRecommendationsMarkdown(result: AuditResult): string {
   const blocks =
     result.recommendations.length > 0
@@ -97,7 +374,19 @@ function buildAuditRunManifest(result: AuditResult): RunManifest {
       discoveredUrls: result.summary.discoveredUrls,
       keyPageCount: result.summary.keyPageCount
     },
-    artifacts: ["site-audit.json", "issues.json", "recommendations.md", "scorecard.md", "index.html", "normalized-pages.json", "competitor-diff.md", "run.json"]
+    artifacts: [
+      "site-audit.json",
+      "issues.json",
+      "recommendations.md",
+      "scorecard.md",
+      "index.html",
+      "normalized-pages.json",
+      "competitor-diff.md",
+      "share-summary.md",
+      "share-summary.json",
+      "pr-snippet.md",
+      "run.json"
+    ]
   };
 }
 
@@ -139,6 +428,9 @@ function buildEvalRunManifest(result: EvalResult): RunManifest {
       "before-after-diff.md",
       "citation-gap-matrix.json",
       "citation-gap-matrix.md",
+      "share-summary.md",
+      "share-summary.json",
+      "pr-snippet.md",
       "content-briefs/*.md",
       "briefs/*.md",
       "run.json",
@@ -506,6 +798,7 @@ export async function readEvalResults(filePath: string): Promise<EvalResult | nu
 
 export async function writeAuditOutputs(outDir: string, result: AuditResult): Promise<void> {
   await ensureDir(outDir);
+  const shareSummary = buildAuditShareSummary(result);
   await writeJson(path.join(outDir, "site-audit.json"), result);
   await writeJson(path.join(outDir, "issues.json"), result.issues);
   await writeFile(path.join(outDir, "scorecard.md"), renderScorecardMarkdown(result), "utf8");
@@ -513,17 +806,21 @@ export async function writeAuditOutputs(outDir: string, result: AuditResult): Pr
   await writeFile(path.join(outDir, "index.html"), renderScorecardHtml(result), "utf8");
   await writeJson(path.join(outDir, "normalized-pages.json"), result.pages);
   await writeFile(path.join(outDir, "competitor-diff.md"), renderCompetitorDiffMarkdown(result), "utf8");
+  await writeShareOutputs(outDir, shareSummary);
   await writeJson(path.join(outDir, "run.json"), buildAuditRunManifest(result));
 }
 
 export async function writeEvalOutputs(outDir: string, result: EvalResult, previous: EvalResult | null): Promise<void> {
   await ensureDir(outDir);
+  const previousShareSummary = await readShareSummary(outDir);
+  const shareSummary = buildEvalShareSummary(result, previousShareSummary);
   await writeJson(path.join(outDir, "eval-results.json"), result);
   await writeFile(path.join(outDir, "eval-summary.md"), renderEvalSummaryMarkdown(result), "utf8");
   await writeJson(path.join(outDir, "eval-summary.json"), buildEvalSummaryJson(result));
   await writeFile(path.join(outDir, "before-after-diff.md"), renderEvalDiffMarkdown(result, previous), "utf8");
   await writeJson(path.join(outDir, "citation-gap-matrix.json"), buildCitationGapMatrix(result));
   await writeFile(path.join(outDir, "citation-gap-matrix.md"), renderCitationGapMatrixMarkdown(result), "utf8");
+  await writeShareOutputs(outDir, shareSummary);
   await writeJson(path.join(outDir, "run.json"), buildEvalRunManifest(result));
   await writeBriefOutputs(outDir, result.briefs);
 }

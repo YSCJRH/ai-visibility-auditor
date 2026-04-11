@@ -29,20 +29,19 @@ jobs:
           {
             echo '## AnswerLens demo audit'
             echo ''
+            echo '**CI for AI discoverability.**'
+            echo ''
             echo '- Fixture: static-good'
             echo '- Output directory: runs/static-good'
-            echo '- Generated artifacts:'
-            echo '  - site-audit.json'
-            echo '  - issues.json'
-            echo '  - recommendations.md'
-            echo '  - scorecard.md'
-            echo '  - index.html'
-            echo '  - normalized-pages.json'
-            echo '  - competitor-diff.md'
-            echo '  - run.json'
             echo ''
-            echo '### Scorecard excerpt'
-            sed -n '1,25p' runs/static-good/scorecard.md
+            echo '### Share summary'
+            sed -n '1,90p' runs/static-good/share-summary.md
+            echo ''
+            echo '### PR-ready snippet'
+            sed -n '1,80p' runs/static-good/pr-snippet.md
+            echo ''
+            echo '### Artifact tree'
+            find runs/static-good -maxdepth 2 -type f | sort
           } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
