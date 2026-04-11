@@ -2,9 +2,9 @@
 
 ![AnswerLens cover](assets/readme-cover.svg)
 
-> Open-source AI visibility auditor for product websites.
+> AnswerLens is a CLI-first AI visibility auditor for product websites.
 
-AnswerLens is a CLI-first, report-driven, BYOK-friendly toolkit for teams that want to understand whether a product site is easy for AI systems to read, cite, compare, and recommend. It focuses on explainable structure fixes and reproducible eval runs instead of consumer UI scraping or vague ranking promises.
+AnswerLens is a CLI-first, report-driven, BYOK-friendly toolkit for teams that want to understand whether a product site is easy for AI systems to read, cite, compare, and recommend. AnswerLens focuses on explainable structure, evidence, and validation workflows rather than consumer UI scraping.
 
 ## What ships today
 
@@ -24,6 +24,12 @@ AnswerLens is a CLI-first, report-driven, BYOK-friendly toolkit for teams that w
 | Perplexity eval | Live |
 | Manual answer import | Live |
 | Search Console / Bing connectors | Planned |
+
+## Why AnswerLens
+
+- Explainable audit rules that focus on why AI systems miss or misread a site.
+- A report-first, repo-native workflow that turns runs into artifacts teams can review and ship against.
+- A validation-oriented path that avoids scrape-and-rank claims and keeps evidence visible.
 
 ## What this is not
 
@@ -61,7 +67,7 @@ packages/core      Crawl, extract, audit, scoring, recommendations, config loadi
 packages/providers Live provider adapters and normalization contracts
 packages/report    Markdown, JSON, and HTML report rendering
 examples/          Demo configs and local fixtures
-docs/              Architecture, scoring, limitations, and bootstrap notes
+docs/              Architecture, scoring, limitations, bootstrap notes, and roadmap
 ```
 
 ## Quickstart
@@ -143,9 +149,9 @@ See [docs/scoring.md](/D:/SEO/docs/scoring.md) for the readiness buckets, benchm
 
 ## Roadmap
 
-- `v0.1-audit`: CLI-first audit MVP
-- `v0.2-eval`: stabilized eval contract, richer prompt taxonomy, and content briefs
-- `v0.3-connectors`: GSC, Bing Webmaster, IndexNow, and deeper validation layers
+- `v0.2.1`: ship `#9` for schema-text consistency and evidence density
+- `v0.2.2`: ship `#10` for internal link context, anchor quality, and rule registry
+- Full public roadmap: [docs/roadmap.md](/D:/SEO/docs/roadmap.md)
 
 ## Contributing
 

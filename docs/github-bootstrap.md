@@ -41,6 +41,7 @@ For the current launch phase, keep coordination lightweight:
 - use `kind:*`, `area:*`, and `priority:*` labels for triage
 - split roadmap work into small issues instead of building a separate GitHub Project
 - keep the active launch PR linked from the first issue batch until the repo has more parallel contributors
+- treat [docs/roadmap.md](/D:/SEO/docs/roadmap.md) as the canonical public roadmap
 
 ## Code owners
 
@@ -49,6 +50,6 @@ The repository now includes [`.github/CODEOWNERS`](/D:/SEO/.github/CODEOWNERS). 
 ## Release settings
 
 - enable automated release notes
-- draft a `v0.2.0` release after the launch PR is merged
+- publish release notes that link back to [docs/roadmap.md](/D:/SEO/docs/roadmap.md)
 - add npm publishing only after `eval` stabilizes
 - add artifact attestations after releases become routine
