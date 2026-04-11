@@ -1,0 +1,113 @@
+﻿<svg width="1600" height="840" viewBox="0 0 1600 840" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">AnswerLens README cover</title>
+  <desc id="desc">AnswerLens AI visibility auditor cover art with a central lens, CLI card, report card, and connected audit, citation, prompt, and recommendation nodes.</desc>
+  <defs>
+    <radialGradient id="bgGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(780 390) rotate(90) scale(520 760)">
+      <stop stop-color="#1E6CFF" stop-opacity="0.42"/>
+      <stop offset="0.46" stop-color="#0B253F" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#06111F"/>
+    </radialGradient>
+    <linearGradient id="panel" x1="242" y1="170" x2="568" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#142743" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#0A1728" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="lens" x1="605" y1="180" x2="1015" y2="590" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9FE8FF"/>
+      <stop offset="0.42" stop-color="#2F8CFF"/>
+      <stop offset="1" stop-color="#0B2E65"/>
+    </linearGradient>
+    <linearGradient id="mint" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#9FFFE0"/>
+      <stop offset="1" stop-color="#3FD3FF"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="26" stdDeviation="28" flood-color="#020B16" flood-opacity="0.45"/>
+    </filter>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0H0V64" stroke="#79B8FF" stroke-opacity="0.08" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="840" rx="44" fill="#06111F"/>
+  <rect width="1600" height="840" rx="44" fill="url(#bgGlow)"/>
+  <rect width="1600" height="840" rx="44" fill="url(#grid)"/>
+
+  <circle cx="1260" cy="130" r="210" fill="#3FD3FF" opacity="0.08"/>
+  <circle cx="200" cy="720" r="260" fill="#9FFFE0" opacity="0.06"/>
+  <path d="M1130 90C1232 139 1307 220 1360 333C1415 449 1434 569 1418 695" stroke="#9FE8FF" stroke-opacity="0.13" stroke-width="2"/>
+  <path d="M153 190C284 128 430 111 581 141" stroke="#9FFFE0" stroke-opacity="0.12" stroke-width="2"/>
+
+  <g filter="url(#softShadow)">
+    <rect x="120" y="178" width="430" height="318" rx="28" fill="url(#panel)" stroke="#80B8FF" stroke-opacity="0.22"/>
+    <circle cx="160" cy="219" r="8" fill="#FF6B6B"/>
+    <circle cx="188" cy="219" r="8" fill="#FFD166"/>
+    <circle cx="216" cy="219" r="8" fill="#58E6A7"/>
+    <text x="154" y="274" fill="#7EF7D5" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="26">$ answerlens audit</text>
+    <text x="154" y="322" fill="#D7E8FF" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="24">site-audit.json</text>
+    <text x="154" y="360" fill="#D7E8FF" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="24">recommendations.md</text>
+    <text x="154" y="398" fill="#D7E8FF" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="24">citation-gap-matrix</text>
+    <rect x="154" y="434" width="246" height="12" rx="6" fill="#3FD3FF" opacity="0.55"/>
+    <rect x="154" y="458" width="146" height="12" rx="6" fill="#9FFFE0" opacity="0.4"/>
+  </g>
+
+  <g filter="url(#softShadow)">
+    <rect x="1038" y="210" width="432" height="372" rx="30" fill="#F7FBFF" stroke="#D6E6FF"/>
+    <text x="1080" y="278" fill="#071829" font-family="Inter, Segoe UI, sans-serif" font-size="26" font-weight="700">Visibility scorecard</text>
+    <text x="1080" y="324" fill="#607088" font-family="Inter, Segoe UI, sans-serif" font-size="20">Verified AI Visibility Rate</text>
+    <text x="1080" y="404" fill="#0B55D8" font-family="Inter, Segoe UI, sans-serif" font-size="74" font-weight="800">78</text>
+    <text x="1192" y="404" fill="#486178" font-family="Inter, Segoe UI, sans-serif" font-size="24">/100</text>
+    <rect x="1080" y="452" width="326" height="16" rx="8" fill="#E5EDF8"/>
+    <rect x="1080" y="452" width="252" height="16" rx="8" fill="#0B55D8"/>
+    <rect x="1080" y="506" width="104" height="32" rx="16" fill="#EAFBF7"/>
+    <text x="1101" y="528" fill="#097B5A" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="700">CITED</text>
+    <rect x="1204" y="506" width="140" height="32" rx="16" fill="#EEF4FF"/>
+    <text x="1224" y="528" fill="#1155CC" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="700">MENTIONED</text>
+  </g>
+
+  <g filter="url(#glow)">
+    <circle cx="800" cy="390" r="184" fill="#06111F" stroke="url(#lens)" stroke-width="18"/>
+    <circle cx="800" cy="390" r="130" fill="#0A1D33" stroke="#9FE8FF" stroke-opacity="0.38" stroke-width="2"/>
+    <circle cx="800" cy="390" r="74" fill="#123C72" stroke="#9FFFE0" stroke-opacity="0.75" stroke-width="2"/>
+    <circle cx="800" cy="390" r="16" fill="#9FFFE0"/>
+    <path d="M800 206V574M616 390H984M670 260L930 520M930 260L670 520" stroke="#9FE8FF" stroke-opacity="0.22" stroke-width="2"/>
+    <path d="M894 512L1020 638" stroke="#9FE8FF" stroke-width="18" stroke-linecap="round"/>
+    <path d="M894 512L1020 638" stroke="#06111F" stroke-opacity="0.25" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <g stroke="#83D7FF" stroke-opacity="0.34" stroke-width="2">
+    <path d="M800 206C736 143 682 119 620 118"/>
+    <path d="M984 390C1078 294 1154 168 1240 156"/>
+    <path d="M800 574C845 634 905 674 972 694"/>
+    <path d="M616 390C501 435 416 512 316 573"/>
+  </g>
+
+  <g>
+    <rect x="520" y="84" width="198" height="66" rx="33" fill="#0D223B" stroke="#80B8FF" stroke-opacity="0.34"/>
+    <circle cx="555" cy="117" r="10" fill="url(#mint)"/>
+    <text x="580" y="125" fill="#D7E8FF" font-family="Inter, Segoe UI, sans-serif" font-size="22" font-weight="700">Audit</text>
+    <rect x="1232" y="122" width="220" height="66" rx="33" fill="#0D223B" stroke="#80B8FF" stroke-opacity="0.34"/>
+    <circle cx="1270" cy="155" r="10" fill="url(#mint)"/>
+    <text x="1295" y="163" fill="#D7E8FF" font-family="Inter, Segoe UI, sans-serif" font-size="22" font-weight="700">Citations</text>
+    <rect x="940" y="662" width="222" height="66" rx="33" fill="#0D223B" stroke="#80B8FF" stroke-opacity="0.34"/>
+    <circle cx="978" cy="695" r="10" fill="url(#mint)"/>
+    <text x="1003" y="703" fill="#D7E8FF" font-family="Inter, Segoe UI, sans-serif" font-size="22" font-weight="700">Prompts</text>
+    <rect x="170" y="540" width="292" height="66" rx="33" fill="#0D223B" stroke="#80B8FF" stroke-opacity="0.34"/>
+    <circle cx="209" cy="573" r="10" fill="url(#mint)"/>
+    <text x="234" y="581" fill="#D7E8FF" font-family="Inter, Segoe UI, sans-serif" font-size="22" font-weight="700">Recommendations</text>
+  </g>
+
+  <text x="120" y="640" fill="#FFFFFF" font-family="Inter, Segoe UI, sans-serif" font-size="82" font-weight="850" letter-spacing="-3">AnswerLens</text>
+  <text x="124" y="696" fill="#BBD8FF" font-family="Inter, Segoe UI, sans-serif" font-size="34" font-weight="600">AI visibility audits for product sites</text>
+  <g>
+    <rect x="124" y="730" width="462" height="50" rx="25" fill="#091B30" stroke="#7AD7FF" stroke-opacity="0.25"/>
+    <text x="153" y="763" fill="#9FFFE0" font-family="Inter, Segoe UI, sans-serif" font-size="22" font-weight="700">CLI-first &#183; BYOK &#183; Reproducible reports</text>
+  </g>
+</svg>
+

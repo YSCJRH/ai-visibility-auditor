@@ -42,10 +42,13 @@ Create one GitHub Project as the single source of truth with views by:
 - priority
 - status
 
+## Code owners
+
+The repository now includes [`.github/CODEOWNERS`](/D:/SEO/.github/CODEOWNERS). Keep it synced with the actual maintainer handles before the first public launch.
+
 ## Release settings
 
 - enable automated release notes
 - publish source artifacts for `v0.1`
 - add npm publishing only after `eval` stabilizes
 - add artifact attestations after releases become routine
-

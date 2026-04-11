@@ -1,7 +1,10 @@
 {
   "name": "@answerlens/cli",
   "version": "0.1.0",
+  "description": "AnswerLens CLI entrypoint used by the workspace",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  }
 }
-

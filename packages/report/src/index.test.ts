@@ -1,19 +1,28 @@
-﻿import test from "node:test";
+import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { loadBrandConfig, loadCompetitorsConfig, loadPromptsConfig, runAudit, scoreEvalResponses, applyEvalSummaryToAudit } from "../../core/src/index.ts";
+import {
+  loadBrandConfig,
+  loadCompetitorsConfig,
+  loadPromptsConfig,
+  runAudit,
+  scoreEvalResponses,
+  applyEvalSummaryToAudit
+} from "../../core/src/index.ts";
 import type { ProviderResponse } from "../../providers/src/contracts.ts";
 import {
   readEvalResults,
   renderEvalDiffMarkdown,
   renderEvalSummaryMarkdown,
   renderScorecardMarkdown,
+  renderScorecardHtml,
+  writeAuditOutputs,
   writeEvalOutputs
 } from "./index.ts";
 
-function makeResponse(promptId: string): ProviderResponse {
+function makeResponse(promptId: string, holdout = false, sampleIndex = 0): ProviderResponse {
   return {
     provider: "openai",
     model: "gpt-5",
@@ -29,8 +38,13 @@ function makeResponse(promptId: string): ProviderResponse {
       }
     ],
     searchResults: [],
-    rawPayload: { ok: true },
-    requestedAt: new Date().toISOString()
+    rawPayload: { ok: true, promptId, sampleIndex },
+    requestedAt: new Date().toISOString(),
+    locale: "en-US",
+    sampleIndex,
+    runCount: 1,
+    holdout,
+    rankPosition: null
   };
 }
 
@@ -48,28 +62,82 @@ test("report renderers expose expected audit and eval sections", async () => {
     prompts
   });
 
+  const responses = prompts.prompts.map((promptCase) => makeResponse(promptCase.id, promptCase.holdout ?? false));
   const evalResult = scoreEvalResponses({
     brand,
     competitors,
     prompts,
     audit,
-    responses: prompts.prompts.map((promptCase) => makeResponse(promptCase.id)),
+    responses,
     rawPayloadRoot: path.resolve("runs/test-eval/raw")
   });
 
-  const scorecard = renderScorecardMarkdown(applyEvalSummaryToAudit(audit, evalResult.summary.vavr));
+  const scorecard = renderScorecardMarkdown(applyEvalSummaryToAudit(audit, evalResult.summary));
+  const scorecardHtml = renderScorecardHtml(applyEvalSummaryToAudit(audit, evalResult.summary));
   const evalSummary = renderEvalSummaryMarkdown(evalResult);
   const diff = renderEvalDiffMarkdown(evalResult, null);
+  const expectedBenchmarkCount = prompts.prompts.filter((promptCase) => !promptCase.holdout).length;
+  const expectedHoldoutCount = prompts.prompts.filter((promptCase) => promptCase.holdout).length;
 
   assert.match(scorecard, /VAVR: /);
+  assert.match(scorecardHtml, /Overall score: <strong>/);
+  assert.match(scorecardHtml, / \| VAVR: <strong>/);
+  assert.equal(scorecardHtml.includes(String.fromCharCode(0x74ba)), false);
   assert.match(evalSummary, /# AnswerLens Eval Summary/);
-  assert.match(evalSummary, /## Prompt results/);
+  assert.match(evalSummary, /Accurate mention rate/);
   assert.match(diff, /becomes the baseline/);
+  assert.equal(evalResult.summary.promptCount, expectedBenchmarkCount);
+  assert.ok(prompts.prompts.length >= 34);
+  assert.ok(expectedHoldoutCount >= 10);
 
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-report-"));
+  await writeAuditOutputs(tempDir, audit);
   await writeEvalOutputs(tempDir, evalResult, null);
+
   const written = await readEvalResults(path.join(tempDir, "eval-results.json"));
-  assert.equal(written?.summary.promptCount, 3);
-  const brief = await readFile(path.join(tempDir, "before-after-diff.md"), "utf8");
-  assert.match(brief, /baseline/);
+  const evalSummaryJson = JSON.parse(await readFile(path.join(tempDir, "eval-summary.json"), "utf8")) as {
+    summary: { promptCount: number; locale: string | null };
+    briefs: unknown[];
+  };
+  const runManifest = JSON.parse(await readFile(path.join(tempDir, "run.json"), "utf8")) as {
+    kind: string;
+    provider?: { name: string };
+    artifacts: string[];
+  };
+  const recommendations = await readFile(path.join(tempDir, "recommendations.md"), "utf8");
+  const htmlReport = await readFile(path.join(tempDir, "index.html"), "utf8");
+  const readme = await readFile(path.resolve("README.md"), "utf8");
+  const gitignore = await readFile(path.resolve(".gitignore"), "utf8");
+  const coverSvg = await readFile(path.resolve("assets/readme-cover.svg"), "utf8");
+  const normalizedPages = JSON.parse(await readFile(path.join(tempDir, "normalized-pages.json"), "utf8")) as unknown[];
+  const competitorDiff = await readFile(path.join(tempDir, "competitor-diff.md"), "utf8");
+  const citationGapMatrix = JSON.parse(await readFile(path.join(tempDir, "citation-gap-matrix.json"), "utf8")) as {
+    rows: unknown[];
+    summary: { citationGapCount: number };
+  };
+  const citationGapMarkdown = await readFile(path.join(tempDir, "citation-gap-matrix.md"), "utf8");
+  const contentBrief = await readFile(path.join(tempDir, "content-briefs", "faq-brief.md"), "utf8");
+  const legacyBrief = await readFile(path.join(tempDir, "briefs", "faq-brief.md"), "utf8");
+
+  assert.equal(written?.summary.promptCount, expectedBenchmarkCount);
+  assert.equal(evalSummaryJson.summary.promptCount, expectedBenchmarkCount);
+  assert.equal(evalSummaryJson.summary.locale, "en-US");
+  assert.equal(runManifest.kind, "eval");
+  assert.equal(runManifest.provider?.name, "openai");
+  assert.ok(runManifest.artifacts.includes("eval-summary.json"));
+  assert.ok(runManifest.artifacts.includes("citation-gap-matrix.json"));
+  assert.ok(runManifest.artifacts.includes("normalized-pages.json"));
+  assert.match(recommendations, /# AnswerLens Recommendations/);
+  assert.match(htmlReport, / \| VAVR: <strong>/);
+  assert.equal(htmlReport.includes(String.fromCharCode(0x74ba)), false);
+  assert.match(readme, /!\[AnswerLens cover\]\(assets\/readme-cover\.svg\)/);
+  assert.match(gitignore, /^seofull\.md$/m);
+  assert.match(coverSvg, /<svg[^>]+1600[^>]+840/);
+  assert.match(coverSvg, /AnswerLens/);
+  assert.ok(normalizedPages.length > 0);
+  assert.match(competitorDiff, /# AnswerLens Competitor Structure Diff/);
+  assert.equal(citationGapMatrix.rows.length, prompts.prompts.length);
+  assert.match(citationGapMarkdown, /# AnswerLens Citation Gap Matrix/);
+  assert.match(contentBrief, /# Acme FAQ outline/);
+  assert.match(legacyBrief, /# Acme FAQ outline/);
 });

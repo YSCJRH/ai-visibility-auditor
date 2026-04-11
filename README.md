@@ -1,8 +1,29 @@
-﻿# AnswerLens
+# AnswerLens
+
+![AnswerLens cover](assets/readme-cover.svg)
 
 > Open-source AI visibility auditor for product websites.
 
-AnswerLens helps product and growth teams understand whether a site is ready to be read, cited, compared, and recommended by AI assistants. It is intentionally `CLI-first`, `report-driven`, and `BYOK` instead of trying to be a vague "rank #1 in ChatGPT" dashboard.
+AnswerLens is a CLI-first, report-driven, BYOK-friendly toolkit for teams that want to understand whether a product site is easy for AI systems to read, cite, compare, and recommend. It focuses on explainable structure fixes and reproducible eval runs instead of consumer UI scraping or vague ranking promises.
+
+## What ships today
+
+- `audit` for AI-readiness checks against a live site or local fixture
+- `eval` for prompt-pack benchmarking with OpenAI and Perplexity adapters
+- `manual-import` for scoring normalized answer samples from external or human-collected runs
+- Structured config contracts for `brand.yaml`, `competitors.yaml`, and `prompts.yaml`
+- Markdown, JSON, and static HTML outputs including `run.json`
+- Expanded benchmark prompt pack with holdouts, fixtures, and GitHub issue / PR scaffolding
+
+## Current status
+
+| Area | Status |
+| --- | --- |
+| Audit CLI | Live |
+| OpenAI eval | Live |
+| Perplexity eval | Live |
+| Manual answer import | Live |
+| Search Console / Bing connectors | Planned |
 
 ## Why this exists
 
@@ -10,100 +31,107 @@ AnswerLens helps product and growth teams understand whether a site is ready to 
 - Traditional SEO is still necessary, but it is no longer the whole story.
 - Teams need explainable, reproducible workflows instead of consumer UI scraping.
 
-## What ships in this repo today
-
-- `audit` command for AI-readiness checks against a product site or local fixture
-- Structured config contracts for `brand.yaml`, `competitors.yaml`, and `prompts.yaml`
-- Markdown, JSON, and static HTML reports
-- OpenAI-backed experimental `eval` workflow with normalized citations and raw payload persistence
-- Community health files and GitHub issue / PR scaffolding
-
 ## What this is not
 
 - Not a "rank #1 in ChatGPT" hack
-- Not a consumer UI scraper
+- Not a consumer AI UI scraper
 - Not a generic AI content generator
 - Not a replacement for Search Console or analytics
+- Not a guarantee of placement on any answer surface
 
 ## Repository layout
 
 ```text
-apps/cli           User-facing command entrypoints
-packages/core      Crawl, extract, audit, scoring, config loading
-packages/providers Provider contracts and experimental adapters
-packages/report    Markdown and HTML report rendering
+apps/cli           User-facing command entrypoint
+packages/core      Crawl, extract, audit, scoring, recommendations, config loading
+packages/providers Live provider adapters and normalization contracts
+packages/report    Markdown, JSON, and HTML report rendering
 examples/          Demo configs and local fixtures
-docs/              Scoring, rules, limitations, GitHub bootstrap notes
+docs/              Architecture, scoring, limitations, and bootstrap notes
 ```
 
 ## Quickstart
 
 ```bash
 corepack enable
-pnpm install
-pnpm demo:fixture
+corepack pnpm install
+corepack pnpm demo:fixture
 ```
 
 That command audits the local fixture in [examples/fixtures/static-good](/D:/SEO/examples/fixtures/static-good) and writes outputs to [runs/static-good](/D:/SEO/runs/static-good).
 
-You can also run against a site:
+## Live audit
 
 ```bash
-pnpm run audit -- https://example.com \
+corepack pnpm audit -- https://example.com \
   --brand ./examples/acme/brand.yaml \
   --competitors ./examples/acme/competitors.yaml \
   --prompts ./examples/acme/prompts.yaml \
   --out ./runs/example
 ```
 
-## Experimental eval
-
-Set `OPENAI_API_KEY` and run:
+## Live eval
 
 ```bash
-pnpm run eval -- https://example.com \
+OPENAI_API_KEY=... corepack pnpm eval -- https://example.com \
   --brand ./examples/acme/brand.yaml \
   --competitors ./examples/acme/competitors.yaml \
   --prompts ./examples/acme/prompts.yaml \
   --provider openai \
+  --samples 2 \
+  --locale en-US \
   --out ./runs/example-eval
 ```
 
-`eval` reuses the audit baseline, writes raw provider payloads, and adds:
+Perplexity runs use the same command shape with `--provider perplexity` and `PERPLEXITY_API_KEY`.
 
-- `eval-results.json`
-- `eval-summary.md`
-- `before-after-diff.md`
-- `briefs/*.md` when FAQ / compare / use-case gaps are detected
+## Manual import
 
-## Output contract
+```bash
+corepack pnpm manual-import -- https://example.com \
+  --brand ./examples/acme/brand.yaml \
+  --competitors ./examples/acme/competitors.yaml \
+  --prompts ./examples/acme/prompts.yaml \
+  --input ./responses.json \
+  --out ./runs/example-import
+```
+
+`manual-import` accepts normalized `ProviderResponse[]` JSON or an object with a `responses` array.
+
+## Sample outputs
 
 `audit` writes:
 
 - `site-audit.json`
 - `issues.json`
+- `recommendations.md`
 - `scorecard.md`
 - `index.html`
+- `normalized-pages.json`
+- `competitor-diff.md`
+- `run.json`
 
-`eval` additionally writes:
+`eval` and `manual-import` additionally write:
 
 - `eval-results.json`
 - `eval-summary.md`
+- `eval-summary.json`
 - `before-after-diff.md`
+- `citation-gap-matrix.json`
+- `citation-gap-matrix.md`
+- `content-briefs/*.md`
+- `briefs/*.md` for compatibility
 - `raw/<provider>/<promptId>.json`
 
-## Development
+## How scoring works
 
-```bash
-pnpm test
-pnpm typecheck
-```
+See [docs/scoring.md](/D:/SEO/docs/scoring.md) for the readiness buckets, benchmark-vs-holdout behavior, and answer-layer metrics such as `accurateMentionRate`, `factCoverageScore`, `misrepresentationRate`, and `VAVR`.
 
 ## Roadmap
 
 - `v0.1-audit`: CLI-first audit MVP
-- `v0.2-eval`: OpenAI and Perplexity provider adapters plus normalized citations
-- `v0.3-connectors`: GSC, Bing Webmaster, IndexNow, manual import mode
+- `v0.2-eval`: stabilized eval contract, richer prompt taxonomy, and content briefs
+- `v0.3-connectors`: GSC, Bing Webmaster, IndexNow, and deeper validation layers
 
 ## Contributing
 

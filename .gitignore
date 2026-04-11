@@ -6,6 +6,6 @@ coverage/
 .DS_Store
 Thumbs.db
 *.log
+seofull.md
 runs/*
 !runs/.gitkeep
-

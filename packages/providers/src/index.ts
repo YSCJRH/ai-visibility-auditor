@@ -19,5 +19,5 @@ export async function runEvalProvider(
     return runPerplexityEval(request, options);
   }
 
-  throw new Error(`Unsupported provider: ${provider}`);
+  throw new Error(`Unsupported provider for live eval: ${provider}`);
 }

@@ -1,4 +1,7 @@
-import type { PageType, ScoreBucketId, Severity } from "./types.ts";
+﻿import type { PageType, ScoreBucketId, Severity } from "./types.ts";
+
+export const ARTIFACT_VERSION = "0.2.0";
+export const RULE_VERSION = "2026-04-11";
 
 export const AI_BOTS = ["OAI-SearchBot", "PerplexityBot"] as const;
 
@@ -41,4 +44,3 @@ export const SEVERITY_PENALTIES: Record<Severity, number> = {
   warn: 8,
   info: 3
 };
-
