@@ -1,4 +1,4 @@
-# AnswerLens
+﻿# AnswerLens
 
 ![AnswerLens cover](assets/readme-cover.svg)
 
@@ -25,12 +25,6 @@ AnswerLens is a CLI-first, report-driven, BYOK-friendly toolkit for teams that w
 | Manual answer import | Live |
 | Search Console / Bing connectors | Planned |
 
-## Why this exists
-
-- AI answers are now a discovery layer.
-- Traditional SEO is still necessary, but it is no longer the whole story.
-- Teams need explainable, reproducible workflows instead of consumer UI scraping.
-
 ## What this is not
 
 - Not a "rank #1 in ChatGPT" hack
@@ -38,6 +32,26 @@ AnswerLens is a CLI-first, report-driven, BYOK-friendly toolkit for teams that w
 - Not a generic AI content generator
 - Not a replacement for Search Console or analytics
 - Not a guarantee of placement on any answer surface
+
+## Sample outputs
+
+The fixture demo writes machine-readable audit artifacts, a static scorecard, and follow-up recommendations that can be shared in pull requests, issues, and release notes.
+
+![AnswerLens scorecard preview](assets/readme-scorecard-preview.svg)
+
+![AnswerLens artifact preview](assets/readme-artifacts-preview.svg)
+
+## Before / after showcase
+
+AnswerLens is designed to turn vague "AI SEO" work into concrete structure, evidence, and comparison fixes that a product team can actually ship.
+
+![AnswerLens before and after showcase](assets/readme-before-after-showcase.svg)
+
+## Why this exists
+
+- AI answers are now a discovery layer.
+- Traditional SEO is still necessary, but it is no longer the whole story.
+- Teams need explainable, reproducible workflows instead of consumer UI scraping.
 
 ## Repository layout
 
@@ -98,7 +112,7 @@ corepack pnpm manual-import -- https://example.com \
 
 `manual-import` accepts normalized `ProviderResponse[]` JSON or an object with a `responses` array.
 
-## Sample outputs
+## Output contract
 
 `audit` writes:
 

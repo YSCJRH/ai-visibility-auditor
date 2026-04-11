@@ -1,4 +1,4 @@
-# GitHub Bootstrap Notes
+﻿# GitHub Bootstrap Notes
 
 Some parts of the operating model must be enabled on the GitHub side after this local repo is pushed.
 
@@ -33,14 +33,14 @@ Create:
 - `v0.2-eval`
 - `v0.3-connectors`
 
-## Project
+## Issue batching
 
-Create one GitHub Project as the single source of truth with views by:
+For the current launch phase, keep coordination lightweight:
 
-- milestone
-- area
-- priority
-- status
+- use milestones as the release spine
+- use `kind:*`, `area:*`, and `priority:*` labels for triage
+- split roadmap work into small issues instead of building a separate GitHub Project
+- keep the active launch PR linked from the first issue batch until the repo has more parallel contributors
 
 ## Code owners
 
@@ -49,6 +49,6 @@ The repository now includes [`.github/CODEOWNERS`](/D:/SEO/.github/CODEOWNERS). 
 ## Release settings
 
 - enable automated release notes
-- publish source artifacts for `v0.1`
+- draft a `v0.2.0` release after the launch PR is merged
 - add npm publishing only after `eval` stabilizes
 - add artifact attestations after releases become routine

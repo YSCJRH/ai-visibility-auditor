@@ -1,4 +1,4 @@
-import test from "node:test";
+﻿import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, readFile } from "node:fs/promises";
 import os from "node:os";
@@ -109,6 +109,9 @@ test("report renderers expose expected audit and eval sections", async () => {
   const readme = await readFile(path.resolve("README.md"), "utf8");
   const gitignore = await readFile(path.resolve(".gitignore"), "utf8");
   const coverSvg = await readFile(path.resolve("assets/readme-cover.svg"), "utf8");
+  const scorecardPreviewSvg = await readFile(path.resolve("assets/readme-scorecard-preview.svg"), "utf8");
+  const artifactPreviewSvg = await readFile(path.resolve("assets/readme-artifacts-preview.svg"), "utf8");
+  const showcaseSvg = await readFile(path.resolve("assets/readme-before-after-showcase.svg"), "utf8");
   const normalizedPages = JSON.parse(await readFile(path.join(tempDir, "normalized-pages.json"), "utf8")) as unknown[];
   const competitorDiff = await readFile(path.join(tempDir, "competitor-diff.md"), "utf8");
   const citationGapMatrix = JSON.parse(await readFile(path.join(tempDir, "citation-gap-matrix.json"), "utf8")) as {
@@ -131,9 +134,17 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(htmlReport, / \| VAVR: <strong>/);
   assert.equal(htmlReport.includes(String.fromCharCode(0x74ba)), false);
   assert.match(readme, /!\[AnswerLens cover\]\(assets\/readme-cover\.svg\)/);
+  assert.match(readme, /!\[AnswerLens scorecard preview\]\(assets\/readme-scorecard-preview\.svg\)/);
+  assert.match(readme, /!\[AnswerLens artifact preview\]\(assets\/readme-artifacts-preview\.svg\)/);
+  assert.match(readme, /!\[AnswerLens before and after showcase\]\(assets\/readme-before-after-showcase\.svg\)/);
+  assert.match(readme, /## Sample outputs/);
+  assert.match(readme, /## Before \/ after showcase/);
   assert.match(gitignore, /^seofull\.md$/m);
   assert.match(coverSvg, /<svg[^>]+1600[^>]+840/);
   assert.match(coverSvg, /AnswerLens/);
+  assert.match(scorecardPreviewSvg, /Scorecard preview/);
+  assert.match(artifactPreviewSvg, /Artifact preview/);
+  assert.match(showcaseSvg, /Before and after showcase/);
   assert.ok(normalizedPages.length > 0);
   assert.match(competitorDiff, /# AnswerLens Competitor Structure Diff/);
   assert.equal(citationGapMatrix.rows.length, prompts.prompts.length);
