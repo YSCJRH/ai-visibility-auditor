@@ -1,0 +1,46 @@
+name: Audit teardown
+description: Share an AnswerLens run, before/after diff, or AI discoverability teardown.
+title: "[teardown] "
+labels: ["kind:docs", "area:docs"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for public examples, before/after notes, or "AI may miss this product because..." teardowns.
+
+        Please avoid raw provider payloads, private analytics, consumer AI UI scraping, and ranking guarantees.
+  - type: input
+    id: site
+    attributes:
+      label: Site or fixture
+      description: Which site, fixture, or public page was audited?
+      placeholder: https://example.com
+    validations:
+      required: true
+  - type: textarea
+    id: share-summary
+    attributes:
+      label: AnswerLens share summary
+      description: Paste `share-summary.md` or `pr-snippet.md`.
+      placeholder: |
+        ## AnswerLens audit
+
+        **CI for AI discoverability.** Readiness: **78/100**. VAVR: **pending eval**.
+    validations:
+      required: true
+  - type: textarea
+    id: finding
+    attributes:
+      label: Teardown angle
+      description: What is the most interesting thing this run shows?
+      placeholder: "The pricing page exists, but it lacks citable detail and is weakly linked from comparison content."
+    validations:
+      required: true
+  - type: textarea
+    id: artifacts
+    attributes:
+      label: Public artifacts
+      description: Link screenshots, reports, PRs, or release notes that are safe to share.
+      placeholder: "- scorecard.md\n- recommendations.md\n- before-after-diff.md"
+    validations:
+      required: false

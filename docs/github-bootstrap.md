@@ -23,7 +23,7 @@ Recommended rules:
 
 ## Labels
 
-Sync the labels from [`.github/labels.yml`](/D:/SEO/.github/labels.yml).
+Sync the labels from [`.github/labels.yml`](../.github/labels.yml).
 
 ## Milestones
 
@@ -41,15 +41,16 @@ For the current launch phase, keep coordination lightweight:
 - use `kind:*`, `area:*`, and `priority:*` labels for triage
 - split roadmap work into small issues instead of building a separate GitHub Project
 - keep the active launch PR linked from the first issue batch until the repo has more parallel contributors
-- treat [docs/roadmap.md](/D:/SEO/docs/roadmap.md) as the canonical public roadmap
+- treat [docs/roadmap.md](roadmap.md) as the canonical public roadmap
+- treat [docs/shareable-summary.md](shareable-summary.md) as the canonical share-output contract
 
 ## Code owners
 
-The repository now includes [`.github/CODEOWNERS`](/D:/SEO/.github/CODEOWNERS). Keep it synced with the actual maintainer handles before the first public launch.
+The repository now includes [`.github/CODEOWNERS`](../.github/CODEOWNERS). Keep it synced with the actual maintainer handles before the first public launch.
 
 ## Release settings
 
 - enable automated release notes
-- publish release notes that link back to [docs/roadmap.md](/D:/SEO/docs/roadmap.md)
+- publish release notes that link back to [docs/roadmap.md](roadmap.md)
 - add npm publishing only after `eval` stabilizes
 - add artifact attestations after releases become routine

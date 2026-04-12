@@ -98,3 +98,13 @@ Release planning:
 - `v0.3.0` should introduce connector-backed validation
 
 This document is the canonical public roadmap. README, release notes, and umbrella issues should link back here instead of restating divergent plans.
+
+## Distribution spine
+
+AnswerLens should dogfood its own outputs as the main growth surface:
+
+- `share-summary.md` is the compact human summary for PRs, issues, releases, and Action summaries
+- `share-summary.json` is the stable machine-readable source for badges and downstream report tooling
+- `pr-snippet.md` is the copy-ready GitHub block for teams that want to review AI discoverability changes in a pull request
+
+These assets support the public positioning without changing the core non-goals: no consumer UI scraping, no ranking guarantees, and no dashboard-first rewrite.
