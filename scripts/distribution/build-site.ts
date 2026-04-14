@@ -1,5 +1,6 @@
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 type ShareSummary = {
   project: string;
@@ -416,7 +417,10 @@ async function main(): Promise<void> {
   });
 }
 
-if (process.env.ANSWERLENS_IMPORT_ONLY !== "1") {
+const isCliEntrypoint =
+  process.argv[1] !== undefined && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+
+if (isCliEntrypoint && process.env.ANSWERLENS_IMPORT_ONLY !== "1") {
   main().catch((error) => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
