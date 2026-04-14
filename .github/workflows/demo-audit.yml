@@ -14,36 +14,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - id: answerlens
+        uses: ./
         with:
-          version: 10.33.0
-          run_install: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm demo:fixture
+          command: audit
+          site: examples/fixtures/static-good
+          brand: examples/acme/brand.yaml
+          competitors: examples/acme/competitors.yaml
+          prompts: examples/acme/prompts.yaml
+          out-dir: runs/static-good
       - name: Summarize demo outputs
         run: |
           {
             echo '## AnswerLens demo audit'
             echo ''
-            echo '**CI for AI discoverability.**'
-            echo ''
-            echo '- Fixture: static-good'
-            echo '- Output directory: runs/static-good'
-            echo ''
-            echo '### Share summary'
-            sed -n '1,90p' runs/static-good/share-summary.md
+            cat "${{ steps.answerlens.outputs.share-summary-path }}"
             echo ''
             echo '### PR-ready snippet'
-            sed -n '1,80p' runs/static-good/pr-snippet.md
+            cat "${{ steps.answerlens.outputs.pr-snippet-path }}"
             echo ''
             echo '### Artifact tree'
-            find runs/static-good -maxdepth 2 -type f | sort
+            find "${{ steps.answerlens.outputs.out-dir }}" -maxdepth 2 -type f | sort
           } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
           name: answerlens-demo-audit
-          path: runs/static-good
+          path: ${{ steps.answerlens.outputs.out-dir }}

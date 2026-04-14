@@ -57,6 +57,12 @@ AI may miss this product because:
 | Manual answer import | Live |
 | Search Console / Bing connectors | Planned |
 
+## Distribution
+
+- Canonical distribution plan: [docs/distribution-plan.md](docs/distribution-plan.md)
+- Manual setup checklist for Pages, npm, and repo settings: [docs/manual-steps.md](docs/manual-steps.md)
+- GitHub Action usage and output contract: [docs/github-action.md](docs/github-action.md)
+
 ## Why AnswerLens
 
 - CI for AI discoverability, built for Git workflows instead of dashboard lock-in.

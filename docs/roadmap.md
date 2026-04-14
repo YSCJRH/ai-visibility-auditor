@@ -99,6 +99,8 @@ Release planning:
 
 This document is the canonical public roadmap. README, release notes, and umbrella issues should link back here instead of restating divergent plans.
 
+Canonical distribution follow-through lives in [docs/distribution-plan.md](distribution-plan.md).
+
 ## Distribution spine
 
 AnswerLens should dogfood its own outputs as the main growth surface:

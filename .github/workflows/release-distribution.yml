@@ -1,0 +1,142 @@
+name: Release Distribution
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag-name:
+        description: "Optional semver tag to simulate or publish, for example v0.2.0."
+        required: false
+        type: string
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - name: Resolve release tag
+        shell: bash
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            echo "RELEASE_TAG=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+          elif [ -n "${{ github.event.inputs.tag-name }}" ]; then
+            echo "RELEASE_TAG=${{ github.event.inputs.tag-name }}" >> "$GITHUB_ENV"
+          else
+            echo "RELEASE_TAG=" >> "$GITHUB_ENV"
+          fi
+      - name: Validate CLI version matches tag
+        if: ${{ env.RELEASE_TAG != '' }}
+        run: |
+          node -e "const fs=require('node:fs'); const pkg=JSON.parse(fs.readFileSync('apps/cli/package.json','utf8')); const tag=(process.env.RELEASE_TAG||'').replace(/^v/, ''); if (pkg.version !== tag) { console.error(`apps/cli/package.json version ${pkg.version} does not match tag ${tag}`); process.exit(1); }"
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm demo:fixture
+      - run: pnpm build:cli
+      - run: pnpm pack:cli
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("node:fs");
+            fs.mkdirSync("dist", { recursive: true });
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            const compiled = releases.map((release) => ({
+              tag_name: release.tag_name,
+              name: release.name,
+              html_url: release.html_url,
+              published_at: release.published_at,
+              body: release.body,
+              draft: release.draft,
+              prerelease: release.prerelease
+            }));
+            fs.writeFileSync("dist/releases.json", `${JSON.stringify(compiled, null, 2)}\n`);
+      - run: pnpm build:site -- --releases dist/releases.json
+      - name: Create release bundles
+        run: |
+          tar -czf dist/answerlens-demo-audit.tar.gz runs/static-good
+          tar -czf dist/answerlens-site.tar.gz dist/site
+      - name: Write release notes
+        run: |
+          cat <<'EOF' > dist/release-notes.md
+          AnswerLens is a CLI-first AI visibility auditor for product websites.
+
+          CI for AI discoverability.
+
+          ## What ships
+
+          - Publish-ready CLI bundle and tarball
+          - Reusable GitHub Action contract
+          - Static site bundle with examples, docs, releases, and playbooks
+          - Report-first outputs including share summaries, PR snippets, and machine-readable manifests
+
+          ## Known limits
+
+          - No consumer AI UI scraping
+          - No ranking guarantees
+          - GitHub Pages deployment still depends on repository settings
+          - npm publish is skipped unless NPM_TOKEN is configured
+
+          ## Canonical docs
+
+          - README: https://github.com/YSCJRH/ai-visibility-auditor#readme
+          - Distribution plan: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/distribution-plan.md
+          - Manual steps: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/manual-steps.md
+          EOF
+      - name: Create or update GitHub release
+        if: ${{ env.RELEASE_TAG != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" --notes-file dist/release-notes.md
+          else
+            gh release create "$RELEASE_TAG" --title "$RELEASE_TAG" --notes-file dist/release-notes.md
+          fi
+      - name: Publish to npm
+        if: ${{ env.HAS_NPM_TOKEN == 'true' && env.RELEASE_TAG != '' }}
+        working-directory: apps/cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
+      - name: Note skipped npm publish
+        if: ${{ env.HAS_NPM_TOKEN != 'true' || env.RELEASE_TAG == '' }}
+        run: |
+          {
+            echo "## npm publish skipped"
+            echo ""
+            echo "Either NPM_TOKEN is missing or no semver release tag was provided, so the workflow only produced tarballs and release artifacts."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload assets to GitHub release
+        if: ${{ env.RELEASE_TAG != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "$RELEASE_TAG" dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz --clobber
+      - uses: actions/upload-artifact@v4
+        with:
+          name: answerlens-release-distribution
+          path: |
+            dist/packages
+            dist/answerlens-demo-audit.tar.gz
+            dist/answerlens-site.tar.gz
+            dist/site

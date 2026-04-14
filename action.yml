@@ -1,0 +1,166 @@
+name: "AnswerLens"
+description: "Run AnswerLens audit, eval, or manual-import in GitHub Actions."
+
+inputs:
+  command:
+    description: "One of audit, eval, or manual-import."
+    required: true
+  site:
+    description: "Public URL or local fixture path."
+    required: true
+  brand:
+    description: "Path to brand.yaml."
+    required: true
+  competitors:
+    description: "Path to competitors.yaml."
+    required: true
+  prompts:
+    description: "Path to prompts.yaml."
+    required: true
+  out-dir:
+    description: "Output directory for AnswerLens artifacts."
+    required: false
+    default: "runs/answerlens"
+  provider:
+    description: "Provider name for eval runs."
+    required: false
+  model:
+    description: "Optional provider model override."
+    required: false
+  samples:
+    description: "Repeated samples for eval runs."
+    required: false
+    default: "1"
+  locale:
+    description: "Optional locale override."
+    required: false
+  manual-input:
+    description: "Path to normalized manual-import JSON."
+    required: false
+  node-version:
+    description: "Node.js version used by the Action."
+    required: false
+    default: "22"
+  pnpm-version:
+    description: "pnpm version used by the Action."
+    required: false
+    default: "10.33.0"
+
+outputs:
+  out-dir:
+    description: "Absolute output directory for generated artifacts."
+    value: ${{ steps.run-answerlens.outputs.out_dir }}
+  share-summary-path:
+    description: "Absolute path to share-summary.md."
+    value: ${{ steps.run-answerlens.outputs.share_summary_path }}
+  pr-snippet-path:
+    description: "Absolute path to pr-snippet.md."
+    value: ${{ steps.run-answerlens.outputs.pr_snippet_path }}
+  run-json-path:
+    description: "Absolute path to run.json."
+    value: ${{ steps.run-answerlens.outputs.run_json_path }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: pnpm/action-setup@v4
+      with:
+        version: ${{ inputs.pnpm-version }}
+        run_install: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+    - name: Install AnswerLens dependencies
+      shell: pwsh
+      run: |
+        Set-StrictMode -Version Latest
+        Set-Location '${{ github.action_path }}'
+        pnpm install --frozen-lockfile
+    - name: Build AnswerLens CLI
+      shell: pwsh
+      run: |
+        Set-StrictMode -Version Latest
+        Set-Location '${{ github.action_path }}'
+        pnpm build:cli
+    - name: Run AnswerLens
+      id: run-answerlens
+      shell: pwsh
+      run: |
+        Set-StrictMode -Version Latest
+
+        function Resolve-AnswerLensInput([string]$Value) {
+          if ([string]::IsNullOrWhiteSpace($Value)) {
+            return $null
+          }
+
+          if ($Value -match '^(https?://)') {
+            return $Value
+          }
+
+          if ([System.IO.Path]::IsPathRooted($Value)) {
+            return $Value
+          }
+
+          return [System.IO.Path]::GetFullPath((Join-Path '${{ github.workspace }}' $Value))
+        }
+
+        $command = '${{ inputs.command }}'
+        if ($command -notin @('audit', 'eval', 'manual-import')) {
+          throw "Unsupported command '$command'. Use audit, eval, or manual-import."
+        }
+
+        if ($command -eq 'eval' -and [string]::IsNullOrWhiteSpace('${{ inputs.provider }}')) {
+          throw 'Input "provider" is required for eval runs.'
+        }
+
+        if ($command -eq 'manual-import' -and [string]::IsNullOrWhiteSpace('${{ inputs.manual-input }}')) {
+          throw 'Input "manual-input" is required for manual-import runs.'
+        }
+
+        $outInput = '${{ inputs.out-dir }}'
+        $outDir = if ([System.IO.Path]::IsPathRooted($outInput)) {
+          $outInput
+        } else {
+          [System.IO.Path]::GetFullPath((Join-Path '${{ github.workspace }}' $outInput))
+        }
+
+        $args = @(
+          (Join-Path '${{ github.action_path }}' 'apps/cli/dist/index.js'),
+          $command,
+          (Resolve-AnswerLensInput '${{ inputs.site }}'),
+          '--brand',
+          (Resolve-AnswerLensInput '${{ inputs.brand }}'),
+          '--competitors',
+          (Resolve-AnswerLensInput '${{ inputs.competitors }}'),
+          '--prompts',
+          (Resolve-AnswerLensInput '${{ inputs.prompts }}'),
+          '--out',
+          $outDir
+        )
+
+        if ($command -eq 'eval') {
+          $args += @('--provider', '${{ inputs.provider }}')
+
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.model }}')) {
+            $args += @('--model', '${{ inputs.model }}')
+          }
+
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.samples }}')) {
+            $args += @('--samples', '${{ inputs.samples }}')
+          }
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace('${{ inputs.locale }}')) {
+          $args += @('--locale', '${{ inputs.locale }}')
+        }
+
+        if ($command -eq 'manual-import') {
+          $args += @('--input', (Resolve-AnswerLensInput '${{ inputs.manual-input }}'))
+        }
+
+        & node @args
+
+        "out_dir=$outDir" >> $env:GITHUB_OUTPUT
+        "share_summary_path=$([System.IO.Path]::GetFullPath((Join-Path $outDir 'share-summary.md')))" >> $env:GITHUB_OUTPUT
+        "pr_snippet_path=$([System.IO.Path]::GetFullPath((Join-Path $outDir 'pr-snippet.md')))" >> $env:GITHUB_OUTPUT
+        "run_json_path=$([System.IO.Path]::GetFullPath((Join-Path $outDir 'run.json')))" >> $env:GITHUB_OUTPUT
