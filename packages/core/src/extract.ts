@@ -12,7 +12,7 @@ import type {
   SchemaTextSignal,
   SiteSource
 } from "./types.ts";
-import { keywordCoverage, pathLooksLike, unique } from "./utils.ts";
+import { keywordCoverage, normalizeComparableUrl, pathLooksLike, unique } from "./utils.ts";
 
 function detectPageType(page: FetchedPage, title: string, h1: string): PageType {
   const pathname = new URL(page.url).pathname.toLowerCase();
@@ -310,23 +310,14 @@ function absoluteUrl(source: SiteSource, currentUrl: string, href: string): stri
   }
 
   try {
-    return normalizeResolvedUrl(new URL(href, currentUrl).toString());
+    return normalizeComparableUrl(new URL(href, currentUrl).toString());
   } catch {
     try {
-      return normalizeResolvedUrl(new URL(href, source.baseUrl).toString());
+      return normalizeComparableUrl(new URL(href, source.baseUrl).toString());
     } catch {
       return null;
     }
   }
-}
-
-function normalizeResolvedUrl(value: string): string {
-  const url = new URL(value);
-  url.hash = "";
-  if (url.pathname.length > 1) {
-    url.pathname = url.pathname.replace(/\/+$/, "");
-  }
-  return url.toString();
 }
 
 function fallbackAnchorText(targetUrl: string): string {

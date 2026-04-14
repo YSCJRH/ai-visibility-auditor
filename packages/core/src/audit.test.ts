@@ -143,3 +143,19 @@ test("weak link context fixture reports discoverability gaps", async () => {
   assert.ok(issueTitles.has("Proof page lacks contextual support"));
   assert.ok(result.recommendations.some((recommendation) => recommendation.id === "close-comparison-gaps"));
 });
+
+test("trailing slash proof pages still collect incoming link context", async () => {
+  const configs = await loadFixtureConfigs();
+  const result = await runAudit({
+    siteInput: "./examples/fixtures/trailing-slash-link-context",
+    ...configs
+  });
+
+  const enterprisePage = result.pages.find((page) => page.url === "https://fixture.local/use-case/enterprise");
+  const enterpriseWeakLinkIssue = result.issues.find(
+    (issue) => issue.title === "Key proof page is weakly linked" && issue.pageUrl === "https://fixture.local/use-case/enterprise"
+  );
+
+  assert.ok(enterprisePage);
+  assert.equal(enterpriseWeakLinkIssue, undefined);
+});

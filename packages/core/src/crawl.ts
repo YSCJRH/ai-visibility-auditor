@@ -3,7 +3,7 @@ import path from "node:path";
 import { XMLParser } from "fast-xml-parser";
 import { AI_BOTS } from "./constants.ts";
 import type { CrawlOptions, CrawlResult, FetchedPage, RobotsSnapshot, SiteSource } from "./types.ts";
-import { matchesAnyPattern, normalizeUrlPathname, pathLooksLike, unique } from "./utils.ts";
+import { matchesAnyPattern, normalizeComparableUrl, normalizeUrlPathname, pathLooksLike, unique } from "./utils.ts";
 
 const xmlParser = new XMLParser({ ignoreAttributes: false });
 
@@ -26,10 +26,10 @@ function resolveSiteSource(siteInput: string): SiteSource {
 
 function buildUrl(source: SiteSource, target: string): string {
   if (/^https?:\/\//i.test(target)) {
-    return target;
+    return normalizeComparableUrl(target);
   }
 
-  return target.startsWith("/") ? `${source.baseUrl}${target}` : `${source.baseUrl}/${target}`;
+  return normalizeComparableUrl(target.startsWith("/") ? `${source.baseUrl}${target}` : `${source.baseUrl}/${target}`);
 }
 
 async function pathIsFile(filePath: string): Promise<boolean> {
@@ -212,7 +212,7 @@ async function discoverLocalHtmlUrls(source: SiteSource): Promise<string[]> {
       const relative = path.relative(rootDir, fullPath).replace(/\\/g, "/");
       let pathname = relative.replace(/index\.html$/i, "").replace(/\.html$/i, "");
       pathname = pathname === "" ? "/" : `/${pathname}`.replace(/\/+/g, "/");
-      urls.push(`${source.baseUrl}${pathname}`);
+      urls.push(normalizeComparableUrl(`${source.baseUrl}${pathname}`));
     }
   }
 
