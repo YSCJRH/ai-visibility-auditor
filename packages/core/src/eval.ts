@@ -15,6 +15,8 @@ export interface EvalPromptScores {
   competitorExcluded: number;
   signalAlignment: number;
   vavr: number;
+  competitivePositionScore: number | null;
+  rankCoverageRate: number;
 }
 
 export interface EvalPromptResult {
@@ -56,6 +58,8 @@ export interface EvalSummary {
   factCoverageScore: number;
   accuracyRate: number;
   vavr: number;
+  competitivePositionScore: number | null;
+  rankCoverageRate: number;
 }
 
 export interface ContentBrief {
@@ -181,6 +185,34 @@ function scoreSignalAlignment(promptCase: PromptCase, scores: EvalPromptScores):
   return (scores.accurateMention + Math.max(scores.ownedCitation, scores.trustedCitation) + scores.recommendation) / 3;
 }
 
+export function rankPositionToCompetitivePositionScore(rankPosition: number | null): number | null {
+  if (rankPosition === null) {
+    return null;
+  }
+
+  if (!Number.isInteger(rankPosition) || rankPosition < 1) {
+    throw new Error(`Expected rankPosition to be a positive integer or null. Received: ${rankPosition}`);
+  }
+
+  if (rankPosition === 1) {
+    return 1;
+  }
+
+  if (rankPosition === 2) {
+    return 0.75;
+  }
+
+  if (rankPosition === 3) {
+    return 0.5;
+  }
+
+  if (rankPosition === 4) {
+    return 0.25;
+  }
+
+  return 0;
+}
+
 function rawPayloadFilePath(rawPayloadRoot: string, response: ProviderResponse): string {
   const suffix = response.sampleIndex > 0 ? `--sample-${response.sampleIndex + 1}` : "";
   return path.join(rawPayloadRoot, response.provider, `${response.promptId}${suffix}.json`);
@@ -209,6 +241,7 @@ function computePromptScores(
   const competitorMentions = mentionedCompetitors(response.answerText, competitors);
   const competitorExcluded = mention === 0 && competitorMentions.length > 0 ? 1 : 0;
   const vavr = accurateMention === 1 && (ownedCitation === 1 || trustedCitation === 1) ? 1 : 0;
+  const competitivePositionScore = rankPositionToCompetitivePositionScore(response.rankPosition);
 
   return {
     scores: {
@@ -221,7 +254,9 @@ function computePromptScores(
       factCoverage: accuracyResult.factCoverage,
       misrepresented: misrepresented ? 1 : 0,
       competitorExcluded,
-      vavr
+      vavr,
+      competitivePositionScore,
+      rankCoverageRate: response.rankPosition === null ? 0 : 1
     },
     matchedFacts: accuracyResult.matchedFacts,
     recommended,
@@ -234,6 +269,10 @@ function roundPercent(value: number): number {
   return Math.round(value * 100);
 }
 
+function roundScore(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
 function weightedAverage(values: Array<{ value: number; weight: number }>): number {
   const totalWeight = values.reduce((sum, entry) => sum + entry.weight, 0);
   if (totalWeight === 0) {
@@ -241,6 +280,15 @@ function weightedAverage(values: Array<{ value: number; weight: number }>): numb
   }
 
   return values.reduce((sum, entry) => sum + entry.value * entry.weight, 0) / totalWeight;
+}
+
+function weightedAverageNullable(values: Array<{ value: number | null; weight: number }>): number | null {
+  const present = values.filter((entry): entry is { value: number; weight: number } => entry.value !== null);
+  if (present.length === 0) {
+    return null;
+  }
+
+  return weightedAverage(present);
 }
 
 function createFaqBrief(audit: AuditResult, brand: BrandConfig): ContentBrief {
@@ -330,6 +378,14 @@ export function buildContentBriefs(
 function averagePromptGroup(results: EvalPromptResult[], promptCase: PromptCase): { weight: number; values: EvalPromptScores } {
   const average = (selector: (result: EvalPromptResult) => number) =>
     results.reduce((sum, result) => sum + selector(result), 0) / Math.max(results.length, 1);
+  const averageNullable = (selector: (result: EvalPromptResult) => number | null): number | null => {
+    const present = results.map((result) => selector(result)).filter((value): value is number => value !== null);
+    if (present.length === 0) {
+      return null;
+    }
+
+    return present.reduce((sum, value) => sum + value, 0) / present.length;
+  };
 
   return {
     weight: PRIORITY_WEIGHTS[promptCase.priority ?? "medium"],
@@ -344,7 +400,9 @@ function averagePromptGroup(results: EvalPromptResult[], promptCase: PromptCase)
       misrepresented: average((result) => result.scores.misrepresented),
       competitorExcluded: average((result) => result.scores.competitorExcluded),
       signalAlignment: average((result) => result.scores.signalAlignment),
-      vavr: average((result) => result.scores.vavr)
+      vavr: average((result) => result.scores.vavr),
+      competitivePositionScore: averageNullable((result) => result.scores.competitivePositionScore),
+      rankCoverageRate: average((result) => result.scores.rankCoverageRate)
     }
   };
 }
@@ -403,6 +461,7 @@ export function scoreEvalResponses(input: ScoreEvalInput): EvalResult {
     .map(([promptId, results]) => ({ promptId, results, promptCase: promptLookup.get(promptId)! }))
     .filter((entry) => entry.promptCase.holdout);
   const weighted = activeGroups.map((entry) => averagePromptGroup(entry.results, entry.promptCase));
+  const activeSampleResults = promptResults.filter((result) => !result.holdout);
   const localeCandidates = unique(promptResults.map((result) => result.locale).filter((value): value is string => Boolean(value)));
 
   const summary: EvalSummary = {
@@ -419,7 +478,16 @@ export function scoreEvalResponses(input: ScoreEvalInput): EvalResult {
     competitorExclusionGap: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.competitorExcluded, weight: entry.weight })))),
     factCoverageScore: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.factCoverage, weight: entry.weight })))),
     accuracyRate: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.accuracy, weight: entry.weight })))),
-    vavr: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.vavr, weight: entry.weight }))))
+    vavr: roundPercent(weightedAverage(weighted.map((entry) => ({ value: entry.values.vavr, weight: entry.weight })))),
+    competitivePositionScore: (() => {
+      const value = weightedAverageNullable(
+        weighted.map((entry) => ({ value: entry.values.competitivePositionScore, weight: entry.weight }))
+      );
+      return value === null ? null : roundScore(value);
+    })(),
+    rankCoverageRate: roundPercent(
+      activeSampleResults.filter((result) => result.rankPosition !== null).length / Math.max(activeSampleResults.length, 1)
+    )
   };
 
   const generatedAt = new Date().toISOString();

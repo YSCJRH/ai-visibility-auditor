@@ -28,6 +28,8 @@ AnswerLens keeps the public scoring model intentionally explainable.
 - `factCoverageScore`
 - `accuracyRate`
 - `VAVR`
+- `competitivePositionScore` for ranked `manual-import` runs
+- `rankCoverageRate` for showing how much of the benchmark pack had reviewed rank data
 
 Holdout prompts are stored in the same run output but are excluded from the primary benchmark summary.
 
@@ -39,6 +41,26 @@ A prompt contributes to `VAVR` only when the answer both:
 
 - mentions the brand accurately enough to pass the accuracy threshold
 - includes at least one owned or trusted citation
+
+## `CPS`
+
+`CPS` is the competitive position score for reviewed rank inputs.
+
+It currently comes from `manual-import` or other auditable normalized responses, not from consumer UI scraping.
+
+The mapping is intentionally simple:
+
+- rank `1` -> `1.00`
+- rank `2` -> `0.75`
+- rank `3` -> `0.50`
+- rank `4` -> `0.25`
+- rank `5+` -> `0.00`
+
+AnswerLens reports `competitivePositionScore` alongside `VAVR` when ranked manual inputs are available.
+
+`rankCoverageRate` shows what percentage of non-holdout samples included a valid `rankPosition`.
+
+These fields do not imply an official platform ranking and do not change the headline `VAVR` in `v0.2.3`.
 
 ## Output contract
 
