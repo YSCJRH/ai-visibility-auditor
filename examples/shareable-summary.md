@@ -9,17 +9,15 @@ This is a shortened example of the share layer produced by `corepack pnpm demo:f
 ```md
 ## AnswerLens audit
 
-**CI for AI discoverability.** Readiness: **85/100**. VAVR: **pending eval**.
+**CI for AI discoverability.** Readiness: **90/100**. VAVR: **pending eval**.
 
 ### AI may miss this product because
 
 - Thin key page: add plain-language explanations, evidence blocks, and stronger sections.
-- Key proof page is weakly linked: connect FAQ, integrations, and use-case pages from buyer-path pages.
 
 ### Recommended next fixes
 
 - Tighten structure and schema alignment on key pages
-- Close FAQ, compare, integrations, and use-case gaps
 ```
 
 ## Why this matters

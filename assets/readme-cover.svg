@@ -61,10 +61,10 @@
     <rect x="1038" y="210" width="432" height="372" rx="30" fill="#F7FBFF" stroke="#D6E6FF"/>
     <text x="1080" y="278" fill="#071829" font-family="Inter, Segoe UI, sans-serif" font-size="26" font-weight="700">Visibility scorecard</text>
     <text x="1080" y="324" fill="#607088" font-family="Inter, Segoe UI, sans-serif" font-size="20">AI discoverability readiness</text>
-    <text x="1080" y="404" fill="#0B55D8" font-family="Inter, Segoe UI, sans-serif" font-size="74" font-weight="800">85</text>
+    <text x="1080" y="404" fill="#0B55D8" font-family="Inter, Segoe UI, sans-serif" font-size="74" font-weight="800">90</text>
     <text x="1192" y="404" fill="#486178" font-family="Inter, Segoe UI, sans-serif" font-size="24">/100</text>
     <rect x="1080" y="452" width="326" height="16" rx="8" fill="#E5EDF8"/>
-    <rect x="1080" y="452" width="277" height="16" rx="8" fill="#0B55D8"/>
+    <rect x="1080" y="452" width="294" height="16" rx="8" fill="#0B55D8"/>
     <rect x="1080" y="506" width="104" height="32" rx="16" fill="#EAFBF7"/>
     <text x="1101" y="528" fill="#097B5A" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="700">CITED</text>
     <rect x="1204" y="506" width="140" height="32" rx="16" fill="#EEF4FF"/>

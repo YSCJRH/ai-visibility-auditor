@@ -118,6 +118,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   const htmlReport = await readFile(path.join(tempDir, "index.html"), "utf8");
   const siteAudit = JSON.parse(await readFile(path.join(tempDir, "site-audit.json"), "utf8")) as {
     pages: Array<{
+      internalLinkRecords?: unknown[];
       jsonLdRecords?: unknown[];
       schemaTextSignals?: unknown[];
       evidenceSignals?: unknown[];
@@ -137,7 +138,9 @@ test("report renderers expose expected audit and eval sections", async () => {
   const scorecardPreviewSvg = await readFile(path.resolve("assets/readme-scorecard-preview.svg"), "utf8");
   const artifactPreviewSvg = await readFile(path.resolve("assets/readme-artifacts-preview.svg"), "utf8");
   const showcaseSvg = await readFile(path.resolve("assets/readme-before-after-showcase.svg"), "utf8");
-  const normalizedPages = JSON.parse(await readFile(path.join(tempDir, "normalized-pages.json"), "utf8")) as unknown[];
+  const normalizedPages = JSON.parse(await readFile(path.join(tempDir, "normalized-pages.json"), "utf8")) as Array<{
+    internalLinkRecords?: unknown[];
+  }>;
   const competitorDiff = await readFile(path.join(tempDir, "competitor-diff.md"), "utf8");
   const citationGapMatrix = JSON.parse(await readFile(path.join(tempDir, "citation-gap-matrix.json"), "utf8")) as {
     rows: unknown[];
@@ -175,6 +178,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(recommendations, /# AnswerLens Recommendations/);
   assert.match(htmlReport, / \| VAVR: <strong>/);
   assert.equal(htmlReport.includes(String.fromCharCode(0x74ba)), false);
+  assert.ok(siteAudit.pages.some((page) => (page.internalLinkRecords ?? []).length > 0));
   assert.ok(siteAudit.pages.some((page) => (page.jsonLdRecords ?? []).length > 0));
   assert.ok(siteAudit.pages.some((page) => (page.schemaTextSignals ?? []).length > 0));
   assert.ok(siteAudit.pages.some((page) => (page.evidenceSignals ?? []).length > 0));
@@ -216,6 +220,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(artifactPreviewSvg, /Artifact preview/);
   assert.match(showcaseSvg, /Before and after showcase/);
   assert.ok(normalizedPages.length > 0);
+  assert.ok(normalizedPages.some((page) => (page.internalLinkRecords ?? []).length > 0));
   assert.match(competitorDiff, /# AnswerLens Competitor Structure Diff/);
   assert.equal(citationGapMatrix.rows.length, prompts.prompts.length);
   assert.match(citationGapMarkdown, /# AnswerLens Citation Gap Matrix/);

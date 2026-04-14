@@ -64,6 +64,19 @@ export function normalizeUrlPathname(url: string): string {
   }
 }
 
+export function normalizeComparableUrl(value: string): string {
+  try {
+    const url = new URL(value);
+    url.hash = "";
+    if (url.pathname.length > 1) {
+      url.pathname = url.pathname.replace(/\/+$/, "");
+    }
+    return url.toString();
+  } catch {
+    return value;
+  }
+}
+
 export function normalizeDomain(value: string): string {
   try {
     return new URL(value.startsWith("http") ? value : `https://${value}`).hostname.replace(/^www\./, "").toLowerCase();
