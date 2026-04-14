@@ -26,7 +26,7 @@ If a repo runs AnswerLens in GitHub Actions, prefer the workflow badge over a sc
 
 Score badges are intentionally not first-class yet. They are easy to misread as answer rankings. If a project creates one from `share-summary.json`, use readiness language:
 
-- Good: `AI discoverability readiness: 78/100`
+- Good: `AI discoverability readiness: 85/100`
 - Good: `AnswerLens audited`
 - Avoid: `AI search rank`
 - Avoid: `ChatGPT visibility`
