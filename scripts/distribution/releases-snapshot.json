@@ -1,0 +1,16 @@
+[
+  {
+    "tag_name": "v0.2.0",
+    "name": "v0.2.0",
+    "html_url": "https://github.com/YSCJRH/ai-visibility-auditor/releases/tag/v0.2.0",
+    "published_at": "2026-04-13T00:00:00Z",
+    "body": "Launch-hardening release with AnswerLens branding alignment, share-summary outputs, PR-ready snippets, roadmap cleanup, and public distribution foundations."
+  },
+  {
+    "tag_name": "v0.1.0-alpha.1",
+    "name": "v0.1.0-alpha.1",
+    "html_url": "https://github.com/YSCJRH/ai-visibility-auditor/releases/tag/v0.1.0-alpha.1",
+    "published_at": "2026-03-30T00:00:00Z",
+    "body": "Early alpha for the CLI-first audit baseline, report outputs, and initial repository-native AI visibility workflow."
+  }
+]

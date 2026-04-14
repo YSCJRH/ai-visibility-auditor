@@ -1,11 +1,12 @@
-# GitHub Action Example
+# GitHub Action
 
-AnswerLens works best when the report is visible inside the Git workflow. The default pattern is:
+AnswerLens ships a reusable root Action so teams can keep AI discoverability checks inside GitHub-native workflows instead of rebuilding shell glue in every repository.
 
-1. Run the fixture or site audit in CI.
-2. Upload the full `runs/<name>` directory as an artifact.
-3. Append `share-summary.md` to the GitHub job summary.
-4. Keep PR comments opt-in to avoid noisy automation.
+The public interface is:
+
+- `uses: YSCJRH/ai-visibility-auditor@vX`
+- commands: `audit`, `eval`, `manual-import`
+- outputs: `out-dir`, `share-summary-path`, `pr-snippet-path`, `run-json-path`
 
 ## Minimal workflow
 
@@ -21,27 +22,59 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+
+      - id: answerlens
+        uses: YSCJRH/ai-visibility-auditor@vX
         with:
-          version: 10.33.0
-          run_install: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm demo:fixture
+          command: audit
+          site: examples/fixtures/static-good
+          brand: examples/acme/brand.yaml
+          competitors: examples/acme/competitors.yaml
+          prompts: examples/acme/prompts.yaml
+          out-dir: runs/static-good
+
       - name: Publish AnswerLens summary
-        run: cat runs/static-good/share-summary.md >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          cat "${{ steps.answerlens.outputs.share-summary-path }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### PR-ready snippet" >> "$GITHUB_STEP_SUMMARY"
+          cat "${{ steps.answerlens.outputs.pr-snippet-path }}" >> "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/upload-artifact@v4
         with:
           name: answerlens-report
-          path: runs/static-good
+          path: ${{ steps.answerlens.outputs.out-dir }}
 ```
 
-## PR snippet
+## Inputs
 
-When a maintainer wants a concise PR comment, copy `runs/<name>/pr-snippet.md`. Keep it manual or label-triggered until the project needs automated comments.
+Required:
+
+- `command`
+- `site`
+- `brand`
+- `competitors`
+- `prompts`
+
+Optional:
+
+- `out-dir` default: `runs/answerlens`
+- `provider` for `eval`
+- `model`
+- `samples`
+- `locale`
+- `manual-input` for `manual-import`
+
+## Outputs
+
+- `out-dir`: absolute path to the generated run directory
+- `share-summary-path`: absolute path to `share-summary.md`
+- `pr-snippet-path`: absolute path to `pr-snippet.md`
+- `run-json-path`: absolute path to `run.json`
+
+## Dogfood pattern
+
+This repository uses the same root Action via `uses: ./` in its fixture workflow. That keeps the public Action contract exercised on every change instead of leaving it as documentation-only surface area.
 
 ## Guardrails
 

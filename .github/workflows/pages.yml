@@ -1,0 +1,66 @@
+name: Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: answerlens
+        uses: ./
+        with:
+          command: audit
+          site: examples/fixtures/static-good
+          brand: examples/acme/brand.yaml
+          competitors: examples/acme/competitors.yaml
+          prompts: examples/acme/prompts.yaml
+          out-dir: runs/static-good
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("node:fs");
+            fs.mkdirSync("dist", { recursive: true });
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            const compiled = releases.map((release) => ({
+              tag_name: release.tag_name,
+              name: release.name,
+              html_url: release.html_url,
+              published_at: release.published_at,
+              body: release.body,
+              draft: release.draft,
+              prerelease: release.prerelease
+            }));
+            fs.writeFileSync("dist/releases.json", `${JSON.stringify(compiled, null, 2)}\n`);
+      - run: pnpm build:site -- --releases dist/releases.json
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/site
+
+  deploy:
+    if: ${{ vars.ANSWERLENS_ENABLE_PAGES_DEPLOY == 'true' }}
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
