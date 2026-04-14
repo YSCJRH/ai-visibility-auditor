@@ -1,10 +1,51 @@
 {
   "name": "@answerlens/cli",
-  "version": "0.1.0",
-  "description": "AnswerLens CLI entrypoint used by the workspace",
-  "private": true,
+  "version": "0.2.0",
+  "description": "CLI-first AI visibility auditor for product websites.",
+  "private": false,
   "type": "module",
+  "license": "Apache-2.0",
   "engines": {
     "node": ">=22.0.0"
+  },
+  "bin": {
+    "answerlens": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "homepage": "https://github.com/YSCJRH/ai-visibility-auditor",
+  "bugs": {
+    "url": "https://github.com/YSCJRH/ai-visibility-auditor/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YSCJRH/ai-visibility-auditor.git",
+    "directory": "apps/cli"
+  },
+  "keywords": [
+    "answerlens",
+    "ai-visibility",
+    "ai-discoverability",
+    "aeo",
+    "geo",
+    "seo",
+    "cli",
+    "developer-tools",
+    "github-actions"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup --config tsup.config.ts",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "fast-xml-parser": "^4.5.0",
+    "yaml": "^2.7.0",
+    "zod": "^3.24.2"
   }
 }

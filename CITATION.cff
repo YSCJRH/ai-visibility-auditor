@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use AnswerLens, please cite it using the metadata from this file."
+title: "AnswerLens"
+type: software
+version: "0.2.0"
+license: "Apache-2.0"
+abstract: "CLI-first AI visibility auditor for product websites. CI for AI discoverability."
+repository-code: "https://github.com/YSCJRH/ai-visibility-auditor"
+url: "https://github.com/YSCJRH/ai-visibility-auditor"
+authors:
+  - family-names: "YSCJRH"
