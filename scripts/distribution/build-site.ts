@@ -1,5 +1,6 @@
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 type ShareSummary = {
   project: string;
@@ -43,6 +44,15 @@ type PageSpec = {
 const REPO_URL = "https://github.com/YSCJRH/ai-visibility-auditor";
 const DESCRIPTION = "AnswerLens is a CLI-first AI visibility auditor for product websites.";
 const TAGLINE = "CI for AI discoverability.";
+const DEFAULT_REPOSITORY = "YSCJRH/ai-visibility-auditor";
+
+type BuildSiteOptions = {
+  repository?: string;
+  siteUrl?: string;
+  outDir?: string;
+  demoRunDir?: string;
+  releasesPath?: string;
+};
 
 function parseArgs(argv: string[]): Map<string, string> {
   const flags = new Map<string, string>();
@@ -51,15 +61,18 @@ function parseArgs(argv: string[]): Map<string, string> {
     if (!token.startsWith("--")) {
       continue;
     }
+
     const key = token.slice(2);
     const next = argv[index + 1];
     if (!next || next.startsWith("--")) {
       flags.set(key, "true");
       continue;
     }
+
     flags.set(key, next);
     index += 1;
   }
+
   return flags;
 }
 
@@ -86,7 +99,8 @@ function excerpt(value: string | undefined, max = 220): string {
   if (compact.length <= max) {
     return compact;
   }
-  return `${compact.slice(0, max - 1).trimEnd()}…`;
+
+  return `${compact.slice(0, max - 3).trimEnd()}...`;
 }
 
 function formatDate(value: string | undefined, fallback: string): string {
@@ -99,7 +113,12 @@ function formatReadableDate(value: string | undefined, fallback: string): string
   if (Number.isNaN(date.getTime())) {
     return fallback;
   }
-  return new Intl.DateTimeFormat("en-US", { year: "numeric", month: "short", day: "numeric" }).format(date);
+
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  }).format(date);
 }
 
 async function readJson<T>(filePath: string): Promise<T> {
@@ -175,13 +194,12 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string): strin
 </html>`;
 }
 
-async function main(): Promise<void> {
-  const flags = parseArgs(process.argv.slice(2));
-  const repository = process.env.GITHUB_REPOSITORY ?? "YSCJRH/ai-visibility-auditor";
-  const siteUrl = withTrailingSlash(flags.get("site-url") ?? process.env.ANSWERLENS_SITE_URL ?? defaultSiteUrl(repository));
-  const outDir = path.resolve(flags.get("out") ?? "dist/site");
-  const demoRunDir = path.resolve(flags.get("demo-run") ?? "runs/static-good");
-  const releasesPath = path.resolve(flags.get("releases") ?? "scripts/distribution/releases-snapshot.json");
+export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
+  const repository = options.repository ?? process.env.GITHUB_REPOSITORY ?? DEFAULT_REPOSITORY;
+  const siteUrl = withTrailingSlash(options.siteUrl ?? process.env.ANSWERLENS_SITE_URL ?? defaultSiteUrl(repository));
+  const outDir = path.resolve(options.outDir ?? "dist/site");
+  const demoRunDir = path.resolve(options.demoRunDir ?? "runs/static-good");
+  const releasesPath = path.resolve(options.releasesPath ?? "scripts/distribution/releases-snapshot.json");
 
   const [shareSummary, runManifest, shareSummaryMarkdown, recommendationsMarkdown, exampleMarkdown, releases] = await Promise.all([
     readJson<ShareSummary>(path.join(demoRunDir, "share-summary.json")),
@@ -364,7 +382,11 @@ async function main(): Promise<void> {
   const sitemap = pages
     .map((page) => `<url><loc>${escapeHtml(new URL(page.route, siteUrl).href)}</loc><lastmod>${escapeHtml(updatedAt)}</lastmod></url>`)
     .join("");
-  await writeFile(path.join(outDir, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemap}</urlset>\n`, "utf8");
+  await writeFile(
+    path.join(outDir, "sitemap.xml"),
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemap}</urlset>\n`,
+    "utf8"
+  );
 
   const feedEntries = releases
     .map((release) => {
@@ -378,10 +400,29 @@ async function main(): Promise<void> {
     "utf8"
   );
 
-  await writeFile(path.join(outDir, "robots.txt"), `User-agent: *\nAllow: /\nSitemap: ${new URL("sitemap.xml", siteUrl).href}\n`, "utf8");
+  await writeFile(
+    path.join(outDir, "robots.txt"),
+    `User-agent: *\nAllow: /\nSitemap: ${new URL("sitemap.xml", siteUrl).href}\n`,
+    "utf8"
+  );
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exitCode = 1;
-});
+async function main(): Promise<void> {
+  const flags = parseArgs(process.argv.slice(2));
+  await buildSite({
+    siteUrl: flags.get("site-url"),
+    outDir: flags.get("out") ?? undefined,
+    demoRunDir: flags.get("demo-run") ?? undefined,
+    releasesPath: flags.get("releases") ?? undefined
+  });
+}
+
+const isCliEntrypoint =
+  process.argv[1] !== undefined && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+
+if (isCliEntrypoint && process.env.ANSWERLENS_IMPORT_ONLY !== "1") {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  });
+}
