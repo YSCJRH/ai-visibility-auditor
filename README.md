@@ -32,11 +32,10 @@ The first shareable result looks like this:
 ```md
 ## AnswerLens audit
 
-**CI for AI discoverability.** Readiness: **85/100**. VAVR: **pending eval**.
+**CI for AI discoverability.** Readiness: **90/100**. VAVR: **pending eval**.
 
 AI may miss this product because:
 - Thin key page: add plain-language explanations, evidence blocks, and stronger sections.
-- Key proof page is weakly linked: connect FAQ, integrations, and use-case pages from buyer-path pages.
 ```
 
 ## What ships today

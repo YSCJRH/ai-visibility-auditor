@@ -3,6 +3,7 @@ import type {
   BrandDetails,
   EvidenceSignal,
   FetchedPage,
+  InternalLinkRecord,
   JsonLdQuestionAnswer,
   JsonLdRecord,
   JsonLdRecordType,
@@ -55,17 +56,29 @@ const WORKFLOW_TERMS = ["setup", "quickstart", "implementation", "workflow", "de
 const OUTCOME_TERMS = ["reduce", "increase", "improve", "adoption", "activation", "time-to-value", "faster", "outcome"];
 const DOCS_TERMS = ["api", "sdk", "quickstart", "reference", "guide", "version", "updated", "implementation"];
 
+function normalizeWhitespace(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function truncateText(value: string, maxLength = 180): string {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  return `${value.slice(0, maxLength - 3).trim()}...`;
+}
+
 function cleanValue(value: unknown, maxLength = 180): string | undefined {
   if (typeof value !== "string") {
     return undefined;
   }
 
-  const cleaned = value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const cleaned = normalizeWhitespace(value.replace(/<[^>]+>/g, " "));
   if (!cleaned) {
     return undefined;
   }
 
-  return cleaned.length > maxLength ? `${cleaned.slice(0, maxLength - 3)}...` : cleaned;
+  return truncateText(cleaned, maxLength);
 }
 
 function valuesFromUnknown(value: unknown): unknown[] {
@@ -297,14 +310,162 @@ function absoluteUrl(source: SiteSource, currentUrl: string, href: string): stri
   }
 
   try {
-    return new URL(href, currentUrl).toString();
+    return normalizeResolvedUrl(new URL(href, currentUrl).toString());
   } catch {
     try {
-      return new URL(href, source.baseUrl).toString();
+      return normalizeResolvedUrl(new URL(href, source.baseUrl).toString());
     } catch {
       return null;
     }
   }
+}
+
+function normalizeResolvedUrl(value: string): string {
+  const url = new URL(value);
+  url.hash = "";
+  if (url.pathname.length > 1) {
+    url.pathname = url.pathname.replace(/\/+$/, "");
+  }
+  return url.toString();
+}
+
+function fallbackAnchorText(targetUrl: string): string {
+  const pathname = new URL(targetUrl).pathname;
+  const segments = pathname.split("/").filter(Boolean);
+  const lastSegment = segments.at(-1);
+
+  if (!lastSegment) {
+    return "home";
+  }
+
+  return lastSegment.replace(/[-_]+/g, " ").trim() || "home";
+}
+
+function extractAnchorText(
+  $: ReturnType<typeof load>,
+  element: any,
+  targetUrl: string
+): string {
+  const directText = normalizeWhitespace($(element).text());
+  if (directText) {
+    return truncateText(directText, 120);
+  }
+
+  const ariaLabel = cleanValue($(element).attr("aria-label"), 120);
+  if (ariaLabel) {
+    return ariaLabel;
+  }
+
+  const title = cleanValue($(element).attr("title"), 120);
+  if (title) {
+    return title;
+  }
+
+  return truncateText(fallbackAnchorText(targetUrl), 120);
+}
+
+function extractHeadingContext($: ReturnType<typeof load>, element: any): string | undefined {
+  const containers = $(element)
+    .parents()
+    .toArray()
+    .map((node) => $(node))
+    .filter((node) => node.is("section, article, main, header, nav, div, body"));
+
+  for (const container of containers) {
+    const heading = cleanValue(container.children("h2, h3, h1").first().text(), 120);
+    if (heading) {
+      return heading;
+    }
+
+    const nestedHeading = cleanValue(container.find("h2, h3, h1").first().text(), 120);
+    if (nestedHeading) {
+      return nestedHeading;
+    }
+  }
+
+  return undefined;
+}
+
+function extractSourceContext(
+  $: ReturnType<typeof load>,
+  element: any,
+  anchorText: string
+): string {
+  const block = $(element).closest("li, p, td, th");
+  const blockText = block.length > 0 ? cleanValue(block.text(), 180) : undefined;
+  const heading = extractHeadingContext($, element);
+  const contextParts: string[] = [];
+
+  if (heading) {
+    contextParts.push(heading);
+  }
+
+  if (blockText) {
+    const alreadyCoveredByHeading = heading ? blockText.toLowerCase().includes(heading.toLowerCase()) : false;
+    contextParts.push(alreadyCoveredByHeading ? blockText : truncateText(`${heading ?? ""} ${blockText}`.trim(), 180));
+  }
+
+  const context = cleanValue(contextParts.join(" "), 200);
+  if (context && context.length >= 32) {
+    return context;
+  }
+
+  if (heading) {
+    const headingContext = cleanValue(`${heading} ${anchorText}`, 160);
+    if (headingContext) {
+      return headingContext;
+    }
+  }
+
+  return truncateText(anchorText, 120);
+}
+
+function extractInternalLinkRecords(
+  $: ReturnType<typeof load>,
+  source: SiteSource,
+  currentUrl: string
+): { internalLinkRecords: InternalLinkRecord[]; externalLinks: string[] } {
+  const sourceHost = new URL(source.baseUrl).host;
+  const internalLinkRecords: InternalLinkRecord[] = [];
+  const externalLinks: string[] = [];
+  const seenInternal = new Set<string>();
+  const seenExternal = new Set<string>();
+
+  $("a[href]").each((_, element) => {
+    const href = $(element).attr("href") ?? "";
+    const targetUrl = absoluteUrl(source, currentUrl, href);
+    if (!targetUrl) {
+      return;
+    }
+
+    if (new URL(targetUrl).host !== sourceHost) {
+      if (!seenExternal.has(targetUrl)) {
+        seenExternal.add(targetUrl);
+        externalLinks.push(targetUrl);
+      }
+      return;
+    }
+
+    const anchorText = extractAnchorText($, element, targetUrl);
+    const sourceContext = extractSourceContext($, element, anchorText);
+    const recordKey = `${targetUrl}::${anchorText.toLowerCase()}::${sourceContext.toLowerCase()}`;
+
+    if (seenInternal.has(recordKey)) {
+      return;
+    }
+
+    seenInternal.add(recordKey);
+    internalLinkRecords.push({
+      url: targetUrl,
+      anchorText,
+      sourceContext
+    });
+  });
+
+  return {
+    internalLinkRecords,
+    externalLinks
+  };
 }
 
 export function normalizePage(source: SiteSource, page: FetchedPage, _brand: BrandDetails): PageRecord {
@@ -320,14 +481,8 @@ export function normalizePage(source: SiteSource, page: FetchedPage, _brand: Bra
   const jsonLd = extractJsonLd($);
   const text = collectText($);
   const pathname = new URL(page.url).pathname || "/";
-  const links = $("a[href]")
-    .map((_, element) => $(element).attr("href"))
-    .get()
-    .map((href) => absoluteUrl(source, page.url, href ?? ""))
-    .filter((href): href is string => Boolean(href));
-  const sourceHost = new URL(source.baseUrl).host;
-  const internalLinks = links.filter((link) => new URL(link).host === sourceHost);
-  const externalLinks = links.filter((link) => new URL(link).host !== sourceHost);
+  const { internalLinkRecords, externalLinks } = extractInternalLinkRecords($, source, page.url);
+  const internalLinks = unique(internalLinkRecords.map((record) => record.url));
   const robotsMeta = [$("meta[name='robots']").attr("content"), $("meta[name='googlebot']").attr("content")]
     .filter(Boolean)
     .join(" ")
@@ -351,6 +506,7 @@ export function normalizePage(source: SiteSource, page: FetchedPage, _brand: Bra
     h1Count: h1Nodes.length,
     headings,
     wordCount,
+    internalLinkRecords,
     internalLinks,
     externalLinks,
     lists,

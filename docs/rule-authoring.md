@@ -21,6 +21,8 @@ Audit rules should be deterministic by default.
 - write a concise message
 - include a concrete fix hint
 - add a positive and negative fixture case
+- register the rule through `packages/core/src/rules/` instead of appending more logic to `audit.ts`
+- if the rule depends on internal links, back it with fixtures that exercise URL, anchor text, and source context together
 
 ## Preferred categories
 
@@ -33,4 +35,3 @@ Audit rules should be deterministic by default.
 - `comparison`
 - `coverage`
 - `accessibility`
-

@@ -31,13 +31,12 @@ Audit whether a product site can be read, cited, compared, and recommended by AI
 
 | Metric | Value |
 | --- | --- |
-| overallScore | 85 |
+| overallScore | 90 |
 | vavr | pending eval |
 
 ## AI may miss this product because
 
 - **Thin key page** (warn, https://fixture.local/): Add plain-language explanations, evidence blocks, and stronger sections.
-- **Key proof page is weakly linked** (warn, https://fixture.local/faq): Link to this page from the homepage, docs, or related buyer-path pages.
 
 ## Top fixes
 
@@ -65,7 +64,7 @@ The JSON shape is intentionally small:
     "ruleVersion": "2026-04-14"
   },
   "metrics": {
-    "overallScore": 85,
+    "overallScore": 90,
     "vavr": null
   },
   "topIssues": [],
@@ -83,7 +82,7 @@ Use this when a team wants a copy-ready GitHub block:
 ```md
 ## AnswerLens audit
 
-**CI for AI discoverability.** Readiness: **85/100**. VAVR: **pending eval**.
+**CI for AI discoverability.** Readiness: **90/100**. VAVR: **pending eval**.
 
 ### AI may miss this product because
 

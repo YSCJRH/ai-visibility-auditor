@@ -134,6 +134,12 @@ export interface EvidenceSignal {
   examples: string[];
 }
 
+export interface InternalLinkRecord {
+  url: string;
+  anchorText: string;
+  sourceContext: string;
+}
+
 export interface PageRecord {
   url: string;
   pathname: string;
@@ -145,6 +151,7 @@ export interface PageRecord {
   h1Count: number;
   headings: string[];
   wordCount: number;
+  internalLinkRecords: InternalLinkRecord[];
   internalLinks: string[];
   externalLinks: string[];
   lists: number;
