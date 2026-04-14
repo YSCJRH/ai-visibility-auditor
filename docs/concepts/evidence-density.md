@@ -20,6 +20,17 @@ Thin pages can be crawlable and still be poor source material. AnswerLens flags 
 - Compare pages with no decision criteria
 - Trust pages that say "secure" without explaining why
 
-## Roadmap
+## First supported signals
 
-Evidence density is part of issue `#9`. The goal is to move from "this page exists" toward "this page contains source material an answer can cite."
+AnswerLens now records bounded evidence signals for key proof pages:
+
+- numbers, tables, and lists
+- pricing or packaging terms
+- trust markers such as SSO, encryption, SOC 2, and audit logs
+- freshness and version markers
+- comparison criteria
+- workflow, docs, and outcome terms
+
+The audit scores density by page type instead of treating page existence as enough. Pricing, security, docs, compare, and use-case pages can be flagged when they lack the proof blocks that answer systems need to cite.
+
+Evidence density is still a source-material check, not a promise that any AI answer surface will rank or cite the page.

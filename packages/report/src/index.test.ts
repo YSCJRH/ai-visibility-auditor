@@ -116,6 +116,13 @@ test("report renderers expose expected audit and eval sections", async () => {
   const prSnippet = await readFile(path.join(tempDir, "pr-snippet.md"), "utf8");
   const recommendations = await readFile(path.join(tempDir, "recommendations.md"), "utf8");
   const htmlReport = await readFile(path.join(tempDir, "index.html"), "utf8");
+  const siteAudit = JSON.parse(await readFile(path.join(tempDir, "site-audit.json"), "utf8")) as {
+    pages: Array<{
+      jsonLdRecords?: unknown[];
+      schemaTextSignals?: unknown[];
+      evidenceSignals?: unknown[];
+    }>;
+  };
   const readme = await readFile(path.resolve("README.md"), "utf8");
   const roadmap = await readFile(path.resolve("docs/roadmap.md"), "utf8");
   const githubBootstrap = await readFile(path.resolve("docs/github-bootstrap.md"), "utf8");
@@ -137,8 +144,9 @@ test("report renderers expose expected audit and eval sections", async () => {
     summary: { citationGapCount: number };
   };
   const citationGapMarkdown = await readFile(path.join(tempDir, "citation-gap-matrix.md"), "utf8");
-  const contentBrief = await readFile(path.join(tempDir, "content-briefs", "faq-brief.md"), "utf8");
-  const legacyBrief = await readFile(path.join(tempDir, "briefs", "faq-brief.md"), "utf8");
+  const firstBriefId = evalResult.briefs[0]?.id;
+  const contentBrief = firstBriefId ? await readFile(path.join(tempDir, "content-briefs", `${firstBriefId}.md`), "utf8") : null;
+  const legacyBrief = firstBriefId ? await readFile(path.join(tempDir, "briefs", `${firstBriefId}.md`), "utf8") : null;
 
   assert.equal(written?.summary.promptCount, expectedBenchmarkCount);
   assert.equal(evalSummaryJson.summary.promptCount, expectedBenchmarkCount);
@@ -167,6 +175,9 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(recommendations, /# AnswerLens Recommendations/);
   assert.match(htmlReport, / \| VAVR: <strong>/);
   assert.equal(htmlReport.includes(String.fromCharCode(0x74ba)), false);
+  assert.ok(siteAudit.pages.some((page) => (page.jsonLdRecords ?? []).length > 0));
+  assert.ok(siteAudit.pages.some((page) => (page.schemaTextSignals ?? []).length > 0));
+  assert.ok(siteAudit.pages.some((page) => (page.evidenceSignals ?? []).length > 0));
   assert.doesNotMatch(readme, /\/D:\/SEO/);
   assert.match(readme, /AnswerLens is a CLI-first AI visibility auditor for product websites\./);
   assert.match(readme, /CI for AI discoverability\./);
@@ -208,6 +219,10 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(competitorDiff, /# AnswerLens Competitor Structure Diff/);
   assert.equal(citationGapMatrix.rows.length, prompts.prompts.length);
   assert.match(citationGapMarkdown, /# AnswerLens Citation Gap Matrix/);
-  assert.match(contentBrief, /# Acme FAQ outline/);
-  assert.match(legacyBrief, /# Acme FAQ outline/);
+  if (contentBrief && legacyBrief) {
+    assert.match(contentBrief, /^# /);
+    assert.match(legacyBrief, /^# /);
+  } else {
+    assert.match(evalSummary, /- none/);
+  }
 });

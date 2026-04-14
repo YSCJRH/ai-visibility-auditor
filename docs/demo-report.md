@@ -19,7 +19,7 @@ The report is written to `runs/static-good`.
 
 ## Example conclusion
 
-The fixture currently scores `78/100`. It is crawlable and has broad page coverage, but AnswerLens still flags thin key pages, missing homepage JSON-LD, and pricing evidence gaps. That is the point of the fixture: even a "pretty good" product site can still lack the source material AI systems need to cite and compare it.
+The fixture currently scores `85/100`. It is crawlable, has broad page coverage, and now includes field-level schema signals, but AnswerLens still flags thin key pages and weak internal links to proof pages. That is the point of the fixture: even a "pretty good" product site can still lack enough source material and page-to-page support for AI systems to cite and compare it confidently.
 
 ## Share safely
 

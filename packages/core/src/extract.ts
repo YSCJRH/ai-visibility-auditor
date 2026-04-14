@@ -1,6 +1,17 @@
 ﻿import { load } from "cheerio";
-import type { BrandDetails, FetchedPage, PageRecord, PageType, SiteSource } from "./types.ts";
-import { pathLooksLike } from "./utils.ts";
+import type {
+  BrandDetails,
+  EvidenceSignal,
+  FetchedPage,
+  JsonLdQuestionAnswer,
+  JsonLdRecord,
+  JsonLdRecordType,
+  PageRecord,
+  PageType,
+  SchemaTextSignal,
+  SiteSource
+} from "./types.ts";
+import { keywordCoverage, pathLooksLike, unique } from "./utils.ts";
 
 function detectPageType(page: FetchedPage, title: string, h1: string): PageType {
   const pathname = new URL(page.url).pathname.toLowerCase();
@@ -18,24 +29,133 @@ function detectPageType(page: FetchedPage, title: string, h1: string): PageType 
   return "other";
 }
 
-function extractJsonLdTypes($: ReturnType<typeof load>): string[] {
+const SUPPORTED_JSON_LD_TYPES = new Map<string, JsonLdRecordType>([
+  ["faqpage", "FAQPage"],
+  ["organization", "Organization"],
+  ["softwareapplication", "SoftwareApplication"],
+  ["product", "Product"]
+]);
+
+const TRUST_TERMS = [
+  "soc 2",
+  "iso 27001",
+  "sso",
+  "saml",
+  "gdpr",
+  "encryption",
+  "audit log",
+  "dpa",
+  "hipaa",
+  "role-based"
+];
+
+const PRICING_TERMS = ["plan", "pricing", "price", "starter", "growth", "enterprise", "seat", "quote", "free", "$"];
+const COMPARISON_TERMS = ["compare", "alternative", "versus", "vs", "criteria", "trade-off", "decision"];
+const WORKFLOW_TERMS = ["setup", "quickstart", "implementation", "workflow", "deploy", "configure", "onboard", "rollout"];
+const OUTCOME_TERMS = ["reduce", "increase", "improve", "adoption", "activation", "time-to-value", "faster", "outcome"];
+const DOCS_TERMS = ["api", "sdk", "quickstart", "reference", "guide", "version", "updated", "implementation"];
+
+function cleanValue(value: unknown, maxLength = 180): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const cleaned = value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  if (!cleaned) {
+    return undefined;
+  }
+
+  return cleaned.length > maxLength ? `${cleaned.slice(0, maxLength - 3)}...` : cleaned;
+}
+
+function valuesFromUnknown(value: unknown): unknown[] {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  return value === undefined || value === null ? [] : [value];
+}
+
+function jsonLdTypesForNode(node: Record<string, unknown>): string[] {
+  return valuesFromUnknown(node["@type"])
+    .filter((type): type is string => typeof type === "string")
+    .map((type) => type.trim())
+    .filter(Boolean);
+}
+
+function normalizeSupportedType(type: string): JsonLdRecordType | null {
+  return SUPPORTED_JSON_LD_TYPES.get(type.toLowerCase()) ?? null;
+}
+
+function queueJsonLdNodes(parsed: unknown): Record<string, unknown>[] {
+  const queue = Array.isArray(parsed) ? [...parsed] : [parsed];
+  const nodes: Record<string, unknown>[] = [];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current || typeof current !== "object") {
+      continue;
+    }
+
+    const node = current as Record<string, unknown>;
+    nodes.push(node);
+
+    for (const graphNode of valuesFromUnknown(node["@graph"])) {
+      queue.push(graphNode);
+    }
+  }
+
+  return nodes;
+}
+
+function extractFaqQuestions(node: Record<string, unknown>): JsonLdQuestionAnswer[] {
+  return valuesFromUnknown(node.mainEntity)
+    .filter((questionNode): questionNode is Record<string, unknown> => Boolean(questionNode) && typeof questionNode === "object")
+    .map((questionNode) => {
+      const answerNode = valuesFromUnknown(questionNode.acceptedAnswer).find(
+        (candidate): candidate is Record<string, unknown> => Boolean(candidate) && typeof candidate === "object"
+      );
+      return {
+        question: cleanValue(questionNode.name ?? questionNode.text, 140) ?? "",
+        answer: cleanValue(answerNode?.text ?? answerNode?.name, 180) ?? ""
+      };
+    })
+    .filter((entry) => entry.question || entry.answer);
+}
+
+function extractSupportedRecord(node: Record<string, unknown>, type: JsonLdRecordType): JsonLdRecord {
+  const record: JsonLdRecord = {
+    type,
+    name: cleanValue(node.name),
+    description: cleanValue(node.description),
+    url: cleanValue(node.url),
+    category: cleanValue(node.applicationCategory ?? node.category)
+  };
+
+  if (type === "FAQPage") {
+    record.questions = extractFaqQuestions(node);
+  }
+
+  return record;
+}
+
+function extractJsonLd($: ReturnType<typeof load>): { types: string[]; records: JsonLdRecord[] } {
   const types: string[] = [];
+  const records: JsonLdRecord[] = [];
 
   $("script[type='application/ld+json']").each((_, element) => {
     try {
       const raw = $(element).text().trim();
       if (!raw) return;
       const parsed = JSON.parse(raw);
-      const queue = Array.isArray(parsed) ? [...parsed] : [parsed];
+      const nodes = queueJsonLdNodes(parsed);
 
-      while (queue.length > 0) {
-        const current = queue.shift();
-        if (!current || typeof current !== "object") continue;
-        if (typeof current["@type"] === "string") {
-          types.push(current["@type"]);
-        }
-        if (Array.isArray(current["@graph"])) {
-          queue.push(...current["@graph"]);
+      for (const node of nodes) {
+        for (const type of jsonLdTypesForNode(node)) {
+          types.push(type);
+          const supportedType = normalizeSupportedType(type);
+          if (supportedType) {
+            records.push(extractSupportedRecord(node, supportedType));
+          }
         }
       }
     } catch {
@@ -43,7 +163,7 @@ function extractJsonLdTypes($: ReturnType<typeof load>): string[] {
     }
   });
 
-  return [...new Set(types)];
+  return { types: unique(types), records };
 }
 
 function collectText($: ReturnType<typeof load>): string {
@@ -52,6 +172,123 @@ function collectText($: ReturnType<typeof load>): string {
     .text()
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function compactExamples(values: string[], limit = 3): string[] {
+  return unique(values.map((value) => value.trim()).filter(Boolean)).slice(0, limit);
+}
+
+function countTermHits(textLower: string, terms: string[]): string[] {
+  return terms.filter((term) => textLower.includes(term.toLowerCase()));
+}
+
+function regexExamples(text: string, pattern: RegExp): string[] {
+  return compactExamples([...text.matchAll(pattern)].map((match) => match[0]), 3);
+}
+
+function pushSignal(signals: EvidenceSignal[], type: string, count: number, examples: string[]): void {
+  if (count <= 0) {
+    return;
+  }
+
+  signals.push({
+    type,
+    count,
+    examples: compactExamples(examples)
+  });
+}
+
+function valueIsVisible(visibleText: string, value: string): boolean {
+  const normalizedValue = value.toLowerCase().replace(/\s+/g, " ").trim();
+  const normalizedText = visibleText.toLowerCase().replace(/\s+/g, " ").trim();
+
+  if (!normalizedValue) {
+    return true;
+  }
+
+  if (normalizedText.includes(normalizedValue)) {
+    return true;
+  }
+
+  return keywordCoverage(visibleText, value) >= 0.55;
+}
+
+function createSchemaTextSignals(records: JsonLdRecord[], visibleText: string): SchemaTextSignal[] {
+  const signals: SchemaTextSignal[] = [];
+
+  for (const record of records) {
+    for (const field of ["name", "description", "category"] as const) {
+      const value = record[field];
+      if (!value) {
+        continue;
+      }
+
+      signals.push({
+        recordType: record.type,
+        field,
+        value,
+        visible: valueIsVisible(visibleText, value)
+      });
+    }
+
+    for (const question of record.questions ?? []) {
+      if (question.question) {
+        signals.push({
+          recordType: record.type,
+          field: "faq.question",
+          value: question.question,
+          visible: valueIsVisible(visibleText, question.question)
+        });
+      }
+
+      if (question.answer) {
+        signals.push({
+          recordType: record.type,
+          field: "faq.answer",
+          value: question.answer,
+          visible: valueIsVisible(visibleText, question.answer)
+        });
+      }
+    }
+  }
+
+  return signals;
+}
+
+function createEvidenceSignals(text: string, pageType: PageType, lists: number, tables: number): EvidenceSignal[] {
+  const signals: EvidenceSignal[] = [];
+  const textLower = text.toLowerCase();
+  const words = text.split(/\s+/).filter(Boolean);
+  const numbers = regexExamples(
+    text,
+    /(?:\$\s?\d{1,4}(?:[.,]\d+)?|\b\d{1,4}(?:[.,]\d+)?%?(?:\s?(?:k|m|b|days?|weeks?|months?|users?|seats?))?\b)/gi
+  );
+  const dates = regexExamples(text, /\b(?:20\d{2}|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/gi);
+  const versions = regexExamples(text, /\bv?\d+\.\d+(?:\.\d+)?\b/gi);
+  const trustTerms = countTermHits(textLower, TRUST_TERMS);
+  const pricingTerms = countTermHits(textLower, PRICING_TERMS);
+  const comparisonTerms = countTermHits(textLower, COMPARISON_TERMS);
+  const workflowTerms = countTermHits(textLower, WORKFLOW_TERMS);
+  const outcomeTerms = countTermHits(textLower, OUTCOME_TERMS);
+  const docsTerms = countTermHits(textLower, DOCS_TERMS);
+
+  pushSignal(signals, "numbers", numbers.length, numbers);
+  pushSignal(signals, "tables", tables, tables > 0 ? [`${tables} table${tables === 1 ? "" : "s"}`] : []);
+  pushSignal(signals, "lists", lists, lists > 0 ? [`${lists} list${lists === 1 ? "" : "s"}`] : []);
+  pushSignal(signals, "trust-markers", trustTerms.length, trustTerms);
+  pushSignal(signals, "freshness", dates.length, dates);
+  pushSignal(signals, "versions", versions.length, versions);
+  pushSignal(signals, "pricing-proof", pricingTerms.length, pricingTerms);
+  pushSignal(signals, "comparison-criteria", comparisonTerms.length, comparisonTerms);
+  pushSignal(signals, "workflow-proof", workflowTerms.length, workflowTerms);
+  pushSignal(signals, "outcome-proof", outcomeTerms.length, outcomeTerms);
+  pushSignal(signals, "docs-proof", docsTerms.length, docsTerms);
+
+  if (["pricing", "security", "docs", "compare", "use-case"].includes(pageType)) {
+    pushSignal(signals, "body-depth", Math.floor(words.length / 80), [`${words.length} words`]);
+  }
+
+  return signals;
 }
 
 function absoluteUrl(source: SiteSource, currentUrl: string, href: string): string | null {
@@ -80,8 +317,8 @@ export function normalizePage(source: SiteSource, page: FetchedPage, _brand: Bra
     .map((_, element) => $(element).text().trim())
     .get()
     .filter(Boolean);
+  const jsonLd = extractJsonLd($);
   const text = collectText($);
-  const jsonLdTypes = extractJsonLdTypes($);
   const pathname = new URL(page.url).pathname || "/";
   const links = $("a[href]")
     .map((_, element) => $(element).attr("href"))
@@ -97,12 +334,17 @@ export function normalizePage(source: SiteSource, page: FetchedPage, _brand: Bra
     .toLowerCase();
   const wordCount = text ? text.split(/\s+/).length : 0;
   const textLower = text.toLowerCase();
+  const pageType = detectPageType(page, title, h1);
+  const lists = $("ul, ol").length;
+  const tables = $("table").length;
+  const schemaTextSignals = createSchemaTextSignals(jsonLd.records, text);
+  const evidenceSignals = createEvidenceSignals(text, pageType, lists, tables);
 
   return {
     url: page.url,
     pathname,
     status: page.status,
-    pageType: detectPageType(page, title, h1),
+    pageType,
     title,
     metaDescription,
     h1,
@@ -111,10 +353,13 @@ export function normalizePage(source: SiteSource, page: FetchedPage, _brand: Bra
     wordCount,
     internalLinks,
     externalLinks,
-    lists: $("ul, ol").length,
-    tables: $("table").length,
-    hasJsonLd: jsonLdTypes.length > 0,
-    jsonLdTypes,
+    lists,
+    tables,
+    hasJsonLd: jsonLd.types.length > 0,
+    jsonLdTypes: jsonLd.types,
+    jsonLdRecords: jsonLd.records,
+    schemaTextSignals,
+    evidenceSignals,
     ariaLabeledControls: $("button[aria-label], [role='button'][aria-label], input[aria-label], textarea[aria-label], select[aria-label], a[role='button'][aria-label]").length,
     interactiveControls: $("button, [role='button'], input, textarea, select, a[role='button']").length,
     canonical: $("link[rel='canonical']").attr("href")?.trim() ?? null,

@@ -105,6 +105,35 @@ export interface FetchedPage {
   fetchError?: string;
 }
 
+export type JsonLdRecordType = "FAQPage" | "Organization" | "SoftwareApplication" | "Product";
+
+export interface JsonLdQuestionAnswer {
+  question: string;
+  answer: string;
+}
+
+export interface JsonLdRecord {
+  type: JsonLdRecordType;
+  name?: string;
+  description?: string;
+  url?: string;
+  category?: string;
+  questions?: JsonLdQuestionAnswer[];
+}
+
+export interface SchemaTextSignal {
+  recordType: JsonLdRecordType;
+  field: string;
+  value: string;
+  visible: boolean;
+}
+
+export interface EvidenceSignal {
+  type: string;
+  count: number;
+  examples: string[];
+}
+
 export interface PageRecord {
   url: string;
   pathname: string;
@@ -122,6 +151,9 @@ export interface PageRecord {
   tables: number;
   hasJsonLd: boolean;
   jsonLdTypes: string[];
+  jsonLdRecords: JsonLdRecord[];
+  schemaTextSignals: SchemaTextSignal[];
+  evidenceSignals: EvidenceSignal[];
   ariaLabeledControls: number;
   interactiveControls: number;
   canonical: string | null;

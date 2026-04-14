@@ -51,6 +51,33 @@ function pageText(page: PageRecord): string {
   return `${page.title} ${page.h1} ${page.textSnippet}`.trim();
 }
 
+function signalExamples(page: PageRecord, type: string): string[] {
+  return page.evidenceSignals.find((signal) => signal.type === type)?.examples ?? [];
+}
+
+function hasEvidenceSignal(page: PageRecord, ...types: string[]): boolean {
+  return types.some((type) => (page.evidenceSignals.find((signal) => signal.type === type)?.count ?? 0) > 0);
+}
+
+function compactEvidence(values: string[]): string {
+  return values.filter(Boolean).slice(0, 3).join("; ");
+}
+
+function summarizeMissingGroups(page: PageRecord, groups: Array<{ label: string; signals: string[] }>): string[] {
+  return groups
+    .filter((group) => !hasEvidenceSignal(page, ...group.signals))
+    .map((group) => group.label);
+}
+
+function summarizePresentSignals(page: PageRecord, groups: Array<{ label: string; signals: string[] }>): string[] {
+  return groups
+    .filter((group) => hasEvidenceSignal(page, ...group.signals))
+    .map((group) => {
+      const examples = group.signals.flatMap((signal) => signalExamples(page, signal));
+      return examples.length > 0 ? `${group.label}: ${compactEvidence(examples)}` : group.label;
+    });
+}
+
 function computeBucketScore(issues: Issue[], bucket: ScoreBucketId): BucketScore {
   const bucketIssues = issues.filter((issue) => issue.bucket === bucket);
   const penalty = bucketIssues.reduce((sum, issue) => sum + SEVERITY_PENALTIES[issue.severity], 0);
@@ -370,6 +397,67 @@ function applySchemaConsistencyRules(context: AuditContext, page: PageRecord): v
   const faqSchema = page.jsonLdTypes.some((type) => type.toLowerCase() === "faqpage");
   const hasProductSchema = page.jsonLdTypes.some((type) => ["product", "softwareapplication", "service"].includes(type.toLowerCase()));
   const questionSignals = page.headings.filter((heading) => heading.includes("?")).length;
+  const invisibleSignals = page.schemaTextSignals.filter((signal) => !signal.visible);
+  const missingNames = invisibleSignals.filter((signal) => signal.field === "name");
+  const missingDescriptions = invisibleSignals.filter((signal) => signal.field === "description");
+  const missingQuestions = invisibleSignals.filter((signal) => signal.field === "faq.question");
+  const missingAnswers = invisibleSignals.filter((signal) => signal.field === "faq.answer");
+
+  if (missingNames.length > 0) {
+    addIssue(issues, {
+      severity: "warn",
+      scope: "page",
+      category: "schema",
+      bucket: "structure",
+      title: "Structured data name is not visible",
+      message: "A JSON-LD name field is not reinforced by visible page text.",
+      fixHint: "Mirror the structured entity name in visible headings or supporting copy.",
+      pageUrl: page.url,
+      evidence: compactEvidence(missingNames.map((signal) => `${signal.recordType}.${signal.field}: ${signal.value}`))
+    });
+  }
+
+  if (missingDescriptions.length > 0) {
+    addIssue(issues, {
+      severity: "info",
+      scope: "page",
+      category: "schema",
+      bucket: "structure",
+      title: "Structured data description is not visible",
+      message: "A JSON-LD description field is not supported by visible page text.",
+      fixHint: "Keep structured descriptions aligned with visible product copy.",
+      pageUrl: page.url,
+      evidence: compactEvidence(missingDescriptions.map((signal) => `${signal.recordType}.${signal.field}: ${signal.value}`))
+    });
+  }
+
+  if (missingQuestions.length > 0) {
+    addIssue(issues, {
+      severity: "warn",
+      scope: "page",
+      category: "schema",
+      bucket: "structure",
+      title: "FAQ schema does not match visible questions",
+      message: "FAQPage JSON-LD contains questions that do not appear as visible page text.",
+      fixHint: "Use visible FAQ headings or question rows that match the JSON-LD questions.",
+      pageUrl: page.url,
+      evidence: compactEvidence(missingQuestions.map((signal) => signal.value))
+    });
+  }
+
+  if (missingAnswers.length > 0) {
+    addIssue(issues, {
+      severity: "info",
+      scope: "page",
+      category: "schema",
+      bucket: "structure",
+      title: "FAQ schema answers are not visible",
+      message: "FAQPage JSON-LD contains answers that are not visible on the page.",
+      fixHint: "Expose the same answer text in visible FAQ content, not only structured data.",
+      pageUrl: page.url,
+      evidence: compactEvidence(missingAnswers.map((signal) => signal.value))
+    });
+  }
 
   if (page.pageType === "home" && !page.hasJsonLd) {
     addIssue(issues, {
@@ -426,116 +514,100 @@ function applySchemaConsistencyRules(context: AuditContext, page: PageRecord): v
 
 function applyEvidenceRules(context: AuditContext, page: PageRecord): void {
   const { issues } = context;
-
-  if (page.pageType === "pricing") {
-    if (!page.hasNumbers || page.tables === 0) {
-      addIssue(issues, {
-        severity: "warn",
-        scope: "page",
-        category: "evidence",
-        bucket: "evidence",
-        title: "Pricing page lacks citable detail",
-        message: "The pricing page has limited numeric or tabular evidence.",
-        fixHint: "Add concrete plan details, ranges, or tables that can be cited.",
-        pageUrl: page.url
-      });
-    }
-
-    if (page.wordCount < 180) {
-      addIssue(issues, {
-        severity: "info",
-        scope: "page",
-        category: "evidence",
-        bucket: "evidence",
-        title: "Pricing page evidence is thin",
-        message: "The pricing page is short relative to the amount of proof buyers usually need.",
-        fixHint: "Add pricing qualifiers, packaging notes, and proof-oriented FAQ or comparison context.",
-        pageUrl: page.url
-      });
-    }
-  }
-
-  if (page.pageType === "security") {
-    if (!page.hasTrustSignals) {
-      addIssue(issues, {
-        severity: "warn",
-        scope: "page",
-        category: "evidence",
-        bucket: "evidence",
-        title: "Security page lacks trust signals",
-        message: "The security page does not mention common trust markers.",
-        fixHint: "Add concrete compliance, deployment, and control statements.",
-        pageUrl: page.url
-      });
-    }
-
-    if (page.wordCount < 140) {
-      addIssue(issues, {
-        severity: "info",
-        scope: "page",
-        category: "evidence",
-        bucket: "evidence",
-        title: "Security page is light on implementation detail",
-        message: "The security page is short and may not provide enough citable proof.",
-        fixHint: "Add controls, architecture details, and customer-facing answers to common security objections.",
-        pageUrl: page.url
-      });
-    }
-  }
-
-  if (page.pageType === "docs") {
-    if (!page.hasDate && !page.hasVersion) {
-      addIssue(issues, {
-        severity: "info",
-        scope: "page",
-        category: "evidence",
-        bucket: "evidence",
-        title: "Docs page lacks freshness markers",
-        message: "The docs page does not expose last updated dates or versions.",
-        fixHint: "Add updated timestamps or version markers to key docs.",
-        pageUrl: page.url
-      });
-    }
-
-    if (page.wordCount < 120) {
-      addIssue(issues, {
-        severity: "info",
-        scope: "page",
-        category: "evidence",
-        bucket: "evidence",
-        title: "Docs page is too thin to cite confidently",
-        message: "The docs page has limited explanatory text for grounded answers to rely on.",
-        fixHint: "Add setup steps, reference details, and example-driven explanations.",
-        pageUrl: page.url
-      });
-    }
-  }
-
-  if (page.pageType === "compare" && page.tables === 0 && page.wordCount < 180) {
-    addIssue(issues, {
+  const requirements: Partial<
+    Record<
+      PageType,
+      {
+        title: string;
+        severity: "warn" | "info";
+        minGroups: number;
+        groups: Array<{ label: string; signals: string[] }>;
+        fixHint: string;
+      }
+    >
+  > = {
+    pricing: {
+      title: "Pricing page evidence density is low",
+      severity: "warn",
+      minGroups: 3,
+      groups: [
+        { label: "numeric prices or ranges", signals: ["numbers"] },
+        { label: "plan or packaging terms", signals: ["pricing-proof"] },
+        { label: "tables or scannable lists", signals: ["tables", "lists"] },
+        { label: "supporting body depth", signals: ["body-depth"] }
+      ],
+      fixHint: "Add concrete plans, ranges, packaging qualifiers, and scannable proof blocks."
+    },
+    security: {
+      title: "Security page evidence density is low",
+      severity: "warn",
+      minGroups: 2,
+      groups: [
+        { label: "trust markers", signals: ["trust-markers"] },
+        { label: "controls lists or tables", signals: ["lists", "tables"] },
+        { label: "implementation or workflow detail", signals: ["workflow-proof", "body-depth"] }
+      ],
+      fixHint: "Add compliance markers, controls, deployment details, and buyer-facing trust answers."
+    },
+    docs: {
+      title: "Docs page evidence density is low",
       severity: "info",
-      scope: "page",
-      category: "evidence",
-      bucket: "evidence",
-      title: "Compare page lacks citable proof blocks",
-      message: "The compare page is short and does not include a clear table or equivalent evidence block.",
-      fixHint: "Add comparison tables, decision criteria, or proof-oriented bullet lists.",
-      pageUrl: page.url
-    });
+      minGroups: 2,
+      groups: [
+        { label: "freshness or version markers", signals: ["freshness", "versions"] },
+        { label: "API, SDK, or guide terms", signals: ["docs-proof"] },
+        { label: "workflow or setup detail", signals: ["workflow-proof", "lists", "tables"] }
+      ],
+      fixHint: "Add updated dates, versions, setup steps, API references, and example-driven documentation."
+    },
+    compare: {
+      title: "Compare page evidence density is low",
+      severity: "info",
+      minGroups: 2,
+      groups: [
+        { label: "comparison criteria", signals: ["comparison-criteria"] },
+        { label: "tables or scannable lists", signals: ["tables", "lists"] },
+        { label: "pricing, docs, or proof context", signals: ["pricing-proof", "docs-proof", "trust-markers"] }
+      ],
+      fixHint: "Add comparison tables, decision criteria, fit guidance, and proof-oriented bullet lists."
+    },
+    "use-case": {
+      title: "Use-case page evidence density is low",
+      severity: "info",
+      minGroups: 2,
+      groups: [
+        { label: "workflow or rollout detail", signals: ["workflow-proof"] },
+        { label: "outcomes or success criteria", signals: ["outcome-proof", "numbers"] },
+        { label: "supporting proof context", signals: ["pricing-proof", "docs-proof", "trust-markers", "body-depth"] }
+      ],
+      fixHint: "Add audience-specific workflows, before/after outcomes, and measurable success criteria."
+    }
+  };
+
+  const requirement = requirements[page.pageType];
+  if (!requirement) {
+    return;
   }
 
-  if (page.pageType === "use-case" && !page.hasNumbers && page.wordCount < 160) {
-    addIssue(issues, {
-      severity: "info",
-      scope: "page",
-      category: "evidence",
-      bucket: "evidence",
-      title: "Use-case page lacks outcome detail",
-      message: "The use-case page is light on concrete metrics, workflows, or proof points.",
-      fixHint: "Add before/after outcomes, workflow steps, or measurable success criteria.",
-      pageUrl: page.url
-    });
+  const missingGroups = summarizeMissingGroups(page, requirement.groups);
+  const presentGroups = summarizePresentSignals(page, requirement.groups);
+  const presentCount = requirement.groups.length - missingGroups.length;
+
+  if (presentCount >= requirement.minGroups) {
+    return;
   }
+
+  addIssue(issues, {
+    severity: presentCount === 0 ? "warn" : requirement.severity,
+    scope: "page",
+    category: "evidence",
+    bucket: "evidence",
+    title: requirement.title,
+    message: `The ${page.pageType} page only satisfies ${presentCount}/${requirement.groups.length} expected evidence signal groups.`,
+    fixHint: requirement.fixHint,
+    pageUrl: page.url,
+    evidence: `Missing: ${missingGroups.join(", ")}. Present: ${presentGroups.length > 0 ? presentGroups.join("; ") : "none"}.`
+  });
 }
 
 function applyComparativeRules(context: AuditContext, page: PageRecord): void {
