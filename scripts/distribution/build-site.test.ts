@@ -3,14 +3,39 @@ import assert from "node:assert/strict";
 import { access, mkdtemp, readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { loadBrandConfig, loadCompetitorsConfig, loadPromptsConfig, runAudit } from "../../packages/core/src/index.ts";
+import { writeAuditOutputs } from "../../packages/report/src/index.ts";
 import { buildSite } from "./build-site.ts";
 
+async function createDemoRun(): Promise<string> {
+  const [brand, competitors, prompts] = await Promise.all([
+    loadBrandConfig(path.resolve("examples/acme/brand.yaml")),
+    loadCompetitorsConfig(path.resolve("examples/acme/competitors.yaml")),
+    loadPromptsConfig(path.resolve("examples/acme/prompts.yaml"))
+  ]);
+
+  const audit = await runAudit({
+    siteInput: "./examples/fixtures/static-good",
+    brand,
+    competitors,
+    prompts
+  });
+
+  const demoRunDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-demo-run-"));
+  await writeAuditOutputs(demoRunDir, audit);
+  return demoRunDir;
+}
+
 test("build-site writes indexable pages and metadata", async () => {
-  const outDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-site-"));
+  const [demoRunDir, outDir] = await Promise.all([
+    createDemoRun(),
+    mkdtemp(path.join(os.tmpdir(), "answerlens-site-"))
+  ]);
+
   await buildSite({
     outDir,
-    demoRunDir: "runs/static-good",
-    releasesPath: "scripts/distribution/releases-snapshot.json"
+    demoRunDir,
+    releasesPath: path.resolve("scripts/distribution/releases-snapshot.json")
   });
 
   await Promise.all([
@@ -38,5 +63,6 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(examples, /"@type":"Dataset"/);
   assert.match(feed, /AnswerLens releases/);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/examples\//);
-  assert.doesNotMatch(home, /鈥/);
+  assert.equal(home.includes("閳"), false);
+  assert.equal(home.includes("鈥"), false);
 });
