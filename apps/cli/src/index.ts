@@ -115,6 +115,7 @@ Notes:
   - audit is the stable v0.1 command.
   - eval runs the configured prompt pack, including holdout prompts, and aggregates repeated samples.
   - manual-import accepts normalized ProviderResponse entries or a { responses: [...] } wrapper.
+  - manual-import may include rankPosition for manual rank validation; use a positive integer or null.
   - Set OPENAI_API_KEY or PERPLEXITY_API_KEY before live eval runs.
 `);
 }
@@ -217,6 +218,20 @@ function normalizeSearchResult(entry: unknown): SearchResult {
   };
 }
 
+function normalizeRankPosition(value: unknown, promptId: string, index: number): number | null {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 1) {
+    throw new Error(
+      `Imported response ${promptId} at index ${index} has invalid rankPosition. Expected a positive integer or null.`
+    );
+  }
+
+  return value;
+}
+
 function normalizeImportedResponses(
   payload: unknown,
   defaults: { brandDomain: string; trustedDomains: string[]; locale: string | null }
@@ -258,7 +273,7 @@ function normalizeImportedResponses(
       sampleIndex: response.sampleIndex ?? 0,
       runCount: response.runCount ?? wrapper.runCount ?? 1,
       holdout: response.holdout ?? false,
-      rankPosition: response.rankPosition ?? null
+      rankPosition: normalizeRankPosition(response.rankPosition, response.promptId, index)
     } satisfies ProviderResponse;
   });
 }

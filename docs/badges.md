@@ -34,4 +34,4 @@ Score badges are intentionally not first-class yet. They are easy to misread as 
 
 ## Source artifact
 
-Use `share-summary.json` as the source for future badge generators. It includes the run mode, readiness score, VAVR when available, and guardrail text.
+Use `share-summary.json` as the source for future badge generators. It includes the run mode, readiness score, VAVR when available, optional manual-rank validation metrics, and guardrail text.

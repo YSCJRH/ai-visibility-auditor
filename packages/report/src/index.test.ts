@@ -22,7 +22,7 @@ import {
   writeEvalOutputs
 } from "./index.ts";
 
-function makeResponse(promptId: string, holdout = false, sampleIndex = 0): ProviderResponse {
+function makeResponse(promptId: string, holdout = false, sampleIndex = 0, rankPosition: number | null = null): ProviderResponse {
   return {
     provider: "openai",
     model: "gpt-5",
@@ -44,7 +44,7 @@ function makeResponse(promptId: string, holdout = false, sampleIndex = 0): Provi
     sampleIndex,
     runCount: 1,
     holdout,
-    rankPosition: null
+    rankPosition
   };
 }
 
@@ -85,6 +85,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.equal(scorecardHtml.includes(String.fromCharCode(0x74ba)), false);
   assert.match(evalSummary, /# AnswerLens Eval Summary/);
   assert.match(evalSummary, /Accurate mention rate/);
+  assert.doesNotMatch(evalSummary, /Manual rank validation/);
   assert.match(diff, /becomes the baseline/);
   assert.equal(evalResult.summary.promptCount, expectedBenchmarkCount);
   assert.ok(prompts.prompts.length >= 34);
@@ -170,12 +171,14 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.equal(shareSummary.run.mode, "eval");
   assert.equal(shareSummary.metrics.overallScore, audit.summary.overallScore);
   assert.equal(shareSummary.metrics.vavr, evalResult.summary.vavr);
+  assert.equal("competitivePositionScore" in shareSummary.metrics, false);
   assert.ok(shareSummary.topIssues.length > 0);
   assert.ok(shareSummary.topRecommendations.length > 0);
   assert.ok(shareSummary.artifacts.includes("pr-snippet.md"));
   assert.match(shareSummaryMarkdown, /# AnswerLens Share Summary/);
   assert.match(shareSummaryMarkdown, /AI may miss this product because/);
   assert.match(shareSummaryMarkdown, /does not scrape consumer AI UIs/);
+  assert.doesNotMatch(shareSummaryMarkdown, /Manual validation: CPS/);
   assert.match(prSnippet, /## AnswerLens audit/);
   assert.match(prSnippet, /CI for AI discoverability/);
   assert.match(prSnippet, /<details>/);
@@ -246,4 +249,76 @@ test("report renderers expose expected audit and eval sections", async () => {
   } else {
     assert.match(evalSummary, /- none/);
   }
+});
+
+test("manual-import report outputs expose CPS only when ranked samples are present", async () => {
+  const [brand, competitors, prompts] = await Promise.all([
+    loadBrandConfig(path.resolve("examples/acme/brand.yaml")),
+    loadCompetitorsConfig(path.resolve("examples/acme/competitors.yaml")),
+    loadPromptsConfig(path.resolve("examples/acme/prompts.yaml"))
+  ]);
+
+  const audit = await runAudit({
+    siteInput: "./examples/fixtures/static-good",
+    brand,
+    competitors,
+    prompts
+  });
+
+  const responses = [
+    {
+      ...makeResponse("best-developer-analytics", false, 0, 1),
+      provider: "manual" as const,
+      model: "manual-import"
+    },
+    {
+      ...makeResponse("developer-analytics-vs-mixpanel", false, 0, 2),
+      provider: "manual" as const,
+      model: "manual-import"
+    }
+  ];
+
+  const evalResult = scoreEvalResponses({
+    brand,
+    competitors,
+    prompts,
+    audit,
+    responses,
+    rawPayloadRoot: path.resolve("runs/test-eval/raw"),
+    mode: "manual-import"
+  });
+
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-manual-report-"));
+  await writeAuditOutputs(tempDir, applyEvalSummaryToAudit(audit, evalResult.summary, "manual-import"));
+  await writeEvalOutputs(tempDir, evalResult, null);
+
+  const evalSummary = await readFile(path.join(tempDir, "eval-summary.md"), "utf8");
+  const evalSummaryJson = JSON.parse(await readFile(path.join(tempDir, "eval-summary.json"), "utf8")) as {
+    summary: { competitivePositionScore: number | null; rankCoverageRate: number };
+    prompts: Array<{ scores: { competitivePositionScore: number | null; rankCoverageRate: number } }>;
+  };
+  const shareSummary = JSON.parse(await readFile(path.join(tempDir, "share-summary.json"), "utf8")) as {
+    run: { mode: string };
+    metrics: { competitivePositionScore?: number; rankCoverageRate?: number };
+  };
+  const shareSummaryMarkdown = await readFile(path.join(tempDir, "share-summary.md"), "utf8");
+  const prSnippet = await readFile(path.join(tempDir, "pr-snippet.md"), "utf8");
+  const runManifest = JSON.parse(await readFile(path.join(tempDir, "run.json"), "utf8")) as {
+    summary: { competitivePositionScore: number | null; rankCoverageRate: number };
+  };
+
+  assert.match(evalSummary, /Manual rank validation/);
+  assert.match(evalSummary, /Competitive position score: 0.88/);
+  assert.match(evalSummary, /Rank coverage: 100%/);
+  assert.equal(evalSummaryJson.summary.competitivePositionScore, 0.88);
+  assert.equal(evalSummaryJson.summary.rankCoverageRate, 100);
+  assert.equal(evalSummaryJson.prompts[0]?.scores.competitivePositionScore, 1);
+  assert.equal(evalSummaryJson.prompts[1]?.scores.competitivePositionScore, 0.75);
+  assert.equal(shareSummary.run.mode, "manual-import");
+  assert.equal(shareSummary.metrics.competitivePositionScore, 0.88);
+  assert.equal(shareSummary.metrics.rankCoverageRate, 100);
+  assert.match(shareSummaryMarkdown, /Manual validation: CPS 0.88 across 100% ranked samples\./);
+  assert.match(prSnippet, /Manual validation: CPS 0.88 across 100% ranked samples\./);
+  assert.equal(runManifest.summary.competitivePositionScore, 0.88);
+  assert.equal(runManifest.summary.rankCoverageRate, 100);
 });

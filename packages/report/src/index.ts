@@ -186,6 +186,27 @@ function buildAuditShareSummary(result: AuditResult): ShareSummary {
 }
 
 function buildEvalShareSummary(result: EvalResult, previous: ShareSummary | null): ShareSummary {
+  const metrics: ShareSummary["metrics"] = {
+    overallScore: result.audit.overallScore,
+    vavr: result.summary.vavr,
+    promptCount: result.summary.promptCount,
+    holdoutPromptCount: result.summary.holdoutPromptCount,
+    sampleCount: result.summary.sampleCount,
+    mentionRate: result.summary.mentionRate,
+    accurateMentionRate: result.summary.accurateMentionRate,
+    ownedCitationRate: result.summary.ownedCitationRate,
+    trustedCitationRate: result.summary.trustedCitationRate,
+    recommendationRate: result.summary.recommendationRate,
+    misrepresentationRate: result.summary.misrepresentationRate,
+    competitorExclusionGap: result.summary.competitorExclusionGap,
+    factCoverageScore: result.summary.factCoverageScore
+  };
+
+  if (result.run.mode === "manual-import" && result.summary.competitivePositionScore !== null) {
+    metrics.competitivePositionScore = result.summary.competitivePositionScore;
+    metrics.rankCoverageRate = result.summary.rankCoverageRate;
+  }
+
   return {
     project: "AnswerLens",
     tagline: "CI for AI discoverability.",
@@ -201,21 +222,7 @@ function buildEvalShareSummary(result: EvalResult, previous: ShareSummary | null
       locale: result.run.locale
     },
     site: result.site,
-    metrics: {
-      overallScore: result.audit.overallScore,
-      vavr: result.summary.vavr,
-      promptCount: result.summary.promptCount,
-      holdoutPromptCount: result.summary.holdoutPromptCount,
-      sampleCount: result.summary.sampleCount,
-      mentionRate: result.summary.mentionRate,
-      accurateMentionRate: result.summary.accurateMentionRate,
-      ownedCitationRate: result.summary.ownedCitationRate,
-      trustedCitationRate: result.summary.trustedCitationRate,
-      recommendationRate: result.summary.recommendationRate,
-      misrepresentationRate: result.summary.misrepresentationRate,
-      competitorExclusionGap: result.summary.competitorExclusionGap,
-      factCoverageScore: result.summary.factCoverageScore
-    },
+    metrics,
     topIssues: previous?.topIssues ?? [],
     topRecommendations: previous?.topRecommendations ?? [],
     artifacts: evalArtifacts()
@@ -230,10 +237,21 @@ function renderMetricValue(value: number | string | null): string {
   return String(value);
 }
 
+function manualRankValidationLine(metrics: ShareSummary["metrics"]): string | null {
+  const competitivePositionScore = metrics.competitivePositionScore;
+  const rankCoverageRate = metrics.rankCoverageRate;
+  if (typeof competitivePositionScore !== "number" || typeof rankCoverageRate !== "number") {
+    return null;
+  }
+
+  return `Manual validation: CPS ${competitivePositionScore} across ${rankCoverageRate}% ranked samples.`;
+}
+
 function renderShareSummaryMarkdown(summary: ShareSummary): string {
   const metricRows = Object.entries(summary.metrics)
     .map(([key, value]) => `| ${escapeTableCell(key)} | ${escapeTableCell(renderMetricValue(value))} |`)
     .join("\n");
+  const manualValidation = manualRankValidationLine(summary.metrics);
 
   const issues =
     summary.topIssues.length > 0
@@ -269,6 +287,8 @@ ${summary.positioning}
 | --- | --- |
 ${metricRows}
 
+${manualValidation ? `${manualValidation}\n` : ""}
+
 ## AI may miss this product because
 
 ${issues}
@@ -300,10 +320,13 @@ function renderPrSnippetMarkdown(summary: ShareSummary): string {
 
   const score = renderMetricValue(summary.metrics.overallScore);
   const vavr = renderMetricValue(summary.metrics.vavr ?? null);
+  const manualValidation = manualRankValidationLine(summary.metrics);
 
   return `## AnswerLens audit
 
 **${summary.tagline}** Readiness: **${score}/100**. VAVR: **${vavr}**.
+
+${manualValidation ? `${manualValidation}\n` : ""}
 
 ### AI may miss this product because
 
@@ -412,7 +435,9 @@ function buildEvalRunManifest(result: EvalResult): RunManifest {
       misrepresentationRate: result.summary.misrepresentationRate,
       competitorExclusionGap: result.summary.competitorExclusionGap,
       factCoverageScore: result.summary.factCoverageScore,
-      accuracyRate: result.summary.accuracyRate
+      accuracyRate: result.summary.accuracyRate,
+      competitivePositionScore: result.summary.competitivePositionScore,
+      rankCoverageRate: result.summary.rankCoverageRate
     },
     artifacts: [
       "site-audit.json",
@@ -750,6 +775,11 @@ export function renderScorecardHtml(result: AuditResult): string {
 }
 
 export function renderEvalSummaryMarkdown(result: EvalResult): string {
+  const manualRankSection =
+    result.summary.competitivePositionScore === null
+      ? ""
+      : `\n\n## Manual rank validation\n\n- Competitive position score: ${result.summary.competitivePositionScore}\n- Rank coverage: ${result.summary.rankCoverageRate}%\n`;
+
   const promptRows = result.prompts
     .map(
       (promptResult) =>
@@ -762,7 +792,7 @@ export function renderEvalSummaryMarkdown(result: EvalResult): string {
       ? result.briefs.map((brief) => `- ${brief.type}: ${brief.title}`).join("\n")
       : "- none";
 
-  return `# AnswerLens Eval Summary\n\n## Overview\n\n- Site: ${result.site.input}\n- Provider: ${result.provider.name}\n- Model: ${result.provider.model}\n- Generated: ${result.generatedAt}\n- Benchmark prompt count: ${result.summary.promptCount}\n- Holdout prompt count: ${result.summary.holdoutPromptCount}\n- Sample count: ${result.summary.sampleCount}\n- Locale: ${result.summary.locale ?? "default"}\n- VAVR: ${result.summary.vavr}\n\n## Metrics\n\n- Mention rate: ${result.summary.mentionRate}\n- Accurate mention rate: ${result.summary.accurateMentionRate}\n- Owned citation rate: ${result.summary.ownedCitationRate}\n- Trusted citation rate: ${result.summary.trustedCitationRate}\n- Recommendation rate: ${result.summary.recommendationRate}\n- Misrepresentation rate: ${result.summary.misrepresentationRate}\n- Competitor exclusion gap: ${result.summary.competitorExclusionGap}\n- Fact coverage score: ${result.summary.factCoverageScore}\n- Accuracy rate: ${result.summary.accuracyRate}\n\n## Prompt results\n\n| Prompt | Category | Sample | Pack | VAVR | Accurate mention | Citations | Recommended |\n| --- | --- | ---: | --- | ---: | --- | ---: | --- |\n${promptRows}\n\n## Generated briefs\n\n${briefList}\n`;
+  return `# AnswerLens Eval Summary\n\n## Overview\n\n- Site: ${result.site.input}\n- Provider: ${result.provider.name}\n- Model: ${result.provider.model}\n- Generated: ${result.generatedAt}\n- Benchmark prompt count: ${result.summary.promptCount}\n- Holdout prompt count: ${result.summary.holdoutPromptCount}\n- Sample count: ${result.summary.sampleCount}\n- Locale: ${result.summary.locale ?? "default"}\n- VAVR: ${result.summary.vavr}\n\n## Metrics\n\n- Mention rate: ${result.summary.mentionRate}\n- Accurate mention rate: ${result.summary.accurateMentionRate}\n- Owned citation rate: ${result.summary.ownedCitationRate}\n- Trusted citation rate: ${result.summary.trustedCitationRate}\n- Recommendation rate: ${result.summary.recommendationRate}\n- Misrepresentation rate: ${result.summary.misrepresentationRate}\n- Competitor exclusion gap: ${result.summary.competitorExclusionGap}\n- Fact coverage score: ${result.summary.factCoverageScore}\n- Accuracy rate: ${result.summary.accuracyRate}${manualRankSection}\n\n## Prompt results\n\n| Prompt | Category | Sample | Pack | VAVR | Accurate mention | Citations | Recommended |\n| --- | --- | ---: | --- | ---: | --- | ---: | --- |\n${promptRows}\n\n## Generated briefs\n\n${briefList}\n`;
 }
 
 export function renderEvalDiffMarkdown(current: EvalResult, previous: EvalResult | null): string {

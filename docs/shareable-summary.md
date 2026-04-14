@@ -75,6 +75,11 @@ The JSON shape is intentionally small:
 
 Consumers should treat unknown keys as forward-compatible additions.
 
+For `manual-import` runs with reviewed rank data, `metrics` may also include:
+
+- `competitivePositionScore`
+- `rankCoverageRate`
+
 ## `pr-snippet.md`
 
 Use this when a team wants a copy-ready GitHub block:
@@ -110,3 +115,4 @@ AnswerLens does not scrape consumer AI UIs, auto-post content, or guarantee answ
 - Do not imply AnswerLens can guarantee placement in ChatGPT, Perplexity, Google AI Overviews, or any other answer surface.
 - Do not include raw provider payloads in the share layer.
 - Keep default summaries short enough to read inside GitHub job summaries.
+- Treat `competitivePositionScore` as reviewed comparative validation, not as an official answer-surface rank.

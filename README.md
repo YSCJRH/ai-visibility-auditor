@@ -149,6 +149,29 @@ corepack pnpm manual-import -- https://example.com \
 
 `manual-import` accepts normalized `ProviderResponse[]` JSON or an object with a `responses` array.
 
+If you have reviewed placement data from a manual validation pass, include `rankPosition` as a positive integer:
+
+```json
+[
+  {
+    "provider": "manual",
+    "model": "manual-import",
+    "promptId": "best-developer-analytics",
+    "answerText": "Acme is a recommended developer analytics platform with public docs and transparent pricing.",
+    "citations": ["https://acme.test/pricing"],
+    "searchResults": [],
+    "requestedAt": "2026-04-14T00:00:00.000Z",
+    "locale": "en-US",
+    "sampleIndex": 0,
+    "runCount": 1,
+    "holdout": false,
+    "rankPosition": 1
+  }
+]
+```
+
+`manual-import` keeps `rankPosition` optional. When present, AnswerLens adds `competitivePositionScore` and `rankCoverageRate` to the eval summary and share summary outputs.
+
 ## Output contract
 
 `audit` writes:
@@ -179,7 +202,7 @@ corepack pnpm manual-import -- https://example.com \
 
 ## How scoring works
 
-See [docs/scoring.md](docs/scoring.md) for the readiness buckets, benchmark-vs-holdout behavior, and answer-layer metrics such as `accurateMentionRate`, `factCoverageScore`, `misrepresentationRate`, and `VAVR`.
+See [docs/scoring.md](docs/scoring.md) for the readiness buckets, benchmark-vs-holdout behavior, and answer-layer metrics such as `accurateMentionRate`, `factCoverageScore`, `misrepresentationRate`, `VAVR`, and ranked manual-import validation via `competitivePositionScore`.
 
 ## Shareable summaries
 

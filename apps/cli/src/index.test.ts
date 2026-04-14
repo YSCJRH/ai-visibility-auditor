@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import type { ProviderResponse } from "../../../packages/providers/src/index.ts";
 
-function fakeResponse(promptId: string, sampleIndex = 0): ProviderResponse {
+function fakeResponse(promptId: string, sampleIndex = 0, rankPosition: number | null = null): ProviderResponse {
   return {
     provider: "openai",
     model: "gpt-5-mini",
@@ -32,7 +32,7 @@ function fakeResponse(promptId: string, sampleIndex = 0): ProviderResponse {
     sampleIndex,
     runCount: 2,
     holdout: false,
-    rankPosition: null
+    rankPosition
   };
 }
 
@@ -121,6 +121,9 @@ test("runCli manual-import accepts normalized provider responses", async () => {
   ]);
 
   const evalSummary = await readFile(path.join(outDir, "eval-summary.md"), "utf8");
+  const shareSummary = JSON.parse(await readFile(path.join(outDir, "share-summary.json"), "utf8")) as {
+    metrics: { competitivePositionScore?: number; rankCoverageRate?: number };
+  };
   const runManifest = JSON.parse(await readFile(path.join(outDir, "run.json"), "utf8")) as {
     kind: string;
     run: { mode: string };
@@ -137,4 +140,100 @@ test("runCli manual-import accepts normalized provider responses", async () => {
   assert.equal(runManifest.run.mode, "manual-import");
   assert.equal(auditResult.run.mode, "manual-import");
   assert.equal(evalResult.run.mode, "manual-import");
+  assert.equal(shareSummary.metrics.competitivePositionScore, undefined);
+  assert.equal(shareSummary.metrics.rankCoverageRate, undefined);
+});
+
+test("runCli manual-import surfaces CPS when rank positions are provided", async () => {
+  process.env.ANSWERLENS_IMPORT_ONLY = "1";
+  const { runCli } = await import("./index.ts");
+  const outDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-manual-rank-"));
+  const inputFile = path.join(outDir, "responses.json");
+
+  await writeFile(
+    inputFile,
+    JSON.stringify([
+      {
+        ...fakeResponse("best-developer-analytics", 0, 1),
+        provider: "manual",
+        model: "manual-import"
+      },
+      {
+        ...fakeResponse("developer-analytics-vs-mixpanel", 0, 2),
+        provider: "manual",
+        model: "manual-import"
+      }
+    ]),
+    "utf8"
+  );
+
+  await runCli([
+    "manual-import",
+    "./examples/fixtures/static-good",
+    "--brand",
+    "./examples/acme/brand.yaml",
+    "--competitors",
+    "./examples/acme/competitors.yaml",
+    "--prompts",
+    "./examples/acme/prompts.yaml",
+    "--out",
+    outDir,
+    "--input",
+    inputFile,
+    "--locale",
+    "en-US"
+  ]);
+
+  const evalSummary = await readFile(path.join(outDir, "eval-summary.md"), "utf8");
+  const shareSummary = JSON.parse(await readFile(path.join(outDir, "share-summary.json"), "utf8")) as {
+    metrics: { competitivePositionScore?: number; rankCoverageRate?: number };
+  };
+
+  assert.match(evalSummary, /Manual rank validation/);
+  assert.match(evalSummary, /Competitive position score: 0.88/);
+  assert.equal(shareSummary.metrics.competitivePositionScore, 0.88);
+  assert.equal(shareSummary.metrics.rankCoverageRate, 100);
+});
+
+test("runCli manual-import rejects invalid rank positions", async () => {
+  process.env.ANSWERLENS_IMPORT_ONLY = "1";
+  const { runCli } = await import("./index.ts");
+  for (const invalidRankPosition of [0, -1, 1.5, "first"]) {
+    const outDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-manual-invalid-rank-"));
+    const inputFile = path.join(outDir, "responses.json");
+
+    await writeFile(
+      inputFile,
+      JSON.stringify([
+        {
+          ...fakeResponse("best-developer-analytics", 0),
+          provider: "manual",
+          model: "manual-import",
+          rankPosition: invalidRankPosition
+        }
+      ]),
+      "utf8"
+    );
+
+    await assert.rejects(
+      () =>
+        runCli([
+          "manual-import",
+          "./examples/fixtures/static-good",
+          "--brand",
+          "./examples/acme/brand.yaml",
+          "--competitors",
+          "./examples/acme/competitors.yaml",
+          "--prompts",
+          "./examples/acme/prompts.yaml",
+          "--out",
+          outDir,
+          "--input",
+          inputFile,
+          "--locale",
+          "en-US"
+        ]),
+      /invalid rankPosition/i
+    );
+  }
 });

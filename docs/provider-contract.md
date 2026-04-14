@@ -27,6 +27,12 @@ Every provider response should return:
 - `holdout`
 - `rankPosition`
 
+`rankPosition` is optional and intended for reviewed inputs such as `manual-import`:
+
+- `null` or omitted means no placement data was provided
+- positive integers (`1..n`) describe relative position, where `1` is best
+- invalid values such as `0`, negatives, decimals, or strings should fail normalization
+
 Each citation should include:
 
 - `url`
@@ -40,6 +46,8 @@ Each citation should include:
 - `openai` is a live adapter
 - `perplexity` is a live adapter
 - `manual` is reserved for normalized imported responses
+- live providers may keep `rankPosition` as `null` until a reviewed validation source exists
+- the core scorer only accepts non-null `rankPosition` during `manual-import` runs
 - raw payloads are written to `runs/<name>/raw/<provider>/<promptId>.json`
 - provider-specific parsing belongs in adapters, not the core scorer
 
