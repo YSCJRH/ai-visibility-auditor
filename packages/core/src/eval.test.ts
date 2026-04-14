@@ -101,6 +101,42 @@ test("scoreEvalResponses computes richer summary metrics and brief recommendatio
   assert.equal(result.summary.rankCoverageRate, 0);
 });
 
+test("scoreEvalResponses rejects non-manual rank inputs", async () => {
+  const [brand, competitors, prompts] = await Promise.all([
+    loadBrandConfig(path.resolve("examples/acme/brand.yaml")),
+    loadCompetitorsConfig(path.resolve("examples/acme/competitors.yaml")),
+    loadPromptsConfig(path.resolve("examples/acme/prompts.yaml"))
+  ]);
+
+  const audit = await runAudit({
+    siteInput: "./examples/fixtures/static-good",
+    brand,
+    competitors,
+    prompts
+  });
+
+  assert.throws(
+    () =>
+      scoreEvalResponses({
+        brand,
+        competitors,
+        prompts,
+        audit,
+        responses: [
+          makeResponse(
+            "best-developer-analytics",
+            "Acme is a developer analytics platform for product and engineering teams with public docs and transparent pricing.",
+            0,
+            1
+          )
+        ],
+        rawPayloadRoot: path.resolve("runs/test-eval/raw"),
+        mode: "eval"
+      }),
+    /rankPosition is only supported for manual-import runs/i
+  );
+});
+
 test("scoreEvalResponses computes CPS from manual rank inputs and excludes holdouts from top-level summary", async () => {
   const [brand, competitors, prompts] = await Promise.all([
     loadBrandConfig(path.resolve("examples/acme/brand.yaml")),
@@ -118,11 +154,25 @@ test("scoreEvalResponses computes CPS from manual rank inputs and excludes holdo
   const answer =
     "Acme is a developer analytics platform for product and engineering teams, and it provides public docs, transparent pricing, and self-serve onboarding.";
   const responses = [
-    makeResponse("best-developer-analytics", answer, 0, 1),
-    makeResponse("best-developer-analytics", answer, 1, null),
-    makeResponse("developer-analytics-vs-mixpanel", `${answer} Acme is a better fit than Mixpanel for developer experience teams.`, 0, 2),
+    {
+      ...makeResponse("best-developer-analytics", answer, 0, 1),
+      provider: "manual" as const,
+      model: "manual-import"
+    },
+    {
+      ...makeResponse("best-developer-analytics", answer, 1, null),
+      provider: "manual" as const,
+      model: "manual-import"
+    },
+    {
+      ...makeResponse("developer-analytics-vs-mixpanel", `${answer} Acme is a better fit than Mixpanel for developer experience teams.`, 0, 2),
+      provider: "manual" as const,
+      model: "manual-import"
+    },
     {
       ...makeResponse("holdout-best-for-fintech", answer, 0, 4),
+      provider: "manual" as const,
+      model: "manual-import",
       holdout: true
     }
   ];
@@ -133,7 +183,8 @@ test("scoreEvalResponses computes CPS from manual rank inputs and excludes holdo
     prompts,
     audit,
     responses,
-    rawPayloadRoot: path.resolve("runs/test-eval/raw")
+    rawPayloadRoot: path.resolve("runs/test-eval/raw"),
+    mode: "manual-import"
   });
 
   assert.equal(result.summary.promptCount, 2);

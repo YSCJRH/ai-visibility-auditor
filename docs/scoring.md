@@ -48,6 +48,8 @@ A prompt contributes to `VAVR` only when the answer both:
 
 It currently comes from `manual-import` or other auditable normalized responses, not from consumer UI scraping.
 
+Non-manual `eval` runs must keep `rankPosition` as `null`; the scorer rejects non-null rank data outside `manual-import`.
+
 The mapping is intentionally simple:
 
 - rank `1` -> `1.00`

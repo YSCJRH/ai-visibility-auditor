@@ -47,6 +47,7 @@ Each citation should include:
 - `perplexity` is a live adapter
 - `manual` is reserved for normalized imported responses
 - live providers may keep `rankPosition` as `null` until a reviewed validation source exists
+- the core scorer only accepts non-null `rankPosition` during `manual-import` runs
 - raw payloads are written to `runs/<name>/raw/<provider>/<promptId>.json`
 - provider-specific parsing belongs in adapters, not the core scorer
 

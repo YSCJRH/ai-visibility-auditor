@@ -213,6 +213,24 @@ export function rankPositionToCompetitivePositionScore(rankPosition: number | nu
   return 0;
 }
 
+function resolveRankPosition(
+  mode: Extract<RunMode, "eval" | "manual-import"> | undefined,
+  response: ProviderResponse
+): number | null {
+  const activeMode = mode ?? "eval";
+  if (activeMode !== "manual-import") {
+    if (response.rankPosition !== null) {
+      throw new Error(
+        `rankPosition is only supported for manual-import runs. Received ${response.rankPosition} for ${response.promptId}.`
+      );
+    }
+
+    return null;
+  }
+
+  return response.rankPosition;
+}
+
 function rawPayloadFilePath(rawPayloadRoot: string, response: ProviderResponse): string {
   const suffix = response.sampleIndex > 0 ? `--sample-${response.sampleIndex + 1}` : "";
   return path.join(rawPayloadRoot, response.provider, `${response.promptId}${suffix}.json`);
@@ -415,7 +433,10 @@ export function scoreEvalResponses(input: ScoreEvalInput): EvalResult {
       throw new Error(`No prompt config found for provider response ${response.promptId}`);
     }
 
-    const computed = computePromptScores(promptCase, response, input.brand, input.competitors);
+    const rankPosition = resolveRankPosition(input.mode, response);
+    const normalizedResponse = rankPosition === response.rankPosition ? response : { ...response, rankPosition };
+
+    const computed = computePromptScores(promptCase, normalizedResponse, input.brand, input.competitors);
     const scores: EvalPromptScores = {
       ...computed.scores,
       signalAlignment: 0
@@ -434,7 +455,7 @@ export function scoreEvalResponses(input: ScoreEvalInput): EvalResult {
       model: response.model,
       locale: response.locale ?? promptCase.locale ?? null,
       sampleIndex: response.sampleIndex,
-      rankPosition: response.rankPosition,
+      rankPosition,
       answerText: response.answerText,
       citations: response.citations,
       searchResults: response.searchResults,
