@@ -22,12 +22,12 @@ Recently completed on `main`:
 - `#9` Schema-text consistency and evidence density rules
 - `#10` Internal link context, anchor quality, and rule registry
 - `#11` Manual rank import and CPS scoring
+- `#12` Multi-sample aggregation stability summary
 
 Current execution order:
 
-1. `#12` Multi-sample aggregation stability summary
-2. `#13` Search Console connector and validation contract
-3. `#14` Bing Webmaster / IndexNow helper
+1. `#13` Search Console connector and validation contract
+2. `#14` Bing Webmaster / IndexNow helper
 
 Why `#9` and `#10` came first:
 
@@ -81,7 +81,8 @@ Planned outcome:
 Current status:
 
 - `#11` is already merged to `main`
-- `#12` is the active remaining gate for the `v0.2.3` validation layer
+- `#12` is already merged to `main`
+- `v0.2.3` is release-ready from the validation-layer perspective
 
 ### `v0.3.0`
 
@@ -106,7 +107,7 @@ Release planning:
 - `v0.2.0` is the launch-hardening release
 - work intended for `v0.2.1` is already on `main`
 - work intended for `v0.2.2` is already on `main`
-- `v0.2.3` is the current release target and should center on validation credibility in eval and manual import
+- `v0.2.3` is the current release target and is ready to tag from `main`
 - `v0.3.0` should introduce connector-backed validation
 
 This document is the canonical public roadmap. README, release notes, and umbrella issues should link back here instead of restating divergent plans.

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag-name:
-        description: "Optional semver tag to simulate or publish, for example v0.2.0."
+        description: "Optional semver tag to simulate or publish, for example v0.2.3."
         required: false
         type: string
   push:
@@ -84,15 +84,17 @@ jobs:
 
           ## What ships
 
-          - Publish-ready CLI bundle and tarball
-          - Reusable GitHub Action contract
-          - Static site bundle with examples, docs, releases, and playbooks
-          - Report-first outputs including share summaries, PR snippets, and machine-readable manifests
+          - Field-level schema-text consistency and evidence density checks
+          - Internal link context and discoverability rules for proof pages
+          - Manual rank import with competitive position score (CPS)
+          - Repeated-sample stability summaries in `eval-summary.*` and `share-summary.*`
+          - Publish-ready CLI bundle and tarball plus repo-native report artifacts
 
           ## Known limits
 
           - No consumer AI UI scraping
           - No ranking guarantees
+          - Search Console and Bing validation connectors are still planned for `v0.3.0`
           - GitHub Pages deployment still depends on repository settings
           - npm publish is skipped unless NPM_TOKEN is configured
 

@@ -60,7 +60,7 @@ The JSON shape is intentionally small:
   "run": {
     "id": "00000000-0000-0000-0000-000000000000",
     "mode": "audit",
-    "artifactVersion": "0.2.0",
+    "artifactVersion": "0.2.3",
     "ruleVersion": "2026-04-14"
   },
   "metrics": {
