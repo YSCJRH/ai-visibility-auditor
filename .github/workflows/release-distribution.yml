@@ -89,13 +89,14 @@ jobs:
           - Manual rank import with competitive position score (CPS)
           - Repeated-sample stability summaries in `eval-summary.*` and `share-summary.*`
           - Search Console validation import with dedicated summary artifacts
+          - Bing Webmaster validation plus IndexNow helper artifacts
           - Publish-ready CLI bundle and tarball plus repo-native report artifacts
 
           ## Known limits
 
           - No consumer AI UI scraping
           - No ranking guarantees
-          - Bing / IndexNow helper work is still planned for `v0.3.0`
+          - Bing and IndexNow stay in helper mode; the first version does not submit live IndexNow requests
           - GitHub Pages deployment still depends on repository settings
           - npm publish is skipped unless NPM_TOKEN is configured
 

@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { AuditResult, SearchConsoleValidationResult } from "../../core/src/types.ts";
+import type { AuditResult, IndexNowHelperResult, SearchValidationResult } from "../../core/src/types.ts";
 import type { ContentBrief, EvalResult } from "../../core/src/eval.ts";
 import { BUCKET_LABELS } from "../../core/src/audit.ts";
 import { summarizeEvalDiff } from "../../core/src/eval.ts";
@@ -10,7 +10,7 @@ type RunKind = "audit" | "eval" | "manual-import" | "validation-import";
 
 interface RunManifest {
   kind: RunKind;
-  run: AuditResult["run"] | EvalResult["run"] | SearchConsoleValidationResult["run"];
+  run: AuditResult["run"] | EvalResult["run"] | SearchValidationResult["run"];
   generatedAt: string;
   site: AuditResult["site"];
   summary: Record<string, number | string | null | string[]>;
@@ -49,13 +49,20 @@ interface EvalSummaryJson {
   briefs: Array<Pick<ContentBrief, "id" | "type" | "title" | "audience" | "angle" | "cta">>;
 }
 
-interface SearchConsoleSummaryJson {
-  run: SearchConsoleValidationResult["run"];
-  site: SearchConsoleValidationResult["site"];
-  source: SearchConsoleValidationResult["source"];
-  summary: SearchConsoleValidationResult["summary"];
-  findings: SearchConsoleValidationResult["findings"];
-  topPages: SearchConsoleValidationResult["topPages"];
+interface SearchValidationSummaryJson {
+  run: SearchValidationResult["run"];
+  site: SearchValidationResult["site"];
+  source: SearchValidationResult["source"];
+  summary: SearchValidationResult["summary"];
+  findings: SearchValidationResult["findings"];
+  topPages: SearchValidationResult["topPages"];
+}
+
+interface IndexNowSummaryJson {
+  site: IndexNowHelperResult["site"];
+  generatedAt: string;
+  summary: IndexNowHelperResult["summary"];
+  candidates: IndexNowHelperResult["candidates"];
 }
 
 interface ShareSummary {
@@ -174,6 +181,18 @@ function validationArtifacts(): string[] {
   ];
 }
 
+function bingHelperArtifacts(): string[] {
+  return [
+    ...auditArtifacts(),
+    "bing-summary.md",
+    "bing-summary.json",
+    "bing-pages.json",
+    "indexnow-summary.md",
+    "indexnow-summary.json",
+    "indexnow-candidates.json"
+  ];
+}
+
 function buildAuditShareSummary(result: AuditResult): ShareSummary {
   return {
     project: "AnswerLens",
@@ -254,7 +273,11 @@ function buildEvalShareSummary(result: EvalResult, previous: ShareSummary | null
   };
 }
 
-function buildValidationShareSummary(audit: AuditResult, result: SearchConsoleValidationResult): ShareSummary {
+function buildValidationShareSummary(
+  audit: AuditResult,
+  result: SearchValidationResult,
+  options?: { validationLabel?: string; indexNowCandidateCount?: number }
+): ShareSummary {
   return {
     project: "AnswerLens",
     tagline: "CI for AI discoverability.",
@@ -273,16 +296,18 @@ function buildValidationShareSummary(audit: AuditResult, result: SearchConsoleVa
     metrics: {
       overallScore: audit.summary.overallScore,
       vavr: audit.summary.vavr,
+      validationLabel: options?.validationLabel ?? "Search Console",
       importedPageCount: result.summary.importedPageCount,
       matchedAuditPageCount: result.summary.matchedAuditPageCount,
       keyPagesWithEvidence: result.summary.keyPagesWithEvidence,
       keyPagesWithoutEvidence: result.summary.keyPagesWithoutEvidence,
       totalClicks: result.summary.totalClicks,
-      totalImpressions: result.summary.totalImpressions
+      totalImpressions: result.summary.totalImpressions,
+      indexNowCandidateCount: options?.indexNowCandidateCount ?? null
     },
     topIssues: topIssues(audit),
     topRecommendations: topRecommendations(audit),
-    artifacts: validationArtifacts()
+    artifacts: options?.indexNowCandidateCount !== undefined ? bingHelperArtifacts() : validationArtifacts()
   };
 }
 
@@ -323,6 +348,7 @@ function stabilitySummaryLine(metrics: ShareSummary["metrics"]): string | null {
 function searchValidationLine(metrics: ShareSummary["metrics"]): string | null {
   const keyPagesWithEvidence = metrics.keyPagesWithEvidence;
   const keyPagesWithoutEvidence = metrics.keyPagesWithoutEvidence;
+  const validationLabel = typeof metrics.validationLabel === "string" ? metrics.validationLabel : "Search Console";
   if (typeof keyPagesWithEvidence !== "number" || typeof keyPagesWithoutEvidence !== "number") {
     return null;
   }
@@ -332,7 +358,16 @@ function searchValidationLine(metrics: ShareSummary["metrics"]): string | null {
     return null;
   }
 
-  return `Search validation: ${keyPagesWithEvidence}/${total} key pages show Search Console evidence.`;
+  return `${validationLabel} validation: ${keyPagesWithEvidence}/${total} key pages show ${validationLabel} evidence.`;
+}
+
+function indexNowHelperLine(metrics: ShareSummary["metrics"]): string | null {
+  const indexNowCandidateCount = metrics.indexNowCandidateCount;
+  if (typeof indexNowCandidateCount !== "number" || indexNowCandidateCount < 1) {
+    return null;
+  }
+
+  return `IndexNow helper: prepared ${indexNowCandidateCount} candidate URLs for submission planning.`;
 }
 
 function renderShareSummaryMarkdown(summary: ShareSummary): string {
@@ -350,7 +385,9 @@ function renderShareSummaryMarkdown(summary: ShareSummary): string {
           "keyPagesWithEvidence",
           "keyPagesWithoutEvidence",
           "totalClicks",
-          "totalImpressions"
+          "totalImpressions",
+          "validationLabel",
+          "indexNowCandidateCount"
         ].includes(key)
     )
     .map(([key, value]) => `| ${escapeTableCell(key)} | ${escapeTableCell(renderMetricValue(value))} |`)
@@ -358,6 +395,7 @@ function renderShareSummaryMarkdown(summary: ShareSummary): string {
   const manualValidation = manualRankValidationLine(summary.metrics);
   const stabilitySummary = stabilitySummaryLine(summary.metrics);
   const searchValidation = searchValidationLine(summary.metrics);
+  const indexNowHelper = indexNowHelperLine(summary.metrics);
 
   const issues =
     summary.topIssues.length > 0
@@ -393,7 +431,7 @@ ${summary.positioning}
 | --- | --- |
 ${metricRows}
 
-${manualValidation ? `${manualValidation}\n` : ""}${stabilitySummary ? `${stabilitySummary}\n` : ""}${searchValidation ? `${searchValidation}\n` : ""}
+${manualValidation ? `${manualValidation}\n` : ""}${stabilitySummary ? `${stabilitySummary}\n` : ""}${searchValidation ? `${searchValidation}\n` : ""}${indexNowHelper ? `${indexNowHelper}\n` : ""}
 
 ## AI may miss this product because
 
@@ -571,7 +609,7 @@ function buildEvalRunManifest(result: EvalResult): RunManifest {
   };
 }
 
-function buildValidationRunManifest(audit: AuditResult, result: SearchConsoleValidationResult): RunManifest {
+function buildValidationRunManifest(audit: AuditResult, result: SearchValidationResult): RunManifest {
   return {
     kind: "validation-import",
     run: result.run,
@@ -607,6 +645,35 @@ function buildValidationRunManifest(audit: AuditResult, result: SearchConsoleVal
       "pr-snippet.md",
       "run.json"
     ]
+  };
+}
+
+function buildBingHelperRunManifest(
+  audit: AuditResult,
+  result: SearchValidationResult,
+  indexNow: IndexNowHelperResult
+): RunManifest {
+  return {
+    kind: "validation-import",
+    run: result.run,
+    generatedAt: result.run.completedAt,
+    site: result.site,
+    summary: {
+      overallScore: audit.summary.overallScore,
+      vavr: audit.summary.vavr,
+      importedPageCount: result.summary.importedPageCount,
+      matchedAuditPageCount: result.summary.matchedAuditPageCount,
+      outOfScopePageCount: result.summary.outOfScopePageCount,
+      keyPagesWithEvidence: result.summary.keyPagesWithEvidence,
+      keyPagesWithoutEvidence: result.summary.keyPagesWithoutEvidence,
+      pagesWithClicks: result.summary.pagesWithClicks,
+      pagesWithImpressions: result.summary.pagesWithImpressions,
+      totalClicks: result.summary.totalClicks,
+      totalImpressions: result.summary.totalImpressions,
+      validationSource: result.source.type,
+      indexNowCandidateCount: indexNow.summary.candidateCount
+    },
+    artifacts: bingHelperArtifacts()
   };
 }
 
@@ -650,7 +717,7 @@ function buildEvalSummaryJson(result: EvalResult): EvalSummaryJson {
   };
 }
 
-function buildSearchConsoleSummaryJson(result: SearchConsoleValidationResult): SearchConsoleSummaryJson {
+function buildSearchValidationSummaryJson(result: SearchValidationResult): SearchValidationSummaryJson {
   return {
     run: result.run,
     site: result.site,
@@ -658,6 +725,15 @@ function buildSearchConsoleSummaryJson(result: SearchConsoleValidationResult): S
     summary: result.summary,
     findings: result.findings,
     topPages: result.topPages
+  };
+}
+
+function buildIndexNowSummaryJson(result: IndexNowHelperResult): IndexNowSummaryJson {
+  return {
+    site: result.site,
+    generatedAt: result.generatedAt,
+    summary: result.summary,
+    candidates: result.candidates
   };
 }
 
@@ -963,7 +1039,7 @@ export function renderEvalSummaryMarkdown(result: EvalResult): string {
   return `# AnswerLens Eval Summary\n\n## Overview\n\n- Site: ${result.site.input}\n- Provider: ${result.provider.name}\n- Model: ${result.provider.model}\n- Generated: ${result.generatedAt}\n- Benchmark prompt count: ${result.summary.promptCount}\n- Holdout prompt count: ${result.summary.holdoutPromptCount}\n- Sample count: ${result.summary.sampleCount}\n- Locale: ${result.summary.locale ?? "default"}\n- VAVR: ${result.summary.vavr}\n\n## Metrics\n\n- Mention rate: ${result.summary.mentionRate}\n- Accurate mention rate: ${result.summary.accurateMentionRate}\n- Owned citation rate: ${result.summary.ownedCitationRate}\n- Trusted citation rate: ${result.summary.trustedCitationRate}\n- Recommendation rate: ${result.summary.recommendationRate}\n- Misrepresentation rate: ${result.summary.misrepresentationRate}\n- Competitor exclusion gap: ${result.summary.competitorExclusionGap}\n- Fact coverage score: ${result.summary.factCoverageScore}\n- Accuracy rate: ${result.summary.accuracyRate}${manualRankSection}${stabilitySection}\n\n## Prompt results\n\n| Prompt | Category | Sample | Pack | VAVR | Accurate mention | Citations | Recommended |\n| --- | --- | ---: | --- | ---: | --- | ---: | --- |\n${promptRows}\n\n## Generated briefs\n\n${briefList}\n`;
 }
 
-export function renderSearchConsoleSummaryMarkdown(result: SearchConsoleValidationResult): string {
+export function renderSearchValidationSummaryMarkdown(result: SearchValidationResult, title: string): string {
   const keyProofRows = result.keyPageCoverage
     .sort((left, right) => right.impressions - left.impressions || left.pageUrl.localeCompare(right.pageUrl))
     .map(
@@ -987,7 +1063,7 @@ export function renderSearchConsoleSummaryMarkdown(result: SearchConsoleValidati
           .join("\n")
       : "| none | none | n/a | n/a | - |";
 
-  return `# AnswerLens Search Console Summary
+  return `# ${title}
 
 ## Overview
 
@@ -1018,6 +1094,38 @@ ${topPageRows || "| none | n/a | 0 | 0 | 0 |"}
 | Severity | Finding | Page type | Page | Evidence |
 | --- | --- | --- | --- | --- |
 ${findingRows}
+`;
+}
+
+export function renderSearchConsoleSummaryMarkdown(result: SearchValidationResult): string {
+  return renderSearchValidationSummaryMarkdown(result, "AnswerLens Search Console Summary");
+}
+
+export function renderBingSummaryMarkdown(result: SearchValidationResult): string {
+  return renderSearchValidationSummaryMarkdown(result, "AnswerLens Bing Webmaster Summary");
+}
+
+export function renderIndexNowSummaryMarkdown(result: IndexNowHelperResult): string {
+  const candidateRows = result.candidates
+    .map((candidate) => `| ${candidate.pageType} | ${candidate.url} | ${escapeTableCell(candidate.reason)} |`)
+    .join("\n");
+
+  return `# AnswerLens IndexNow Helper Summary
+
+## Overview
+
+- Site: ${result.site.input}
+- Generated: ${result.generatedAt}
+- Host: ${result.summary.host}
+- Endpoint: ${result.summary.endpoint}
+- Candidate URLs: ${result.summary.candidateCount}
+- Key page candidates: ${result.summary.keyPageCandidateCount}
+
+## Candidate URLs
+
+| Page type | URL | Reason |
+| --- | --- | --- |
+${candidateRows || "| none | none | none |"}
 `;
 }
 
@@ -1084,13 +1192,34 @@ export async function writeEvalOutputs(outDir: string, result: EvalResult, previ
 export async function writeValidationOutputs(
   outDir: string,
   audit: AuditResult,
-  result: SearchConsoleValidationResult
+  result: SearchValidationResult
 ): Promise<void> {
   await ensureDir(outDir);
   const shareSummary = buildValidationShareSummary(audit, result);
-  await writeJson(path.join(outDir, "search-console-summary.json"), buildSearchConsoleSummaryJson(result));
+  await writeJson(path.join(outDir, "search-console-summary.json"), buildSearchValidationSummaryJson(result));
   await writeFile(path.join(outDir, "search-console-summary.md"), renderSearchConsoleSummaryMarkdown(result), "utf8");
   await writeJson(path.join(outDir, "search-console-pages.json"), result.pages);
   await writeShareOutputs(outDir, shareSummary);
   await writeJson(path.join(outDir, "run.json"), buildValidationRunManifest(audit, result));
+}
+
+export async function writeBingIndexNowOutputs(
+  outDir: string,
+  audit: AuditResult,
+  result: SearchValidationResult,
+  indexNow: IndexNowHelperResult
+): Promise<void> {
+  await ensureDir(outDir);
+  const shareSummary = buildValidationShareSummary(audit, result, {
+    validationLabel: "Bing Webmaster",
+    indexNowCandidateCount: indexNow.summary.candidateCount
+  });
+  await writeJson(path.join(outDir, "bing-summary.json"), buildSearchValidationSummaryJson(result));
+  await writeFile(path.join(outDir, "bing-summary.md"), renderBingSummaryMarkdown(result), "utf8");
+  await writeJson(path.join(outDir, "bing-pages.json"), result.pages);
+  await writeJson(path.join(outDir, "indexnow-summary.json"), buildIndexNowSummaryJson(indexNow));
+  await writeFile(path.join(outDir, "indexnow-summary.md"), renderIndexNowSummaryMarkdown(indexNow), "utf8");
+  await writeJson(path.join(outDir, "indexnow-candidates.json"), indexNow.candidates);
+  await writeShareOutputs(outDir, shareSummary);
+  await writeJson(path.join(outDir, "run.json"), buildBingHelperRunManifest(audit, result, indexNow));
 }

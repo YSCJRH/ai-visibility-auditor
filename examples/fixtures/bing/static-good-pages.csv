@@ -1,0 +1,6 @@
+page,clicks,impressions,ctr,position
+https://fixture.local/pricing,8,90,8.9%,3.8
+https://fixture.local/security,3,35,8.6%,5.1
+https://fixture.local/docs,5,70,7.1%,4.6
+https://fixture.local/not-in-crawl,1,12,8.3%,9.4
+https://external.example/integrations,2,18,11.1%,2.4

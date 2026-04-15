@@ -2,7 +2,7 @@
 export type Scope = "site" | "page";
 export type SiteKind = "remote" | "local";
 export type RunMode = "audit" | "eval" | "manual-import" | "validation-import";
-export type ValidationSource = "search-console";
+export type ValidationSource = "search-console" | "bing-webmaster";
 export type PageType =
   | "home"
   | "product"
@@ -251,13 +251,13 @@ export interface AuditResult {
   };
 }
 
-export interface ValidationSourceDescriptor {
+export interface SearchValidationSourceDescriptor {
   type: ValidationSource;
   input: string;
   format: "csv";
 }
 
-export interface SearchConsolePageRecord {
+export interface SearchValidationPageRecord {
   page: string;
   normalizedUrl: string;
   domain: string;
@@ -274,7 +274,7 @@ export interface SearchConsolePageRecord {
   highestAuditSeverity: Severity | null;
 }
 
-export interface SearchConsoleFinding {
+export interface SearchValidationFinding {
   id: string;
   severity: Severity;
   title: string;
@@ -285,7 +285,7 @@ export interface SearchConsoleFinding {
   relatedAuditIssueIds?: string[];
 }
 
-export interface SearchConsoleKeyPageCoverage {
+export interface SearchValidationKeyPageCoverage {
   pageUrl: string;
   pageType: PageType;
   hasEvidence: boolean;
@@ -293,7 +293,7 @@ export interface SearchConsoleKeyPageCoverage {
   clicks: number;
 }
 
-export interface SearchConsoleValidationSummary {
+export interface SearchValidationSummary {
   importedPageCount: number;
   matchedAuditPageCount: number;
   outOfScopePageCount: number;
@@ -305,15 +305,41 @@ export interface SearchConsoleValidationSummary {
   totalImpressions: number;
 }
 
-export interface SearchConsoleValidationResult {
+export interface SearchValidationResult {
   run: RunMetadata;
   site: AuditResult["site"];
-  source: ValidationSourceDescriptor;
-  summary: SearchConsoleValidationSummary;
-  findings: SearchConsoleFinding[];
-  keyPageCoverage: SearchConsoleKeyPageCoverage[];
-  topPages: SearchConsolePageRecord[];
-  pages: SearchConsolePageRecord[];
+  source: SearchValidationSourceDescriptor;
+  summary: SearchValidationSummary;
+  findings: SearchValidationFinding[];
+  keyPageCoverage: SearchValidationKeyPageCoverage[];
+  topPages: SearchValidationPageRecord[];
+  pages: SearchValidationPageRecord[];
+}
+
+export type SearchConsolePageRecord = SearchValidationPageRecord;
+export type SearchConsoleFinding = SearchValidationFinding;
+export type SearchConsoleKeyPageCoverage = SearchValidationKeyPageCoverage;
+export type SearchConsoleValidationSummary = SearchValidationSummary;
+export type SearchConsoleValidationResult = SearchValidationResult;
+
+export interface IndexNowCandidate {
+  url: string;
+  pageType: PageType;
+  reason: string;
+}
+
+export interface IndexNowHelperSummary {
+  candidateCount: number;
+  keyPageCandidateCount: number;
+  host: string;
+  endpoint: string;
+}
+
+export interface IndexNowHelperResult {
+  site: AuditResult["site"];
+  generatedAt: string;
+  summary: IndexNowHelperSummary;
+  candidates: IndexNowCandidate[];
 }
 
 export interface CrawlOptions {

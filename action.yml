@@ -1,9 +1,9 @@
 name: "AnswerLens"
-description: "Run AnswerLens audit, eval, or manual-import in GitHub Actions."
+description: "Run AnswerLens audit, eval, manual-import, validation import, or helper workflows in GitHub Actions."
 
 inputs:
   command:
-    description: "One of audit, eval, or manual-import."
+    description: "One of audit, eval, manual-import, search-console-import, or bing-indexnow-helper."
     required: true
   site:
     description: "Public URL or local fixture path."
@@ -36,6 +36,9 @@ inputs:
     required: false
   manual-input:
     description: "Path to normalized manual-import JSON."
+    required: false
+  bing-input:
+    description: "Path to page-level Bing Webmaster CSV export."
     required: false
   node-version:
     description: "Node.js version used by the Action."
@@ -105,8 +108,8 @@ runs:
         }
 
         $command = '${{ inputs.command }}'
-        if ($command -notin @('audit', 'eval', 'manual-import')) {
-          throw "Unsupported command '$command'. Use audit, eval, or manual-import."
+        if ($command -notin @('audit', 'eval', 'manual-import', 'search-console-import', 'bing-indexnow-helper')) {
+          throw "Unsupported command '$command'. Use audit, eval, manual-import, search-console-import, or bing-indexnow-helper."
         }
 
         if ($command -eq 'eval' -and [string]::IsNullOrWhiteSpace('${{ inputs.provider }}')) {
@@ -115,6 +118,10 @@ runs:
 
         if ($command -eq 'manual-import' -and [string]::IsNullOrWhiteSpace('${{ inputs.manual-input }}')) {
           throw 'Input "manual-input" is required for manual-import runs.'
+        }
+
+        if ($command -eq 'bing-indexnow-helper' -and [string]::IsNullOrWhiteSpace('${{ inputs.bing-input }}')) {
+          throw 'Input "bing-input" is required for bing-indexnow-helper runs.'
         }
 
         $outInput = '${{ inputs.out-dir }}'
@@ -156,6 +163,10 @@ runs:
 
         if ($command -eq 'manual-import') {
           $args += @('--input', (Resolve-AnswerLensInput '${{ inputs.manual-input }}'))
+        }
+
+        if ($command -eq 'bing-indexnow-helper') {
+          $args += @('--bing-input', (Resolve-AnswerLensInput '${{ inputs.bing-input }}'))
         }
 
         & node @args

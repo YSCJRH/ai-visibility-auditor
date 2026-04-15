@@ -5,7 +5,7 @@ AnswerLens ships a reusable root Action so teams can keep AI discoverability che
 The public interface is:
 
 - `uses: YSCJRH/ai-visibility-auditor@vX`
-- commands: `audit`, `eval`, `manual-import`
+- commands: `audit`, `eval`, `manual-import`, `search-console-import`, `bing-indexnow-helper`
 - outputs: `out-dir`, `share-summary-path`, `pr-snippet-path`, `run-json-path`
 
 ## Minimal workflow
@@ -64,6 +64,7 @@ Optional:
 - `samples`
 - `locale`
 - `manual-input` for `manual-import`
+- `bing-input` for `bing-indexnow-helper`
 
 ## Outputs
 

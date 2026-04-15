@@ -4,7 +4,7 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { loadBrandConfig, loadCompetitorsConfig, loadPromptsConfig, runAudit } from "./index.ts";
-import { buildSearchConsoleValidation, parseSearchConsoleCsv } from "./validation.ts";
+import { buildBingWebmasterValidation, buildIndexNowHelper, buildSearchConsoleValidation, parseSearchConsoleCsv } from "./validation.ts";
 
 test("parseSearchConsoleCsv reads valid page-level exports", async () => {
   const csv = await readFile(path.resolve("examples/fixtures/search-console/static-good-pages.csv"), "utf8");
@@ -102,11 +102,60 @@ test("buildSearchConsoleValidation flags search-visible pages that still have au
     path.resolve("examples/fixtures/search-console/missing-evidence-pages.csv")
   );
   const blockerFinding = result.validation.findings.find(
-    (finding) => finding.title === "Search-visible page still has audit blockers"
+    (finding) => finding.title === "Search Console-visible page still has audit blockers"
   );
 
   assert.equal(result.validation.summary.pagesWithImpressions, 1);
   assert.ok(result.validation.summary.totalImpressions > 0);
   assert.equal(blockerFinding?.pageUrl, "https://fixture.local/pricing");
   assert.ok((blockerFinding?.relatedAuditIssueIds?.length ?? 0) > 0);
+});
+
+test("buildBingWebmasterValidation reuses search validation contract with Bing source", async () => {
+  const [brand, competitors, prompts, csvText] = await Promise.all([
+    loadBrandConfig(path.resolve("examples/acme/brand.yaml")),
+    loadCompetitorsConfig(path.resolve("examples/acme/competitors.yaml")),
+    loadPromptsConfig(path.resolve("examples/acme/prompts.yaml")),
+    readFile(path.resolve("examples/fixtures/bing/static-good-pages.csv"), "utf8")
+  ]);
+
+  const audit = await runAudit({
+    siteInput: "./examples/fixtures/static-good",
+    brand,
+    competitors,
+    prompts
+  });
+
+  const result = buildBingWebmasterValidation(audit, csvText, path.resolve("examples/fixtures/bing/static-good-pages.csv"));
+  const unmatchedFinding = result.validation.findings.find((finding) => finding.title === "Bing Webmaster page is not covered by crawl");
+
+  assert.equal(result.audit.run.validationSource, "bing-webmaster");
+  assert.equal(result.validation.source.type, "bing-webmaster");
+  assert.equal(result.validation.summary.importedPageCount, 5);
+  assert.equal(result.validation.summary.outOfScopePageCount, 1);
+  assert.ok(result.validation.pages.some((page) => page.outOfScope));
+  assert.match(unmatchedFinding?.pageUrl ?? "", /not-in-crawl/);
+});
+
+test("buildIndexNowHelper prepares candidate URLs from audited key pages", async () => {
+  const [brand, competitors, prompts] = await Promise.all([
+    loadBrandConfig(path.resolve("examples/acme/brand.yaml")),
+    loadCompetitorsConfig(path.resolve("examples/acme/competitors.yaml")),
+    loadPromptsConfig(path.resolve("examples/acme/prompts.yaml"))
+  ]);
+
+  const audit = await runAudit({
+    siteInput: "./examples/fixtures/static-good",
+    brand,
+    competitors,
+    prompts
+  });
+
+  const helper = buildIndexNowHelper(audit);
+
+  assert.equal(helper.summary.host, "fixture.local");
+  assert.equal(helper.summary.endpoint, "https://api.indexnow.org/indexnow");
+  assert.ok(helper.summary.candidateCount > 0);
+  assert.ok(helper.candidates.some((candidate) => candidate.pageType === "pricing"));
+  assert.ok(helper.candidates.some((candidate) => candidate.reason.includes("discoverable")));
 });

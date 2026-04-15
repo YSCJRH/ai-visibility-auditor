@@ -57,7 +57,7 @@ AI may miss this product because:
 | Perplexity eval | Live |
 | Manual answer import | Live |
 | Search Console validation import | Live |
-| Bing / IndexNow helpers | Planned |
+| Bing / IndexNow helpers | Live |
 
 ## Distribution
 
@@ -195,6 +195,27 @@ corepack pnpm search-console-import -- https://example.com \
 
 It uses Search Console as an external evidence layer for existing audit findings. It does not replace audit, eval, analytics, or Search Console itself.
 
+## Bing / IndexNow helper
+
+```bash
+corepack pnpm bing-indexnow-helper -- https://example.com \
+  --brand ./examples/acme/brand.yaml \
+  --competitors ./examples/acme/competitors.yaml \
+  --prompts ./examples/acme/prompts.yaml \
+  --bing-input ./bing-pages.csv \
+  --out ./runs/example-bing
+```
+
+`bing-indexnow-helper` imports page-level Bing Webmaster CSV exports using the same required columns as Search Console validation:
+
+- `page`
+- `clicks`
+- `impressions`
+- `ctr`
+- `position`
+
+It also generates IndexNow helper artifacts for the current audited key pages. The first version does not submit live IndexNow requests.
+
 ## Output contract
 
 `audit` writes:
@@ -229,6 +250,15 @@ It uses Search Console as an external evidence layer for existing audit findings
 - `search-console-summary.md`
 - `search-console-pages.json`
 
+`bing-indexnow-helper` additionally writes:
+
+- `bing-summary.json`
+- `bing-summary.md`
+- `bing-pages.json`
+- `indexnow-summary.json`
+- `indexnow-summary.md`
+- `indexnow-candidates.json`
+
 ## How scoring works
 
 See [docs/scoring.md](docs/scoring.md) for the readiness buckets, benchmark-vs-holdout behavior, and answer-layer metrics such as `accurateMentionRate`, `factCoverageScore`, `misrepresentationRate`, `VAVR`, and ranked manual-import validation via `competitivePositionScore`.
@@ -253,6 +283,7 @@ See [docs/shareable-summary.md](docs/shareable-summary.md) and [docs/badges.md](
 - [AnswerLens vs AI SEO dashboards](docs/compare/answerlens-vs-ai-seo-dashboards.md)
 - [AnswerLens vs consumer UI scraping](docs/compare/answerlens-vs-ui-scraping.md)
 - [Search Console validation import](docs/search-console.md)
+- [Bing / IndexNow helper](docs/bing-indexnow.md)
 
 ## Roadmap
 
@@ -260,7 +291,7 @@ See [docs/shareable-summary.md](docs/shareable-summary.md) and [docs/badges.md](
 - Landed on `main` after `v0.2.0`: `#10` internal link context, anchor quality, and rule registry
 - Released in `v0.2.3` on April 15, 2026: `#11` manual rank import and CPS plus `#12` repeated-sample stability summaries
 - Landed on `main` after `v0.2.3`: `#13` Search Console validation import
-- Current connector slice: `#14` Bing Webmaster / IndexNow helper
+- Landed on `main` after `v0.2.3`: `#14` Bing Webmaster / IndexNow helper
 - Full public roadmap: [docs/roadmap.md](docs/roadmap.md)
 
 ## Contributing
