@@ -228,7 +228,8 @@ See [docs/shareable-summary.md](docs/shareable-summary.md) and [docs/badges.md](
 
 - Landed on `main` after `v0.2.0`: `#9` schema-text consistency and evidence density
 - Landed on `main` after `v0.2.0`: `#10` internal link context, anchor quality, and rule registry
-- Current release line: `#11` manual rank import and CPS, then `#12` stability summaries, then `#13` Search Console validation
+- Ready on `main` for `v0.2.3`: `#11` manual rank import and CPS plus `#12` repeated-sample stability summaries
+- Next execution line: `#13` Search Console validation, then `#14` Bing Webmaster / IndexNow helper
 - Full public roadmap: [docs/roadmap.md](docs/roadmap.md)
 
 ## Contributing

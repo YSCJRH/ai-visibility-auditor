@@ -1,6 +1,6 @@
 ﻿import type { PageType, ScoreBucketId, Severity } from "./types.ts";
 
-export const ARTIFACT_VERSION = "0.2.0";
+export const ARTIFACT_VERSION = "0.2.3";
 export const RULE_VERSION = "2026-04-14";
 
 export const AI_BOTS = ["OAI-SearchBot", "PerplexityBot"] as const;
