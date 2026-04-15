@@ -17,22 +17,25 @@ Non-goals that stay fixed across roadmap stages:
 
 ## Near-term priorities
 
-The next execution order is fixed:
+Recently completed on `main`:
 
-1. `#9` Schema-text consistency and evidence density rules
-2. `#10` Internal link context, anchor quality, and rule registry
-3. `#11` Manual rank import and CPS scoring
-4. `#12` Multi-sample aggregation stability summary
-5. `#13` Search Console connector and validation contract
-6. `#14` Bing Webmaster / IndexNow helper
+- `#9` Schema-text consistency and evidence density rules
+- `#10` Internal link context, anchor quality, and rule registry
+- `#11` Manual rank import and CPS scoring
 
-Why `#9` and `#10` come first:
+Current execution order:
+
+1. `#12` Multi-sample aggregation stability summary
+2. `#13` Search Console connector and validation contract
+3. `#14` Bing Webmaster / IndexNow helper
+
+Why `#9` and `#10` came first:
 
 - they address the root causes behind why AI systems miss, flatten, or misrepresent a site
 - they strengthen the quality of audit findings without changing the public output contract
-- they are more central to product value than adding more providers or connectors first
+- they were more central to product value than adding more providers or connectors first
 
-Why connectors wait until `v0.3.0`:
+Why connectors still wait until `v0.3.0`:
 
 - validation is broader than connector work alone
 - the product needs stronger audit and eval credibility before it layers on search-console style evidence
@@ -44,6 +47,8 @@ Why connectors wait until `v0.3.0`:
 
 Primary focus: `#9` Schema-text consistency and evidence density rules
 
+Status: implemented on `main`
+
 Planned outcome:
 
 - keep field-level JSON-LD signals for `FAQPage`, `Organization`, and `SoftwareApplication` or `Product`
@@ -54,6 +59,8 @@ Planned outcome:
 ### `v0.2.2`
 
 Primary focus: `#10` Internal link context, anchor quality, and rule registry
+
+Status: implemented on `main`
 
 Planned outcome:
 
@@ -70,6 +77,11 @@ Planned outcome:
 - support manual rank-aware imports and CPS-style scoring when rank data exists
 - improve repeated-sample summaries with stability-oriented aggregation
 - keep `eval-results.json` sample-level detail intact while making summaries more decision-friendly
+
+Current status:
+
+- `#11` is already merged to `main`
+- `#12` is the active remaining gate for the `v0.2.3` validation layer
 
 ### `v0.3.0`
 
@@ -92,9 +104,9 @@ Current milestone mapping:
 Release planning:
 
 - `v0.2.0` is the launch-hardening release
-- `v0.2.1` should center on schema-text consistency and evidence density
-- `v0.2.2` should center on discoverability and rule structure
-- `v0.2.3` should center on validation credibility in eval and manual import
+- work intended for `v0.2.1` is already on `main`
+- work intended for `v0.2.2` is already on `main`
+- `v0.2.3` is the current release target and should center on validation credibility in eval and manual import
 - `v0.3.0` should introduce connector-backed validation
 
 This document is the canonical public roadmap. README, release notes, and umbrella issues should link back here instead of restating divergent plans.

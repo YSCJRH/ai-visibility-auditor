@@ -226,8 +226,9 @@ See [docs/shareable-summary.md](docs/shareable-summary.md) and [docs/badges.md](
 
 ## Roadmap
 
-- `v0.2.1`: ship `#9` for schema-text consistency and evidence density
-- `v0.2.2`: ship `#10` for internal link context, anchor quality, and rule registry
+- Landed on `main` after `v0.2.0`: `#9` schema-text consistency and evidence density
+- Landed on `main` after `v0.2.0`: `#10` internal link context, anchor quality, and rule registry
+- Current release line: `#11` manual rank import and CPS, then `#12` stability summaries, then `#13` Search Console validation
 - Full public roadmap: [docs/roadmap.md](docs/roadmap.md)
 
 ## Contributing
