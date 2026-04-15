@@ -227,7 +227,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(roadmap, /#12/);
   assert.match(roadmap, /#13/);
   assert.match(roadmap, /#14/);
-  assert.match(roadmap, /active implementation slice/);
+  assert.match(roadmap, /next helper slice/);
   assert.match(githubBootstrap, /canonical public roadmap/);
   assert.doesNotMatch(githubBootstrap, /\/D:\/SEO/);
   assert.match(distributionPlan, /# Distribution Plan/);
