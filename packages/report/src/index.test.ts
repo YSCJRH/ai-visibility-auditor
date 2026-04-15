@@ -241,9 +241,11 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(distributionPlan, /# Distribution Plan/);
   assert.match(distributionPlan, /qualified distribution starts \/ 28d/);
   assert.match(distributionPlan, /Actions runtime changes can quietly erode reliability/);
+  assert.match(distributionPlan, /npm trusted publishing/);
   assert.match(manualSteps, /@answerlens/);
   assert.match(manualSteps, /GitHub Pages/);
   assert.match(manualSteps, /Node 24-based JavaScript actions/);
+  assert.match(manualSteps, /ANSWERLENS_ENABLE_NPM_TRUSTED_PUBLISH/);
   assert.match(shareSummaryDocs, /# Shareable Summary Contract/);
   assert.match(searchConsoleDocs, /# Search Console Validation Import/);
   assert.match(searchConsoleDocs, /Required columns/);

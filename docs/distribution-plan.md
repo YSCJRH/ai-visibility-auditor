@@ -19,6 +19,7 @@ AnswerLens should behave like a self-propagating open-source distribution system
 - The reusable GitHub Action exists, but it is not yet a stable published adoption path with docs-backed external usage
 - The Pages compiler and workflow scaffolding exist, but GitHub Pages, homepage, sitemap/feed publishing, and canonical site deployment are not yet enabled publicly
 - Release distribution now works on semver tags, but npm publish and some public distribution surfaces still depend on credentials and repo settings
+- npm publish can now be enabled through either `NPM_TOKEN` or npm trusted publishing, but one of those paths still needs manual setup
 - GitHub workflow maintenance still matters because Actions runtime changes can quietly erode reliability if versions are not kept current
 - DOI and the minimal growth metrics loop are still pending
 

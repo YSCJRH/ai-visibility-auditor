@@ -16,12 +16,14 @@ env:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
     env:
       HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+      HAS_NPM_TRUSTED_PUBLISH: ${{ vars.ANSWERLENS_ENABLE_NPM_TRUSTED_PUBLISH == 'true' }}
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -126,13 +128,17 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
+      - name: Publish to npm with trusted publishing
+        if: ${{ env.HAS_NPM_TOKEN != 'true' && env.HAS_NPM_TRUSTED_PUBLISH == 'true' && env.RELEASE_TAG != '' }}
+        working-directory: apps/cli
+        run: npm publish --provenance --access public
       - name: Note skipped npm publish
-        if: ${{ env.HAS_NPM_TOKEN != 'true' || env.RELEASE_TAG == '' }}
+        if: ${{ (env.HAS_NPM_TOKEN != 'true' && env.HAS_NPM_TRUSTED_PUBLISH != 'true') || env.RELEASE_TAG == '' }}
         run: |
           {
             echo "## npm publish skipped"
             echo ""
-            echo "Either NPM_TOKEN is missing or no semver release tag was provided, so the workflow only produced tarballs and release artifacts."
+            echo "Either no semver release tag was provided, or neither NPM_TOKEN nor trusted publishing is enabled, so the workflow only produced tarballs and release artifacts."
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload assets to GitHub release
         if: ${{ env.RELEASE_TAG != '' }}

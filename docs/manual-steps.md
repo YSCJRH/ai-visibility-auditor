@@ -6,7 +6,10 @@ These are the smallest manual steps needed to activate the public distribution s
 
 1. Confirm control of the preferred scope `@answerlens`.
 2. If the scope cannot be controlled, switch the public package name to `answerlens-cli` before the first publish.
-3. Add `NPM_TOKEN` as a repository secret.
+3. Choose one publish path:
+   - Token path: add `NPM_TOKEN` as a repository secret.
+   - Trusted publishing path: configure npm trusted publishing for this repository and set repository variable `ANSWERLENS_ENABLE_NPM_TRUSTED_PUBLISH=true`.
+4. After either path is enabled, the semver-tag release workflow can publish `@answerlens/cli` automatically.
 
 ## GitHub Pages
 
@@ -43,3 +46,5 @@ Without extra credentials, the repository can still:
 - generate the static site
 - upload Pages artifacts in CI
 - upload release artifacts except for the npm publish step
+
+With trusted publishing configured, npm publish no longer requires `NPM_TOKEN`.
