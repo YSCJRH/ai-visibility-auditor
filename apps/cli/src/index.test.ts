@@ -250,3 +250,70 @@ test("runCli manual-import rejects invalid rank positions", async () => {
     );
   }
 });
+
+test("runCli search-console-import writes validation artifacts and metadata", async () => {
+  process.env.ANSWERLENS_IMPORT_ONLY = "1";
+  const { runCli } = await import("./index.ts");
+  const outDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-search-console-"));
+  const logs: string[] = [];
+
+  await runCli(
+    [
+      "search-console-import",
+      "./examples/fixtures/static-good",
+      "--brand",
+      "./examples/acme/brand.yaml",
+      "--competitors",
+      "./examples/acme/competitors.yaml",
+      "--prompts",
+      "./examples/acme/prompts.yaml",
+      "--input",
+      "./examples/fixtures/search-console/static-good-pages.csv",
+      "--out",
+      outDir
+    ],
+    {
+      runProvider: async () => {
+        throw new Error("search-console-import should not call live providers");
+      },
+      logger: {
+        log(message: string) {
+          logs.push(message);
+        },
+        error(message: string) {
+          logs.push(message);
+        }
+      }
+    }
+  );
+
+  const summaryMarkdown = await readFile(path.join(outDir, "search-console-summary.md"), "utf8");
+  const summaryJson = JSON.parse(await readFile(path.join(outDir, "search-console-summary.json"), "utf8")) as {
+    source: { type: string };
+    summary: { importedPageCount: number; matchedAuditPageCount: number };
+  };
+  const pagesJson = JSON.parse(await readFile(path.join(outDir, "search-console-pages.json"), "utf8")) as Array<{
+    page: string;
+  }>;
+  const shareSummary = await readFile(path.join(outDir, "share-summary.md"), "utf8");
+  const runManifest = JSON.parse(await readFile(path.join(outDir, "run.json"), "utf8")) as {
+    kind: string;
+    run: { mode: string; validationSource?: string };
+  };
+  const auditResult = JSON.parse(await readFile(path.join(outDir, "site-audit.json"), "utf8")) as {
+    run: { mode: string; validationSource?: string };
+  };
+
+  assert.match(summaryMarkdown, /# AnswerLens Search Console Summary/);
+  assert.equal(summaryJson.source.type, "search-console");
+  assert.equal(summaryJson.summary.importedPageCount, 5);
+  assert.equal(summaryJson.summary.matchedAuditPageCount, 3);
+  assert.ok(pagesJson.some((page) => page.page.includes("pricing")));
+  assert.match(shareSummary, /Search validation: \d+\/\d+ key pages show Search Console evidence\./);
+  assert.equal(runManifest.kind, "validation-import");
+  assert.equal(runManifest.run.mode, "validation-import");
+  assert.equal(runManifest.run.validationSource, "search-console");
+  assert.equal(auditResult.run.mode, "validation-import");
+  assert.equal(auditResult.run.validationSource, "search-console");
+  assert.ok(logs.some((entry) => entry.includes("AnswerLens Search Console import complete.")));
+});

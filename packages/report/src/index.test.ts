@@ -8,6 +8,7 @@ import {
   loadCompetitorsConfig,
   loadPromptsConfig,
   runAudit,
+  buildSearchConsoleValidation,
   scoreEvalResponses,
   applyEvalSummaryToAudit
 } from "../../core/src/index.ts";
@@ -16,10 +17,12 @@ import {
   readEvalResults,
   renderEvalDiffMarkdown,
   renderEvalSummaryMarkdown,
+  renderSearchConsoleSummaryMarkdown,
   renderScorecardMarkdown,
   renderScorecardHtml,
   writeAuditOutputs,
-  writeEvalOutputs
+  writeEvalOutputs,
+  writeValidationOutputs
 } from "./index.ts";
 
 function makeResponse(promptId: string, holdout = false, sampleIndex = 0, rankPosition: number | null = null): ProviderResponse {
@@ -133,6 +136,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   const distributionPlan = await readFile(path.resolve("docs/distribution-plan.md"), "utf8");
   const manualSteps = await readFile(path.resolve("docs/manual-steps.md"), "utf8");
   const shareSummaryDocs = await readFile(path.resolve("docs/shareable-summary.md"), "utf8");
+  const searchConsoleDocs = await readFile(path.resolve("docs/search-console.md"), "utf8");
   const badgesDocs = await readFile(path.resolve("docs/badges.md"), "utf8");
   const githubActionDocs = await readFile(path.resolve("docs/github-action.md"), "utf8");
   const actionDefinition = await readFile(path.resolve("action.yml"), "utf8");
@@ -203,6 +207,8 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(readme, /CI for AI discoverability\./);
   assert.match(readme, /share-summary\.md/);
   assert.match(readme, /pr-snippet\.md/);
+  assert.match(readme, /search-console-import/);
+  assert.match(readme, /search-console-summary\.json/);
   assert.match(readme, /AnswerLens focuses on explainable structure, evidence, and validation workflows rather than consumer UI scraping\./);
   assert.match(readme, /## Why AnswerLens/);
   assert.match(readme, /Full public roadmap: \[docs\/roadmap\.md\]/);
@@ -221,6 +227,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(roadmap, /#12/);
   assert.match(roadmap, /#13/);
   assert.match(roadmap, /#14/);
+  assert.match(roadmap, /active implementation slice/);
   assert.match(githubBootstrap, /canonical public roadmap/);
   assert.doesNotMatch(githubBootstrap, /\/D:\/SEO/);
   assert.match(distributionPlan, /# Distribution Plan/);
@@ -228,6 +235,8 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(manualSteps, /@answerlens/);
   assert.match(manualSteps, /GitHub Pages/);
   assert.match(shareSummaryDocs, /# Shareable Summary Contract/);
+  assert.match(searchConsoleDocs, /# Search Console Validation Import/);
+  assert.match(searchConsoleDocs, /Required columns/);
   assert.match(badgesDocs, /AI discoverability audited with AnswerLens/);
   assert.match(githubActionDocs, /GITHUB_STEP_SUMMARY/);
   assert.match(githubActionDocs, /uses: YSCJRH\/ai-visibility-auditor@vX/);
@@ -238,6 +247,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(prTemplate, /AnswerLens share summary/);
   assert.match(teardownTemplate, /Audit teardown/);
   assert.equal(packageJson.scripts["manual-import"], "node --experimental-strip-types apps/cli/src/index.ts manual-import");
+  assert.equal(packageJson.scripts["search-console-import"], "node --experimental-strip-types apps/cli/src/index.ts search-console-import");
   assert.equal(packageJson.scripts["build:cli"], "corepack pnpm --dir apps/cli build");
   assert.equal(packageJson.scripts["pack:cli:dry-run"], "corepack pnpm --dir apps/cli pack --dry-run");
   assert.equal(packageJson.scripts["build:site"], "node --experimental-strip-types scripts/distribution/build-site.ts");
@@ -388,4 +398,67 @@ test("manual-import report outputs expose CPS only when ranked samples are prese
   assert.match(prSnippet, /Manual validation: CPS 0.88 across 100% ranked samples\./);
   assert.equal(runManifest.summary.competitivePositionScore, 0.88);
   assert.equal(runManifest.summary.rankCoverageRate, 100);
+});
+
+test("validation outputs expose Search Console summaries without changing eval artifacts", async () => {
+  const [brand, competitors, prompts, csvText] = await Promise.all([
+    loadBrandConfig(path.resolve("examples/acme/brand.yaml")),
+    loadCompetitorsConfig(path.resolve("examples/acme/competitors.yaml")),
+    loadPromptsConfig(path.resolve("examples/acme/prompts.yaml")),
+    readFile(path.resolve("examples/fixtures/search-console/static-good-pages.csv"), "utf8")
+  ]);
+
+  const audit = await runAudit({
+    siteInput: "./examples/fixtures/static-good",
+    brand,
+    competitors,
+    prompts
+  });
+
+  const validation = buildSearchConsoleValidation(
+    audit,
+    csvText,
+    path.resolve("examples/fixtures/search-console/static-good-pages.csv")
+  );
+
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-search-console-report-"));
+  await writeAuditOutputs(tempDir, validation.audit);
+  await writeValidationOutputs(tempDir, validation.audit, validation.validation);
+
+  const summaryMarkdown = await readFile(path.join(tempDir, "search-console-summary.md"), "utf8");
+  const summaryJson = JSON.parse(await readFile(path.join(tempDir, "search-console-summary.json"), "utf8")) as {
+    source: { type: string; format: string };
+    summary: { importedPageCount: number; keyPagesWithEvidence: number; keyPagesWithoutEvidence: number };
+    findings: Array<{ title: string }>;
+    topPages: Array<{ page: string }>;
+  };
+  const pagesJson = JSON.parse(await readFile(path.join(tempDir, "search-console-pages.json"), "utf8")) as Array<{
+    page: string;
+    outOfScope: boolean;
+  }>;
+  const shareSummary = await readFile(path.join(tempDir, "share-summary.md"), "utf8");
+  const runManifest = JSON.parse(await readFile(path.join(tempDir, "run.json"), "utf8")) as {
+    kind: string;
+    summary: { validationSource: string; importedPageCount: number };
+  };
+  const siteAudit = JSON.parse(await readFile(path.join(tempDir, "site-audit.json"), "utf8")) as {
+    run: { mode: string; validationSource?: string };
+  };
+
+  assert.match(renderSearchConsoleSummaryMarkdown(validation.validation), /# AnswerLens Search Console Summary/);
+  assert.match(summaryMarkdown, /## Key page evidence coverage/);
+  assert.match(summaryMarkdown, /## Validation findings/);
+  assert.equal(summaryJson.source.type, "search-console");
+  assert.equal(summaryJson.source.format, "csv");
+  assert.equal(summaryJson.summary.importedPageCount, 5);
+  assert.ok(summaryJson.summary.keyPagesWithoutEvidence > 0);
+  assert.ok(summaryJson.findings.some((finding) => finding.title === "Search Console page is not covered by crawl"));
+  assert.ok(summaryJson.topPages.some((page) => page.page.includes("pricing")));
+  assert.ok(pagesJson.some((page) => page.outOfScope));
+  assert.match(shareSummary, /Search validation: \d+\/\d+ key pages show Search Console evidence\./);
+  assert.equal(runManifest.kind, "validation-import");
+  assert.equal(runManifest.summary.validationSource, "search-console");
+  assert.equal(runManifest.summary.importedPageCount, 5);
+  assert.equal(siteAudit.run.mode, "validation-import");
+  assert.equal(siteAudit.run.validationSource, "search-console");
 });

@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
   applyEvalSummaryToAudit,
+  buildSearchConsoleValidation,
   loadBrandConfig,
   loadCompetitorsConfig,
   loadPromptsConfig,
@@ -14,7 +15,7 @@ import { normalizeDomain } from "../../../packages/core/src/utils.ts";
 import type { RunMode } from "../../../packages/core/src/index.ts";
 import type { Citation, ProviderName, ProviderResponse, SearchResult } from "../../../packages/providers/src/index.ts";
 import { runEvalProvider } from "../../../packages/providers/src/index.ts";
-import { readEvalResults, writeAuditOutputs, writeEvalOutputs } from "../../../packages/report/src/index.ts";
+import { readEvalResults, writeAuditOutputs, writeEvalOutputs, writeValidationOutputs } from "../../../packages/report/src/index.ts";
 
 type ParsedArgs = {
   positionals: string[];
@@ -110,12 +111,14 @@ Usage:
   corepack pnpm audit <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir>
   corepack pnpm eval <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --provider <openai|perplexity> [--model <model>] [--samples <n>] [--locale <locale>]
   corepack pnpm manual-import <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --input <responses.json> [--locale <locale>]
+  corepack pnpm search-console-import <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --input <gsc-pages.csv>
 
 Notes:
   - audit is the stable v0.1 command.
   - eval runs the configured prompt pack, including holdout prompts, and aggregates repeated samples.
   - manual-import accepts normalized ProviderResponse entries or a { responses: [...] } wrapper.
   - manual-import may include rankPosition for manual rank validation; use a positive integer or null.
+  - search-console-import validates audit findings against imported page-level Search Console exports.
   - Set OPENAI_API_KEY or PERPLEXITY_API_KEY before live eval runs.
 `);
 }
@@ -399,6 +402,38 @@ async function runManualImportCommand(parsed: ParsedArgs, dependencies: CliDepen
   );
 }
 
+async function runSearchConsoleImportCommand(parsed: ParsedArgs, dependencies: CliDependencies): Promise<void> {
+  const siteInput = parsed.positionals[0];
+  if (!siteInput) {
+    throw new Error("Missing site input. Pass a public URL or a local fixture directory.");
+  }
+
+  const outDir = path.resolve(requiredFlag(parsed, "out"));
+  const inputPath = path.resolve(requiredFlag(parsed, "input"));
+  const [brand, competitors, prompts] = await loadAuditInputs(parsed);
+
+  const audit = await runAudit({
+    siteInput,
+    sitemapUrl: parsed.flags.get("sitemap")?.[0],
+    includePatterns: listFlag(parsed, "include"),
+    excludePatterns: listFlag(parsed, "exclude"),
+    maxPages: numberFlag(parsed, "max-pages", 20),
+    brand,
+    competitors,
+    prompts
+  });
+
+  const csvText = await readFile(inputPath, "utf8");
+  const validation = buildSearchConsoleValidation(audit, csvText, inputPath);
+
+  await writeAuditOutputs(outDir, validation.audit);
+  await writeValidationOutputs(outDir, validation.audit, validation.validation);
+
+  dependencies.logger.log(
+    `AnswerLens Search Console import complete.\n  Site: ${siteInput}\n  Imported pages: ${validation.validation.summary.importedPageCount}\n  Key pages with evidence: ${validation.validation.summary.keyPagesWithEvidence}\n  Output: ${outDir}`
+  );
+}
+
 export async function runCli(
   argv: string[] = process.argv.slice(2),
   dependencies: CliDependencies = {
@@ -425,6 +460,11 @@ export async function runCli(
 
   if (command === "manual-import") {
     await runManualImportCommand(parsed, dependencies);
+    return;
+  }
+
+  if (command === "search-console-import") {
+    await runSearchConsoleImportCommand(parsed, dependencies);
     return;
   }
 

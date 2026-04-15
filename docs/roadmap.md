@@ -94,6 +94,11 @@ Planned outcome:
 - add Bing Webmaster and IndexNow helpers as follow-on validation tools
 - connect audit and eval outputs to search-facing evidence without introducing consumer UI scraping or rank guarantees
 
+Current status:
+
+- `#13` is the active implementation slice
+- first delivery is import-first and contract-first, using page-level Search Console exports instead of live OAuth
+
 ## GitHub alignment
 
 Current milestone mapping:

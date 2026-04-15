@@ -1,16 +1,16 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { AuditResult } from "../../core/src/types.ts";
+import type { AuditResult, SearchConsoleValidationResult } from "../../core/src/types.ts";
 import type { ContentBrief, EvalResult } from "../../core/src/eval.ts";
 import { BUCKET_LABELS } from "../../core/src/audit.ts";
 import { summarizeEvalDiff } from "../../core/src/eval.ts";
 import { ensureDir } from "../../core/src/utils.ts";
 
-type RunKind = "audit" | "eval" | "manual-import";
+type RunKind = "audit" | "eval" | "manual-import" | "validation-import";
 
 interface RunManifest {
   kind: RunKind;
-  run: AuditResult["run"] | EvalResult["run"];
+  run: AuditResult["run"] | EvalResult["run"] | SearchConsoleValidationResult["run"];
   generatedAt: string;
   site: AuditResult["site"];
   summary: Record<string, number | string | null | string[]>;
@@ -47,6 +47,15 @@ interface EvalSummaryJson {
     }>;
   promptGroups: EvalResult["promptGroups"];
   briefs: Array<Pick<ContentBrief, "id" | "type" | "title" | "audience" | "angle" | "cta">>;
+}
+
+interface SearchConsoleSummaryJson {
+  run: SearchConsoleValidationResult["run"];
+  site: SearchConsoleValidationResult["site"];
+  source: SearchConsoleValidationResult["source"];
+  summary: SearchConsoleValidationResult["summary"];
+  findings: SearchConsoleValidationResult["findings"];
+  topPages: SearchConsoleValidationResult["topPages"];
 }
 
 interface ShareSummary {
@@ -156,6 +165,15 @@ function evalArtifacts(): string[] {
   ];
 }
 
+function validationArtifacts(): string[] {
+  return [
+    ...auditArtifacts(),
+    "search-console-summary.md",
+    "search-console-summary.json",
+    "search-console-pages.json"
+  ];
+}
+
 function buildAuditShareSummary(result: AuditResult): ShareSummary {
   return {
     project: "AnswerLens",
@@ -236,6 +254,38 @@ function buildEvalShareSummary(result: EvalResult, previous: ShareSummary | null
   };
 }
 
+function buildValidationShareSummary(audit: AuditResult, result: SearchConsoleValidationResult): ShareSummary {
+  return {
+    project: "AnswerLens",
+    tagline: "CI for AI discoverability.",
+    positioning: "Audit whether a product site can be read, cited, compared, and recommended by AI systems.",
+    disclaimer: SHARE_DISCLAIMER,
+    run: {
+      id: result.run.id,
+      mode: "validation-import",
+      generatedAt: result.run.completedAt,
+      artifactVersion: result.run.artifactVersion,
+      ruleVersion: result.run.ruleVersion,
+      sampleCount: result.run.sampleCount,
+      locale: result.run.locale
+    },
+    site: result.site,
+    metrics: {
+      overallScore: audit.summary.overallScore,
+      vavr: audit.summary.vavr,
+      importedPageCount: result.summary.importedPageCount,
+      matchedAuditPageCount: result.summary.matchedAuditPageCount,
+      keyPagesWithEvidence: result.summary.keyPagesWithEvidence,
+      keyPagesWithoutEvidence: result.summary.keyPagesWithoutEvidence,
+      totalClicks: result.summary.totalClicks,
+      totalImpressions: result.summary.totalImpressions
+    },
+    topIssues: topIssues(audit),
+    topRecommendations: topRecommendations(audit),
+    artifacts: validationArtifacts()
+  };
+}
+
 function renderMetricValue(value: number | string | null): string {
   if (value === null) {
     return "pending eval";
@@ -270,6 +320,21 @@ function stabilitySummaryLine(metrics: ShareSummary["metrics"]): string | null {
   return `Stability: ${stablePromptRate}% of repeated prompt groups were stable (${unstablePromptCount} unstable across ${repeatedPromptCount} repeated prompts).`;
 }
 
+function searchValidationLine(metrics: ShareSummary["metrics"]): string | null {
+  const keyPagesWithEvidence = metrics.keyPagesWithEvidence;
+  const keyPagesWithoutEvidence = metrics.keyPagesWithoutEvidence;
+  if (typeof keyPagesWithEvidence !== "number" || typeof keyPagesWithoutEvidence !== "number") {
+    return null;
+  }
+
+  const total = keyPagesWithEvidence + keyPagesWithoutEvidence;
+  if (total <= 0) {
+    return null;
+  }
+
+  return `Search validation: ${keyPagesWithEvidence}/${total} key pages show Search Console evidence.`;
+}
+
 function renderShareSummaryMarkdown(summary: ShareSummary): string {
   const metricRows = Object.entries(summary.metrics)
     .filter(
@@ -279,13 +344,20 @@ function renderShareSummaryMarkdown(summary: ShareSummary): string {
           "rankCoverageRate",
           "repeatedPromptCount",
           "stablePromptRate",
-          "unstablePromptCount"
+          "unstablePromptCount",
+          "importedPageCount",
+          "matchedAuditPageCount",
+          "keyPagesWithEvidence",
+          "keyPagesWithoutEvidence",
+          "totalClicks",
+          "totalImpressions"
         ].includes(key)
     )
     .map(([key, value]) => `| ${escapeTableCell(key)} | ${escapeTableCell(renderMetricValue(value))} |`)
     .join("\n");
   const manualValidation = manualRankValidationLine(summary.metrics);
   const stabilitySummary = stabilitySummaryLine(summary.metrics);
+  const searchValidation = searchValidationLine(summary.metrics);
 
   const issues =
     summary.topIssues.length > 0
@@ -321,7 +393,7 @@ ${summary.positioning}
 | --- | --- |
 ${metricRows}
 
-${manualValidation ? `${manualValidation}\n` : ""}${stabilitySummary ? `${stabilitySummary}\n` : ""}
+${manualValidation ? `${manualValidation}\n` : ""}${stabilitySummary ? `${stabilitySummary}\n` : ""}${searchValidation ? `${searchValidation}\n` : ""}
 
 ## AI may miss this product because
 
@@ -499,6 +571,45 @@ function buildEvalRunManifest(result: EvalResult): RunManifest {
   };
 }
 
+function buildValidationRunManifest(audit: AuditResult, result: SearchConsoleValidationResult): RunManifest {
+  return {
+    kind: "validation-import",
+    run: result.run,
+    generatedAt: result.run.completedAt,
+    site: result.site,
+    summary: {
+      overallScore: audit.summary.overallScore,
+      vavr: audit.summary.vavr,
+      importedPageCount: result.summary.importedPageCount,
+      matchedAuditPageCount: result.summary.matchedAuditPageCount,
+      outOfScopePageCount: result.summary.outOfScopePageCount,
+      keyPagesWithEvidence: result.summary.keyPagesWithEvidence,
+      keyPagesWithoutEvidence: result.summary.keyPagesWithoutEvidence,
+      pagesWithClicks: result.summary.pagesWithClicks,
+      pagesWithImpressions: result.summary.pagesWithImpressions,
+      totalClicks: result.summary.totalClicks,
+      totalImpressions: result.summary.totalImpressions,
+      validationSource: result.source.type
+    },
+    artifacts: [
+      "site-audit.json",
+      "issues.json",
+      "recommendations.md",
+      "scorecard.md",
+      "index.html",
+      "normalized-pages.json",
+      "competitor-diff.md",
+      "search-console-summary.json",
+      "search-console-summary.md",
+      "search-console-pages.json",
+      "share-summary.md",
+      "share-summary.json",
+      "pr-snippet.md",
+      "run.json"
+    ]
+  };
+}
+
 function buildEvalSummaryJson(result: EvalResult): EvalSummaryJson {
   return {
     run: result.run,
@@ -536,6 +647,17 @@ function buildEvalSummaryJson(result: EvalResult): EvalSummaryJson {
       angle: brief.angle,
       cta: brief.cta
     }))
+  };
+}
+
+function buildSearchConsoleSummaryJson(result: SearchConsoleValidationResult): SearchConsoleSummaryJson {
+  return {
+    run: result.run,
+    site: result.site,
+    source: result.source,
+    summary: result.summary,
+    findings: result.findings,
+    topPages: result.topPages
   };
 }
 
@@ -841,6 +963,64 @@ export function renderEvalSummaryMarkdown(result: EvalResult): string {
   return `# AnswerLens Eval Summary\n\n## Overview\n\n- Site: ${result.site.input}\n- Provider: ${result.provider.name}\n- Model: ${result.provider.model}\n- Generated: ${result.generatedAt}\n- Benchmark prompt count: ${result.summary.promptCount}\n- Holdout prompt count: ${result.summary.holdoutPromptCount}\n- Sample count: ${result.summary.sampleCount}\n- Locale: ${result.summary.locale ?? "default"}\n- VAVR: ${result.summary.vavr}\n\n## Metrics\n\n- Mention rate: ${result.summary.mentionRate}\n- Accurate mention rate: ${result.summary.accurateMentionRate}\n- Owned citation rate: ${result.summary.ownedCitationRate}\n- Trusted citation rate: ${result.summary.trustedCitationRate}\n- Recommendation rate: ${result.summary.recommendationRate}\n- Misrepresentation rate: ${result.summary.misrepresentationRate}\n- Competitor exclusion gap: ${result.summary.competitorExclusionGap}\n- Fact coverage score: ${result.summary.factCoverageScore}\n- Accuracy rate: ${result.summary.accuracyRate}${manualRankSection}${stabilitySection}\n\n## Prompt results\n\n| Prompt | Category | Sample | Pack | VAVR | Accurate mention | Citations | Recommended |\n| --- | --- | ---: | --- | ---: | --- | ---: | --- |\n${promptRows}\n\n## Generated briefs\n\n${briefList}\n`;
 }
 
+export function renderSearchConsoleSummaryMarkdown(result: SearchConsoleValidationResult): string {
+  const keyProofRows = result.keyPageCoverage
+    .sort((left, right) => right.impressions - left.impressions || left.pageUrl.localeCompare(right.pageUrl))
+    .map(
+      (page) =>
+        `| ${page.pageType} | ${page.pageUrl} | ${page.hasEvidence ? "yes" : "no"} | ${page.impressions} | ${page.clicks} |`
+    )
+    .join("\n");
+  const topPageRows = result.topPages
+    .map(
+      (page) =>
+        `| ${page.page} | ${page.matchedPageType ?? "unmatched"} | ${page.impressions} | ${page.clicks} | ${page.position} |`
+    )
+    .join("\n");
+  const findingRows =
+    result.findings.length > 0
+      ? result.findings
+          .map(
+            (finding) =>
+              `| ${finding.severity} | ${finding.title} | ${finding.pageType ?? "n/a"} | ${finding.pageUrl} | ${escapeTableCell(finding.evidence ?? "-")} |`
+          )
+          .join("\n")
+      : "| none | none | n/a | n/a | - |";
+
+  return `# AnswerLens Search Console Summary
+
+## Overview
+
+- Site: ${result.site.input}
+- Source: ${result.source.input}
+- Imported pages: ${result.summary.importedPageCount}
+- Matched audit pages: ${result.summary.matchedAuditPageCount}
+- Out-of-scope pages: ${result.summary.outOfScopePageCount}
+- Key pages with evidence: ${result.summary.keyPagesWithEvidence}
+- Key pages without evidence: ${result.summary.keyPagesWithoutEvidence}
+- Total clicks: ${result.summary.totalClicks}
+- Total impressions: ${result.summary.totalImpressions}
+
+## Key page evidence coverage
+
+| Page type | Page | Evidence | Impressions | Clicks |
+| --- | --- | --- | ---: | ---: |
+${keyProofRows || "| none | none | no | 0 | 0 |"}
+
+## Top pages by impressions
+
+| Page | Matched type | Impressions | Clicks | Position |
+| --- | --- | ---: | ---: | ---: |
+${topPageRows || "| none | n/a | 0 | 0 | 0 |"}
+
+## Validation findings
+
+| Severity | Finding | Page type | Page | Evidence |
+| --- | --- | --- | --- | --- |
+${findingRows}
+`;
+}
+
 export function renderEvalDiffMarkdown(current: EvalResult, previous: EvalResult | null): string {
   if (!previous) {
     return `# AnswerLens Before/After Diff\n\nNo previous eval-results.json was found in this output directory, so this run becomes the baseline.\n`;
@@ -899,4 +1079,18 @@ export async function writeEvalOutputs(outDir: string, result: EvalResult, previ
   await writeShareOutputs(outDir, shareSummary);
   await writeJson(path.join(outDir, "run.json"), buildEvalRunManifest(result));
   await writeBriefOutputs(outDir, result.briefs);
+}
+
+export async function writeValidationOutputs(
+  outDir: string,
+  audit: AuditResult,
+  result: SearchConsoleValidationResult
+): Promise<void> {
+  await ensureDir(outDir);
+  const shareSummary = buildValidationShareSummary(audit, result);
+  await writeJson(path.join(outDir, "search-console-summary.json"), buildSearchConsoleSummaryJson(result));
+  await writeFile(path.join(outDir, "search-console-summary.md"), renderSearchConsoleSummaryMarkdown(result), "utf8");
+  await writeJson(path.join(outDir, "search-console-pages.json"), result.pages);
+  await writeShareOutputs(outDir, shareSummary);
+  await writeJson(path.join(outDir, "run.json"), buildValidationRunManifest(audit, result));
 }

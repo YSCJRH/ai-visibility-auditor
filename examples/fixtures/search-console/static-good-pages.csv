@@ -1,0 +1,6 @@
+page,clicks,impressions,ctr,position
+https://fixture.local/pricing,12,120,10%,3.2
+http://fixture.local/security/,4,40,10%,4.5
+https://fixture.local/docs,6,100,6%,5.2
+https://fixture.local/missing-page,2,20,10%,8.2
+https://external.example/compare,1,10,10%,2.0

@@ -43,6 +43,7 @@ AI may miss this product because:
 - `audit` for AI-readiness checks against a live site or local fixture
 - `eval` for prompt-pack benchmarking with OpenAI and Perplexity adapters
 - `manual-import` for scoring normalized answer samples from external or human-collected runs
+- `search-console-import` for validating key-page evidence against imported page-level Search Console exports
 - Structured config contracts for `brand.yaml`, `competitors.yaml`, and `prompts.yaml`
 - Markdown, JSON, static HTML, and PR-ready outputs including `share-summary.md`, `pr-snippet.md`, and `run.json`
 - Expanded benchmark prompt pack with holdouts, fixtures, and GitHub issue / PR scaffolding
@@ -55,7 +56,8 @@ AI may miss this product because:
 | OpenAI eval | Live |
 | Perplexity eval | Live |
 | Manual answer import | Live |
-| Search Console / Bing connectors | Planned |
+| Search Console validation import | In progress |
+| Bing / IndexNow helpers | Planned |
 
 ## Distribution
 
@@ -172,6 +174,27 @@ If you have reviewed placement data from a manual validation pass, include `rank
 
 `manual-import` keeps `rankPosition` optional. When present, AnswerLens adds `competitivePositionScore` and `rankCoverageRate` to the eval summary and share summary outputs.
 
+## Search Console validation import
+
+```bash
+corepack pnpm search-console-import -- https://example.com \
+  --brand ./examples/acme/brand.yaml \
+  --competitors ./examples/acme/competitors.yaml \
+  --prompts ./examples/acme/prompts.yaml \
+  --input ./gsc-pages.csv \
+  --out ./runs/example-search-console
+```
+
+`search-console-import` accepts page-level Search Console CSV exports with these required columns:
+
+- `page`
+- `clicks`
+- `impressions`
+- `ctr`
+- `position`
+
+It uses Search Console as an external evidence layer for existing audit findings. It does not replace audit, eval, analytics, or Search Console itself.
+
 ## Output contract
 
 `audit` writes:
@@ -200,6 +223,12 @@ If you have reviewed placement data from a manual validation pass, include `rank
 - `briefs/*.md` for compatibility
 - `raw/<provider>/<promptId>.json`
 
+`search-console-import` additionally writes:
+
+- `search-console-summary.json`
+- `search-console-summary.md`
+- `search-console-pages.json`
+
 ## How scoring works
 
 See [docs/scoring.md](docs/scoring.md) for the readiness buckets, benchmark-vs-holdout behavior, and answer-layer metrics such as `accurateMentionRate`, `factCoverageScore`, `misrepresentationRate`, `VAVR`, and ranked manual-import validation via `competitivePositionScore`.
@@ -223,13 +252,14 @@ See [docs/shareable-summary.md](docs/shareable-summary.md) and [docs/badges.md](
 - [Evidence density](docs/concepts/evidence-density.md)
 - [AnswerLens vs AI SEO dashboards](docs/compare/answerlens-vs-ai-seo-dashboards.md)
 - [AnswerLens vs consumer UI scraping](docs/compare/answerlens-vs-ui-scraping.md)
+- [Search Console validation import](docs/search-console.md)
 
 ## Roadmap
 
 - Landed on `main` after `v0.2.0`: `#9` schema-text consistency and evidence density
 - Landed on `main` after `v0.2.0`: `#10` internal link context, anchor quality, and rule registry
 - Released in `v0.2.3` on April 15, 2026: `#11` manual rank import and CPS plus `#12` repeated-sample stability summaries
-- Next execution line: `#13` Search Console validation, then `#14` Bing Webmaster / IndexNow helper
+- Current connector slice: `#13` Search Console validation import, then `#14` Bing Webmaster / IndexNow helper
 - Full public roadmap: [docs/roadmap.md](docs/roadmap.md)
 
 ## Contributing
