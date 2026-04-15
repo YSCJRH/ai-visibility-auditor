@@ -56,7 +56,7 @@ AI may miss this product because:
 | OpenAI eval | Live |
 | Perplexity eval | Live |
 | Manual answer import | Live |
-| Search Console validation import | In progress |
+| Search Console validation import | Live |
 | Bing / IndexNow helpers | Planned |
 
 ## Distribution
@@ -259,7 +259,8 @@ See [docs/shareable-summary.md](docs/shareable-summary.md) and [docs/badges.md](
 - Landed on `main` after `v0.2.0`: `#9` schema-text consistency and evidence density
 - Landed on `main` after `v0.2.0`: `#10` internal link context, anchor quality, and rule registry
 - Released in `v0.2.3` on April 15, 2026: `#11` manual rank import and CPS plus `#12` repeated-sample stability summaries
-- Current connector slice: `#13` Search Console validation import, then `#14` Bing Webmaster / IndexNow helper
+- Landed on `main` after `v0.2.3`: `#13` Search Console validation import
+- Current connector slice: `#14` Bing Webmaster / IndexNow helper
 - Full public roadmap: [docs/roadmap.md](docs/roadmap.md)
 
 ## Contributing

@@ -23,11 +23,11 @@ Recently completed on `main`:
 - `#10` Internal link context, anchor quality, and rule registry
 - `#11` Manual rank import and CPS scoring
 - `#12` Multi-sample aggregation stability summary
+- `#13` Search Console validation import
 
 Current execution order:
 
-1. `#13` Search Console connector and validation contract
-2. `#14` Bing Webmaster / IndexNow helper
+1. `#14` Bing Webmaster / IndexNow helper
 
 Why `#9` and `#10` came first:
 
@@ -96,8 +96,8 @@ Planned outcome:
 
 Current status:
 
-- `#13` is the active implementation slice
-- first delivery is import-first and contract-first, using page-level Search Console exports instead of live OAuth
+- `#13` is implemented on `main` as an import-first, contract-first validation layer
+- `#14` is the next helper slice and should reuse the validation-oriented posture rather than introduce a dashboard path
 
 ## GitHub alignment
 
