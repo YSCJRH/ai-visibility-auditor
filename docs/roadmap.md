@@ -82,7 +82,7 @@ Current status:
 
 - `#11` is already merged to `main`
 - `#12` is already merged to `main`
-- `v0.2.3` is release-ready from the validation-layer perspective
+- `v0.2.3` was released on April 15, 2026
 
 ### `v0.3.0`
 
@@ -107,8 +107,8 @@ Release planning:
 - `v0.2.0` is the launch-hardening release
 - work intended for `v0.2.1` is already on `main`
 - work intended for `v0.2.2` is already on `main`
-- `v0.2.3` is the current release target and is ready to tag from `main`
-- `v0.3.0` should introduce connector-backed validation
+- `v0.2.3` is released and closes the current validation-layer work for `#11` and `#12`
+- `v0.3.0` is now the current release target and should introduce connector-backed validation
 
 This document is the canonical public roadmap. README, release notes, and umbrella issues should link back here instead of restating divergent plans.
 
