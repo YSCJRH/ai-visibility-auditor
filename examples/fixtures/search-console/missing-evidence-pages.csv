@@ -1,0 +1,3 @@
+page,clicks,impressions,ctr,position
+https://fixture.local/product.html,5,60,8.3%,6.1
+https://fixture.local/missing-from-crawl,3,25,12%,9.4

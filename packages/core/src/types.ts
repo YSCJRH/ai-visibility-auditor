@@ -1,7 +1,8 @@
 ﻿export type Severity = "error" | "warn" | "info";
 export type Scope = "site" | "page";
 export type SiteKind = "remote" | "local";
-export type RunMode = "audit" | "eval" | "manual-import";
+export type RunMode = "audit" | "eval" | "manual-import" | "validation-import";
+export type ValidationSource = "search-console";
 export type PageType =
   | "home"
   | "product"
@@ -222,6 +223,7 @@ export interface RunMetadata {
   configHash: string;
   sampleCount: number;
   locale: string | null;
+  validationSource?: ValidationSource;
 }
 
 export interface AuditResult {
@@ -247,6 +249,71 @@ export interface AuditResult {
     competitorNames: string[];
     prompts: number;
   };
+}
+
+export interface ValidationSourceDescriptor {
+  type: ValidationSource;
+  input: string;
+  format: "csv";
+}
+
+export interface SearchConsolePageRecord {
+  page: string;
+  normalizedUrl: string;
+  domain: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+  outOfScope: boolean;
+  matchedAuditPageUrl: string | null;
+  matchedPageType: PageType | null;
+  hasEvidence: boolean;
+  hasClicks: boolean;
+  auditIssueCount: number;
+  highestAuditSeverity: Severity | null;
+}
+
+export interface SearchConsoleFinding {
+  id: string;
+  severity: Severity;
+  title: string;
+  pageUrl: string;
+  pageType: PageType | null;
+  message: string;
+  evidence?: string;
+  relatedAuditIssueIds?: string[];
+}
+
+export interface SearchConsoleKeyPageCoverage {
+  pageUrl: string;
+  pageType: PageType;
+  hasEvidence: boolean;
+  impressions: number;
+  clicks: number;
+}
+
+export interface SearchConsoleValidationSummary {
+  importedPageCount: number;
+  matchedAuditPageCount: number;
+  outOfScopePageCount: number;
+  keyPagesWithEvidence: number;
+  keyPagesWithoutEvidence: number;
+  pagesWithClicks: number;
+  pagesWithImpressions: number;
+  totalClicks: number;
+  totalImpressions: number;
+}
+
+export interface SearchConsoleValidationResult {
+  run: RunMetadata;
+  site: AuditResult["site"];
+  source: ValidationSourceDescriptor;
+  summary: SearchConsoleValidationSummary;
+  findings: SearchConsoleFinding[];
+  keyPageCoverage: SearchConsoleKeyPageCoverage[];
+  topPages: SearchConsolePageRecord[];
+  pages: SearchConsolePageRecord[];
 }
 
 export interface CrawlOptions {
