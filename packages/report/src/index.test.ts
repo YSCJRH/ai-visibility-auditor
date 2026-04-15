@@ -86,6 +86,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(evalSummary, /# AnswerLens Eval Summary/);
   assert.match(evalSummary, /Accurate mention rate/);
   assert.doesNotMatch(evalSummary, /Manual rank validation/);
+  assert.doesNotMatch(evalSummary, /## Stability summary/);
   assert.match(diff, /becomes the baseline/);
   assert.equal(evalResult.summary.promptCount, expectedBenchmarkCount);
   assert.ok(prompts.prompts.length >= 34);
@@ -97,7 +98,8 @@ test("report renderers expose expected audit and eval sections", async () => {
 
   const written = await readEvalResults(path.join(tempDir, "eval-results.json"));
   const evalSummaryJson = JSON.parse(await readFile(path.join(tempDir, "eval-summary.json"), "utf8")) as {
-    summary: { promptCount: number; locale: string | null };
+    summary: { promptCount: number; locale: string | null; repeatedPromptCount: number; stablePromptRate: number; unstablePromptCount: number };
+    promptGroups: Array<{ promptId: string; sampleCount: number; stable: boolean }>;
     briefs: unknown[];
   };
   const runManifest = JSON.parse(await readFile(path.join(tempDir, "run.json"), "utf8")) as {
@@ -159,6 +161,11 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.equal(written?.summary.promptCount, expectedBenchmarkCount);
   assert.equal(evalSummaryJson.summary.promptCount, expectedBenchmarkCount);
   assert.equal(evalSummaryJson.summary.locale, "en-US");
+  assert.equal(evalSummaryJson.summary.repeatedPromptCount, 0);
+  assert.equal(evalSummaryJson.summary.stablePromptRate, 0);
+  assert.equal(evalSummaryJson.summary.unstablePromptCount, 0);
+  assert.equal(evalSummaryJson.promptGroups.length, prompts.prompts.length);
+  assert.ok(evalSummaryJson.promptGroups.every((group) => group.sampleCount === 1));
   assert.equal(runManifest.kind, "eval");
   assert.equal(runManifest.provider?.name, "openai");
   assert.ok(runManifest.artifacts.includes("eval-summary.json"));
@@ -172,6 +179,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.equal(shareSummary.metrics.overallScore, audit.summary.overallScore);
   assert.equal(shareSummary.metrics.vavr, evalResult.summary.vavr);
   assert.equal("competitivePositionScore" in shareSummary.metrics, false);
+  assert.equal("stablePromptRate" in shareSummary.metrics, false);
   assert.ok(shareSummary.topIssues.length > 0);
   assert.ok(shareSummary.topRecommendations.length > 0);
   assert.ok(shareSummary.artifacts.includes("pr-snippet.md"));
@@ -179,6 +187,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(shareSummaryMarkdown, /AI may miss this product because/);
   assert.match(shareSummaryMarkdown, /does not scrape consumer AI UIs/);
   assert.doesNotMatch(shareSummaryMarkdown, /Manual validation: CPS/);
+  assert.doesNotMatch(shareSummaryMarkdown, /Stability:/);
   assert.match(prSnippet, /## AnswerLens audit/);
   assert.match(prSnippet, /CI for AI discoverability/);
   assert.match(prSnippet, /<details>/);
@@ -249,6 +258,64 @@ test("report renderers expose expected audit and eval sections", async () => {
   } else {
     assert.match(evalSummary, /- none/);
   }
+});
+
+test("report outputs expose stability summaries for repeated eval samples", async () => {
+  const [brand, competitors, prompts] = await Promise.all([
+    loadBrandConfig(path.resolve("examples/acme/brand.yaml")),
+    loadCompetitorsConfig(path.resolve("examples/acme/competitors.yaml")),
+    loadPromptsConfig(path.resolve("examples/acme/prompts.yaml"))
+  ]);
+
+  const audit = await runAudit({
+    siteInput: "./examples/fixtures/static-good",
+    brand,
+    competitors,
+    prompts
+  });
+
+  const responses = prompts.prompts.flatMap((promptCase) => [
+    makeResponse(promptCase.id, promptCase.holdout ?? false, 0),
+    makeResponse(promptCase.id, promptCase.holdout ?? false, 1)
+  ]);
+  const evalResult = scoreEvalResponses({
+    brand,
+    competitors,
+    prompts,
+    audit,
+    responses,
+    rawPayloadRoot: path.resolve("runs/test-eval/raw")
+  });
+
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-report-stability-"));
+  await writeAuditOutputs(tempDir, audit);
+  await writeEvalOutputs(tempDir, evalResult, null);
+
+  const evalSummary = await readFile(path.join(tempDir, "eval-summary.md"), "utf8");
+  const evalSummaryJson = JSON.parse(await readFile(path.join(tempDir, "eval-summary.json"), "utf8")) as {
+    summary: { repeatedPromptCount: number; stablePromptRate: number; unstablePromptCount: number };
+    promptGroups: Array<{ sampleCount: number; stable: boolean; consensusRate: number; spreadNote: string | null }>;
+  };
+  const shareSummary = JSON.parse(await readFile(path.join(tempDir, "share-summary.json"), "utf8")) as {
+    metrics: { repeatedPromptCount?: number; stablePromptRate?: number; unstablePromptCount?: number };
+  };
+  const shareSummaryMarkdown = await readFile(path.join(tempDir, "share-summary.md"), "utf8");
+
+  const expectedRepeatedPromptCount = prompts.prompts.filter((promptCase) => !promptCase.holdout).length;
+
+  assert.match(evalSummary, /## Stability summary/);
+  assert.match(evalSummary, /Stable repeated prompts: 100%/);
+  assert.equal(evalSummaryJson.summary.repeatedPromptCount, expectedRepeatedPromptCount);
+  assert.equal(evalSummaryJson.summary.stablePromptRate, 100);
+  assert.equal(evalSummaryJson.summary.unstablePromptCount, 0);
+  assert.ok(evalSummaryJson.promptGroups.every((group) => group.sampleCount === 2));
+  assert.ok(evalSummaryJson.promptGroups.every((group) => group.stable === true));
+  assert.ok(evalSummaryJson.promptGroups.every((group) => group.consensusRate === 100));
+  assert.ok(evalSummaryJson.promptGroups.every((group) => group.spreadNote === null));
+  assert.equal(shareSummary.metrics.repeatedPromptCount, expectedRepeatedPromptCount);
+  assert.equal(shareSummary.metrics.stablePromptRate, 100);
+  assert.equal(shareSummary.metrics.unstablePromptCount, 0);
+  assert.match(shareSummaryMarkdown, /Stability: 100% of repeated prompt groups were stable/);
 });
 
 test("manual-import report outputs expose CPS only when ranked samples are present", async () => {

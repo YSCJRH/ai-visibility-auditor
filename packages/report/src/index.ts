@@ -42,9 +42,10 @@ interface EvalSummaryJson {
     recommendation: boolean;
     misrepresented: boolean;
     matchedFacts: string[];
-    competitorMentions: string[];
-    scores: EvalResult["prompts"][number]["scores"];
-  }>;
+      competitorMentions: string[];
+      scores: EvalResult["prompts"][number]["scores"];
+    }>;
+  promptGroups: EvalResult["promptGroups"];
   briefs: Array<Pick<ContentBrief, "id" | "type" | "title" | "audience" | "angle" | "cta">>;
 }
 
@@ -207,6 +208,12 @@ function buildEvalShareSummary(result: EvalResult, previous: ShareSummary | null
     metrics.rankCoverageRate = result.summary.rankCoverageRate;
   }
 
+  if (result.summary.repeatedPromptCount > 0) {
+    metrics.repeatedPromptCount = result.summary.repeatedPromptCount;
+    metrics.stablePromptRate = result.summary.stablePromptRate;
+    metrics.unstablePromptCount = result.summary.unstablePromptCount;
+  }
+
   return {
     project: "AnswerLens",
     tagline: "CI for AI discoverability.",
@@ -247,11 +254,38 @@ function manualRankValidationLine(metrics: ShareSummary["metrics"]): string | nu
   return `Manual validation: CPS ${competitivePositionScore} across ${rankCoverageRate}% ranked samples.`;
 }
 
+function stabilitySummaryLine(metrics: ShareSummary["metrics"]): string | null {
+  const repeatedPromptCount = metrics.repeatedPromptCount;
+  const stablePromptRate = metrics.stablePromptRate;
+  const unstablePromptCount = metrics.unstablePromptCount;
+  if (
+    typeof repeatedPromptCount !== "number" ||
+    repeatedPromptCount < 1 ||
+    typeof stablePromptRate !== "number" ||
+    typeof unstablePromptCount !== "number"
+  ) {
+    return null;
+  }
+
+  return `Stability: ${stablePromptRate}% of repeated prompt groups were stable (${unstablePromptCount} unstable across ${repeatedPromptCount} repeated prompts).`;
+}
+
 function renderShareSummaryMarkdown(summary: ShareSummary): string {
   const metricRows = Object.entries(summary.metrics)
+    .filter(
+      ([key]) =>
+        ![
+          "competitivePositionScore",
+          "rankCoverageRate",
+          "repeatedPromptCount",
+          "stablePromptRate",
+          "unstablePromptCount"
+        ].includes(key)
+    )
     .map(([key, value]) => `| ${escapeTableCell(key)} | ${escapeTableCell(renderMetricValue(value))} |`)
     .join("\n");
   const manualValidation = manualRankValidationLine(summary.metrics);
+  const stabilitySummary = stabilitySummaryLine(summary.metrics);
 
   const issues =
     summary.topIssues.length > 0
@@ -287,7 +321,7 @@ ${summary.positioning}
 | --- | --- |
 ${metricRows}
 
-${manualValidation ? `${manualValidation}\n` : ""}
+${manualValidation ? `${manualValidation}\n` : ""}${stabilitySummary ? `${stabilitySummary}\n` : ""}
 
 ## AI may miss this product because
 
@@ -493,6 +527,7 @@ function buildEvalSummaryJson(result: EvalResult): EvalSummaryJson {
       competitorMentions: promptResult.competitorMentions,
       scores: promptResult.scores
     })),
+    promptGroups: result.promptGroups,
     briefs: result.briefs.map((brief) => ({
       id: brief.id,
       type: brief.type,
@@ -779,6 +814,17 @@ export function renderEvalSummaryMarkdown(result: EvalResult): string {
     result.summary.competitivePositionScore === null
       ? ""
       : `\n\n## Manual rank validation\n\n- Competitive position score: ${result.summary.competitivePositionScore}\n- Rank coverage: ${result.summary.rankCoverageRate}%\n`;
+  const repeatedPromptGroups = result.promptGroups.filter((group) => !group.holdout && group.sampleCount > 1);
+  const stabilityRows = repeatedPromptGroups
+    .map(
+      (group) =>
+        `| ${group.promptId} | ${group.category} | ${group.sampleCount} | ${group.holdout ? "holdout" : "benchmark"} | ${group.stable ? "yes" : "no"} | ${group.consensusRate}% | ${escapeTableCell(group.spreadNote ?? "-")} |`
+    )
+    .join("\n");
+  const stabilitySection =
+    repeatedPromptGroups.length === 0
+      ? ""
+      : `\n\n## Stability summary\n\n- Repeated prompt groups: ${result.summary.repeatedPromptCount}\n- Stable repeated prompts: ${result.summary.stablePromptRate}%\n- Unstable repeated prompts: ${result.summary.unstablePromptCount}\n\n| Prompt | Category | Samples | Pack | Stable | Consensus | Spread note |\n| --- | --- | ---: | --- | --- | ---: | --- |\n${stabilityRows}\n`;
 
   const promptRows = result.prompts
     .map(
@@ -792,7 +838,7 @@ export function renderEvalSummaryMarkdown(result: EvalResult): string {
       ? result.briefs.map((brief) => `- ${brief.type}: ${brief.title}`).join("\n")
       : "- none";
 
-  return `# AnswerLens Eval Summary\n\n## Overview\n\n- Site: ${result.site.input}\n- Provider: ${result.provider.name}\n- Model: ${result.provider.model}\n- Generated: ${result.generatedAt}\n- Benchmark prompt count: ${result.summary.promptCount}\n- Holdout prompt count: ${result.summary.holdoutPromptCount}\n- Sample count: ${result.summary.sampleCount}\n- Locale: ${result.summary.locale ?? "default"}\n- VAVR: ${result.summary.vavr}\n\n## Metrics\n\n- Mention rate: ${result.summary.mentionRate}\n- Accurate mention rate: ${result.summary.accurateMentionRate}\n- Owned citation rate: ${result.summary.ownedCitationRate}\n- Trusted citation rate: ${result.summary.trustedCitationRate}\n- Recommendation rate: ${result.summary.recommendationRate}\n- Misrepresentation rate: ${result.summary.misrepresentationRate}\n- Competitor exclusion gap: ${result.summary.competitorExclusionGap}\n- Fact coverage score: ${result.summary.factCoverageScore}\n- Accuracy rate: ${result.summary.accuracyRate}${manualRankSection}\n\n## Prompt results\n\n| Prompt | Category | Sample | Pack | VAVR | Accurate mention | Citations | Recommended |\n| --- | --- | ---: | --- | ---: | --- | ---: | --- |\n${promptRows}\n\n## Generated briefs\n\n${briefList}\n`;
+  return `# AnswerLens Eval Summary\n\n## Overview\n\n- Site: ${result.site.input}\n- Provider: ${result.provider.name}\n- Model: ${result.provider.model}\n- Generated: ${result.generatedAt}\n- Benchmark prompt count: ${result.summary.promptCount}\n- Holdout prompt count: ${result.summary.holdoutPromptCount}\n- Sample count: ${result.summary.sampleCount}\n- Locale: ${result.summary.locale ?? "default"}\n- VAVR: ${result.summary.vavr}\n\n## Metrics\n\n- Mention rate: ${result.summary.mentionRate}\n- Accurate mention rate: ${result.summary.accurateMentionRate}\n- Owned citation rate: ${result.summary.ownedCitationRate}\n- Trusted citation rate: ${result.summary.trustedCitationRate}\n- Recommendation rate: ${result.summary.recommendationRate}\n- Misrepresentation rate: ${result.summary.misrepresentationRate}\n- Competitor exclusion gap: ${result.summary.competitorExclusionGap}\n- Fact coverage score: ${result.summary.factCoverageScore}\n- Accuracy rate: ${result.summary.accuracyRate}${manualRankSection}${stabilitySection}\n\n## Prompt results\n\n| Prompt | Category | Sample | Pack | VAVR | Accurate mention | Citations | Recommended |\n| --- | --- | ---: | --- | ---: | --- | ---: | --- |\n${promptRows}\n\n## Generated briefs\n\n${briefList}\n`;
 }
 
 export function renderEvalDiffMarkdown(current: EvalResult, previous: EvalResult | null): string {

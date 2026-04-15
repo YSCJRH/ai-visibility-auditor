@@ -80,6 +80,12 @@ For `manual-import` runs with reviewed rank data, `metrics` may also include:
 - `competitivePositionScore`
 - `rankCoverageRate`
 
+For repeated-sample eval runs, `metrics` may also include:
+
+- `repeatedPromptCount`
+- `stablePromptRate`
+- `unstablePromptCount`
+
 ## `pr-snippet.md`
 
 Use this when a team wants a copy-ready GitHub block:
@@ -116,3 +122,4 @@ AnswerLens does not scrape consumer AI UIs, auto-post content, or guarantee answ
 - Do not include raw provider payloads in the share layer.
 - Keep default summaries short enough to read inside GitHub job summaries.
 - Treat `competitivePositionScore` as reviewed comparative validation, not as an official answer-surface rank.
+- Treat stability as a credibility note for repeated samples, not as a promise that answer surfaces are controllable.

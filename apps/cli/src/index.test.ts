@@ -77,10 +77,23 @@ test("runCli eval writes audit, eval, and raw payload outputs", async () => {
   const evalSummary = await readFile(path.join(outDir, "eval-summary.md"), "utf8");
   const scorecard = await readFile(path.join(outDir, "scorecard.md"), "utf8");
   const rawPayload = await readFile(path.join(outDir, "raw", "openai", "best-developer-analytics--sample-2.json"), "utf8");
+  const shareSummary = JSON.parse(await readFile(path.join(outDir, "share-summary.json"), "utf8")) as {
+    metrics: { repeatedPromptCount?: number; stablePromptRate?: number; unstablePromptCount?: number };
+  };
+  const evalSummaryJson = JSON.parse(await readFile(path.join(outDir, "eval-summary.json"), "utf8")) as {
+    summary: { repeatedPromptCount: number; stablePromptRate: number; unstablePromptCount: number };
+  };
 
   assert.match(evalSummary, /# AnswerLens Eval Summary/);
+  assert.match(evalSummary, /## Stability summary/);
   assert.match(scorecard, /VAVR: /);
   assert.match(rawPayload, /"sampleIndex": 1/);
+  assert.ok((shareSummary.metrics.repeatedPromptCount ?? 0) > 0);
+  assert.equal(shareSummary.metrics.stablePromptRate, 100);
+  assert.equal(shareSummary.metrics.unstablePromptCount, 0);
+  assert.ok(evalSummaryJson.summary.repeatedPromptCount > 0);
+  assert.equal(evalSummaryJson.summary.stablePromptRate, 100);
+  assert.equal(evalSummaryJson.summary.unstablePromptCount, 0);
   assert.ok(logs.some((entry) => entry.includes("AnswerLens eval complete.")));
 });
 
