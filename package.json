@@ -13,6 +13,7 @@
     "eval": "node --experimental-strip-types apps/cli/src/index.ts eval",
     "manual-import": "node --experimental-strip-types apps/cli/src/index.ts manual-import",
     "search-console-import": "node --experimental-strip-types apps/cli/src/index.ts search-console-import",
+    "bing-indexnow-helper": "node --experimental-strip-types apps/cli/src/index.ts bing-indexnow-helper",
     "demo:fixture": "node --experimental-strip-types apps/cli/src/index.ts audit ./examples/fixtures/static-good --brand ./examples/acme/brand.yaml --competitors ./examples/acme/competitors.yaml --prompts ./examples/acme/prompts.yaml --out ./runs/static-good",
     "build:cli": "corepack pnpm --dir apps/cli build",
     "pack:cli": "corepack pnpm --dir apps/cli pack --pack-destination ../../dist/packages",

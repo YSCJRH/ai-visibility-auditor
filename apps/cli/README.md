@@ -10,6 +10,7 @@ Core behaviors:
 - `eval` benchmarks prompt packs with live providers
 - `manual-import` scores normalized answer samples without scraping consumer AI UIs
 - `search-console-import` validates audit coverage against imported page-level Search Console exports
+- `bing-indexnow-helper` validates Bing page exports and prepares IndexNow helper artifacts
 
 The repository slug is `ai-visibility-auditor`; the public product name is `AnswerLens`.
 

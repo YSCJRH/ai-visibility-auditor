@@ -4,6 +4,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
   applyEvalSummaryToAudit,
+  buildBingWebmasterValidation,
+  buildIndexNowHelper,
   buildSearchConsoleValidation,
   loadBrandConfig,
   loadCompetitorsConfig,
@@ -15,7 +17,7 @@ import { normalizeDomain } from "../../../packages/core/src/utils.ts";
 import type { RunMode } from "../../../packages/core/src/index.ts";
 import type { Citation, ProviderName, ProviderResponse, SearchResult } from "../../../packages/providers/src/index.ts";
 import { runEvalProvider } from "../../../packages/providers/src/index.ts";
-import { readEvalResults, writeAuditOutputs, writeEvalOutputs, writeValidationOutputs } from "../../../packages/report/src/index.ts";
+import { readEvalResults, writeAuditOutputs, writeBingIndexNowOutputs, writeEvalOutputs, writeValidationOutputs } from "../../../packages/report/src/index.ts";
 
 type ParsedArgs = {
   positionals: string[];
@@ -112,6 +114,7 @@ Usage:
   corepack pnpm eval <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --provider <openai|perplexity> [--model <model>] [--samples <n>] [--locale <locale>]
   corepack pnpm manual-import <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --input <responses.json> [--locale <locale>]
   corepack pnpm search-console-import <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --input <gsc-pages.csv>
+  corepack pnpm bing-indexnow-helper <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --bing-input <bing-pages.csv>
 
 Notes:
   - audit is the stable v0.1 command.
@@ -119,6 +122,7 @@ Notes:
   - manual-import accepts normalized ProviderResponse entries or a { responses: [...] } wrapper.
   - manual-import may include rankPosition for manual rank validation; use a positive integer or null.
   - search-console-import validates audit findings against imported page-level Search Console exports.
+  - bing-indexnow-helper validates page-level Bing exports and prepares IndexNow helper artifacts without submitting live requests.
   - Set OPENAI_API_KEY or PERPLEXITY_API_KEY before live eval runs.
 `);
 }
@@ -434,6 +438,39 @@ async function runSearchConsoleImportCommand(parsed: ParsedArgs, dependencies: C
   );
 }
 
+async function runBingIndexNowHelperCommand(parsed: ParsedArgs, dependencies: CliDependencies): Promise<void> {
+  const siteInput = parsed.positionals[0];
+  if (!siteInput) {
+    throw new Error("Missing site input. Pass a public URL or a local fixture directory.");
+  }
+
+  const outDir = path.resolve(requiredFlag(parsed, "out"));
+  const bingInputPath = path.resolve(requiredFlag(parsed, "bing-input"));
+  const [brand, competitors, prompts] = await loadAuditInputs(parsed);
+
+  const audit = await runAudit({
+    siteInput,
+    sitemapUrl: parsed.flags.get("sitemap")?.[0],
+    includePatterns: listFlag(parsed, "include"),
+    excludePatterns: listFlag(parsed, "exclude"),
+    maxPages: numberFlag(parsed, "max-pages", 20),
+    brand,
+    competitors,
+    prompts
+  });
+
+  const csvText = await readFile(bingInputPath, "utf8");
+  const validation = buildBingWebmasterValidation(audit, csvText, bingInputPath);
+  const indexNow = buildIndexNowHelper(validation.audit);
+
+  await writeAuditOutputs(outDir, validation.audit);
+  await writeBingIndexNowOutputs(outDir, validation.audit, validation.validation, indexNow);
+
+  dependencies.logger.log(
+    `AnswerLens Bing / IndexNow helper complete.\n  Site: ${siteInput}\n  Imported Bing pages: ${validation.validation.summary.importedPageCount}\n  IndexNow candidates: ${indexNow.summary.candidateCount}\n  Output: ${outDir}`
+  );
+}
+
 export async function runCli(
   argv: string[] = process.argv.slice(2),
   dependencies: CliDependencies = {
@@ -465,6 +502,11 @@ export async function runCli(
 
   if (command === "search-console-import") {
     await runSearchConsoleImportCommand(parsed, dependencies);
+    return;
+  }
+
+  if (command === "bing-indexnow-helper") {
+    await runBingIndexNowHelperCommand(parsed, dependencies);
     return;
   }
 

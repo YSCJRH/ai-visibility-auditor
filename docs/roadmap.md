@@ -24,10 +24,7 @@ Recently completed on `main`:
 - `#11` Manual rank import and CPS scoring
 - `#12` Multi-sample aggregation stability summary
 - `#13` Search Console validation import
-
-Current execution order:
-
-1. `#14` Bing Webmaster / IndexNow helper
+- `#14` Bing Webmaster / IndexNow helper
 
 Why `#9` and `#10` came first:
 
@@ -97,7 +94,8 @@ Planned outcome:
 Current status:
 
 - `#13` is implemented on `main` as an import-first, contract-first validation layer
-- `#14` is the next helper slice and should reuse the validation-oriented posture rather than introduce a dashboard path
+- `#14` is implemented on `main` as an optional Bing validation and IndexNow helper layer
+- connector follow-through should keep using repo-native artifacts instead of introducing a dashboard path
 
 ## GitHub alignment
 
@@ -113,7 +111,7 @@ Release planning:
 - work intended for `v0.2.1` is already on `main`
 - work intended for `v0.2.2` is already on `main`
 - `v0.2.3` is released and closes the current validation-layer work for `#11` and `#12`
-- `v0.3.0` is now the current release target and should introduce connector-backed validation
+- `v0.3.0` is now the current connector-focused release line and includes import-first validation plus helper artifacts
 
 This document is the canonical public roadmap. README, release notes, and umbrella issues should link back here instead of restating divergent plans.
 

@@ -8,6 +8,8 @@ import {
   loadCompetitorsConfig,
   loadPromptsConfig,
   runAudit,
+  buildBingWebmasterValidation,
+  buildIndexNowHelper,
   buildSearchConsoleValidation,
   scoreEvalResponses,
   applyEvalSummaryToAudit
@@ -17,10 +19,13 @@ import {
   readEvalResults,
   renderEvalDiffMarkdown,
   renderEvalSummaryMarkdown,
+  renderBingSummaryMarkdown,
+  renderIndexNowSummaryMarkdown,
   renderSearchConsoleSummaryMarkdown,
   renderScorecardMarkdown,
   renderScorecardHtml,
   writeAuditOutputs,
+  writeBingIndexNowOutputs,
   writeEvalOutputs,
   writeValidationOutputs
 } from "./index.ts";
@@ -137,6 +142,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   const manualSteps = await readFile(path.resolve("docs/manual-steps.md"), "utf8");
   const shareSummaryDocs = await readFile(path.resolve("docs/shareable-summary.md"), "utf8");
   const searchConsoleDocs = await readFile(path.resolve("docs/search-console.md"), "utf8");
+  const bingIndexNowDocs = await readFile(path.resolve("docs/bing-indexnow.md"), "utf8");
   const badgesDocs = await readFile(path.resolve("docs/badges.md"), "utf8");
   const githubActionDocs = await readFile(path.resolve("docs/github-action.md"), "utf8");
   const actionDefinition = await readFile(path.resolve("action.yml"), "utf8");
@@ -209,6 +215,8 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(readme, /pr-snippet\.md/);
   assert.match(readme, /search-console-import/);
   assert.match(readme, /search-console-summary\.json/);
+  assert.match(readme, /bing-indexnow-helper/);
+  assert.match(readme, /indexnow-summary\.json/);
   assert.match(readme, /AnswerLens focuses on explainable structure, evidence, and validation workflows rather than consumer UI scraping\./);
   assert.match(readme, /## Why AnswerLens/);
   assert.match(readme, /Full public roadmap: \[docs\/roadmap\.md\]/);
@@ -227,7 +235,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(roadmap, /#12/);
   assert.match(roadmap, /#13/);
   assert.match(roadmap, /#14/);
-  assert.match(roadmap, /next helper slice/);
+  assert.match(roadmap, /implemented on `main` as an optional Bing validation and IndexNow helper layer/);
   assert.match(githubBootstrap, /canonical public roadmap/);
   assert.doesNotMatch(githubBootstrap, /\/D:\/SEO/);
   assert.match(distributionPlan, /# Distribution Plan/);
@@ -237,17 +245,22 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(shareSummaryDocs, /# Shareable Summary Contract/);
   assert.match(searchConsoleDocs, /# Search Console Validation Import/);
   assert.match(searchConsoleDocs, /Required columns/);
+  assert.match(bingIndexNowDocs, /# Bing \/ IndexNow Helper/);
+  assert.match(bingIndexNowDocs, /IndexNow helper outputs/);
   assert.match(badgesDocs, /AI discoverability audited with AnswerLens/);
   assert.match(githubActionDocs, /GITHUB_STEP_SUMMARY/);
   assert.match(githubActionDocs, /uses: YSCJRH\/ai-visibility-auditor@vX/);
+  assert.match(githubActionDocs, /bing-indexnow-helper/);
   assert.match(actionDefinition, /name: "AnswerLens"/);
   assert.match(actionDefinition, /share-summary-path/);
+  assert.match(actionDefinition, /bing-input/);
   assert.match(citationFile, /title: "AnswerLens"/);
   assert.match(citationFile, /repository-code:/);
   assert.match(prTemplate, /AnswerLens share summary/);
   assert.match(teardownTemplate, /Audit teardown/);
   assert.equal(packageJson.scripts["manual-import"], "node --experimental-strip-types apps/cli/src/index.ts manual-import");
   assert.equal(packageJson.scripts["search-console-import"], "node --experimental-strip-types apps/cli/src/index.ts search-console-import");
+  assert.equal(packageJson.scripts["bing-indexnow-helper"], "node --experimental-strip-types apps/cli/src/index.ts bing-indexnow-helper");
   assert.equal(packageJson.scripts["build:cli"], "corepack pnpm --dir apps/cli build");
   assert.equal(packageJson.scripts["pack:cli:dry-run"], "corepack pnpm --dir apps/cli pack --dry-run");
   assert.equal(packageJson.scripts["build:site"], "node --experimental-strip-types scripts/distribution/build-site.ts");
@@ -455,10 +468,71 @@ test("validation outputs expose Search Console summaries without changing eval a
   assert.ok(summaryJson.findings.some((finding) => finding.title === "Search Console page is not covered by crawl"));
   assert.ok(summaryJson.topPages.some((page) => page.page.includes("pricing")));
   assert.ok(pagesJson.some((page) => page.outOfScope));
-  assert.match(shareSummary, /Search validation: \d+\/\d+ key pages show Search Console evidence\./);
+  assert.match(shareSummary, /Search Console validation: \d+\/\d+ key pages show Search Console evidence\./);
   assert.equal(runManifest.kind, "validation-import");
   assert.equal(runManifest.summary.validationSource, "search-console");
   assert.equal(runManifest.summary.importedPageCount, 5);
   assert.equal(siteAudit.run.mode, "validation-import");
   assert.equal(siteAudit.run.validationSource, "search-console");
+});
+
+test("bing helper outputs expose Bing validation and IndexNow artifacts", async () => {
+  const [brand, competitors, prompts, csvText] = await Promise.all([
+    loadBrandConfig(path.resolve("examples/acme/brand.yaml")),
+    loadCompetitorsConfig(path.resolve("examples/acme/competitors.yaml")),
+    loadPromptsConfig(path.resolve("examples/acme/prompts.yaml")),
+    readFile(path.resolve("examples/fixtures/bing/static-good-pages.csv"), "utf8")
+  ]);
+
+  const audit = await runAudit({
+    siteInput: "./examples/fixtures/static-good",
+    brand,
+    competitors,
+    prompts
+  });
+
+  const validation = buildBingWebmasterValidation(
+    audit,
+    csvText,
+    path.resolve("examples/fixtures/bing/static-good-pages.csv")
+  );
+  const indexNow = buildIndexNowHelper(validation.audit);
+
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-bing-helper-report-"));
+  await writeAuditOutputs(tempDir, validation.audit);
+  await writeBingIndexNowOutputs(tempDir, validation.audit, validation.validation, indexNow);
+
+  const bingSummary = await readFile(path.join(tempDir, "bing-summary.md"), "utf8");
+  const bingSummaryJson = JSON.parse(await readFile(path.join(tempDir, "bing-summary.json"), "utf8")) as {
+    source: { type: string };
+    summary: { importedPageCount: number };
+  };
+  const bingPages = JSON.parse(await readFile(path.join(tempDir, "bing-pages.json"), "utf8")) as Array<{ page: string }>;
+  const indexNowSummary = await readFile(path.join(tempDir, "indexnow-summary.md"), "utf8");
+  const indexNowSummaryJson = JSON.parse(await readFile(path.join(tempDir, "indexnow-summary.json"), "utf8")) as {
+    summary: { candidateCount: number; endpoint: string };
+  };
+  const indexNowCandidates = JSON.parse(await readFile(path.join(tempDir, "indexnow-candidates.json"), "utf8")) as Array<{
+    url: string;
+    pageType: string;
+  }>;
+  const shareSummary = await readFile(path.join(tempDir, "share-summary.md"), "utf8");
+  const runManifest = JSON.parse(await readFile(path.join(tempDir, "run.json"), "utf8")) as {
+    summary: { validationSource: string; indexNowCandidateCount: number };
+  };
+
+  assert.match(renderBingSummaryMarkdown(validation.validation), /# AnswerLens Bing Webmaster Summary/);
+  assert.match(renderIndexNowSummaryMarkdown(indexNow), /# AnswerLens IndexNow Helper Summary/);
+  assert.match(bingSummary, /## Validation findings/);
+  assert.equal(bingSummaryJson.source.type, "bing-webmaster");
+  assert.equal(bingSummaryJson.summary.importedPageCount, 5);
+  assert.ok(bingPages.some((page) => page.page.includes("pricing")));
+  assert.match(indexNowSummary, /## Candidate URLs/);
+  assert.equal(indexNowSummaryJson.summary.endpoint, "https://api.indexnow.org/indexnow");
+  assert.ok(indexNowSummaryJson.summary.candidateCount > 0);
+  assert.ok(indexNowCandidates.some((candidate) => candidate.pageType === "pricing"));
+  assert.match(shareSummary, /Bing Webmaster validation: \d+\/\d+ key pages show Bing Webmaster evidence\./);
+  assert.match(shareSummary, /IndexNow helper: prepared \d+ candidate URLs/);
+  assert.equal(runManifest.summary.validationSource, "bing-webmaster");
+  assert.ok(runManifest.summary.indexNowCandidateCount > 0);
 });

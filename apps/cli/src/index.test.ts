@@ -309,11 +309,67 @@ test("runCli search-console-import writes validation artifacts and metadata", as
   assert.equal(summaryJson.summary.importedPageCount, 5);
   assert.equal(summaryJson.summary.matchedAuditPageCount, 3);
   assert.ok(pagesJson.some((page) => page.page.includes("pricing")));
-  assert.match(shareSummary, /Search validation: \d+\/\d+ key pages show Search Console evidence\./);
+  assert.match(shareSummary, /Search Console validation: \d+\/\d+ key pages show Search Console evidence\./);
   assert.equal(runManifest.kind, "validation-import");
   assert.equal(runManifest.run.mode, "validation-import");
   assert.equal(runManifest.run.validationSource, "search-console");
   assert.equal(auditResult.run.mode, "validation-import");
   assert.equal(auditResult.run.validationSource, "search-console");
   assert.ok(logs.some((entry) => entry.includes("AnswerLens Search Console import complete.")));
+});
+
+test("runCli bing-indexnow-helper writes Bing and IndexNow artifacts", async () => {
+  process.env.ANSWERLENS_IMPORT_ONLY = "1";
+  const { runCli } = await import("./index.ts");
+  const outDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-bing-helper-"));
+  const logs: string[] = [];
+
+  await runCli(
+    [
+      "bing-indexnow-helper",
+      "./examples/fixtures/static-good",
+      "--brand",
+      "./examples/acme/brand.yaml",
+      "--competitors",
+      "./examples/acme/competitors.yaml",
+      "--prompts",
+      "./examples/acme/prompts.yaml",
+      "--bing-input",
+      "./examples/fixtures/bing/static-good-pages.csv",
+      "--out",
+      outDir
+    ],
+    {
+      runProvider: async () => {
+        throw new Error("bing-indexnow-helper should not call live providers");
+      },
+      logger: {
+        log(message: string) {
+          logs.push(message);
+        },
+        error(message: string) {
+          logs.push(message);
+        }
+      }
+    }
+  );
+
+  const bingSummary = await readFile(path.join(outDir, "bing-summary.md"), "utf8");
+  const indexNowSummary = await readFile(path.join(outDir, "indexnow-summary.md"), "utf8");
+  const shareSummary = await readFile(path.join(outDir, "share-summary.md"), "utf8");
+  const runManifest = JSON.parse(await readFile(path.join(outDir, "run.json"), "utf8")) as {
+    kind: string;
+    run: { mode: string; validationSource?: string };
+    summary: { indexNowCandidateCount: number };
+  };
+
+  assert.match(bingSummary, /# AnswerLens Bing Webmaster Summary/);
+  assert.match(indexNowSummary, /# AnswerLens IndexNow Helper Summary/);
+  assert.match(shareSummary, /Bing Webmaster validation: \d+\/\d+ key pages show Bing Webmaster evidence\./);
+  assert.match(shareSummary, /IndexNow helper: prepared \d+ candidate URLs/);
+  assert.equal(runManifest.kind, "validation-import");
+  assert.equal(runManifest.run.mode, "validation-import");
+  assert.equal(runManifest.run.validationSource, "bing-webmaster");
+  assert.ok(runManifest.summary.indexNowCandidateCount > 0);
+  assert.ok(logs.some((entry) => entry.includes("AnswerLens Bing / IndexNow helper complete.")));
 });
