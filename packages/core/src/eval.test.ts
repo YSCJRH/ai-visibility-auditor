@@ -36,6 +36,21 @@ function makeResponse(promptId: string, answerText: string, sampleIndex = 0, ran
   };
 }
 
+function makeManualResponse(
+  promptId: string,
+  answerText: string,
+  sampleIndex = 0,
+  rankPosition: number | null = null,
+  holdout = false
+): ProviderResponse {
+  return {
+    ...makeResponse(promptId, answerText, sampleIndex, rankPosition),
+    provider: "manual",
+    model: "manual-import",
+    holdout
+  };
+}
+
 test("rankPositionToCompetitivePositionScore maps ranked answers to bounded CPS values", () => {
   assert.equal(rankPositionToCompetitivePositionScore(1), 1);
   assert.equal(rankPositionToCompetitivePositionScore(2), 0.75);
@@ -196,4 +211,68 @@ test("scoreEvalResponses computes CPS from manual rank inputs and excludes holdo
   assert.equal(result.prompts[1]?.scores.competitivePositionScore, null);
   assert.equal(result.prompts[1]?.scores.rankCoverageRate, 0);
   assert.equal(result.prompts[3]?.holdout, true);
+});
+
+test("scoreEvalResponses summarizes repeated prompt groups with stability metadata", async () => {
+  const [brand, competitors, prompts] = await Promise.all([
+    loadBrandConfig(path.resolve("examples/acme/brand.yaml")),
+    loadCompetitorsConfig(path.resolve("examples/acme/competitors.yaml")),
+    loadPromptsConfig(path.resolve("examples/acme/prompts.yaml"))
+  ]);
+
+  const audit = await runAudit({
+    siteInput: "./examples/fixtures/static-good",
+    brand,
+    competitors,
+    prompts
+  });
+
+  const strongAnswer =
+    "Acme is a developer analytics platform for product and engineering teams, and it provides public docs, transparent pricing, and self-serve onboarding.";
+  const weakAnswer = "Mixpanel is a stronger fit for broader marketing analytics teams.";
+
+  const result = scoreEvalResponses({
+    brand,
+    competitors,
+    prompts,
+    audit,
+    responses: [
+      makeManualResponse("best-developer-analytics", strongAnswer, 0, 1),
+      makeManualResponse("best-developer-analytics", strongAnswer, 1, 4),
+      makeManualResponse("developer-analytics-vs-mixpanel", `${strongAnswer} Acme is a better fit than Mixpanel for developer-facing teams.`, 0, null),
+      {
+        ...makeManualResponse("developer-analytics-vs-mixpanel", weakAnswer, 1, null),
+        citations: [],
+        searchResults: []
+      },
+      makeManualResponse("holdout-best-for-fintech", strongAnswer, 0, 2, true),
+      {
+        ...makeManualResponse("holdout-best-for-fintech", weakAnswer, 1, null, true),
+        citations: [],
+        searchResults: []
+      }
+    ],
+    rawPayloadRoot: path.resolve("runs/test-eval/raw"),
+    mode: "manual-import"
+  });
+
+  const stableGroup = result.promptGroups.find((group) => group.promptId === "best-developer-analytics");
+  const unstableGroup = result.promptGroups.find((group) => group.promptId === "developer-analytics-vs-mixpanel");
+  const holdoutGroup = result.promptGroups.find((group) => group.promptId === "holdout-best-for-fintech");
+
+  assert.equal(result.summary.repeatedPromptCount, 2);
+  assert.equal(result.summary.stablePromptRate, 50);
+  assert.equal(result.summary.unstablePromptCount, 1);
+  assert.equal(stableGroup?.sampleCount, 2);
+  assert.equal(stableGroup?.stable, true);
+  assert.equal(stableGroup?.consensusRate, 100);
+  assert.equal(stableGroup?.spreadNote, null);
+  assert.equal(stableGroup?.scores.competitivePositionScore, 0.63);
+  assert.equal(unstableGroup?.sampleCount, 2);
+  assert.equal(unstableGroup?.stable, false);
+  assert.ok((unstableGroup?.consensusRate ?? 0) < 100);
+  assert.ok((unstableGroup?.unstableSignals ?? []).includes("mention"));
+  assert.match(unstableGroup?.spreadNote ?? "", /Signals varied across repeated samples/i);
+  assert.equal(holdoutGroup?.holdout, true);
+  assert.equal(holdoutGroup?.sampleCount, 2);
 });

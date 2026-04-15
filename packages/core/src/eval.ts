@@ -60,6 +60,28 @@ export interface EvalSummary {
   vavr: number;
   competitivePositionScore: number | null;
   rankCoverageRate: number;
+  repeatedPromptCount: number;
+  stablePromptRate: number;
+  unstablePromptCount: number;
+}
+
+export interface EvalPromptGroupSummary {
+  promptId: string;
+  category: string;
+  priority: "high" | "medium" | "low";
+  prompt: string;
+  expectedSignal: string;
+  intent: string | null;
+  holdout: boolean;
+  provider: string;
+  model: string;
+  locale: string | null;
+  sampleCount: number;
+  stable: boolean;
+  consensusRate: number;
+  spreadNote: string | null;
+  unstableSignals: string[];
+  scores: EvalPromptScores;
 }
 
 export interface ContentBrief {
@@ -88,6 +110,7 @@ export interface EvalResult {
   };
   summary: EvalSummary;
   prompts: EvalPromptResult[];
+  promptGroups: EvalPromptGroupSummary[];
   briefs: ContentBrief[];
 }
 
@@ -118,6 +141,38 @@ const RECOMMENDATION_KEYWORDS = [
   "worth considering",
   "shortlist"
 ];
+
+type StabilitySignalKey =
+  | "mention"
+  | "accurateMention"
+  | "ownedCitation"
+  | "trustedCitation"
+  | "recommendation"
+  | "misrepresented"
+  | "competitorExcluded"
+  | "vavr";
+
+const STABILITY_SIGNAL_KEYS: StabilitySignalKey[] = [
+  "mention",
+  "accurateMention",
+  "ownedCitation",
+  "trustedCitation",
+  "recommendation",
+  "misrepresented",
+  "competitorExcluded",
+  "vavr"
+];
+
+const STABILITY_SIGNAL_LABELS: Record<StabilitySignalKey, string> = {
+  mention: "mention",
+  accurateMention: "accurate mention",
+  ownedCitation: "owned citation",
+  trustedCitation: "trusted citation",
+  recommendation: "recommendation",
+  misrepresented: "misrepresentation",
+  competitorExcluded: "competitor exclusion",
+  vavr: "VAVR"
+};
 
 function mentionBrand(answerText: string, brandName: string): boolean {
   return answerText.toLowerCase().includes(brandName.toLowerCase());
@@ -309,6 +364,48 @@ function weightedAverageNullable(values: Array<{ value: number | null; weight: n
   return weightedAverage(present);
 }
 
+function median(values: number[]): number {
+  if (values.length === 0) {
+    return 0;
+  }
+
+  const sorted = [...values].sort((left, right) => left - right);
+  const middle = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 1) {
+    return sorted[middle] ?? 0;
+  }
+
+  return ((sorted[middle - 1] ?? 0) + (sorted[middle] ?? 0)) / 2;
+}
+
+function medianNullable(values: Array<number | null>): number | null {
+  const present = values.filter((value): value is number => value !== null);
+  if (present.length === 0) {
+    return null;
+  }
+
+  return median(present);
+}
+
+function majority(values: number[]): number {
+  const positives = values.filter((value) => value >= 1).length;
+  return positives > values.length / 2 ? 1 : 0;
+}
+
+function signalConsensusRate(values: number[]): number {
+  const positives = values.filter((value) => value >= 1).length;
+  const negatives = values.length - positives;
+  return roundPercent(Math.max(positives, negatives) / Math.max(values.length, 1));
+}
+
+function spreadNote(sampleCount: number, unstableSignals: string[]): string | null {
+  if (sampleCount <= 1 || unstableSignals.length === 0) {
+    return null;
+  }
+
+  return `Signals varied across repeated samples: ${unstableSignals.join(", ")}.`;
+}
+
 function createFaqBrief(audit: AuditResult, brand: BrandConfig): ContentBrief {
   const issues = audit.issues
     .filter((issue) => issue.category === "coverage" || issue.category === "evidence")
@@ -393,35 +490,78 @@ export function buildContentBriefs(
   return briefs;
 }
 
-function averagePromptGroup(results: EvalPromptResult[], promptCase: PromptCase): { weight: number; values: EvalPromptScores } {
-  const average = (selector: (result: EvalPromptResult) => number) =>
-    results.reduce((sum, result) => sum + selector(result), 0) / Math.max(results.length, 1);
-  const averageNullable = (selector: (result: EvalPromptResult) => number | null): number | null => {
-    const present = results.map((result) => selector(result)).filter((value): value is number => value !== null);
-    if (present.length === 0) {
-      return null;
-    }
+function summarizePromptGroup(
+  results: EvalPromptResult[],
+  promptCase: PromptCase
+): { weight: number; values: EvalPromptScores; group: EvalPromptGroupSummary } {
+  const binaryScores = Object.fromEntries(
+    STABILITY_SIGNAL_KEYS.map((key) => {
+      const values = results.map((result) => result.scores[key]);
+      return [
+        key,
+        {
+          majority: majority(values),
+          consensusRate: signalConsensusRate(values)
+        }
+      ];
+    })
+  ) as Record<StabilitySignalKey, { majority: number; consensusRate: number }>;
 
-    return present.reduce((sum, value) => sum + value, 0) / present.length;
+  const unstableSignals = STABILITY_SIGNAL_KEYS.filter((key) => binaryScores[key].consensusRate < 100);
+  const consensusRate = roundPercent(
+    STABILITY_SIGNAL_KEYS.reduce((sum, key) => sum + binaryScores[key].consensusRate / 100, 0) /
+      STABILITY_SIGNAL_KEYS.length
+  );
+  const localeCandidates = unique(results.map((result) => result.locale).filter((value): value is string => Boolean(value)));
+  const provider = unique(results.map((result) => result.provider)).join(", ") || "unknown";
+  const model = unique(results.map((result) => result.model)).join(", ") || "unknown";
+
+  const values: EvalPromptScores = {
+    mention: binaryScores.mention.majority,
+    accurateMention: binaryScores.accurateMention.majority,
+    ownedCitation: binaryScores.ownedCitation.majority,
+    trustedCitation: binaryScores.trustedCitation.majority,
+    recommendation: binaryScores.recommendation.majority,
+    accuracy: roundScore(median(results.map((result) => result.scores.accuracy))),
+    factCoverage: roundScore(median(results.map((result) => result.scores.factCoverage))),
+    misrepresented: binaryScores.misrepresented.majority,
+    competitorExcluded: binaryScores.competitorExcluded.majority,
+    signalAlignment: roundScore(median(results.map((result) => result.scores.signalAlignment))),
+    vavr: binaryScores.vavr.majority,
+    competitivePositionScore: (() => {
+      const value = medianNullable(results.map((result) => result.scores.competitivePositionScore));
+      return value === null ? null : roundScore(value);
+    })(),
+    rankCoverageRate:
+      results.reduce((sum, result) => sum + result.scores.rankCoverageRate, 0) / Math.max(results.length, 1)
+  };
+
+  const group: EvalPromptGroupSummary = {
+    promptId: promptCase.id,
+    category: promptCase.category,
+    priority: promptCase.priority ?? "medium",
+    prompt: promptCase.template,
+    expectedSignal: promptCase.expected_signal,
+    intent: promptCase.intent ?? null,
+    holdout: promptCase.holdout ?? false,
+    provider,
+    model,
+    locale: localeCandidates.length === 1 ? localeCandidates[0] : localeCandidates.length > 1 ? "mixed" : null,
+    sampleCount: results.length,
+    stable: unstableSignals.length === 0,
+    consensusRate,
+    spreadNote: spreadNote(
+      results.length,
+      unstableSignals.map((key) => STABILITY_SIGNAL_LABELS[key])
+    ),
+    unstableSignals: unstableSignals.map((key) => STABILITY_SIGNAL_LABELS[key]),
+    scores: values
   };
 
   return {
     weight: PRIORITY_WEIGHTS[promptCase.priority ?? "medium"],
-    values: {
-      mention: average((result) => result.scores.mention),
-      accurateMention: average((result) => result.scores.accurateMention),
-      ownedCitation: average((result) => result.scores.ownedCitation),
-      trustedCitation: average((result) => result.scores.trustedCitation),
-      recommendation: average((result) => result.scores.recommendation),
-      accuracy: average((result) => result.scores.accuracy),
-      factCoverage: average((result) => result.scores.factCoverage),
-      misrepresented: average((result) => result.scores.misrepresented),
-      competitorExcluded: average((result) => result.scores.competitorExcluded),
-      signalAlignment: average((result) => result.scores.signalAlignment),
-      vavr: average((result) => result.scores.vavr),
-      competitivePositionScore: averageNullable((result) => result.scores.competitivePositionScore),
-      rankCoverageRate: average((result) => result.scores.rankCoverageRate)
-    }
+    values,
+    group
   };
 }
 
@@ -475,15 +615,22 @@ export function scoreEvalResponses(input: ScoreEvalInput): EvalResult {
     promptGroups.set(result.promptId, current);
   }
 
-  const activeGroups = [...promptGroups.entries()]
-    .map(([promptId, results]) => ({ promptId, results, promptCase: promptLookup.get(promptId)! }))
-    .filter((entry) => !entry.promptCase.holdout);
-  const holdoutGroups = [...promptGroups.entries()]
-    .map(([promptId, results]) => ({ promptId, results, promptCase: promptLookup.get(promptId)! }))
-    .filter((entry) => entry.promptCase.holdout);
-  const weighted = activeGroups.map((entry) => averagePromptGroup(entry.results, entry.promptCase));
+  const grouped = [...promptGroups.entries()].map(([promptId, results]) => {
+    const promptCase = promptLookup.get(promptId)!;
+    return {
+      promptId,
+      results,
+      promptCase,
+      ...summarizePromptGroup(results, promptCase)
+    };
+  });
+  const activeGroups = grouped.filter((entry) => !entry.promptCase.holdout);
+  const holdoutGroups = grouped.filter((entry) => entry.promptCase.holdout);
+  const weighted = activeGroups.map((entry) => ({ weight: entry.weight, values: entry.values }));
   const activeSampleResults = promptResults.filter((result) => !result.holdout);
   const localeCandidates = unique(promptResults.map((result) => result.locale).filter((value): value is string => Boolean(value)));
+  const repeatedPromptGroups = activeGroups.map((entry) => entry.group).filter((group) => group.sampleCount > 1);
+  const stablePromptGroups = repeatedPromptGroups.filter((group) => group.stable);
 
   const summary: EvalSummary = {
     promptCount: activeGroups.length,
@@ -508,7 +655,11 @@ export function scoreEvalResponses(input: ScoreEvalInput): EvalResult {
     })(),
     rankCoverageRate: roundPercent(
       activeSampleResults.filter((result) => result.rankPosition !== null).length / Math.max(activeSampleResults.length, 1)
-    )
+    ),
+    repeatedPromptCount: repeatedPromptGroups.length,
+    stablePromptRate:
+      repeatedPromptGroups.length === 0 ? 0 : roundPercent(stablePromptGroups.length / repeatedPromptGroups.length),
+    unstablePromptCount: repeatedPromptGroups.length - stablePromptGroups.length
   };
 
   const generatedAt = new Date().toISOString();
@@ -534,6 +685,7 @@ export function scoreEvalResponses(input: ScoreEvalInput): EvalResult {
     },
     summary,
     prompts: promptResults,
+    promptGroups: grouped.map((entry) => entry.group),
     briefs: buildContentBriefs(input.audit, input.brand, input.competitors)
   };
 }
