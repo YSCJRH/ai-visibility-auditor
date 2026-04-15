@@ -21,7 +21,7 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - id: answerlens
         uses: YSCJRH/ai-visibility-auditor@vX
@@ -83,3 +83,8 @@ This repository uses the same root Action via `uses: ./` in its fixture workflow
 - Do not call readiness scores rankings.
 - Do not imply AnswerLens guarantees answer-surface placement.
 - Prefer `share-summary.md` for public summaries and keep full JSON artifacts available for review.
+
+## Runtime note
+
+- Repository workflows are hardened for the GitHub Actions Node 24 transition.
+- Self-hosted runners should stay on a runner version compatible with Node 24-based actions.

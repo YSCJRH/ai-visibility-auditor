@@ -67,10 +67,14 @@ runs:
   using: "composite"
   steps:
     - uses: pnpm/action-setup@v4
+      env:
+        FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       with:
         version: ${{ inputs.pnpm-version }}
         run_install: false
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v5
+      env:
+        FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       with:
         node-version: ${{ inputs.node-version }}
     - name: Install AnswerLens dependencies
