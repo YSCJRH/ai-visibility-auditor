@@ -11,6 +11,9 @@ on:
     tags:
       - "v*"
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 permissions:
   contents: write
 
@@ -20,12 +23,12 @@ jobs:
     env:
       HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
           version: 10.33.0
           run_install: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: pnpm
@@ -50,7 +53,7 @@ jobs:
       - run: pnpm demo:fixture
       - run: pnpm build:cli
       - run: pnpm pack:cli
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         with:
           script: |
             const fs = require("node:fs");
@@ -137,7 +140,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release upload "$RELEASE_TAG" dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz --clobber
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: answerlens-release-distribution
           path: |

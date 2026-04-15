@@ -240,8 +240,10 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.doesNotMatch(githubBootstrap, /\/D:\/SEO/);
   assert.match(distributionPlan, /# Distribution Plan/);
   assert.match(distributionPlan, /qualified distribution starts \/ 28d/);
+  assert.match(distributionPlan, /Actions runtime changes can quietly erode reliability/);
   assert.match(manualSteps, /@answerlens/);
   assert.match(manualSteps, /GitHub Pages/);
+  assert.match(manualSteps, /Node 24-based JavaScript actions/);
   assert.match(shareSummaryDocs, /# Shareable Summary Contract/);
   assert.match(searchConsoleDocs, /# Search Console Validation Import/);
   assert.match(searchConsoleDocs, /Required columns/);
@@ -251,9 +253,12 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(githubActionDocs, /GITHUB_STEP_SUMMARY/);
   assert.match(githubActionDocs, /uses: YSCJRH\/ai-visibility-auditor@vX/);
   assert.match(githubActionDocs, /bing-indexnow-helper/);
+  assert.match(githubActionDocs, /Node 24 transition/);
   assert.match(actionDefinition, /name: "AnswerLens"/);
   assert.match(actionDefinition, /share-summary-path/);
   assert.match(actionDefinition, /bing-input/);
+  assert.match(actionDefinition, /actions\/setup-node@v5/);
+  assert.match(actionDefinition, /FORCE_JAVASCRIPT_ACTIONS_TO_NODE24/);
   assert.match(citationFile, /title: "AnswerLens"/);
   assert.match(citationFile, /repository-code:/);
   assert.match(prTemplate, /AnswerLens share summary/);

@@ -12,11 +12,14 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - id: answerlens
         uses: ./
         with:
@@ -26,7 +29,7 @@ jobs:
           competitors: examples/acme/competitors.yaml
           prompts: examples/acme/prompts.yaml
           out-dir: runs/static-good
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         with:
           script: |
             const fs = require("node:fs");
@@ -47,7 +50,7 @@ jobs:
             }));
             fs.writeFileSync("dist/releases.json", `${JSON.stringify(compiled, null, 2)}\n`);
       - run: pnpm build:site -- --releases dist/releases.json
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: dist/site
 

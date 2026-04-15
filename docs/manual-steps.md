@@ -14,6 +14,12 @@ These are the smallest manual steps needed to activate the public distribution s
 2. Set repository variable `ANSWERLENS_ENABLE_PAGES_DEPLOY=true` after Pages is enabled.
 3. Set the repository homepage URL to the Pages site once the first deploy succeeds.
 
+## GitHub Actions runtime
+
+1. Keep self-hosted runners on a version compatible with Node 24-based JavaScript actions.
+2. If you maintain copied workflows outside this repository, prefer the same major action versions used here:
+   `actions/checkout@v5`, `actions/setup-node@v5`, `actions/github-script@v8`, and `actions/upload-artifact@v6`.
+
 ## GitHub repository settings
 
 Update the public repository metadata to keep the brand coherent:
