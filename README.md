@@ -290,8 +290,7 @@ See [docs/shareable-summary.md](docs/shareable-summary.md) and [docs/badges.md](
 - Landed on `main` after `v0.2.0`: `#9` schema-text consistency and evidence density
 - Landed on `main` after `v0.2.0`: `#10` internal link context, anchor quality, and rule registry
 - Released in `v0.2.3` on April 15, 2026: `#11` manual rank import and CPS plus `#12` repeated-sample stability summaries
-- Landed on `main` after `v0.2.3`: `#13` Search Console validation import
-- Landed on `main` after `v0.2.3`: `#14` Bing Webmaster / IndexNow helper
+- Ready on `main` for `v0.3.0`: `#13` Search Console validation import plus `#14` Bing Webmaster / IndexNow helper
 - Full public roadmap: [docs/roadmap.md](docs/roadmap.md)
 
 ## Contributing

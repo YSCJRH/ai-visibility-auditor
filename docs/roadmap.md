@@ -111,7 +111,7 @@ Release planning:
 - work intended for `v0.2.1` is already on `main`
 - work intended for `v0.2.2` is already on `main`
 - `v0.2.3` is released and closes the current validation-layer work for `#11` and `#12`
-- `v0.3.0` is now the current connector-focused release line and includes import-first validation plus helper artifacts
+- `v0.3.0` is now release-ready on `main` and should ship the connector-focused import and helper layer
 
 This document is the canonical public roadmap. README, release notes, and umbrella issues should link back here instead of restating divergent plans.
 
