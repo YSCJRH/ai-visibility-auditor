@@ -8,15 +8,18 @@ AnswerLens should behave like a self-propagating open-source distribution system
 - GitHub releases with good narrative copy but no attached release assets
 - Shareable run artifacts such as `share-summary.md`, `share-summary.json`, `pr-snippet.md`, `run.json`, and `index.html`
 - A demo workflow that uploads fixture artifacts
+- A reusable root `action.yml` for `uses: YSCJRH/ai-visibility-auditor@vX`
+- A static-site compiler plus Pages workflow scaffolding in-repo
+- `CITATION.cff` and manual setup docs for distribution follow-through
 - Issue and PR templates that already encourage artifact-backed discussion
 
 ## Main bottlenecks
 
 - No public install surface yet, even though the product is CLI-first
-- No reusable `uses: owner/repo@vX` GitHub Action entry point
-- No GitHub Pages site, homepage URL, sitemap, feed, or canonical metadata
-- No compiler layer that turns artifacts into release assets, example pages, and indexable pages
-- No `CITATION.cff`, DOI path, or minimal growth metrics loop
+- The reusable GitHub Action exists, but it is not yet a stable published adoption path with docs-backed external usage
+- The Pages compiler and workflow scaffolding exist, but GitHub Pages, homepage, sitemap/feed publishing, and canonical site deployment are not yet enabled publicly
+- Release distribution scaffolding exists, but real release assets and npm publishing still depend on credentials and repo settings
+- DOI and the minimal growth metrics loop are still pending
 
 ## P0
 
@@ -26,6 +29,11 @@ Goals:
 - ship a reusable GitHub Action
 - ship a static-site compiler and Pages workflow scaffold
 - document the manual settings that still require tokens or clicks
+
+Status:
+
+- largely landed in-repo
+- remaining work is enablement, packaging, and public activation rather than missing scaffolding
 
 Acceptance:
 
@@ -72,6 +80,8 @@ No extra credentials required for P0:
 - site compiler and Pages artifact workflow
 - `CITATION.cff`
 - docs and release scaffolding
+
+These pieces now exist in-repo; the remaining gap is activation rather than local implementation.
 
 Requires manual setup for P1 or later:
 
