@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag-name:
-        description: "Optional semver tag to simulate or publish, for example v0.2.3."
+        description: "Optional semver tag to simulate or publish, for example v0.3.0."
         required: false
         type: string
   push:
@@ -97,6 +97,7 @@ jobs:
           - No consumer AI UI scraping
           - No ranking guarantees
           - Bing and IndexNow stay in helper mode; the first version does not submit live IndexNow requests
+          - Search connectors remain import-first; this release does not add live OAuth or API sync
           - GitHub Pages deployment still depends on repository settings
           - npm publish is skipped unless NPM_TOKEN is configured
 
