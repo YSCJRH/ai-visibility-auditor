@@ -5,7 +5,7 @@ AnswerLens should behave like a self-propagating open-source distribution system
 ## Current public surface
 
 - GitHub repository homepage with a strong README hero, sample visuals, and concept pages
-- GitHub releases with good narrative copy but no attached release assets
+- GitHub releases with attached CLI, demo, and site assets via `v0.2.3`
 - Shareable run artifacts such as `share-summary.md`, `share-summary.json`, `pr-snippet.md`, `run.json`, and `index.html`
 - A demo workflow that uploads fixture artifacts
 - A reusable root `action.yml` for `uses: YSCJRH/ai-visibility-auditor@vX`
@@ -18,7 +18,7 @@ AnswerLens should behave like a self-propagating open-source distribution system
 - No public install surface yet, even though the product is CLI-first
 - The reusable GitHub Action exists, but it is not yet a stable published adoption path with docs-backed external usage
 - The Pages compiler and workflow scaffolding exist, but GitHub Pages, homepage, sitemap/feed publishing, and canonical site deployment are not yet enabled publicly
-- Release distribution scaffolding exists, but real release assets and npm publishing still depend on credentials and repo settings
+- Release distribution now works on semver tags, but npm publish and some public distribution surfaces still depend on credentials and repo settings
 - DOI and the minimal growth metrics loop are still pending
 
 ## P0
@@ -50,6 +50,11 @@ Goals:
 - enable GitHub Pages deployment
 - attach real release assets and refresh the public site automatically
 - unify GitHub repository settings with the public brand
+
+Status:
+
+- real release assets are now shipping on semver tags
+- npm publish, Pages deployment, homepage activation, and settings alignment still need explicit enablement
 
 Acceptance:
 
