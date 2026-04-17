@@ -21,6 +21,6 @@ After copying it:
 3. Rewrite the prompt pack so it reflects your buyers, proof pages, and comparison questions.
 4. Set `site:` in the workflow to the public URL you want to audit.
 
-The starter bundle is intentionally minimal. It exists to make the public GitHub Action path copyable and reviewable.
+The starter bundle is intentionally minimal. It exists to make the public GitHub Action path copyable, forkable, and easy to reference from README and release docs.
 
 If you want one local run before CI, start with [../../docs/quickstart.md](../../docs/quickstart.md) and then move the same `.github/answerlens/` folder into the target repository workflow.

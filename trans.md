@@ -4,6 +4,7 @@
 > 用法：把这份文档作为 Codex 的任务背景；复杂任务先 `/plan`，再按里程碑执行。
 >
 > 规范化入口：本 workstream 的仓库级摘要与执行边界已整理到 [docs/activation-plan.md](docs/activation-plan.md)。
+> GitHub-native 增长与包装实践已整理到 [docs/github-growth-plan.md](docs/github-growth-plan.md)。
 
 ---
 

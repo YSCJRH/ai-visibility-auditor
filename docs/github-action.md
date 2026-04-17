@@ -108,6 +108,7 @@ Optional:
 - Copy [examples/consumer-repo/.github/workflows/answerlens.yml](../examples/consumer-repo/.github/workflows/answerlens.yml)
 
 The starter bundle is intentionally generic. Replace the example product, domain, competitor list, and prompt pack before using it on a real site.
+Treat it as the shareable adoption asset for forks, releases, and external setup guides.
 
 ## What to publish into `GITHUB_STEP_SUMMARY`
 

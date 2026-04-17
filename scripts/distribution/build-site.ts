@@ -221,6 +221,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
 
   const docsCards = [
     ["docs/activation-plan.md", "Activation plan", "Current operating focus for public entry points and adoption."],
+    ["docs/github-growth-plan.md", "Growth plan", "GitHub-native packaging, funnel, and community strategy."],
     ["docs/quickstart.md", "Quickstart", "Run one real-site audit before you wire CI."],
     ["docs/roadmap.md", "Roadmap", "Canonical public roadmap and issue sequencing."],
     ["docs/distribution-plan.md", "Distribution plan", "P0, P1, and P2 distribution surfaces and metrics."],
@@ -266,13 +267,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           ${renderPanel("What teams can ship next", "Top fixes", `<ul>${renderList(shareSummary.topRecommendations.map((item) => `<strong>${escapeHtml(item.title)}</strong>: ${escapeHtml(item.expectedOutcome)}`))}</ul>`)}
         </section>
         <section class="section grid">
-          ${renderPanel("Recommended first-run path", "Activation funnel", `<ol>${[
-            `<li><a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open the live demo report</a></li>`,
-            `<li><a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">Run the 60-second fixture demo</a></li>`,
-            `<li><a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a></li>`,
-            `<li><a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Add the GitHub Action</a></li>`,
-            `<li><a href="${escapeHtml(new URL("releases/", siteUrl).href)}">Use the latest release as the second front door</a></li>`
-          ].join("")}</ol><p>At every step, start with <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`)}
+          ${renderPanel("Recommended first-run path", "Activation funnel", `<p><a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open the live demo report</a> is the primary entry point.</p><p>Then continue with <a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">Run the 60-second fixture demo</a> or <a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Add the GitHub Action</a>.</p><p>After the fixture run, bridge into real adoption with <a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a> before wiring CI. Use <a href="${escapeHtml(new URL("releases/", siteUrl).href)}">the latest release</a> as the second public front door.</p><p>At every step, start with <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`)}
           ${renderPanel("Latest compiled excerpt", "Share summary", `<pre class="markdown">${escapeHtml(shareSummaryMarkdown.trim())}</pre>`)}
         </section>`,
       jsonLd: [
