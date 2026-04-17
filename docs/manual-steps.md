@@ -2,6 +2,14 @@
 
 These are the smallest manual steps needed to activate the public distribution surfaces that are scaffolded in the repository.
 
+## Activation order
+
+1. Enable GitHub Pages and confirm the canonical site URL.
+2. Set repository homepage, social preview, and topics so the public front door matches the docs.
+3. Choose the npm publish path: trusted publishing or `NPM_TOKEN`.
+4. Keep copied workflow versions current in external repositories.
+5. After the first public deploy, verify the live demo report and release surfaces.
+
 ## npm publishing
 
 1. Confirm control of the preferred scope `@answerlens`.
@@ -15,7 +23,9 @@ These are the smallest manual steps needed to activate the public distribution s
 
 1. Enable GitHub Pages with **Source: GitHub Actions**.
 2. Set repository variable `ANSWERLENS_ENABLE_PAGES_DEPLOY=true` after Pages is enabled.
-3. Set the repository homepage URL to the Pages site once the first deploy succeeds.
+3. Set the repository homepage URL to `https://yscjrh.github.io/ai-visibility-auditor/` once the first deploy succeeds.
+4. Verify the live demo report URL:
+   `https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html`
 
 ## GitHub Actions runtime
 
@@ -29,14 +39,21 @@ Update the public repository metadata to keep the brand coherent:
 
 - Description: `AnswerLens: CLI-first AI visibility auditor for product websites.`
 - Homepage: the GitHub Pages URL after deployment
-- Social preview: `assets/readme-cover.svg` or an exported rasterized equivalent
-- Topics: prefer brand and use-case terms over provider-heavy terms
+- Social preview: `assets/social-preview.png`
+- Topics: prefer `answerlens`, `ai-discoverability`, `ai-visibility`, `aeo`, `seo`, `cli`, `github-actions`, and category/use-case terms over provider-heavy terms
 - Optional: disable Wiki to keep the public distribution surface focused on README, docs, releases, Action docs, and Pages
 
 ## Optional credibility and research setup
 
 - Connect Zenodo if you want DOI-backed release citations
 - Add Marketplace listing metadata only after the reusable Action is stable
+
+## Public truth checklist
+
+- README, roadmap, release notes, and Pages should all agree on the latest released version
+- The live demo link in README should resolve to the Pages-hosted sample report
+- The copied workflow versions in docs should match the repository defaults
+- npm publish copy should mention both trusted publishing and `NPM_TOKEN`
 
 ## Current no-token path
 

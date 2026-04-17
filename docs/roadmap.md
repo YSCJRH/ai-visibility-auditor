@@ -1,4 +1,4 @@
-﻿# Public Roadmap
+# Public Roadmap
 
 `AnswerLens` is the public brand for this repository. The GitHub slug stays `ai-visibility-auditor` for now, but public docs, releases, and issue planning should treat `AnswerLens` as the primary name and `AI visibility auditor for product websites` as the descriptive subtitle.
 
@@ -17,7 +17,7 @@ Non-goals that stay fixed across roadmap stages:
 
 ## Near-term priorities
 
-Recently completed on `main`:
+Recently completed on `main` and released through `v0.3.0`:
 
 - `#9` Schema-text consistency and evidence density rules
 - `#10` Internal link context, anchor quality, and rule registry
@@ -32,7 +32,7 @@ Why `#9` and `#10` came first:
 - they strengthen the quality of audit findings without changing the public output contract
 - they were more central to product value than adding more providers or connectors first
 
-Why connectors still wait until `v0.3.0`:
+Why connectors waited until `v0.3.0`:
 
 - validation is broader than connector work alone
 - the product needs stronger audit and eval credibility before it layers on search-console style evidence
@@ -95,6 +95,7 @@ Current status:
 
 - `#13` is implemented on `main` as an import-first, contract-first validation layer
 - `#14` is implemented on `main` as an optional Bing validation and IndexNow helper layer
+- `v0.3.0` was released on April 15, 2026
 - connector follow-through should keep using repo-native artifacts instead of introducing a dashboard path
 
 ## GitHub alignment
@@ -111,11 +112,18 @@ Release planning:
 - work intended for `v0.2.1` is already on `main`
 - work intended for `v0.2.2` is already on `main`
 - `v0.2.3` is released and closes the current validation-layer work for `#11` and `#12`
-- `v0.3.0` is now release-ready on `main` and should ship the connector-focused import and helper layer
+- `v0.3.0` is released and ships the connector-focused import and helper layer
 
 This document is the canonical public roadmap. README, release notes, and umbrella issues should link back here instead of restating divergent plans.
 
 Canonical distribution follow-through lives in [docs/distribution-plan.md](distribution-plan.md).
+
+## Current operating focus
+
+With `v0.3.0` released on April 15, 2026, near-term work shifts from net-new connector delivery to activation and adoption hardening.
+
+- Canonical brief: [docs/activation-plan.md](activation-plan.md)
+- Detailed working notes: [../trans.md](../trans.md)
 
 ## Distribution spine
 

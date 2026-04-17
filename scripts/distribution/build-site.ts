@@ -139,7 +139,7 @@ function renderPanel(title: string, eyebrow: string, body: string): string {
 
 function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string): string {
   const canonical = new URL(page.route, siteUrl).href;
-  const ogImage = new URL("assets/readme-cover.svg", siteUrl).href;
+  const ogImage = new URL("assets/social-preview.png", siteUrl).href;
 
   return `<!doctype html>
 <html lang="en">
@@ -220,6 +220,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   await cp(demoRunDir, path.join(outDir, "examples", "static-good"), { recursive: true, force: true });
 
   const docsCards = [
+    ["docs/activation-plan.md", "Activation plan", "Current operating focus for public entry points and adoption."],
     ["docs/roadmap.md", "Roadmap", "Canonical public roadmap and issue sequencing."],
     ["docs/distribution-plan.md", "Distribution plan", "P0, P1, and P2 distribution surfaces and metrics."],
     ["docs/manual-steps.md", "Manual steps", "Minimal GitHub, npm, and Pages setup checklist."],
@@ -265,9 +266,9 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         </section>
         <section class="section grid">
           ${renderPanel("Current public entry points", "Distribution surfaces", `<ul>${renderList([
+            `<a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Live demo report and sample artifacts</a>`,
             `<a href="${escapeHtml(REPO_URL)}">GitHub repository and README</a>`,
             `<a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Reusable GitHub Action contract</a>`,
-            `<a href="${escapeHtml(new URL("examples/", siteUrl).href)}">Example artifacts and sample report</a>`,
             `<a href="${escapeHtml(new URL("releases/", siteUrl).href)}">Release index and attached bundles</a>`
           ])}</ul>`)}
           ${renderPanel("Latest compiled excerpt", "Share summary", `<pre class="markdown">${escapeHtml(shareSummaryMarkdown.trim())}</pre>`)}

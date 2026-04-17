@@ -104,13 +104,14 @@ jobs:
           - Bing and IndexNow stay in helper mode; the first version does not submit live IndexNow requests
           - Search connectors remain import-first; this release does not add live OAuth or API sync
           - GitHub Pages deployment still depends on repository settings
-          - npm publish is skipped unless NPM_TOKEN is configured
+          - npm publish is skipped unless NPM_TOKEN or trusted publishing is configured
 
           ## Canonical docs
 
           - README: https://github.com/YSCJRH/ai-visibility-auditor#readme
           - Distribution plan: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/distribution-plan.md
           - Manual steps: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/manual-steps.md
+          - Activation plan: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/activation-plan.md
           EOF
       - name: Create or update GitHub release
         if: ${{ env.RELEASE_TAG != '' }}

@@ -1,4 +1,4 @@
-﻿# AnswerLens
+# AnswerLens
 
 [![CI](https://github.com/YSCJRH/ai-visibility-auditor/actions/workflows/ci.yml/badge.svg)](https://github.com/YSCJRH/ai-visibility-auditor/actions/workflows/ci.yml)
 [![Demo Audit](https://github.com/YSCJRH/ai-visibility-auditor/actions/workflows/demo-audit.yml/badge.svg)](https://github.com/YSCJRH/ai-visibility-auditor/actions/workflows/demo-audit.yml)
@@ -15,9 +15,37 @@ AnswerLens focuses on explainable structure, evidence, and validation workflows 
 
 Open-source. CLI-first. Report-driven. No consumer UI scraping. No ranking promises.
 
-The repository slug is `ai-visibility-auditor`; the public project name is `AnswerLens`.
+## Start here
 
-## Try the fixture demo in 60 seconds
+- [Open the live demo report](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html): the canonical Pages-hosted sample report. If Pages has not been activated yet, use the [repo walkthrough fallback](docs/demo-report.md).
+- [Run the 60-second fixture demo](#run-the-60-second-fixture-demo): generate the same artifact set locally.
+- [Add the GitHub Action](docs/github-action.md): wire AnswerLens into pull requests, artifact uploads, and `GITHUB_STEP_SUMMARY`.
+
+## What you get
+
+- `audit` for AI-readiness checks against a live site or local fixture
+- `eval` for prompt-pack benchmarking with OpenAI and Perplexity adapters
+- `manual-import` for scoring normalized answer samples from external or human-collected runs
+- `search-console-import` for validating key-page evidence against imported page-level Search Console exports
+- `bing-indexnow-helper` for Bing validation imports plus IndexNow helper artifacts
+- Repo-native outputs such as `share-summary.md`, `pr-snippet.md`, `run.json`, and `index.html`
+
+## Why AnswerLens
+
+- CI for AI discoverability, built for Git workflows instead of dashboard lock-in
+- Explainable audit rules that focus on why AI systems miss or misread a site
+- A report-first, repo-native workflow that turns runs into artifacts teams can review and ship against
+- A validation-oriented path that avoids scrape-and-rank claims and keeps evidence visible
+
+## What this is not
+
+- Not a "rank #1 in ChatGPT" hack
+- Not a consumer AI UI scraper
+- Not a generic AI content generator
+- Not a replacement for Search Console or analytics
+- Not a guarantee of placement on any answer surface
+
+## Run the 60-second fixture demo
 
 ```bash
 corepack enable
@@ -38,15 +66,33 @@ AI may miss this product because:
 - Thin key page: add plain-language explanations, evidence blocks, and stronger sections.
 ```
 
-## What ships today
+## Open the live demo report
 
-- `audit` for AI-readiness checks against a live site or local fixture
-- `eval` for prompt-pack benchmarking with OpenAI and Perplexity adapters
-- `manual-import` for scoring normalized answer samples from external or human-collected runs
-- `search-console-import` for validating key-page evidence against imported page-level Search Console exports
-- Structured config contracts for `brand.yaml`, `competitors.yaml`, and `prompts.yaml`
-- Markdown, JSON, static HTML, and PR-ready outputs including `share-summary.md`, `pr-snippet.md`, and `run.json`
-- Expanded benchmark prompt pack with holdouts, fixtures, and GitHub issue / PR scaffolding
+- Canonical live demo URL: [Pages sample report](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html)
+- Repo walkthrough fallback: [docs/demo-report.md](docs/demo-report.md)
+- Open these artifacts first:
+  - `share-summary.md`
+  - `pr-snippet.md`
+  - `scorecard.md`
+  - `recommendations.md`
+  - `index.html`
+
+## Add the GitHub Action
+
+Start with [docs/github-action.md](docs/github-action.md) and copy the external starter bundle from [examples/consumer-repo](examples/consumer-repo).
+
+The public Action contract is:
+
+- `uses: YSCJRH/ai-visibility-auditor@vX`
+- `command: audit | eval | manual-import | search-console-import | bing-indexnow-helper`
+- outputs: `out-dir`, `share-summary-path`, `pr-snippet-path`, `run-json-path`
+
+## Install or download
+
+- GitHub Action is the fastest CI-first entry point
+- Release assets are the clearest tarball download surface: [latest release](https://github.com/YSCJRH/ai-visibility-auditor/releases/latest)
+- npm publishing is wired through semver releases and requires either trusted publishing or `NPM_TOKEN`; see [docs/manual-steps.md](docs/manual-steps.md)
+- GitHub Pages, repository homepage, social preview, and topics still require explicit repo settings activation
 
 ## Current status
 
@@ -64,21 +110,7 @@ AI may miss this product because:
 - Canonical distribution plan: [docs/distribution-plan.md](docs/distribution-plan.md)
 - Manual setup checklist for Pages, npm, and repo settings: [docs/manual-steps.md](docs/manual-steps.md)
 - GitHub Action usage and output contract: [docs/github-action.md](docs/github-action.md)
-
-## Why AnswerLens
-
-- CI for AI discoverability, built for Git workflows instead of dashboard lock-in.
-- Explainable audit rules that focus on why AI systems miss or misread a site.
-- A report-first, repo-native workflow that turns runs into artifacts teams can review and ship against.
-- A validation-oriented path that avoids scrape-and-rank claims and keeps evidence visible.
-
-## What this is not
-
-- Not a "rank #1 in ChatGPT" hack
-- Not a consumer AI UI scraper
-- Not a generic AI content generator
-- Not a replacement for Search Console or analytics
-- Not a guarantee of placement on any answer surface
+- Current activation and adoption brief: [docs/activation-plan.md](docs/activation-plan.md)
 
 ## Sample outputs
 
@@ -110,16 +142,18 @@ packages/core      Crawl, extract, audit, scoring, recommendations, config loadi
 packages/providers Live provider adapters and normalization contracts
 packages/report    Markdown, JSON, and HTML report rendering
 examples/          Demo configs and local fixtures
-docs/              Architecture, scoring, limitations, bootstrap notes, and roadmap
+docs/              Architecture, scoring, limitations, activation notes, and roadmap
 ```
+
+Copy the external starter bundle from [examples/consumer-repo](examples/consumer-repo) into `./.github/answerlens/` in the repo you want to audit, then use commands like these:
 
 ## Live audit
 
 ```bash
 corepack pnpm audit -- https://example.com \
-  --brand ./examples/acme/brand.yaml \
-  --competitors ./examples/acme/competitors.yaml \
-  --prompts ./examples/acme/prompts.yaml \
+  --brand ./.github/answerlens/brand.yaml \
+  --competitors ./.github/answerlens/competitors.yaml \
+  --prompts ./.github/answerlens/prompts.yaml \
   --out ./runs/example
 ```
 
@@ -127,9 +161,9 @@ corepack pnpm audit -- https://example.com \
 
 ```bash
 OPENAI_API_KEY=... corepack pnpm eval -- https://example.com \
-  --brand ./examples/acme/brand.yaml \
-  --competitors ./examples/acme/competitors.yaml \
-  --prompts ./examples/acme/prompts.yaml \
+  --brand ./.github/answerlens/brand.yaml \
+  --competitors ./.github/answerlens/competitors.yaml \
+  --prompts ./.github/answerlens/prompts.yaml \
   --provider openai \
   --samples 2 \
   --locale en-US \
@@ -142,9 +176,9 @@ Perplexity runs use the same command shape with `--provider perplexity` and `PER
 
 ```bash
 corepack pnpm manual-import -- https://example.com \
-  --brand ./examples/acme/brand.yaml \
-  --competitors ./examples/acme/competitors.yaml \
-  --prompts ./examples/acme/prompts.yaml \
+  --brand ./.github/answerlens/brand.yaml \
+  --competitors ./.github/answerlens/competitors.yaml \
+  --prompts ./.github/answerlens/prompts.yaml \
   --input ./responses.json \
   --out ./runs/example-import
 ```
@@ -159,8 +193,8 @@ If you have reviewed placement data from a manual validation pass, include `rank
     "provider": "manual",
     "model": "manual-import",
     "promptId": "best-developer-analytics",
-    "answerText": "Acme is a recommended developer analytics platform with public docs and transparent pricing.",
-    "citations": ["https://acme.test/pricing"],
+    "answerText": "Example Product is a recommended developer analytics platform with public docs and transparent pricing.",
+    "citations": ["https://example.com/pricing"],
     "searchResults": [],
     "requestedAt": "2026-04-14T00:00:00.000Z",
     "locale": "en-US",
@@ -178,9 +212,9 @@ If you have reviewed placement data from a manual validation pass, include `rank
 
 ```bash
 corepack pnpm search-console-import -- https://example.com \
-  --brand ./examples/acme/brand.yaml \
-  --competitors ./examples/acme/competitors.yaml \
-  --prompts ./examples/acme/prompts.yaml \
+  --brand ./.github/answerlens/brand.yaml \
+  --competitors ./.github/answerlens/competitors.yaml \
+  --prompts ./.github/answerlens/prompts.yaml \
   --input ./gsc-pages.csv \
   --out ./runs/example-search-console
 ```
@@ -199,9 +233,9 @@ It uses Search Console as an external evidence layer for existing audit findings
 
 ```bash
 corepack pnpm bing-indexnow-helper -- https://example.com \
-  --brand ./examples/acme/brand.yaml \
-  --competitors ./examples/acme/competitors.yaml \
-  --prompts ./examples/acme/prompts.yaml \
+  --brand ./.github/answerlens/brand.yaml \
+  --competitors ./.github/answerlens/competitors.yaml \
+  --prompts ./.github/answerlens/prompts.yaml \
   --bing-input ./bing-pages.csv \
   --out ./runs/example-bing
 ```
@@ -290,8 +324,11 @@ See [docs/shareable-summary.md](docs/shareable-summary.md) and [docs/badges.md](
 - Landed on `main` after `v0.2.0`: `#9` schema-text consistency and evidence density
 - Landed on `main` after `v0.2.0`: `#10` internal link context, anchor quality, and rule registry
 - Released in `v0.2.3` on April 15, 2026: `#11` manual rank import and CPS plus `#12` repeated-sample stability summaries
-- Ready on `main` for `v0.3.0`: `#13` Search Console validation import plus `#14` Bing Webmaster / IndexNow helper
+- Released in `v0.3.0` on April 15, 2026: `#13` Search Console validation import plus `#14` Bing Webmaster / IndexNow helper
+- Current operating focus: [docs/activation-plan.md](docs/activation-plan.md)
 - Full public roadmap: [docs/roadmap.md](docs/roadmap.md)
+
+The repository slug remains `ai-visibility-auditor`; the public product name is `AnswerLens`.
 
 ## Contributing
 

@@ -2,13 +2,29 @@
 
 AnswerLens ships a reusable root Action so teams can keep AI discoverability checks inside GitHub-native workflows instead of rebuilding shell glue in every repository.
 
+For an external repository, start by copying the starter bundle in [examples/consumer-repo](../examples/consumer-repo). The public docs should read from that consumer-repo layout, not from this repository's internal `examples/acme/*` fixtures.
+
 The public interface is:
 
 - `uses: YSCJRH/ai-visibility-auditor@vX`
 - commands: `audit`, `eval`, `manual-import`, `search-console-import`, `bing-indexnow-helper`
 - outputs: `out-dir`, `share-summary-path`, `pr-snippet-path`, `run-json-path`
 
-## Minimal workflow
+## Recommended external repo layout
+
+```text
+.github/
+  answerlens/
+    brand.yaml
+    competitors.yaml
+    prompts.yaml
+  workflows/
+    answerlens.yml
+```
+
+Use the starter files in [examples/consumer-repo/.github](../examples/consumer-repo/.github) as a copyable baseline, then replace the placeholder brand, competitors, prompts, and `site:` URL.
+
+## Minimal workflow for an external repository
 
 ```yaml
 name: AnswerLens
@@ -27,20 +43,24 @@ jobs:
         uses: YSCJRH/ai-visibility-auditor@vX
         with:
           command: audit
-          site: examples/fixtures/static-good
-          brand: examples/acme/brand.yaml
-          competitors: examples/acme/competitors.yaml
-          prompts: examples/acme/prompts.yaml
-          out-dir: runs/static-good
+          site: https://www.example.com
+          brand: .github/answerlens/brand.yaml
+          competitors: .github/answerlens/competitors.yaml
+          prompts: .github/answerlens/prompts.yaml
+          out-dir: runs/answerlens
 
       - name: Publish AnswerLens summary
+        shell: bash
         run: |
           cat "${{ steps.answerlens.outputs.share-summary-path }}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "### PR-ready snippet" >> "$GITHUB_STEP_SUMMARY"
           cat "${{ steps.answerlens.outputs.pr-snippet-path }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### run.json" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`${{ steps.answerlens.outputs.run-json-path }}\`" >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: answerlens-report
           path: ${{ steps.answerlens.outputs.out-dir }}
@@ -73,6 +93,23 @@ Optional:
 - `pr-snippet-path`: absolute path to `pr-snippet.md`
 - `run-json-path`: absolute path to `run.json`
 
+## Starter bundle
+
+- Copy [examples/consumer-repo/.github/answerlens/brand.yaml](../examples/consumer-repo/.github/answerlens/brand.yaml)
+- Copy [examples/consumer-repo/.github/answerlens/competitors.yaml](../examples/consumer-repo/.github/answerlens/competitors.yaml)
+- Copy [examples/consumer-repo/.github/answerlens/prompts.yaml](../examples/consumer-repo/.github/answerlens/prompts.yaml)
+- Copy [examples/consumer-repo/.github/workflows/answerlens.yml](../examples/consumer-repo/.github/workflows/answerlens.yml)
+
+The starter bundle is intentionally generic. Replace the example product, domain, competitor list, and prompt pack before using it on a real site.
+
+## What to publish into `GITHUB_STEP_SUMMARY`
+
+- `share-summary.md` for the human-readable run overview
+- `pr-snippet.md` for the copy-ready block that can move into PRs or issues
+- `run-json-path` as the pointer to the machine-readable manifest
+
+Keep the full `out-dir` uploaded as an artifact so reviewers can open the complete report bundle.
+
 ## Dogfood pattern
 
 This repository uses the same root Action via `uses: ./` in its fixture workflow. That keeps the public Action contract exercised on every change instead of leaving it as documentation-only surface area.
@@ -88,3 +125,4 @@ This repository uses the same root Action via `uses: ./` in its fixture workflow
 
 - Repository workflows are hardened for the GitHub Actions Node 24 transition.
 - Self-hosted runners should stay on a runner version compatible with Node 24-based actions.
+- For copied workflows, prefer the same major versions documented in [docs/manual-steps.md](manual-steps.md): `actions/checkout@v5`, `actions/setup-node@v5`, `actions/github-script@v8`, and `actions/upload-artifact@v6`.

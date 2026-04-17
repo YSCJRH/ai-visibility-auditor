@@ -1,0 +1,30 @@
+brand:
+  name: "Example Product"
+  domain: "example.com"
+  category: "developer analytics platform"
+  one_liner: "Example Product helps product and engineering teams understand onboarding, adoption, and time-to-value."
+  target_personas:
+    - "product managers"
+    - "developer experience teams"
+  key_use_cases:
+    - "analyze onboarding friction"
+    - "measure feature adoption"
+    - "reduce time-to-value"
+  competitors:
+    - "Competitor One"
+    - "Competitor Two"
+    - "Competitor Three"
+  canonical_facts:
+    - id: "positioning"
+      type: "positioning"
+      text: "Example Product is a developer analytics platform for product and engineering teams."
+    - id: "features"
+      type: "features"
+      text: "Example Product supports event analytics, funnels, and activation tracking."
+    - id: "evidence"
+      type: "evidence"
+      text: "Example Product provides public docs, transparent pricing, and buyer-facing trust information."
+  trusted_domains:
+    - "example.com"
+    - "docs.example.com"
+    - "github.com/example"

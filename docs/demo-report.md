@@ -1,6 +1,12 @@
 # Demo Report
 
-Run the local fixture demo to generate a shareable AnswerLens report:
+The canonical live demo report lives at:
+
+- [https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html)
+
+If GitHub Pages has not been activated yet, use the repo-local walkthrough below and the generated files in `runs/static-good`.
+
+Run the local fixture demo to generate the same shareable AnswerLens report locally:
 
 ```bash
 corepack pnpm demo:fixture
@@ -12,9 +18,9 @@ The report is written to `runs/static-good`.
 
 - `share-summary.md`: fastest human-readable overview
 - `pr-snippet.md`: copy-ready GitHub block
+- `index.html`: static report for browser review
 - `scorecard.md`: readiness score, buckets, top issues, and page inventory
 - `recommendations.md`: prioritized fixes
-- `index.html`: static report for browser review
 - `run.json`: machine-readable run metadata
 
 ## Example conclusion

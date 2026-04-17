@@ -5,7 +5,7 @@ AnswerLens should behave like a self-propagating open-source distribution system
 ## Current public surface
 
 - GitHub repository homepage with a strong README hero, sample visuals, and concept pages
-- GitHub releases with attached CLI, demo, and site assets via `v0.2.3`
+- GitHub releases with attached CLI, demo, and site assets through `v0.3.0`
 - Shareable run artifacts such as `share-summary.md`, `share-summary.json`, `pr-snippet.md`, `run.json`, and `index.html`
 - A demo workflow that uploads fixture artifacts
 - A reusable root `action.yml` for `uses: YSCJRH/ai-visibility-auditor@vX`
@@ -77,6 +77,13 @@ Acceptance:
 - DOI or equivalent research citation path is documented and live
 - release, package, Action, and Pages surfaces stay synchronized
 - North Star and leading metrics are reviewed on a repeatable cadence
+
+## Current operating focus
+
+With `v0.3.0` released on April 15, 2026, the near-term distribution bottleneck is activation rather than missing local scaffolding.
+
+- Canonical activation brief: [activation-plan.md](activation-plan.md)
+- Manual activation steps: [manual-steps.md](manual-steps.md)
 
 ## Credentials and manual settings
 

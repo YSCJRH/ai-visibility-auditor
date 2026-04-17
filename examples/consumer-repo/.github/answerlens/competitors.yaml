@@ -1,0 +1,10 @@
+competitors:
+  - name: "Competitor One"
+    domain: "competitor-one.example"
+    category: "product analytics"
+  - name: "Competitor Two"
+    domain: "competitor-two.example"
+    category: "product analytics"
+  - name: "Competitor Three"
+    domain: "competitor-three.example"
+    category: "product analytics"

@@ -1,0 +1,37 @@
+name: AnswerLens
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - id: answerlens
+        uses: YSCJRH/ai-visibility-auditor@v0.3.0
+        with:
+          command: audit
+          site: https://www.example.com
+          brand: .github/answerlens/brand.yaml
+          competitors: .github/answerlens/competitors.yaml
+          prompts: .github/answerlens/prompts.yaml
+          out-dir: runs/answerlens
+
+      - name: Publish AnswerLens summary
+        shell: bash
+        run: |
+          cat "${{ steps.answerlens.outputs.share-summary-path }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### PR-ready snippet" >> "$GITHUB_STEP_SUMMARY"
+          cat "${{ steps.answerlens.outputs.pr-snippet-path }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### run.json" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`${{ steps.answerlens.outputs.run-json-path }}\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: answerlens-report
+          path: ${{ steps.answerlens.outputs.out-dir }}
