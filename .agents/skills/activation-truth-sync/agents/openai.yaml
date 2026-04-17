@@ -1,0 +1,4 @@
+interface:
+  display_name: "Activation Truth Sync"
+  short_description: "Check README, releases, roadmap, and Pages for drift."
+  default_prompt: "Use $activation-truth-sync to audit AnswerLens public docs, release copy, and Pages surfaces for drift before making activation changes."
