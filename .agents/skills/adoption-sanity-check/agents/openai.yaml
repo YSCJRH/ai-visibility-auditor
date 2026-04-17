@@ -1,0 +1,4 @@
+interface:
+  display_name: "Adoption Sanity"
+  short_description: "Verify demo, quickstart, and Action paths stay copyable."
+  default_prompt: "Use $adoption-sanity-check to verify the AnswerLens demo, quickstart, and GitHub Action adoption path still works end-to-end."

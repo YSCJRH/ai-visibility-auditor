@@ -22,6 +22,7 @@ Repository slug: ai-visibility-auditor.
 - Separate code changes from manual repository settings in docs and summaries.
 - Prefer activating existing scaffolding over introducing new features.
 - Keep README, roadmap, distribution docs, Action docs, release copy, and manual steps in brand and status sync.
+- When an activation maintenance workflow repeats and the local flow is stable, codify it under `.agents/skills/` instead of re-explaining it in ad hoc prompts.
 - Every meaningful change should improve at least one funnel step: discover, understand, trust, try, activate, share, or revisit.
 
 ## Verification
