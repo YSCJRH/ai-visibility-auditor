@@ -95,7 +95,7 @@ async function fetchRemoteText(source: SiteSource, target: string): Promise<Fetc
   try {
     const response = await fetch(url, {
       headers: {
-        "user-agent": "AnswerLens/0.1.0 (+https://github.com/example/answerlens)"
+        "user-agent": "AnswerLens/0.3.0 (+https://github.com/YSCJRH/ai-visibility-auditor)"
       },
       signal: AbortSignal.timeout(12000)
     });

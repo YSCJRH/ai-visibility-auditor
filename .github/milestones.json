@@ -5,11 +5,10 @@
   },
   {
     "title": "v0.2-eval",
-    "description": "Experimental OpenAI and Perplexity eval adapters with normalized citations."
+    "description": "OpenAI and Perplexity eval adapters, manual rank import, and stability-oriented summaries."
   },
   {
     "title": "v0.3-connectors",
-    "description": "Search Console, Bing Webmaster, IndexNow, and manual import extensions."
+    "description": "Search Console validation import plus Bing Webmaster and IndexNow helper follow-through."
   }
 ]
-

@@ -49,20 +49,26 @@ test("build-site writes indexable pages and metadata", async () => {
     access(path.join(outDir, "robots.txt"))
   ]);
 
-  const [home, examples, feed, sitemap] = await Promise.all([
+  const [home, docs, releases, examples, feed, sitemap] = await Promise.all([
     readFile(path.join(outDir, "index.html"), "utf8"),
+    readFile(path.join(outDir, "docs", "index.html"), "utf8"),
+    readFile(path.join(outDir, "releases", "index.html"), "utf8"),
     readFile(path.join(outDir, "examples", "index.html"), "utf8"),
     readFile(path.join(outDir, "feed.xml"), "utf8"),
     readFile(path.join(outDir, "sitemap.xml"), "utf8")
   ]);
 
   assert.match(home, /<link rel="canonical" href="https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/"/);
+  assert.match(home, /assets\/social-preview\.png/);
+  assert.match(home, /latestRelease<\/p><p class="metric-value">v0\.3\.0/);
   assert.match(home, /twitter:card/);
   assert.match(home, /SoftwareApplication/);
   assert.match(home, /Organization/);
+  assert.match(docs, /Activation plan/);
+  assert.match(releases, /v0\.3\.0/);
   assert.match(examples, /"@type":"Dataset"/);
   assert.match(feed, /AnswerLens releases/);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/examples\//);
-  assert.equal(home.includes("閳"), false);
-  assert.equal(home.includes("鈥"), false);
+  assert.equal(home.includes("\uFFFD"), false);
+  assert.equal(feed.includes("\uFFFD"), false);
 });

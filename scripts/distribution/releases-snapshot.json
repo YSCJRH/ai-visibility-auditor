@@ -1,5 +1,12 @@
 [
   {
+    "tag_name": "v0.3.0",
+    "name": "v0.3.0",
+    "html_url": "https://github.com/YSCJRH/ai-visibility-auditor/releases/tag/v0.3.0",
+    "published_at": "2026-04-15T12:06:00Z",
+    "body": "AnswerLens is a CLI-first AI visibility auditor for product websites.\n\nCI for AI discoverability.\n\n## What ships\n\n- Field-level schema-text consistency and evidence density checks\n- Internal link context and discoverability rules for proof pages\n- Manual rank import with competitive position score (CPS)\n- Repeated-sample stability summaries in `eval-summary.*` and `share-summary.*`\n- Search Console validation import with dedicated summary artifacts\n- Bing Webmaster validation plus IndexNow helper artifacts\n- Publish-ready CLI bundle and tarball plus repo-native report artifacts\n\n## Known limits\n\n- No consumer AI UI scraping\n- No ranking guarantees\n- Bing and IndexNow stay in helper mode; the first version does not submit live IndexNow requests\n- Search connectors remain import-first; this release does not add live OAuth or API sync\n- GitHub Pages deployment still depends on repository settings\n- npm publish is skipped unless NPM_TOKEN or trusted publishing is configured\n\n## Canonical docs\n\n- README: https://github.com/YSCJRH/ai-visibility-auditor#readme\n- Distribution plan: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/distribution-plan.md\n- Manual steps: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/manual-steps.md\n"
+  },
+  {
     "tag_name": "v0.2.3",
     "name": "v0.2.3",
     "html_url": "https://github.com/YSCJRH/ai-visibility-auditor/releases/tag/v0.2.3",

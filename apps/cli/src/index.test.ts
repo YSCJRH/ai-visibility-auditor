@@ -373,3 +373,35 @@ test("runCli bing-indexnow-helper writes Bing and IndexNow artifacts", async () 
   assert.ok(runManifest.summary.indexNowCandidateCount > 0);
   assert.ok(logs.some((entry) => entry.includes("AnswerLens Bing / IndexNow helper complete.")));
 });
+
+test("consumer repo starter bundle stays self-consistent", async () => {
+  process.env.ANSWERLENS_IMPORT_ONLY = "1";
+  const { runCli } = await import("./index.ts");
+  const outDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-consumer-repo-"));
+
+  await runCli([
+    "audit",
+    "./examples/fixtures/static-good",
+    "--brand",
+    "./examples/consumer-repo/.github/answerlens/brand.yaml",
+    "--competitors",
+    "./examples/consumer-repo/.github/answerlens/competitors.yaml",
+    "--prompts",
+    "./examples/consumer-repo/.github/answerlens/prompts.yaml",
+    "--out",
+    outDir
+  ]);
+
+  const [workflow, shareSummary] = await Promise.all([
+    readFile("./examples/consumer-repo/.github/workflows/answerlens.yml", "utf8"),
+    readFile(path.join(outDir, "share-summary.md"), "utf8")
+  ]);
+
+  assert.match(workflow, /actions\/checkout@v5/);
+  assert.match(workflow, /actions\/upload-artifact@v6/);
+  assert.match(workflow, /\.github\/answerlens\/brand\.yaml/);
+  assert.match(workflow, /\.github\/answerlens\/competitors\.yaml/);
+  assert.match(workflow, /\.github\/answerlens\/prompts\.yaml/);
+  assert.match(workflow, /YSCJRH\/ai-visibility-auditor@v0\.3\.0/);
+  assert.match(shareSummary, /# AnswerLens Share Summary/);
+});
