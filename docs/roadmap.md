@@ -123,6 +123,7 @@ Canonical distribution follow-through lives in [docs/distribution-plan.md](distr
 With `v0.3.0` released on April 15, 2026, near-term work shifts from net-new connector delivery to activation and adoption hardening.
 
 - Canonical brief: [docs/activation-plan.md](activation-plan.md)
+- Current umbrella issue: [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33)
 - Detailed working notes: [../trans.md](../trans.md)
 
 ## Distribution spine

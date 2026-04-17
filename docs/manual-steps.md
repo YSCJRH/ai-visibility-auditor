@@ -8,7 +8,7 @@ These are the smallest manual steps needed to activate the public distribution s
 2. Set repository homepage, social preview, and topics so the public front door matches the docs.
 3. Choose the npm publish path: trusted publishing or `NPM_TOKEN`.
 4. Keep copied workflow versions current in external repositories.
-5. After the first public deploy, verify the live demo report and release surfaces.
+5. After the first public deploy, verify the live demo report, quickstart docs, and release surfaces.
 
 ## npm publishing
 
@@ -51,6 +51,7 @@ Update the public repository metadata to keep the brand coherent:
 ## Public truth checklist
 
 - README, roadmap, release notes, and Pages should all agree on the latest released version
+- README, quickstart docs, release notes, and Pages should all present the same first-run funnel
 - The live demo link in README should resolve to the Pages-hosted sample report
 - The copied workflow versions in docs should match the repository defaults
 - npm publish copy should mention both trusted publishing and `NPM_TOKEN`

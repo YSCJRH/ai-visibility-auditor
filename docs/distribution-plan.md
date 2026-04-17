@@ -83,6 +83,7 @@ Acceptance:
 With `v0.3.0` released on April 15, 2026, the near-term distribution bottleneck is activation rather than missing local scaffolding.
 
 - Canonical activation brief: [activation-plan.md](activation-plan.md)
+- Real-site quickstart: [quickstart.md](quickstart.md)
 - Manual activation steps: [manual-steps.md](manual-steps.md)
 
 ## Credentials and manual settings

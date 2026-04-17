@@ -61,11 +61,15 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /<link rel="canonical" href="https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/"/);
   assert.match(home, /assets\/social-preview\.png/);
   assert.match(home, /latestRelease<\/p><p class="metric-value">v0\.3\.0/);
+  assert.match(home, /Recommended first-run path/);
+  assert.match(home, /5-minute real-site audit/);
   assert.match(home, /twitter:card/);
   assert.match(home, /SoftwareApplication/);
   assert.match(home, /Organization/);
   assert.match(docs, /Activation plan/);
+  assert.match(docs, /Quickstart/);
   assert.match(releases, /v0\.3\.0/);
+  assert.match(releases, /Use the latest release/);
   assert.match(examples, /"@type":"Dataset"/);
   assert.match(feed, /AnswerLens releases/);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/examples\//);

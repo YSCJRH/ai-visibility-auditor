@@ -87,6 +87,13 @@ jobs:
 
           CI for AI discoverability.
 
+          ## Start here
+
+          - Open the live demo report: https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html
+          - Run a 5-minute real-site audit: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/quickstart.md
+          - Add the GitHub Action: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/github-action.md
+          - Download assets from this release: CLI tarball, demo audit bundle, and compiled site bundle
+
           ## What ships
 
           - Field-level schema-text consistency and evidence density checks
@@ -111,7 +118,12 @@ jobs:
           - README: https://github.com/YSCJRH/ai-visibility-auditor#readme
           - Distribution plan: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/distribution-plan.md
           - Manual steps: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/manual-steps.md
+          - Quickstart: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/quickstart.md
           - Activation plan: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/activation-plan.md
+
+          ## Current follow-through
+
+          - Current umbrella issue: https://github.com/YSCJRH/ai-visibility-auditor/issues/33
           EOF
       - name: Create or update GitHub release
         if: ${{ env.RELEASE_TAG != '' }}

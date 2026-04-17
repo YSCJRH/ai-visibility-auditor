@@ -44,6 +44,7 @@ For the current activation phase, keep coordination lightweight:
 - use milestones as the release spine
 - use `kind:*`, `area:*`, and `priority:*` labels for triage
 - split roadmap work into small issues instead of building a separate GitHub Project
+- keep `#33` open while the guided activation funnel is still the active workstream
 - keep the active activation PR linked from the current umbrella issue until the repo has more parallel contributors
 - treat [docs/roadmap.md](roadmap.md) as the canonical public roadmap
 - treat [docs/activation-plan.md](activation-plan.md) as the canonical activation brief
