@@ -17,11 +17,13 @@ The report is written to `runs/static-good`.
 ## What to open first
 
 - `share-summary.md`: fastest human-readable overview
-- `pr-snippet.md`: copy-ready GitHub block
-- `index.html`: static report for browser review
 - `scorecard.md`: readiness score, buckets, top issues, and page inventory
 - `recommendations.md`: prioritized fixes
+- `pr-snippet.md`: copy-ready GitHub block
+- `index.html`: static report for browser review
 - `run.json`: machine-readable run metadata
+
+This is the same artifact order used by the README funnel and the real-site quickstart: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
 
 ## Example conclusion
 

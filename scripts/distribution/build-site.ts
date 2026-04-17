@@ -221,6 +221,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
 
   const docsCards = [
     ["docs/activation-plan.md", "Activation plan", "Current operating focus for public entry points and adoption."],
+    ["docs/quickstart.md", "Quickstart", "Run one real-site audit before you wire CI."],
     ["docs/roadmap.md", "Roadmap", "Canonical public roadmap and issue sequencing."],
     ["docs/distribution-plan.md", "Distribution plan", "P0, P1, and P2 distribution surfaces and metrics."],
     ["docs/manual-steps.md", "Manual steps", "Minimal GitHub, npm, and Pages setup checklist."],
@@ -265,12 +266,13 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           ${renderPanel("What teams can ship next", "Top fixes", `<ul>${renderList(shareSummary.topRecommendations.map((item) => `<strong>${escapeHtml(item.title)}</strong>: ${escapeHtml(item.expectedOutcome)}`))}</ul>`)}
         </section>
         <section class="section grid">
-          ${renderPanel("Current public entry points", "Distribution surfaces", `<ul>${renderList([
-            `<a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Live demo report and sample artifacts</a>`,
-            `<a href="${escapeHtml(REPO_URL)}">GitHub repository and README</a>`,
-            `<a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Reusable GitHub Action contract</a>`,
-            `<a href="${escapeHtml(new URL("releases/", siteUrl).href)}">Release index and attached bundles</a>`
-          ])}</ul>`)}
+          ${renderPanel("Recommended first-run path", "Activation funnel", `<ol>${[
+            `<li><a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open the live demo report</a></li>`,
+            `<li><a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">Run the 60-second fixture demo</a></li>`,
+            `<li><a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a></li>`,
+            `<li><a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Add the GitHub Action</a></li>`,
+            `<li><a href="${escapeHtml(new URL("releases/", siteUrl).href)}">Use the latest release as the second front door</a></li>`
+          ].join("")}</ol><p>At every step, start with <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`)}
           ${renderPanel("Latest compiled excerpt", "Share summary", `<pre class="markdown">${escapeHtml(shareSummaryMarkdown.trim())}</pre>`)}
         </section>`,
       jsonLd: [
@@ -311,7 +313,16 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       filePath: path.join(outDir, "releases", "index.html"),
       title: "Releases",
       description: "Release index, version notes, and distribution surfaces compiled from GitHub metadata.",
-      body: `<section class="hero"><p class="eyebrow">Versioned distribution</p><h1>Each release should create package, Action, Pages, and artifact entry points.</h1><p>This page is compiled from release metadata so the public version line stays machine-readable and easy to index.</p></section><section class="section grid">${releaseCards}</section>`,
+      body: `<section class="hero"><p class="eyebrow">Versioned distribution</p><h1>Release notes should work like a second front door, not a changelog graveyard.</h1><p>This page is compiled from release metadata so the public version line stays machine-readable, easy to index, and useful for first-run visitors.</p></section>
+        <section class="section grid">
+          ${renderPanel("Use the latest release", "Start here", `<ul>${renderList([
+            `<a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open the live demo report</a>`,
+            `<a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a>`,
+            `<a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Add the GitHub Action</a>`,
+            releases[0]?.html_url ? `<a href="${escapeHtml(releases[0].html_url)}">Download the latest release assets</a>` : "Download the latest release assets"
+          ])}</ul><p>Review artifacts in the same order each time: <code>share-summary.md</code>, <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`)}
+        </section>
+        <section class="section grid">${releaseCards}</section>`,
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "CollectionPage",

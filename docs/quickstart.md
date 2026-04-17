@@ -1,0 +1,81 @@
+# Quickstart: Run A Real-Site Audit In 5 Minutes
+
+This is the bridge between the fixture demo and the GitHub Action.
+
+Use it when you already understand the sample report and want one real AnswerLens run against your own public site before you wire CI.
+
+## What you need
+
+- a public site URL
+- Node `>=22.0.0`
+- a local checkout of this repository
+- no provider API keys for a basic `audit` run
+
+## Step 1: install the local workspace
+
+```bash
+corepack enable
+corepack pnpm install
+```
+
+## Step 2: copy the starter config shape
+
+Use the external starter bundle in [../examples/consumer-repo](../examples/consumer-repo) as the source of truth and copy these files into your own working folder:
+
+```text
+.github/
+  answerlens/
+    brand.yaml
+    competitors.yaml
+    prompts.yaml
+```
+
+If you are only evaluating AnswerLens locally, it is fine to create that folder inside this checkout.
+
+If you are preparing long-term adoption, use the same folder shape inside the repository you eventually want to audit in CI.
+
+## Step 3: replace the placeholders
+
+- change the brand name, domain, and proof-page hints in `brand.yaml`
+- update `competitors.yaml` so it reflects your real category
+- rewrite `prompts.yaml` to match your buyers, comparisons, and citation questions
+
+Do not keep the example product, competitor list, or prompt pack for a real audit.
+
+## Step 4: run one real audit
+
+```bash
+corepack pnpm audit -- https://www.example.com \
+  --brand ./.github/answerlens/brand.yaml \
+  --competitors ./.github/answerlens/competitors.yaml \
+  --prompts ./.github/answerlens/prompts.yaml \
+  --out ./runs/answerlens-real-site
+```
+
+That command keeps the workflow in the same CLI shape used by the reusable GitHub Action.
+
+## Step 5: open the artifacts in order
+
+Start with these files:
+
+1. `share-summary.md`
+2. `scorecard.md`
+3. `recommendations.md`
+
+Then use:
+
+- `pr-snippet.md` when you want a copy-ready GitHub block
+- `index.html` when you want a browser-friendly report
+- `run.json` when you want machine-readable run metadata
+
+## What to look for
+
+- Can someone new to the project understand the top issue from `share-summary.md` without opening raw JSON?
+- Does `scorecard.md` make the readiness tradeoff legible enough to discuss with a teammate?
+- Do `recommendations.md` and `pr-snippet.md` feel reviewable, not just generic "AI SEO" advice?
+
+## Next step: move the same path into CI
+
+Once the local run feels useful, continue to [docs/github-action.md](github-action.md).
+
+The GitHub Action should feel like the same artifact contract on a schedule or pull request, not a different product surface.

@@ -4,6 +4,13 @@ AnswerLens ships a reusable root Action so teams can keep AI discoverability che
 
 For an external repository, start by copying the starter bundle in [examples/consumer-repo](../examples/consumer-repo). The public docs should read from that consumer-repo layout, not from this repository's internal `examples/acme/*` fixtures.
 
+Recommended path:
+
+1. open the live demo report
+2. run the fixture demo
+3. run one real local audit with [quickstart.md](quickstart.md)
+4. move the same artifact contract into the GitHub Action
+
 The public interface is:
 
 - `uses: YSCJRH/ai-visibility-auditor@vX`
@@ -109,6 +116,12 @@ The starter bundle is intentionally generic. Replace the example product, domain
 - `run-json-path` as the pointer to the machine-readable manifest
 
 Keep the full `out-dir` uploaded as an artifact so reviewers can open the complete report bundle.
+
+Review artifacts in the same order used everywhere else:
+
+1. `share-summary.md`
+2. `scorecard.md`
+3. `recommendations.md`
 
 ## Dogfood pattern
 

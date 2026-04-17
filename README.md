@@ -17,9 +17,12 @@ Open-source. CLI-first. Report-driven. No consumer UI scraping. No ranking promi
 
 ## Start here
 
-- [Open the live demo report](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html): the canonical Pages-hosted sample report. If Pages has not been activated yet, use the [repo walkthrough fallback](docs/demo-report.md).
-- [Run the 60-second fixture demo](#run-the-60-second-fixture-demo): generate the same artifact set locally.
-- [Add the GitHub Action](docs/github-action.md): wire AnswerLens into pull requests, artifact uploads, and `GITHUB_STEP_SUMMARY`.
+1. [Open the live demo report](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html): see the canonical Pages-hosted sample report first. If Pages has not been activated yet, use the [repo walkthrough fallback](docs/demo-report.md).
+2. [Run the 60-second fixture demo](#run-the-60-second-fixture-demo): generate the same artifact set locally.
+3. [Run a 5-minute real-site audit](docs/quickstart.md): point AnswerLens at your own public site before you wire CI.
+4. [Add the GitHub Action](docs/github-action.md): turn the same artifact flow into pull requests, artifact uploads, and `GITHUB_STEP_SUMMARY`.
+
+Across every step, open artifacts in the same order: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
 
 ## What you get
 
@@ -55,6 +58,14 @@ corepack pnpm demo:fixture
 
 That command audits the local fixture in [examples/fixtures/static-good](examples/fixtures/static-good) and writes outputs to [runs/static-good](runs/static-good).
 
+Open these fixture artifacts first:
+
+- `share-summary.md`
+- `scorecard.md`
+- `recommendations.md`
+- `pr-snippet.md`
+- `index.html`
+
 The first shareable result looks like this:
 
 ```md
@@ -72,14 +83,24 @@ AI may miss this product because:
 - Repo walkthrough fallback: [docs/demo-report.md](docs/demo-report.md)
 - Open these artifacts first:
   - `share-summary.md`
-  - `pr-snippet.md`
   - `scorecard.md`
   - `recommendations.md`
+  - `pr-snippet.md`
   - `index.html`
+
+## Run a 5-minute real-site audit
+
+Use [docs/quickstart.md](docs/quickstart.md) after the fixture demo and before CI adoption.
+
+- Copy the starter bundle shape from [examples/consumer-repo](examples/consumer-repo) into `./.github/answerlens/`.
+- Run one local `audit` against your own public site with the same config layout that later moves into GitHub Actions.
+- Open `share-summary.md`, then `scorecard.md`, then `recommendations.md` before you look at `pr-snippet.md` or `index.html`.
 
 ## Add the GitHub Action
 
 Start with [docs/github-action.md](docs/github-action.md) and copy the external starter bundle from [examples/consumer-repo](examples/consumer-repo).
+
+If you have not run one real local audit yet, use [docs/quickstart.md](docs/quickstart.md) first. The Action should feel like the CI version of the same artifact-backed workflow, not a separate adoption path.
 
 The public Action contract is:
 
@@ -90,6 +111,7 @@ The public Action contract is:
 ## Install or download
 
 - GitHub Action is the fastest CI-first entry point
+- The cleanest one-off local run lives in [docs/quickstart.md](docs/quickstart.md)
 - Release assets are the clearest tarball download surface: [latest release](https://github.com/YSCJRH/ai-visibility-auditor/releases/latest)
 - npm publishing is wired through semver releases and requires either trusted publishing or `NPM_TOKEN`; see [docs/manual-steps.md](docs/manual-steps.md)
 - GitHub Pages, repository homepage, social preview, and topics still require explicit repo settings activation
@@ -109,6 +131,7 @@ The public Action contract is:
 
 - Canonical distribution plan: [docs/distribution-plan.md](docs/distribution-plan.md)
 - Manual setup checklist for Pages, npm, and repo settings: [docs/manual-steps.md](docs/manual-steps.md)
+- 5-minute real-site quickstart: [docs/quickstart.md](docs/quickstart.md)
 - GitHub Action usage and output contract: [docs/github-action.md](docs/github-action.md)
 - Current activation and adoption brief: [docs/activation-plan.md](docs/activation-plan.md)
 
