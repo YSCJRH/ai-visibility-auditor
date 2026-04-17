@@ -209,7 +209,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.ok(siteAudit.pages.some((page) => (page.schemaTextSignals ?? []).length > 0));
   assert.ok(siteAudit.pages.some((page) => (page.evidenceSignals ?? []).length > 0));
   assert.doesNotMatch(readme, /\/D:\/SEO/);
-  assert.match(readme, /AnswerLens is a CLI-first AI visibility auditor for product websites\./);
+  assert.match(readme, /AnswerLens is a CLI-first, GitHub-native AI visibility auditor for product websites\./);
   assert.match(readme, /CI for AI discoverability\./);
   assert.match(readme, /share-summary\.md/);
   assert.match(readme, /pr-snippet\.md/);

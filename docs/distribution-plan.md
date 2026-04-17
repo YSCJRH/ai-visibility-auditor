@@ -4,23 +4,27 @@ AnswerLens should behave like a self-propagating open-source distribution system
 
 ## Current public surface
 
+- The GitHub repository README is the canonical home for the public product story
 - GitHub repository homepage with a strong README hero, sample visuals, and concept pages
+- GitHub Pages is live at `https://yscjrh.github.io/ai-visibility-auditor/` with homepage, docs, releases, examples, playbooks, sitemap, and feed
 - GitHub releases with attached CLI, demo, and site assets through `v0.3.0`
 - Shareable run artifacts such as `share-summary.md`, `share-summary.json`, `pr-snippet.md`, `run.json`, and `index.html`
 - A demo workflow that uploads fixture artifacts
 - A reusable root `action.yml` for `uses: YSCJRH/ai-visibility-auditor@vX`
-- A static-site compiler plus Pages workflow scaffolding in-repo
+- A real-site quickstart between the fixture demo and GitHub Action adoption
+- A static-site compiler plus live Pages deployment path
 - `CITATION.cff` and manual setup docs for distribution follow-through
+- Repo-local activation maintenance skills under `.agents/skills/`
 - Issue and PR templates that already encourage artifact-backed discussion
 
 ## Main bottlenecks
 
-- No public install surface yet, even though the product is CLI-first
-- The reusable GitHub Action exists, but it is not yet a stable published adoption path with docs-backed external usage
-- The Pages compiler and workflow scaffolding exist, but GitHub Pages, homepage, sitemap/feed publishing, and canonical site deployment are not yet enabled publicly
-- Release distribution now works on semver tags, but npm publish and some public distribution surfaces still depend on credentials and repo settings
+- The public funnel is now visible, but external adoption still needs more proof beyond the fixture and quickstart path
+- The reusable GitHub Action is now docs-backed, but wider external reuse still needs repeated validation on real consumer repositories
+- Release distribution now works on semver tags, but npm publish still depends on credentials or trusted publishing setup
 - npm publish can now be enabled through either `NPM_TOKEN` or npm trusted publishing, but one of those paths still needs manual setup
 - GitHub workflow maintenance still matters because Actions runtime changes can quietly erode reliability if versions are not kept current
+- Repo-local skills now cover truth-sync and adoption sanity, but they still need repeated use before broader automation
 - DOI and the minimal growth metrics loop are still pending
 
 ## P0
@@ -56,13 +60,15 @@ Goals:
 Status:
 
 - real release assets are now shipping on semver tags
-- npm publish, Pages deployment, homepage activation, and settings alignment still need explicit enablement
+- Pages, homepage, social preview, topics, and activation funnel are now publicly aligned
+- npm publish still needs explicit trusted publishing or `NPM_TOKEN` enablement
 
 Acceptance:
 
 - tag pushes can publish npm when `NPM_TOKEN` is present and skip cleanly when it is not
 - release assets include CLI tarballs, demo artifacts, and compiled site bundles
 - GitHub homepage, Pages, README, Action docs, and release notes use one canonical product description
+- the release surface acts as a second front door rather than only a changelog page
 
 ## P2
 
@@ -83,8 +89,10 @@ Acceptance:
 With `v0.3.0` released on April 15, 2026, the near-term distribution bottleneck is activation rather than missing local scaffolding.
 
 - Canonical activation brief: [activation-plan.md](activation-plan.md)
+- GitHub-native growth practice: [github-growth-plan.md](github-growth-plan.md)
 - Real-site quickstart: [quickstart.md](quickstart.md)
 - Manual activation steps: [manual-steps.md](manual-steps.md)
+- Repo-local maintenance skills: `.agents/skills/activation-truth-sync` and `.agents/skills/adoption-sanity-check`
 
 ## Credentials and manual settings
 
@@ -101,8 +109,7 @@ These pieces now exist in-repo; the remaining gap is activation rather than loca
 Requires manual setup for P1 or later:
 
 - npm scope control and `NPM_TOKEN`
-- enabling GitHub Pages from Actions
-- setting repository homepage, social preview, and refined topics
+- npm trusted publishing if you want the tokenless publish path
 - optional Zenodo integration
 
 ## Metrics

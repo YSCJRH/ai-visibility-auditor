@@ -9,6 +9,7 @@ These are the smallest manual steps needed to activate the public distribution s
 3. Choose the npm publish path: trusted publishing or `NPM_TOKEN`.
 4. Keep copied workflow versions current in external repositories.
 5. After the first public deploy, verify the live demo report, quickstart docs, and release surfaces.
+6. Keep Discussions categories, pinned onboarding discussion, and issue template contact links aligned with the public funnel.
 
 ## npm publishing
 
@@ -38,10 +39,26 @@ These are the smallest manual steps needed to activate the public distribution s
 Update the public repository metadata to keep the brand coherent:
 
 - Description: `AnswerLens: CLI-first AI visibility auditor for product websites.`
+- Canonical home: the GitHub repository README
 - Homepage: the GitHub Pages URL after deployment
 - Social preview: `assets/social-preview.png`
 - Topics: prefer `answerlens`, `ai-discoverability`, `ai-visibility`, `aeo`, `seo`, `cli`, `github-actions`, and category/use-case terms over provider-heavy terms
 - Optional: disable Wiki to keep the public distribution surface focused on README, docs, releases, Action docs, and Pages
+
+## GitHub Discussions and feedback routing
+
+Keep Discussions enabled and create these categories:
+
+- `Q&A` for first-run questions and unclear results
+- `Ideas` for open-ended product direction
+- `Show and tell` for screenshots, artifacts, and first-run reports
+- `Announcements` for release and roadmap updates
+
+Also pin one onboarding discussion:
+
+- `Start here: share your first AnswerLens run`
+
+Keep `.github/ISSUE_TEMPLATE/config.yml` aligned with that routing so first-time users are nudged toward Discussions instead of opening a vague issue.
 
 ## Optional credibility and research setup
 
@@ -51,9 +68,11 @@ Update the public repository metadata to keep the brand coherent:
 ## Public truth checklist
 
 - README, roadmap, release notes, and Pages should all agree on the latest released version
+- README should remain the canonical home, while the release surface acts as the second front door
 - README, quickstart docs, release notes, and Pages should all present the same first-run funnel
 - The live demo link in README should resolve to the Pages-hosted sample report
 - The copied workflow versions in docs should match the repository defaults
+- Discussions and Issues should describe the same routing as the docs
 - npm publish copy should mention both trusted publishing and `NPM_TOKEN`
 
 ## Current no-token path

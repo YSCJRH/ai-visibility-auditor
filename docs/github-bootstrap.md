@@ -11,6 +11,10 @@ Enable GitHub Discussions and create:
 - `Show and tell`
 - `Announcements`
 
+Keep one onboarding discussion pinned:
+
+- `Start here: share your first AnswerLens run`
+
 ## Ruleset for `main`
 
 Recommended rules:
@@ -44,11 +48,30 @@ For the current activation phase, keep coordination lightweight:
 - use milestones as the release spine
 - use `kind:*`, `area:*`, and `priority:*` labels for triage
 - split roadmap work into small issues instead of building a separate GitHub Project
-- keep `#33` open while the guided activation funnel is still the active workstream
+- keep `#33` open while activation and adoption hardening remains the active workstream
 - keep the active activation PR linked from the current umbrella issue until the repo has more parallel contributors
 - treat [docs/roadmap.md](roadmap.md) as the canonical public roadmap
 - treat [docs/activation-plan.md](activation-plan.md) as the canonical activation brief
 - treat [docs/shareable-summary.md](shareable-summary.md) as the canonical share-output contract
+- treat the repository README as the canonical home and the GitHub Pages site as the proof surface
+- treat repo-local skills under [`.agents/skills/`](../.agents/skills/) as the stable place for repeated activation maintenance workflows once they stop changing week to week
+
+## Feedback routing
+
+Use Discussions when a user is still orienting:
+
+- `Q&A` for first-run questions
+- `Show and tell` for screenshots, artifacts, and first-run stories
+- `Ideas` for open-ended product direction
+
+Use Issues when the work is actionable and specific:
+
+- reproducible bugs
+- docs gaps
+- rule proposals
+- concrete feature requests
+
+Keep [`.github/ISSUE_TEMPLATE/config.yml`](../.github/ISSUE_TEMPLATE/config.yml) aligned with this routing.
 
 ## Code owners
 

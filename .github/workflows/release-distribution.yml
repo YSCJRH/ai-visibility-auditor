@@ -116,6 +116,7 @@ jobs:
           ## Canonical docs
 
           - README: https://github.com/YSCJRH/ai-visibility-auditor#readme
+          - GitHub-native growth plan: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/github-growth-plan.md
           - Distribution plan: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/distribution-plan.md
           - Manual steps: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/manual-steps.md
           - Quickstart: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/quickstart.md

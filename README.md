@@ -9,18 +9,26 @@
 
 > CI for AI discoverability.
 
-AnswerLens is a CLI-first AI visibility auditor for product websites. It checks whether your site can be read, cited, compared, and recommended by AI systems, then writes reproducible artifacts you can review in GitHub.
+AnswerLens is a CLI-first, GitHub-native AI visibility auditor for product websites. It helps product teams understand why AI systems miss, flatten, or misread their site, then writes reproducible artifacts they can review in GitHub.
 
 AnswerLens focuses on explainable structure, evidence, and validation workflows rather than consumer UI scraping.
 
-Open-source. CLI-first. Report-driven. No consumer UI scraping. No ranking promises.
+Open-source. CLI-first. Report-driven. No consumer UI scraping. No ranking promises. No dashboard-first rewrite.
 
 ## Start here
 
-1. [Open the live demo report](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html): see the canonical Pages-hosted sample report first. If Pages has not been activated yet, use the [repo walkthrough fallback](docs/demo-report.md).
-2. [Run the 60-second fixture demo](#run-the-60-second-fixture-demo): generate the same artifact set locally.
-3. [Run a 5-minute real-site audit](docs/quickstart.md): point AnswerLens at your own public site before you wire CI.
-4. [Add the GitHub Action](docs/github-action.md): turn the same artifact flow into pull requests, artifact uploads, and `GITHUB_STEP_SUMMARY`.
+Primary entry:
+
+- [Open the live demo report](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html): the fastest way to understand the output, the artifact flow, and why the project is reviewable in GitHub. If you are browsing a copy or fork without Pages enabled, use the [repo walkthrough fallback](docs/demo-report.md).
+
+Secondary entries:
+
+- [Run the 60-second fixture demo](#run-the-60-second-fixture-demo): reproduce the same artifact set locally.
+- [Add the GitHub Action](docs/github-action.md): move the same workflow into pull requests, artifact uploads, and `GITHUB_STEP_SUMMARY`.
+
+Bridge to real adoption:
+
+- After the fixture demo, [run a 5-minute real-site audit](docs/quickstart.md) before you wire CI.
 
 Across every step, open artifacts in the same order: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
 
@@ -102,6 +110,8 @@ Start with [docs/github-action.md](docs/github-action.md) and copy the external 
 
 If you have not run one real local audit yet, use [docs/quickstart.md](docs/quickstart.md) first. The Action should feel like the CI version of the same artifact-backed workflow, not a separate adoption path.
 
+Treat the starter bundle as the shareable adoption asset for forks, releases, and external setup guides.
+
 The public Action contract is:
 
 - `uses: YSCJRH/ai-visibility-auditor@vX`
@@ -110,11 +120,12 @@ The public Action contract is:
 
 ## Install or download
 
+- This README is the canonical home; GitHub Pages is the proof surface and releases are the second front door
 - GitHub Action is the fastest CI-first entry point
 - The cleanest one-off local run lives in [docs/quickstart.md](docs/quickstart.md)
 - Release assets are the clearest tarball download surface: [latest release](https://github.com/YSCJRH/ai-visibility-auditor/releases/latest)
 - npm publishing is wired through semver releases and requires either trusted publishing or `NPM_TOKEN`; see [docs/manual-steps.md](docs/manual-steps.md)
-- GitHub Pages, repository homepage, social preview, and topics still require explicit repo settings activation
+- If you copy this distribution pattern into another repository, GitHub Pages, repository homepage, social preview, topics, and Discussions routing still require explicit GitHub settings work
 
 ## Current status
 
@@ -130,6 +141,7 @@ The public Action contract is:
 ## Distribution
 
 - Canonical distribution plan: [docs/distribution-plan.md](docs/distribution-plan.md)
+- GitHub-native growth practice: [docs/github-growth-plan.md](docs/github-growth-plan.md)
 - Manual setup checklist for Pages, npm, and repo settings: [docs/manual-steps.md](docs/manual-steps.md)
 - 5-minute real-site quickstart: [docs/quickstart.md](docs/quickstart.md)
 - GitHub Action usage and output contract: [docs/github-action.md](docs/github-action.md)
@@ -156,6 +168,14 @@ AnswerLens is designed to turn vague "AI SEO" work into concrete structure, evid
 - AI answers are now a discovery layer.
 - Traditional SEO is still necessary, but it is no longer the whole story.
 - Teams need explainable, reproducible workflows instead of consumer UI scraping.
+
+## Feedback and community
+
+- First-run question or unclear result: [GitHub Discussions](https://github.com/YSCJRH/ai-visibility-auditor/discussions) in `Q&A`
+- Share a screenshot, artifact, or first-run story: [GitHub Discussions](https://github.com/YSCJRH/ai-visibility-auditor/discussions) in `Show and tell`
+- Reproducible bug, docs gap, or concrete rule request: [GitHub Issues](https://github.com/YSCJRH/ai-visibility-auditor/issues)
+
+If you try AnswerLens on a real site, tell us which artifact helped first.
 
 ## Repository layout
 

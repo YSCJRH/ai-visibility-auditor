@@ -1,2 +1,11 @@
 blank_issues_enabled: false
-
+contact_links:
+  - name: First-run question
+    url: https://github.com/YSCJRH/ai-visibility-auditor/discussions
+    about: Use Discussions > Q&A for first-run questions, setup confusion, or unclear audit results.
+  - name: Share your first run
+    url: https://github.com/YSCJRH/ai-visibility-auditor/discussions
+    about: Use Discussions > Show and tell to share artifacts, screenshots, or what you learned from your first AnswerLens run.
+  - name: Open product direction discussion
+    url: https://github.com/YSCJRH/ai-visibility-auditor/discussions
+    about: Use Discussions > Ideas for open-ended direction or packaging suggestions before opening a feature issue.

@@ -4,7 +4,7 @@ The canonical live demo report lives at:
 
 - [https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html)
 
-If GitHub Pages has not been activated yet, use the repo-local walkthrough below and the generated files in `runs/static-good`.
+If you are browsing a copy or fork without GitHub Pages enabled, use the repo-local walkthrough below and the generated files in `runs/static-good`.
 
 Run the local fixture demo to generate the same shareable AnswerLens report locally:
 
@@ -32,3 +32,5 @@ The fixture currently scores `90/100`. It is crawlable, has broad page coverage,
 ## Share safely
 
 Use `share-summary.md` or `pr-snippet.md` when posting examples. Avoid sharing raw provider payloads, private analytics, or claims that imply guaranteed rankings.
+
+If the fixture report helped you understand AnswerLens, tell us which artifact clicked first in [GitHub Discussions](https://github.com/YSCJRH/ai-visibility-auditor/discussions).

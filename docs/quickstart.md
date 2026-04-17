@@ -79,3 +79,5 @@ Then use:
 Once the local run feels useful, continue to [docs/github-action.md](github-action.md).
 
 The GitHub Action should feel like the same artifact contract on a schedule or pull request, not a different product surface.
+
+If this is your first real-site run, open a [GitHub Discussion](https://github.com/YSCJRH/ai-visibility-auditor/discussions) and tell us which artifact helped first.
