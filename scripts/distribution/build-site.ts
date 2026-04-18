@@ -443,7 +443,16 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       filePath: path.join(outDir, "docs", "index.html"),
       title: "Docs index, concepts, and activation references",
       description: "Canonical docs, concepts, scoring notes, activation guidance, and distribution references for AnswerLens.",
-      body: `<section class="hero"><p class="eyebrow">Canonical documentation</p><h1>AnswerLens docs stay in Markdown and compile to an indexable layer.</h1><p>AnswerLens keeps repo docs as the authoring surface and compiles this page to make them easier for search engines, AI systems, and external teams to discover.</p></section><section class="section grid">${docsCards}</section>`,
+      body: `<section class="hero"><p class="eyebrow">Canonical documentation</p><h1>AnswerLens docs stay in Markdown and compile to an indexable layer.</h1><p>AnswerLens keeps repo docs as the authoring surface and compiles this page to make them easier for search engines, AI systems, and external teams to discover.</p></section><section class="section grid">${docsCards}</section><section class="section grid">${renderPanel("Proof page map", "Where to go next", `<p>Use these proof pages when you want buyer-facing context beyond the demo report.</p><ul>${renderList([
+        `<a href="${escapeHtml(proofPageUrls.pricing)}">Pricing</a>: open-source packaging, BYOK costs, and adoption surfaces.`,
+        `<a href="${escapeHtml(proofPageUrls.security)}">Security</a>: secrets, review flow, and trust guardrails.`,
+        `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: first-run questions in visible, citable language.`,
+        `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: how AnswerLens differs from Profound, Peec AI, and Otterly.`,
+        `<a href="${escapeHtml(proofPageUrls.integrations)}">Integrations</a>: GitHub Action, providers, and validation helpers.`,
+        `<a href="${escapeHtml(proofPageUrls.productMarketing)}">Product marketing teams</a>: homepage and proof-page hardening.`,
+        `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">Developer advocacy teams</a>: docs, examples, and self-serve proof.`,
+        `<a href="${escapeHtml(proofPageUrls.openSource)}">Open-source maintainers</a>: README, Pages, releases, and artifact-first distribution.`
+      ])}</ul>`)}${renderPanel("Artifact order", "Review flow", `<p>After you read the docs, move back into the artifact flow in the same order used everywhere else:</p><ol><li><a href="${escapeHtml(new URL("examples/static-good/share-summary.md", siteUrl).href)}"><code>share-summary.md</code></a></li><li><a href="${escapeHtml(new URL("examples/static-good/scorecard.md", siteUrl).href)}"><code>scorecard.md</code></a></li><li><a href="${escapeHtml(new URL("examples/static-good/recommendations.md", siteUrl).href)}"><code>recommendations.md</code></a></li></ol><p>Then continue to the <a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">real-site quickstart</a> or the <a href="${escapeHtml(repoBlob("docs/github-action.md"))}">GitHub Action path</a>.</p>`)}</section>`,
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
@@ -577,6 +586,13 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       body: `<section class="hero"><p class="eyebrow">First-run FAQ</p><h1>AnswerLens FAQ for new visitors and evaluators.</h1><p>This page answers the recurring first-run questions in visible, citable language so teams can understand the workflow before they wire it into GitHub or compare it with dashboard-first tools.</p></section>
         <section class="section grid">
           ${renderPanel("Common questions", "What people ask first", faqQuestions.map((entry) => `<h2>${escapeHtml(entry.question)}</h2><p>${escapeHtml(entry.answer)}</p>`).join(""))}
+          ${renderPanel("Related proof pages", "What to open next", `<ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.pricing)}">Pricing</a>: see the open-source and BYOK packaging model.`,
+            `<a href="${escapeHtml(proofPageUrls.security)}">Security</a>: review trust, secrets, and guardrails.`,
+            `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: understand how AnswerLens differs from Profound, Peec AI, and Otterly.`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">Integrations</a>: review the GitHub-native workflow path.`,
+            `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">Docs</a>: go deeper on activation, scoring, and Action usage.`
+          ])}</ul>`)}
         </section>`,
       jsonLd: [
         {
@@ -596,9 +612,9 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     {
       route: "compare/",
       filePath: path.join(outDir, "compare", "index.html"),
-      title: "AnswerLens compared with dashboard-first tools",
+      title: "AnswerLens compared with Profound, Peec AI, and Otterly",
       description: "How AnswerLens differs from dashboard-first AI visibility tools such as Profound, Peec AI, and Otterly.",
-      body: `<section class="hero"><p class="eyebrow">Compare</p><h1>AnswerLens fits teams that want repo-native audits instead of dashboard-first packaging.</h1><p>Tools such as Profound, Peec AI, and Otterly may fit teams that want managed monitoring or broader hosted visibility products. AnswerLens fits a different workflow: a CLI-first, GitHub-native audit layer that produces shareable artifacts and keeps BYOK evaluation explicit.</p></section>
+      body: `<section class="hero"><p class="eyebrow">Compare</p><h1>AnswerLens compared with Profound, Peec AI, and Otterly for GitHub-native teams.</h1><p>Compared with Profound, Peec AI, and Otterly, AnswerLens fits teams that want repo-native audits instead of dashboard-first packaging. Those tools may fit teams that want managed monitoring or broader hosted visibility products. AnswerLens keeps a different posture: CLI-first, GitHub-native, artifact-backed, and explicit about BYOK evaluation.</p></section>
         <section class="section grid">
           ${renderPanel("Declared comparison set", "Current public comparison", `<ul>${renderList([
             "Profound: AI visibility platform with a hosted monitoring posture.",
@@ -613,6 +629,14 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             "You want provider usage to stay in your own account rather than hidden behind a hosted vendor surface.",
             "You care more about improving source-material quality than claiming rank positions on answer surfaces.",
             "You want compare-ready, FAQ-ready, and proof-ready content gaps to be visible as artifacts, not only in a monitoring dashboard."
+          ])}</ul>`)}
+          ${renderPanel("Related proof pages", "Cross-linking", `<ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.pricing)}">Pricing</a>: compare packaging and cost posture.`,
+            `<a href="${escapeHtml(proofPageUrls.security)}">Security</a>: compare trust and review models.`,
+            `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: compare first-run and guardrail answers.`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">Integrations</a>: compare GitHub-native workflow surfaces.`,
+            `<a href="${escapeHtml(proofPageUrls.productMarketing)}">Product marketing teams</a>: see the fit for homepage and proof-page work.`,
+            `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">Developer advocacy teams</a>: see the fit for docs and self-serve evaluation.`
           ])}</ul>`)}
         </section>`,
       jsonLd: {
@@ -632,6 +656,13 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         <section class="section grid">
           ${renderPanel("Current integration surfaces", "What ships now", integrationsTable)}
           ${renderPanel("How teams usually adopt", "Suggested path", `<ol><li>Open the live demo report.</li><li>Run the 60-second fixture demo.</li><li>Run one real-site audit locally.</li><li>Move the same artifact contract into the GitHub Action.</li></ol><p>That sequencing keeps integrations understandable and reviewable instead of turning each surface into a separate product.</p>`)}
+          ${renderPanel("Related proof pages", "What this connects to", `<ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: answer first-run workflow questions.`,
+            `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: explain how the GitHub-native path differs from dashboard-first products.`,
+            `<a href="${escapeHtml(proofPageUrls.pricing)}">Pricing</a>: explain where Action and eval usage create variable cost.`,
+            `<a href="${escapeHtml(proofPageUrls.security)}">Security</a>: explain secret handling and review trail expectations.`,
+            `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">Developer advocacy teams</a>: connect integrations to docs and examples.`
+          ])}</ul>`)}
         </section>`,
       jsonLd: {
         "@context": "https://schema.org",
@@ -649,6 +680,13 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       body: `<section class="hero"><p class="eyebrow">Use case</p><h1>AnswerLens for product marketing teams.</h1><p>Product marketing teams use AnswerLens when they need a concrete view of why an AI system might miss the category, flatten the positioning, or skip the proof pages that support a buying decision.</p></section>
         <section class="section grid">
           ${renderPanel("Where teams start", "Workflow", `<h2>Audit the public story</h2><p>Start with the homepage, docs, pricing, and compare surfaces. Review the share summary and scorecard first, then move into the recommendations.</p><h2>What gets shipped</h2><p>Teams usually respond by tightening category language, improving proof density, and publishing better pricing, FAQ, and compare content.</p><h2>What improves</h2><p>The result is not a ranking promise. It is stronger source material that gives AI systems better evidence to cite, compare, and recommend.</p>`)}
+          ${renderPanel("Related proof pages", "What to strengthen", `<ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.pricing)}">Pricing</a>: clarify packaging, BYOK cost, and download surfaces.`,
+            `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: explicitly name Profound, Peec AI, and Otterly with clearer fit guidance.`,
+            `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: answer recurring objections in visible language.`,
+            `<a href="${escapeHtml(proofPageUrls.security)}">Security</a>: keep trust and deployment expectations legible.`,
+            `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">Docs</a>: connect proof pages back to canonical implementation notes.`
+          ])}</ul>`)}
         </section>`,
       jsonLd: {
         "@context": "https://schema.org",
@@ -666,6 +704,13 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       body: `<section class="hero"><p class="eyebrow">Use case</p><h1>AnswerLens for developer advocacy teams.</h1><p>Developer advocacy teams use AnswerLens to see whether docs, examples, integrations, and product proof pages are strong enough for AI-mediated discovery and evaluation.</p></section>
         <section class="section grid">
           ${renderPanel("Where teams focus", "Docs and proof", `<h2>Strengthen docs visibility</h2><p>Review whether the docs index, setup guidance, and API references are public, scannable, and linked from the homepage and adjacent proof pages.</p><h2>Ship example artifacts</h2><p>Use Pages examples, release bundles, and fixture reports as public teaching tools that can be linked directly in GitHub.</p><h2>Reduce first-run friction</h2><p>Keep the quickstart and GitHub Action path aligned so that new developers can move from the demo to their own repository without guesswork.</p>`)}
+          ${renderPanel("Related proof pages", "What to connect", `<ul>${renderList([
+            `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">Docs</a>: keep activation references and implementation notes visible.`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">Integrations</a>: explain the GitHub Action, providers, and validation layers together.`,
+            `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: answer first-run setup questions before CI adoption.`,
+            `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: explain why a repo-native workflow differs from dashboard-first tools.`,
+            `<a href="${escapeHtml(proofPageUrls.security)}">Security</a>: set expectations for secrets, artifacts, and public sharing.`
+          ])}</ul>`)}
         </section>`,
       jsonLd: {
         "@context": "https://schema.org",
@@ -683,6 +728,13 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       body: `<section class="hero"><p class="eyebrow">Use case</p><h1>AnswerLens for open-source maintainers.</h1><p>Open-source maintainers use AnswerLens when the repository itself is the product entry point and the project needs better README, Pages, release, and artifact surfaces before it needs more product modules.</p></section>
         <section class="section grid">
           ${renderPanel("Why maintainers use it", "GitHub-native distribution", `<h2>Audit the repository as public source material</h2><p>Use the README as the canonical home, Pages as the audit target, and release notes as the second front door.</p><h2>Review artifacts in GitHub</h2><p>AnswerLens turns unclear packaging problems into artifacts that can be discussed in issues, pull requests, and Discussions announcements.</p><h2>Repeat the loop</h2><p>That makes self-dogfooding practical: improve public proof pages, rerun the audit, and track whether the next round of feedback is more meaningful.</p>`)}
+          ${renderPanel("Related proof pages", "What to keep aligned", `<ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.pricing)}">Pricing</a>: keep packaging claims concrete and citable.`,
+            `<a href="${escapeHtml(proofPageUrls.security)}">Security</a>: keep trust language honest and reviewable.`,
+            `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: explain the public positioning against adjacent tools.`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">Integrations</a>: keep the GitHub-native adoption path visible.`,
+            `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: keep first-run questions cheap to answer.`
+          ])}</ul>`)}
         </section>`,
       jsonLd: {
         "@context": "https://schema.org",
