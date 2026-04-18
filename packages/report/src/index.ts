@@ -116,6 +116,50 @@ function compactText(value: string): string {
   return value.toLowerCase().replace(/\s+/g, " ").trim();
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function siteLabel(site: Pick<AuditResult["site"], "input" | "display">): string {
+  const display = site.display?.trim();
+  return display && display.length > 0 ? display : site.input;
+}
+
+function fixtureHostNote(site: Pick<AuditResult["site"], "baseUrl">): string | null {
+  if (site.baseUrl !== "https://fixture.local") {
+    return null;
+  }
+
+  return "https://fixture.local is the stable fixture hostname inside this public demo, not the AnswerLens site URL.";
+}
+
+function renderSiteOverviewLines(site: AuditResult["site"]): string {
+  const lines = [`- Site: ${siteLabel(site)}`];
+
+  const note = fixtureHostNote(site);
+  if (note) {
+    lines.push(`- Demo host note: ${note}`);
+  }
+
+  return lines.join("\n");
+}
+
+function renderSiteHtmlNotes(site: AuditResult["site"]): string {
+  const notes: string[] = [];
+
+  const note = fixtureHostNote(site);
+  if (note) {
+    notes.push(`<p><code>https://fixture.local</code> is the stable fixture hostname inside this public demo, not the AnswerLens site URL.</p>`);
+  }
+
+  return notes.join("");
+}
+
 function topIssues(result: AuditResult): ShareSummary["topIssues"] {
   const seen = new Set<string>();
   const diverseIssues = result.issues.filter((issue) => {
@@ -419,7 +463,7 @@ ${summary.positioning}
 
 ## Run
 
-- Site: ${summary.site.input}
+${renderSiteOverviewLines(summary.site)}
 - Mode: ${summary.run.mode}
 - Run ID: ${summary.run.id}
 - Generated: ${summary.run.generatedAt}
@@ -524,7 +568,7 @@ function renderRecommendationsMarkdown(result: AuditResult): string {
           .join("\n\n")
       : "No recommendations were generated for this run.";
 
-  return `# AnswerLens Recommendations\n\n- Site: ${result.site.input}\n- Generated: ${result.site.generatedAt}\n- Overall score: ${result.summary.overallScore}\n\n${blocks}\n`;
+  return `# AnswerLens Recommendations\n\n${renderSiteOverviewLines(result.site)}\n- Generated: ${result.site.generatedAt}\n- Overall score: ${result.summary.overallScore}\n\n${blocks}\n`;
 }
 
 function buildAuditRunManifest(result: AuditResult): RunManifest {
@@ -761,7 +805,7 @@ function renderCompetitorDiffMarkdown(result: AuditResult): string {
     gaps.push(`- ${competitor} is not named in discovered compare content.`);
   }
 
-  return `# AnswerLens Competitor Structure Diff\n\n- Site: ${result.site.input}\n- Configured competitors: ${competitorNames.length}\n- Compare pages discovered: ${comparePages.length}\n\n## Coverage Matrix\n\n| Competitor | Named on compare pages | Matching pages | First matching page |\n| --- | --- | ---: | --- |\n${rows || "| none | no | 0 | |"}\n\n## Structural gaps\n\n${gaps.length > 0 ? gaps.join("\n") : "- none"}\n`;
+  return `# AnswerLens Competitor Structure Diff\n\n${renderSiteOverviewLines(result.site)}\n- Configured competitors: ${competitorNames.length}\n- Compare pages discovered: ${comparePages.length}\n\n## Coverage Matrix\n\n| Competitor | Named on compare pages | Matching pages | First matching page |\n| --- | --- | ---: | --- |\n${rows || "| none | no | 0 | |"}\n\n## Structural gaps\n\n${gaps.length > 0 ? gaps.join("\n") : "- none"}\n`;
 }
 
 function buildCitationGapMatrix(result: EvalResult) {
@@ -820,7 +864,7 @@ function renderCitationGapMatrixMarkdown(result: EvalResult): string {
     )
     .join("\n");
 
-  return `# AnswerLens Citation Gap Matrix\n\n- Site: ${result.site.input}\n- Provider: ${result.provider.name}\n- Model: ${result.provider.model}\n- Samples: ${result.summary.sampleCount}\n- Citation gaps: ${matrix.summary.citationGapCount}\n- Competitor exclusion gaps: ${matrix.summary.competitorExclusionGapCount}\n\n| Prompt | Category | Sample | Pack | Accurate mention | Owned citation | Trusted citation | Citation gap | Competitor excluded | Competitors mentioned |\n| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- |\n${rows}\n`;
+  return `# AnswerLens Citation Gap Matrix\n\n${renderSiteOverviewLines(result.site)}\n- Provider: ${result.provider.name}\n- Model: ${result.provider.model}\n- Samples: ${result.summary.sampleCount}\n- Citation gaps: ${matrix.summary.citationGapCount}\n- Competitor exclusion gaps: ${matrix.summary.competitorExclusionGapCount}\n\n| Prompt | Category | Sample | Pack | Accurate mention | Owned citation | Trusted citation | Citation gap | Competitor excluded | Competitors mentioned |\n| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- |\n${rows}\n`;
 }
 async function writeBriefOutputs(outDir: string, briefs: ContentBrief[]): Promise<void> {
   if (briefs.length === 0) {
@@ -870,7 +914,7 @@ export function renderScorecardMarkdown(result: AuditResult): string {
       ? result.summary.missingPageTypes.map((pageType) => `- ${pageType}`).join("\n")
       : "- none";
 
-  return `# AnswerLens Scorecard\n\n## Overview\n\n- Site: ${result.site.input}\n- Generated: ${result.site.generatedAt}\n- Run ID: ${result.run.id}\n- Overall score: ${result.summary.overallScore}\n- VAVR: ${renderVavr(result.summary.vavr)}\n- Crawled pages: ${result.summary.crawledPages}\n- Discovered URLs: ${result.summary.discoveredUrls}\n\n## Scores\n\n| Bucket | Score | Issues | Errors | Warnings | Info |\n| --- | ---: | ---: | ---: | ---: | ---: |\n${scores}\n\n## Missing coverage\n\n${missingCoverage}\n\n## Top issues\n\n| Severity | Issue | Scope | Fix hint |\n| --- | --- | --- | --- |\n${topIssues}\n\n## Recommendations\n\n${recommendations}\n\n## Page inventory\n\n| Type | URL | Words | JSON-LD | Noindex |\n| --- | --- | ---: | --- | --- |\n${pages}\n`;
+  return `# AnswerLens Scorecard\n\n## Overview\n\n${renderSiteOverviewLines(result.site)}\n- Generated: ${result.site.generatedAt}\n- Run ID: ${result.run.id}\n- Overall score: ${result.summary.overallScore}\n- VAVR: ${renderVavr(result.summary.vavr)}\n- Crawled pages: ${result.summary.crawledPages}\n- Discovered URLs: ${result.summary.discoveredUrls}\n\n## Scores\n\n| Bucket | Score | Issues | Errors | Warnings | Info |\n| --- | ---: | ---: | ---: | ---: | ---: |\n${scores}\n\n## Missing coverage\n\n${missingCoverage}\n\n## Top issues\n\n| Severity | Issue | Scope | Fix hint |\n| --- | --- | --- | --- |\n${topIssues}\n\n## Recommendations\n\n${recommendations}\n\n## Page inventory\n\n| Type | URL | Words | JSON-LD | Noindex |\n| --- | --- | ---: | --- | --- |\n${pages}\n`;
 }
 
 export function renderScorecardHtml(result: AuditResult): string {
@@ -979,10 +1023,11 @@ export function renderScorecardHtml(result: AuditResult): string {
     <main>
       <section class="hero">
         <p>AnswerLens scorecard</p>
-        <h1>${result.site.input}</h1>
+        <h1>${escapeHtml(siteLabel(result.site))}</h1>
         <p>Run ID: <strong>${result.run.id}</strong></p>
         <p>Overall score: <strong>${result.summary.overallScore}</strong> | VAVR: <strong>${renderVavr(result.summary.vavr)}</strong></p>
         <p>${result.site.generatedAt}</p>
+        ${renderSiteHtmlNotes(result.site)}
       </section>
       <section class="grid">${bucketCards}</section>
       <section class="panel">
@@ -1036,7 +1081,7 @@ export function renderEvalSummaryMarkdown(result: EvalResult): string {
       ? result.briefs.map((brief) => `- ${brief.type}: ${brief.title}`).join("\n")
       : "- none";
 
-  return `# AnswerLens Eval Summary\n\n## Overview\n\n- Site: ${result.site.input}\n- Provider: ${result.provider.name}\n- Model: ${result.provider.model}\n- Generated: ${result.generatedAt}\n- Benchmark prompt count: ${result.summary.promptCount}\n- Holdout prompt count: ${result.summary.holdoutPromptCount}\n- Sample count: ${result.summary.sampleCount}\n- Locale: ${result.summary.locale ?? "default"}\n- VAVR: ${result.summary.vavr}\n\n## Metrics\n\n- Mention rate: ${result.summary.mentionRate}\n- Accurate mention rate: ${result.summary.accurateMentionRate}\n- Owned citation rate: ${result.summary.ownedCitationRate}\n- Trusted citation rate: ${result.summary.trustedCitationRate}\n- Recommendation rate: ${result.summary.recommendationRate}\n- Misrepresentation rate: ${result.summary.misrepresentationRate}\n- Competitor exclusion gap: ${result.summary.competitorExclusionGap}\n- Fact coverage score: ${result.summary.factCoverageScore}\n- Accuracy rate: ${result.summary.accuracyRate}${manualRankSection}${stabilitySection}\n\n## Prompt results\n\n| Prompt | Category | Sample | Pack | VAVR | Accurate mention | Citations | Recommended |\n| --- | --- | ---: | --- | ---: | --- | ---: | --- |\n${promptRows}\n\n## Generated briefs\n\n${briefList}\n`;
+  return `# AnswerLens Eval Summary\n\n## Overview\n\n${renderSiteOverviewLines(result.site)}\n- Provider: ${result.provider.name}\n- Model: ${result.provider.model}\n- Generated: ${result.generatedAt}\n- Benchmark prompt count: ${result.summary.promptCount}\n- Holdout prompt count: ${result.summary.holdoutPromptCount}\n- Sample count: ${result.summary.sampleCount}\n- Locale: ${result.summary.locale ?? "default"}\n- VAVR: ${result.summary.vavr}\n\n## Metrics\n\n- Mention rate: ${result.summary.mentionRate}\n- Accurate mention rate: ${result.summary.accurateMentionRate}\n- Owned citation rate: ${result.summary.ownedCitationRate}\n- Trusted citation rate: ${result.summary.trustedCitationRate}\n- Recommendation rate: ${result.summary.recommendationRate}\n- Misrepresentation rate: ${result.summary.misrepresentationRate}\n- Competitor exclusion gap: ${result.summary.competitorExclusionGap}\n- Fact coverage score: ${result.summary.factCoverageScore}\n- Accuracy rate: ${result.summary.accuracyRate}${manualRankSection}${stabilitySection}\n\n## Prompt results\n\n| Prompt | Category | Sample | Pack | VAVR | Accurate mention | Citations | Recommended |\n| --- | --- | ---: | --- | ---: | --- | ---: | --- |\n${promptRows}\n\n## Generated briefs\n\n${briefList}\n`;
 }
 
 export function renderSearchValidationSummaryMarkdown(result: SearchValidationResult, title: string): string {
@@ -1067,7 +1112,7 @@ export function renderSearchValidationSummaryMarkdown(result: SearchValidationRe
 
 ## Overview
 
-- Site: ${result.site.input}
+${renderSiteOverviewLines(result.site)}
 - Source: ${result.source.input}
 - Imported pages: ${result.summary.importedPageCount}
 - Matched audit pages: ${result.summary.matchedAuditPageCount}
@@ -1114,7 +1159,7 @@ export function renderIndexNowSummaryMarkdown(result: IndexNowHelperResult): str
 
 ## Overview
 
-- Site: ${result.site.input}
+${renderSiteOverviewLines(result.site)}
 - Generated: ${result.generatedAt}
 - Host: ${result.summary.host}
 - Endpoint: ${result.summary.endpoint}

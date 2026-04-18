@@ -3,6 +3,7 @@ brand:
   domain: "example.com"
   category: "developer analytics platform"
   one_liner: "Example Product helps product and engineering teams understand onboarding, adoption, and time-to-value."
+  site_display_name: "Example Product public site"
   target_personas:
     - "product managers"
     - "developer experience teams"

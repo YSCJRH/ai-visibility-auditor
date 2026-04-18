@@ -17,9 +17,10 @@ The example uses a consumer-repo layout instead of this repository's internal `e
 After copying it:
 
 1. Replace `Example Product` with your brand and domain.
-2. Update the competitor list to match your category.
-3. Rewrite the prompt pack so it reflects your buyers, proof pages, and comparison questions.
-4. Set `site:` in the workflow to the public URL you want to audit.
+2. Optionally set `site_display_name` in `.github/answerlens/brand.yaml` if you want public artifacts to show a friendly label instead of the raw URL or local path.
+3. Update the competitor list to match your category.
+4. Rewrite the prompt pack so it reflects your buyers, proof pages, and comparison questions.
+5. Set `site:` in the workflow to the public URL you want to audit.
 
 The starter bundle is intentionally minimal. It exists to make the public GitHub Action path copyable, forkable, and easy to reference from README and release docs.
 

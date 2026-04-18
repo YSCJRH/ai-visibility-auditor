@@ -1,0 +1,10 @@
+competitors:
+  - name: "Profound"
+    domain: "profound.com"
+    category: "AI visibility platform"
+  - name: "Peec AI"
+    domain: "peec.ai"
+    category: "AI search monitoring"
+  - name: "Otterly"
+    domain: "otterly.ai"
+    category: "AI visibility monitoring"

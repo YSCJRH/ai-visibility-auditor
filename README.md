@@ -66,6 +66,8 @@ corepack pnpm demo:fixture
 
 That command audits the local fixture in [examples/fixtures/static-good](examples/fixtures/static-good) and writes outputs to [runs/static-good](runs/static-good).
 
+Inside the demo artifact set, `https://fixture.local` is the stable fixture hostname. It keeps the example crawl reproducible and is not the AnswerLens product site URL.
+
 Open these fixture artifacts first:
 
 - `share-summary.md`
@@ -157,16 +159,6 @@ The fixture demo writes machine-readable audit artifacts, a static scorecard, an
 ![AnswerLens artifact preview](assets/readme-artifacts-preview.svg)
 
 See [docs/demo-report.md](docs/demo-report.md) for the fixture report walkthrough.
-
-## AnswerLens on itself
-
-AnswerLens also uses its own audit mindset on its public source-material surfaces.
-
-- The GitHub repository README stays the canonical home.
-- The GitHub Pages site is the canonical audit target.
-- Public-surface iterations should improve one of: positioning clarity, entry friction, proof density, artifact visibility, starter bundle adoption, or community routing.
-
-See [docs/self-dogfooding.md](docs/self-dogfooding.md) for the self-dogfooding loop, backlog buckets, and public dogfood asset templates.
 
 ## Before / after showcase
 
@@ -387,6 +379,16 @@ The repository slug remains `ai-visibility-auditor`; the public product name is 
 ## Contributing
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md). Questions and open-ended ideas should go to GitHub Discussions. Actionable changes should come through Issues and PRs.
+
+## AnswerLens on itself
+
+AnswerLens also uses its own audit mindset on its public source-material surfaces.
+
+- The GitHub repository README stays the canonical home.
+- The GitHub Pages site is the canonical audit target.
+- Public-surface iterations should improve one of: positioning clarity, entry friction, proof density, artifact visibility, starter bundle adoption, or community routing.
+
+See [docs/self-dogfooding.md](docs/self-dogfooding.md) for the self-dogfooding loop, backlog buckets, and public dogfood asset templates.
 
 ## License
 

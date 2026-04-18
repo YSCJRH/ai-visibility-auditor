@@ -31,6 +31,8 @@ The public interface is:
 
 Use the starter files in [examples/consumer-repo/.github](../examples/consumer-repo/.github) as a copyable baseline, then replace the placeholder brand, competitors, prompts, and `site:` URL.
 
+If you want the generated Markdown and HTML artifacts to show a friendlier public label than the raw URL or local path, set `brand.site_display_name` in `brand.yaml`.
+
 ## Minimal workflow for an external repository
 
 ```yaml
