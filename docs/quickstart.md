@@ -37,6 +37,7 @@ If you are preparing long-term adoption, use the same folder shape inside the re
 ## Step 3: replace the placeholders
 
 - change the brand name, domain, and proof-page hints in `brand.yaml`
+- optionally set `site_display_name` in `brand.yaml` if you want public-facing reports to show a friendly label instead of the raw URL or local path
 - update `competitors.yaml` so it reflects your real category
 - rewrite `prompts.yaml` to match your buyers, comparisons, and citation questions
 

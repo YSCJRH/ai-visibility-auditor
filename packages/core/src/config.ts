@@ -16,6 +16,7 @@ const brandSchema = z.object({
     domain: z.string().min(1),
     category: z.string().min(1),
     one_liner: z.string().min(1),
+    site_display_name: z.string().min(1).optional(),
     target_personas: z.array(z.string().min(1)).default([]),
     key_use_cases: z.array(z.string().min(1)).default([]),
     competitors: z.array(z.string().min(1)).default([]),

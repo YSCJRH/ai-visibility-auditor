@@ -14,6 +14,8 @@ corepack pnpm demo:fixture
 
 The report is written to `runs/static-good`.
 
+The fixture pages use `https://fixture.local` as a stable hostname inside the demo artifact set. That hostname exists to keep the example crawl reproducible; it is not the AnswerLens product site URL.
+
 ## What to open first
 
 - `share-summary.md`: fastest human-readable overview

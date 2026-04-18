@@ -236,6 +236,7 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
       kind: crawl.source.kind,
       input: input.siteInput,
       baseUrl: crawl.source.baseUrl,
+      display: input.brand.brand.site_display_name,
       generatedAt: completedAt
     },
     summary: {

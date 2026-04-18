@@ -3,6 +3,7 @@
   domain: "acme.test"
   category: "developer analytics platform"
   one_liner: "Acme helps product and engineering teams understand onboarding, adoption, and time-to-value."
+  site_display_name: "AnswerLens static-good fixture demo"
   target_personas:
     - "product managers"
     - "developer experience teams"

@@ -41,6 +41,24 @@ Use this loop for public-surface work:
 
 The goal is not automation for its own sake. The goal is to keep producing better public source material over time.
 
+## Loop #1 operating path
+
+The first visible loop should run against the current GitHub Pages site:
+
+```bash
+corepack pnpm self-dogfood:pages
+```
+
+That command audits `https://yscjrh.github.io/ai-visibility-auditor/` with the repo-owned config in `./.github/answerlens/` and writes artifacts to `runs/self-dogfood-pages`.
+
+Open the artifacts in the same order used everywhere else:
+
+1. `share-summary.md`
+2. `scorecard.md`
+3. `recommendations.md`
+
+Keep the loop tracked under umbrella issue [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33).
+
 ## Signal types that are in scope
 
 Only optimize four signal classes:

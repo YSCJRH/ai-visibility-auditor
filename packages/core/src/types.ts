@@ -44,6 +44,7 @@ export interface BrandDetails {
   domain: string;
   category: string;
   one_liner: string;
+  site_display_name?: string;
   target_personas: string[];
   key_use_cases: string[];
   competitors: string[];
@@ -232,6 +233,7 @@ export interface AuditResult {
     kind: SiteKind;
     input: string;
     baseUrl: string;
+    display?: string;
     generatedAt: string;
   };
   summary: AuditSummary;

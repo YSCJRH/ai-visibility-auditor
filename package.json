@@ -15,6 +15,7 @@
     "search-console-import": "node --experimental-strip-types apps/cli/src/index.ts search-console-import",
     "bing-indexnow-helper": "node --experimental-strip-types apps/cli/src/index.ts bing-indexnow-helper",
     "demo:fixture": "node --experimental-strip-types apps/cli/src/index.ts audit ./examples/fixtures/static-good --brand ./examples/acme/brand.yaml --competitors ./examples/acme/competitors.yaml --prompts ./examples/acme/prompts.yaml --out ./runs/static-good",
+    "self-dogfood:pages": "node --experimental-strip-types apps/cli/src/index.ts audit https://yscjrh.github.io/ai-visibility-auditor/ --brand ./.github/answerlens/brand.yaml --competitors ./.github/answerlens/competitors.yaml --prompts ./.github/answerlens/prompts.yaml --out ./runs/self-dogfood-pages",
     "build:social-preview": "node --experimental-strip-types scripts/distribution/build-social-preview.ts",
     "build:cli": "corepack pnpm --dir apps/cli build",
     "pack:cli": "corepack pnpm --dir apps/cli pack --pack-destination ../../dist/packages",

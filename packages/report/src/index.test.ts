@@ -82,15 +82,27 @@ test("report renderers expose expected audit and eval sections", async () => {
 
   const scorecard = renderScorecardMarkdown(applyEvalSummaryToAudit(audit, evalResult.summary));
   const scorecardHtml = renderScorecardHtml(applyEvalSummaryToAudit(audit, evalResult.summary));
+  const fallbackScorecard = renderScorecardMarkdown({
+    ...audit,
+    site: {
+      ...audit.site,
+      display: undefined
+    }
+  });
   const evalSummary = renderEvalSummaryMarkdown(evalResult);
   const diff = renderEvalDiffMarkdown(evalResult, null);
   const expectedBenchmarkCount = prompts.prompts.filter((promptCase) => !promptCase.holdout).length;
   const expectedHoldoutCount = prompts.prompts.filter((promptCase) => promptCase.holdout).length;
 
+  assert.equal(audit.site.display, "AnswerLens static-good fixture demo");
+  assert.match(scorecard, /Site: AnswerLens static-good fixture demo/);
+  assert.match(scorecard, /Demo host note: https:\/\/fixture\.local is the stable fixture hostname inside this public demo/);
   assert.match(scorecard, /VAVR: /);
+  assert.match(scorecardHtml, /AnswerLens static-good fixture demo/);
   assert.match(scorecardHtml, /Overall score: <strong>/);
   assert.match(scorecardHtml, / \| VAVR: <strong>/);
   assert.equal(scorecardHtml.includes(String.fromCharCode(0x74ba)), false);
+  assert.match(fallbackScorecard, /Site: \.\/examples\/fixtures\/static-good/);
   assert.match(evalSummary, /# AnswerLens Eval Summary/);
   assert.match(evalSummary, /Accurate mention rate/);
   assert.doesNotMatch(evalSummary, /Manual rank validation/);
@@ -117,6 +129,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   };
   const shareSummary = JSON.parse(await readFile(path.join(tempDir, "share-summary.json"), "utf8")) as {
     project: string;
+    site: { display?: string };
     run: { mode: string };
     metrics: { overallScore: number; vavr: number | null };
     topIssues: unknown[];
@@ -185,6 +198,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.ok(runManifest.artifacts.includes("share-summary.json"));
   assert.ok(runManifest.artifacts.includes("pr-snippet.md"));
   assert.equal(shareSummary.project, "AnswerLens");
+  assert.equal(shareSummary.site.display, "AnswerLens static-good fixture demo");
   assert.equal(shareSummary.run.mode, "eval");
   assert.equal(shareSummary.metrics.overallScore, audit.summary.overallScore);
   assert.equal(shareSummary.metrics.vavr, evalResult.summary.vavr);
@@ -194,6 +208,8 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.ok(shareSummary.topRecommendations.length > 0);
   assert.ok(shareSummary.artifacts.includes("pr-snippet.md"));
   assert.match(shareSummaryMarkdown, /# AnswerLens Share Summary/);
+  assert.match(shareSummaryMarkdown, /Site: AnswerLens static-good fixture demo/);
+  assert.doesNotMatch(shareSummaryMarkdown, /Source target:/);
   assert.match(shareSummaryMarkdown, /AI may miss this product because/);
   assert.match(shareSummaryMarkdown, /does not scrape consumer AI UIs/);
   assert.doesNotMatch(shareSummaryMarkdown, /Manual validation: CPS/);
@@ -202,7 +218,10 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(prSnippet, /CI for AI discoverability/);
   assert.match(prSnippet, /<details>/);
   assert.match(recommendations, /# AnswerLens Recommendations/);
+  assert.match(recommendations, /Site: AnswerLens static-good fixture demo/);
   assert.match(htmlReport, / \| VAVR: <strong>/);
+  assert.match(htmlReport, /AnswerLens static-good fixture demo/);
+  assert.doesNotMatch(htmlReport, /Source target:/);
   assert.equal(htmlReport.includes(String.fromCharCode(0x74ba)), false);
   assert.ok(siteAudit.pages.some((page) => (page.internalLinkRecords ?? []).length > 0));
   assert.ok(siteAudit.pages.some((page) => (page.jsonLdRecords ?? []).length > 0));
@@ -268,6 +287,10 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.equal(packageJson.scripts["manual-import"], "node --experimental-strip-types apps/cli/src/index.ts manual-import");
   assert.equal(packageJson.scripts["search-console-import"], "node --experimental-strip-types apps/cli/src/index.ts search-console-import");
   assert.equal(packageJson.scripts["bing-indexnow-helper"], "node --experimental-strip-types apps/cli/src/index.ts bing-indexnow-helper");
+  assert.equal(
+    packageJson.scripts["self-dogfood:pages"],
+    "node --experimental-strip-types apps/cli/src/index.ts audit https://yscjrh.github.io/ai-visibility-auditor/ --brand ./.github/answerlens/brand.yaml --competitors ./.github/answerlens/competitors.yaml --prompts ./.github/answerlens/prompts.yaml --out ./runs/self-dogfood-pages"
+  );
   assert.equal(packageJson.scripts["build:cli"], "corepack pnpm --dir apps/cli build");
   assert.equal(packageJson.scripts["pack:cli:dry-run"], "corepack pnpm --dir apps/cli pack --dry-run");
   assert.equal(packageJson.scripts["build:site"], "node --experimental-strip-types scripts/distribution/build-site.ts");

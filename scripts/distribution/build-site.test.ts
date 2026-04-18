@@ -20,6 +20,10 @@ async function createDemoRun(): Promise<string> {
     competitors,
     prompts
   });
+  audit.site = {
+    ...audit.site,
+    input: "/home/runner/work/ai-visibility-auditor/ai-visibility-auditor/examples/fixtures/static-good"
+  };
 
   const demoRunDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-demo-run-"));
   await writeAuditOutputs(demoRunDir, audit);
@@ -49,11 +53,12 @@ test("build-site writes indexable pages and metadata", async () => {
     access(path.join(outDir, "robots.txt"))
   ]);
 
-  const [home, docs, releases, examples, feed, sitemap] = await Promise.all([
+  const [home, docs, releases, examples, demoReport, feed, sitemap] = await Promise.all([
     readFile(path.join(outDir, "index.html"), "utf8"),
     readFile(path.join(outDir, "docs", "index.html"), "utf8"),
     readFile(path.join(outDir, "releases", "index.html"), "utf8"),
     readFile(path.join(outDir, "examples", "index.html"), "utf8"),
+    readFile(path.join(outDir, "examples", "static-good", "index.html"), "utf8"),
     readFile(path.join(outDir, "feed.xml"), "utf8"),
     readFile(path.join(outDir, "sitemap.xml"), "utf8")
   ]);
@@ -62,6 +67,10 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /assets\/social-preview\.png/);
   assert.match(home, /latestRelease<\/p><p class="metric-value">v0\.3\.0/);
   assert.match(home, /Recommended first-run path/);
+  assert.match(home, /Public proof block/);
+  assert.match(home, /AnswerLens static-good fixture demo/);
+  assert.match(home, /stable hostname inside the public demo fixture/);
+  assert.match(home, /examples\/static-good\/share-summary\.md/);
   assert.match(home, /primary entry point/);
   assert.match(home, /5-minute real-site audit/);
   assert.match(home, /twitter:card/);
@@ -74,8 +83,15 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(releases, /v0\.3\.0/);
   assert.match(releases, /Use the latest release/);
   assert.match(examples, /"@type":"Dataset"/);
+  assert.match(examples, /AnswerLens static-good fixture demo/);
+  assert.doesNotMatch(home, /\/home\/runner\/work\//);
+  assert.doesNotMatch(examples, /\/home\/runner\/work\//);
+  assert.doesNotMatch(demoReport, /\/home\/runner\/work\//);
+  assert.match(demoReport, /AnswerLens static-good fixture demo/);
   assert.match(feed, /AnswerLens releases/);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/examples\//);
   assert.equal(home.includes("\uFFFD"), false);
+  assert.equal(examples.includes("\uFFFD"), false);
+  assert.equal(demoReport.includes("\uFFFD"), false);
   assert.equal(feed.includes("\uFFFD"), false);
 });

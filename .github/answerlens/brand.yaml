@@ -1,0 +1,30 @@
+brand:
+  name: "AnswerLens"
+  domain: "yscjrh.github.io/ai-visibility-auditor"
+  category: "AI visibility auditor for product websites"
+  one_liner: "AnswerLens helps product teams understand why AI systems miss, flatten, or misread their site, then writes reproducible artifacts they can review in GitHub."
+  site_display_name: "AnswerLens public Pages site"
+  target_personas:
+    - "product marketers"
+    - "developer advocates"
+  key_use_cases:
+    - "audit AI discoverability on key product pages"
+    - "turn visibility issues into reviewable GitHub artifacts"
+    - "bridge a first audit into GitHub-native adoption"
+  competitors:
+    - "Profound"
+    - "Peec AI"
+    - "Otterly"
+  canonical_facts:
+    - id: "positioning"
+      type: "positioning"
+      text: "AnswerLens is a CLI-first AI visibility auditor for product websites."
+    - id: "distribution"
+      type: "distribution"
+      text: "AnswerLens is GitHub-native and writes share summaries, scorecards, recommendations, and static reports."
+    - id: "guardrails"
+      type: "guardrails"
+      text: "AnswerLens does not scrape consumer AI UIs and does not promise rankings on answer surfaces."
+  trusted_domains:
+    - "yscjrh.github.io"
+    - "github.com/YSCJRH/ai-visibility-auditor"

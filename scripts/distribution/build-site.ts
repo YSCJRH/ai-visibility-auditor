@@ -6,6 +6,11 @@ type ShareSummary = {
   project: string;
   tagline: string;
   positioning: string;
+  site: {
+    input: string;
+    baseUrl: string;
+    display?: string;
+  };
   disclaimer: string;
   run: {
     generatedAt: string;
@@ -22,6 +27,11 @@ type ShareSummary = {
 type RunManifest = {
   kind: string;
   generatedAt: string;
+  site: {
+    input: string;
+    baseUrl: string;
+    display?: string;
+  };
 };
 
 type ReleaseEntry = {
@@ -137,6 +147,30 @@ function renderPanel(title: string, eyebrow: string, body: string): string {
   return `<article class="panel"><p class="eyebrow">${escapeHtml(eyebrow)}</p><h2>${escapeHtml(title)}</h2>${body}</article>`;
 }
 
+function siteLabel(site: { input: string; display?: string }): string {
+  const display = site.display?.trim();
+  return display && display.length > 0 ? display : site.input;
+}
+
+function fixtureHostNote(baseUrl: string): string | null {
+  if (baseUrl !== "https://fixture.local") {
+    return null;
+  }
+
+  return "<code>https://fixture.local</code> is the stable hostname inside the public demo fixture, not the AnswerLens site URL.";
+}
+
+function renderSiteIdentity(site: { input: string; baseUrl: string; display?: string }): string {
+  const lines = [`<p><strong>Demo site:</strong> ${escapeHtml(siteLabel(site))}</p>`];
+
+  const note = fixtureHostNote(site.baseUrl);
+  if (note) {
+    lines.push(`<p>${note}</p>`);
+  }
+
+  return lines.join("");
+}
+
 function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string): string {
   const canonical = new URL(page.route, siteUrl).href;
   const ogImage = new URL("assets/social-preview.png", siteUrl).href;
@@ -249,6 +283,18 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   const artifactLinks = shareSummary.artifacts
     .map((artifact) => `<li><a href="../examples/static-good/${escapeHtml(artifact)}">${escapeHtml(artifact)}</a></li>`)
     .join("");
+  const firstIssue = shareSummary.topIssues[0];
+  const firstFix = shareSummary.topRecommendations[0];
+  const publicArtifactLinks = [
+    "share-summary.md",
+    "scorecard.md",
+    "recommendations.md"
+  ]
+    .map(
+      (artifact) =>
+        `<li><a href="${escapeHtml(new URL(`examples/static-good/${artifact}`, siteUrl).href)}">${escapeHtml(artifact)}</a></li>`
+    )
+    .join("");
 
   const pages: PageSpec[] = [
     {
@@ -269,7 +315,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         </section>
         <section class="section grid">
           ${renderPanel("Recommended first-run path", "Activation funnel", `<p><a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open the live demo report</a> is the primary entry point.</p><p>Then continue with <a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">Run the 60-second fixture demo</a> or <a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Add the GitHub Action</a>.</p><p>After the fixture run, bridge into real adoption with <a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a> before wiring CI. Use <a href="${escapeHtml(new URL("releases/", siteUrl).href)}">the latest release</a> as the second public front door.</p><p>At every step, start with <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`)}
-          ${renderPanel("Latest compiled excerpt", "Share summary", `<pre class="markdown">${escapeHtml(shareSummaryMarkdown.trim())}</pre>`)}
+          ${renderPanel("Public proof block", "Artifact proof", `${renderSiteIdentity(shareSummary.site)}${firstIssue ? `<p><strong>Top issue:</strong> ${escapeHtml(firstIssue.title)} (${escapeHtml(firstIssue.severity)}) - ${escapeHtml(firstIssue.fixHint)}</p>` : "<p><strong>Top issue:</strong> none</p>"}${firstFix ? `<p><strong>Top fix:</strong> ${escapeHtml(firstFix.title)} - ${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p><strong>Top fix:</strong> none</p>"}<p>Open artifacts in order: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p><ul>${publicArtifactLinks}</ul>`)}
         </section>`,
       jsonLd: [
         {
@@ -335,11 +381,12 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       body: `<section class="hero"><p class="eyebrow">Example dataset</p><h1>Fixture outputs are treated as public example artifacts.</h1><p>The static-good fixture is the stable source for share summaries, scorecards, recommendations, and HTML report outputs.</p></section>
         <section class="section grid">
           ${renderPanel("Latest demo run", "Run metadata", `<ul>${renderList([
+            `Site: ${escapeHtml(siteLabel(runManifest.site))}`,
             `Mode: ${escapeHtml(runManifest.kind)}`,
             `Generated: ${escapeHtml(formatReadableDate(runManifest.generatedAt, shareSummary.run.generatedAt))}`,
             `Artifact version: ${escapeHtml(shareSummary.run.artifactVersion)}`,
             `Rule version: ${escapeHtml(shareSummary.run.ruleVersion)}`
-          ])}</ul>`)}
+          ])}</ul>${fixtureHostNote(runManifest.site.baseUrl) ? `<p>${fixtureHostNote(runManifest.site.baseUrl)}</p>` : ""}`)}
           ${renderPanel("Example files", "Artifacts", `<ul>${artifactLinks}</ul>`)}
         </section>
         <section class="section grid">
