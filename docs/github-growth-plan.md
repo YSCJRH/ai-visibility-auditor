@@ -35,6 +35,10 @@ Supporting surfaces:
 - Releases as the second public front door
 - GitHub Action as the adoption surface for teams
 
+Related operating practice:
+
+- [self-dogfooding.md](self-dogfooding.md) defines how AnswerLens should use its own audit mindset on its public source-material surfaces
+
 Entry hierarchy:
 
 1. primary entry: open the live demo report

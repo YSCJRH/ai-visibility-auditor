@@ -5,6 +5,7 @@ AnswerLens should behave like a self-propagating open-source distribution system
 ## Current public surface
 
 - The GitHub repository README is the canonical home for the public product story
+- The GitHub Pages site is the canonical audit target for self-dogfooding the public source-material surface
 - GitHub repository homepage with a strong README hero, sample visuals, and concept pages
 - GitHub Pages is live at `https://yscjrh.github.io/ai-visibility-auditor/` with homepage, docs, releases, examples, playbooks, sitemap, and feed
 - GitHub releases with attached CLI, demo, and site assets through `v0.3.0`
@@ -90,6 +91,7 @@ With `v0.3.0` released on April 15, 2026, the near-term distribution bottleneck 
 
 - Canonical activation brief: [activation-plan.md](activation-plan.md)
 - GitHub-native growth practice: [github-growth-plan.md](github-growth-plan.md)
+- Self-dogfooding for discoverability: [self-dogfooding.md](self-dogfooding.md)
 - Real-site quickstart: [quickstart.md](quickstart.md)
 - Manual activation steps: [manual-steps.md](manual-steps.md)
 - Repo-local maintenance skills: `.agents/skills/activation-truth-sync` and `.agents/skills/adoption-sanity-check`

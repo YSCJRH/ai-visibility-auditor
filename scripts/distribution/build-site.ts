@@ -222,6 +222,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   const docsCards = [
     ["docs/activation-plan.md", "Activation plan", "Current operating focus for public entry points and adoption."],
     ["docs/github-growth-plan.md", "Growth plan", "GitHub-native packaging, funnel, and community strategy."],
+    ["docs/self-dogfooding.md", "Self-dogfooding", "How AnswerLens uses its own audit mindset on public source-material surfaces."],
     ["docs/quickstart.md", "Quickstart", "Run one real-site audit before you wire CI."],
     ["docs/roadmap.md", "Roadmap", "Canonical public roadmap and issue sequencing."],
     ["docs/distribution-plan.md", "Distribution plan", "P0, P1, and P2 distribution surfaces and metrics."],

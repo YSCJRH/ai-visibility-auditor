@@ -142,6 +142,7 @@ The public Action contract is:
 
 - Canonical distribution plan: [docs/distribution-plan.md](docs/distribution-plan.md)
 - GitHub-native growth practice: [docs/github-growth-plan.md](docs/github-growth-plan.md)
+- Self-dogfooding for discoverability: [docs/self-dogfooding.md](docs/self-dogfooding.md)
 - Manual setup checklist for Pages, npm, and repo settings: [docs/manual-steps.md](docs/manual-steps.md)
 - 5-minute real-site quickstart: [docs/quickstart.md](docs/quickstart.md)
 - GitHub Action usage and output contract: [docs/github-action.md](docs/github-action.md)
@@ -156,6 +157,16 @@ The fixture demo writes machine-readable audit artifacts, a static scorecard, an
 ![AnswerLens artifact preview](assets/readme-artifacts-preview.svg)
 
 See [docs/demo-report.md](docs/demo-report.md) for the fixture report walkthrough.
+
+## AnswerLens on itself
+
+AnswerLens also uses its own audit mindset on its public source-material surfaces.
+
+- The GitHub repository README stays the canonical home.
+- The GitHub Pages site is the canonical audit target.
+- Public-surface iterations should improve one of: positioning clarity, entry friction, proof density, artifact visibility, starter bundle adoption, or community routing.
+
+See [docs/self-dogfooding.md](docs/self-dogfooding.md) for the self-dogfooding loop, backlog buckets, and public dogfood asset templates.
 
 ## Before / after showcase
 
