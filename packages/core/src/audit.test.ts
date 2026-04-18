@@ -159,3 +159,96 @@ test("trailing slash proof pages still collect incoming link context", async () 
   assert.ok(enterprisePage);
   assert.equal(enterpriseWeakLinkIssue, undefined);
 });
+
+test("remote crawl retries without custom user-agent when the branded request fails", async () => {
+  const configs = await loadFixtureConfigs();
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ url: string; hasUserAgent: boolean }> = [];
+
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+    const headers = new Headers(init?.headers);
+    const hasUserAgent = headers.has("user-agent");
+    requests.push({ url, hasUserAgent });
+
+    if (url.endsWith("/robots.txt")) {
+      return new Response("User-agent: *\nAllow: /\nSitemap: https://example.test/sitemap.xml\n", {
+        status: 200,
+        headers: { "content-type": "text/plain" }
+      });
+    }
+
+    if (url.endsWith("/sitemap.xml")) {
+      return new Response(
+        '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://example.test/</loc></url></urlset>',
+        {
+          status: 200,
+          headers: { "content-type": "application/xml" }
+        }
+      );
+    }
+
+    if (url === "https://example.test/" && hasUserAgent) {
+      throw new TypeError("fetch failed");
+    }
+
+    if (url === "https://example.test/") {
+      return new Response(
+        "<!doctype html><html><head><title>Example Product | AnswerLens</title><meta name=\"description\" content=\"Example Product is an AI visibility auditor for product websites.\" /></head><body><main><h1>Example Product</h1><p>Example Product is an AI visibility auditor for product websites.</p></main></body></html>",
+        {
+          status: 200,
+          headers: { "content-type": "text/html" }
+        }
+      );
+    }
+
+    return new Response("Not found", {
+      status: 404,
+      headers: { "content-type": "text/plain" }
+    });
+  }) as typeof fetch;
+
+  try {
+    const result = await runAudit({
+      siteInput: "https://example.test/",
+      ...configs,
+      brand: {
+        brand: {
+          ...configs.brand.brand,
+          name: "Example Product",
+          domain: "example.test",
+          category: "AI visibility auditor for product websites",
+          one_liner: "Example Product helps teams audit AI discoverability on product sites."
+        }
+      }
+    });
+
+    assert.ok(requests.some((entry) => entry.url === "https://example.test/" && entry.hasUserAgent));
+    assert.ok(requests.some((entry) => entry.url === "https://example.test/" && !entry.hasUserAgent));
+    assert.equal(result.issues.some((issue) => issue.title === "Page fetch failed"), false);
+    assert.equal(result.issues.some((issue) => issue.title === "Homepage was not crawled"), false);
+    assert.ok(result.pages.some((page) => page.url === "https://example.test/"));
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("project-site base path is treated as the homepage", async () => {
+  const { brand } = await loadFixtureConfigs();
+  const page = normalizePage(
+    {
+      kind: "remote",
+      input: "https://yscjrh.github.io/ai-visibility-auditor/",
+      baseUrl: "https://yscjrh.github.io/ai-visibility-auditor"
+    },
+    {
+      url: "https://yscjrh.github.io/ai-visibility-auditor",
+      status: 200,
+      html: "<!doctype html><html><head><title>AnswerLens | Home</title></head><body><main><h1>AnswerLens</h1><p>AnswerLens is a CLI-first AI visibility auditor for product websites.</p></main></body></html>",
+      contentType: "text/html"
+    },
+    brand.brand
+  );
+
+  assert.equal(page.pageType, "home");
+});

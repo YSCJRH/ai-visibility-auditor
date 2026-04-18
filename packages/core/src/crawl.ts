@@ -91,31 +91,42 @@ async function fetchLocalText(source: SiteSource, target: string): Promise<Fetch
 
 async function fetchRemoteText(source: SiteSource, target: string): Promise<FetchedPage> {
   const url = buildUrl(source, target);
-
-  try {
-    const response = await fetch(url, {
+  const attempts: Array<{ headers?: Record<string, string> }> = [
+    {
       headers: {
         "user-agent": "AnswerLens/0.3.0 (+https://github.com/YSCJRH/ai-visibility-auditor)"
-      },
-      signal: AbortSignal.timeout(12000)
-    });
+      }
+    },
+    {}
+  ];
+  let lastError: unknown = null;
 
-    return {
-      url,
-      status: response.status,
-      html: await response.text(),
-      contentType: response.headers.get("content-type") ?? "text/plain",
-      fetchError: response.ok ? undefined : `HTTP ${response.status}`
-    };
-  } catch (error) {
-    return {
-      url,
-      status: 0,
-      html: "",
-      contentType: "text/plain",
-      fetchError: error instanceof Error ? error.message : "Unknown fetch error"
-    };
+  for (const attempt of attempts) {
+    try {
+      const response = await fetch(url, {
+        ...(attempt.headers ? { headers: attempt.headers } : {}),
+        signal: AbortSignal.timeout(12000)
+      });
+
+      return {
+        url,
+        status: response.status,
+        html: await response.text(),
+        contentType: response.headers.get("content-type") ?? "text/plain",
+        fetchError: response.ok ? undefined : `HTTP ${response.status}`
+      };
+    } catch (error) {
+      lastError = error;
+    }
   }
+
+  return {
+    url,
+    status: 0,
+    html: "",
+    contentType: "text/plain",
+    fetchError: lastError instanceof Error ? lastError.message : "Unknown fetch error"
+  };
 }
 
 async function fetchText(source: SiteSource, target: string): Promise<FetchedPage> {

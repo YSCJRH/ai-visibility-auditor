@@ -14,11 +14,20 @@ import type {
 } from "./types.ts";
 import { keywordCoverage, normalizeComparableUrl, pathLooksLike, unique } from "./utils.ts";
 
-function detectPageType(page: FetchedPage, title: string, h1: string): PageType {
-  const pathname = new URL(page.url).pathname.toLowerCase();
+function normalizePathname(pathname: string): string {
+  if (!pathname || pathname === "/") {
+    return "/";
+  }
+
+  return pathname.replace(/\/+$/, "").toLowerCase() || "/";
+}
+
+function detectPageType(source: SiteSource, page: FetchedPage, title: string, h1: string): PageType {
+  const pathname = normalizePathname(new URL(page.url).pathname);
+  const sourcePathname = normalizePathname(new URL(source.baseUrl).pathname);
   const haystack = `${title} ${h1} ${pathname}`.toLowerCase();
 
-  if (pathname === "/" || pathname === "") return "home";
+  if (pathname === "/" || pathname === "" || pathname === sourcePathname) return "home";
   if (pathLooksLike(pathname, "pricing", "plans") || haystack.includes("pricing")) return "pricing";
   if (pathLooksLike(pathname, "security", "trust") || haystack.includes("security")) return "security";
   if (pathLooksLike(pathname, "faq")) return "faq";
@@ -480,7 +489,7 @@ export function normalizePage(source: SiteSource, page: FetchedPage, _brand: Bra
     .toLowerCase();
   const wordCount = text ? text.split(/\s+/).length : 0;
   const textLower = text.toLowerCase();
-  const pageType = detectPageType(page, title, h1);
+  const pageType = detectPageType(source, page, title, h1);
   const lists = $("ul, ol").length;
   const tables = $("table").length;
   const schemaTextSignals = createSchemaTextSignals(jsonLd.records, text);
