@@ -15,6 +15,8 @@ Keep one onboarding discussion pinned:
 
 - `Start here: share your first AnswerLens run`
 
+Use `Announcements` for maintainer dogfood notes and self-audit snapshots.
+
 ## Ruleset for `main`
 
 Recommended rules:
@@ -72,6 +74,14 @@ Use Issues when the work is actionable and specific:
 - concrete feature requests
 
 Keep [`.github/ISSUE_TEMPLATE/config.yml`](../.github/ISSUE_TEMPLATE/config.yml) aligned with this routing.
+
+## Self-dogfooding notes
+
+When public packaging changes because AnswerLens was used on its own Pages, demo, or docs surfaces:
+
+- summarize one clarity, proof, structure, or conversion improvement in release notes
+- post the fuller explanation in `Announcements`
+- keep the README proof section and the self-dogfooding doc aligned with that language
 
 ## Code owners
 

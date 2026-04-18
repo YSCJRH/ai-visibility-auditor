@@ -4,12 +4,14 @@ AnswerLens has enough product surface to be useful today. The next workstream is
 
 This document is the canonical repo entry for that workstream. The detailed working brief lives in [../trans.md](../trans.md).
 The GitHub-native growth practice for that workstream lives in [github-growth-plan.md](github-growth-plan.md).
+The self-dogfooding loop for that workstream lives in [self-dogfooding.md](self-dogfooding.md).
 
 ## Current operating focus
 
 1. `truth-sync`: keep README, roadmap, release surfaces, and GitHub metadata aligned with the actual published state
 2. `activation`: keep the live demo as the primary entry, make the fixture demo and GitHub Action the two secondary entry points, and use the 5-minute real-site audit as the bridge into adoption
 3. `hardening`: codify repo rules, fix distribution drift, and verify that external adopters can copy the documented path
+4. `self-dogfooding`: use AnswerLens on its own Pages, demo, docs, and release-facing surfaces to improve clarity, proof, structure, and conversion over time
 
 Current umbrella issue: [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33)
 
@@ -19,6 +21,7 @@ Current umbrella issue: [#33](https://github.com/YSCJRH/ai-visibility-auditor/is
 - GitHub Action adoption docs and starter examples
 - Pages, release, and install narrative
 - Real-site quickstart and first-run artifact order
+- Self-dogfooding rules for the README, Pages, release, and docs surfaces
 - GitHub-native packaging, community routing, and public proof surfaces
 - Repo governance docs such as `AGENTS.md`
 - Public status alignment across roadmap, releases, milestones, and manual steps
@@ -36,5 +39,6 @@ Current umbrella issue: [#33](https://github.com/YSCJRH/ai-visibility-auditor/is
 - README stays the canonical home while Pages and releases support it as proof and distribution surfaces
 - The real-site quickstart bridges local trial and CI adoption without changing the public non-goals
 - The GitHub Action path reads like an external adopter workflow rather than an internal dogfood-only workflow
+- Self-dogfooding stays focused on public source-material quality rather than platform ranking claims
 - Pages, release, README, and manual setup docs all describe the same public surface
 - Manual settings for GitHub Pages, homepage, social preview, topics, and npm publish remain explicit

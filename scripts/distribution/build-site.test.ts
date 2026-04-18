@@ -69,6 +69,7 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /Organization/);
   assert.match(docs, /Activation plan/);
   assert.match(docs, /Growth plan/);
+  assert.match(docs, /Self-dogfooding/);
   assert.match(docs, /Quickstart/);
   assert.match(releases, /v0\.3\.0/);
   assert.match(releases, /Use the latest release/);

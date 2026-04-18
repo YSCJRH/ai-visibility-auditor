@@ -10,6 +10,7 @@ These are the smallest manual steps needed to activate the public distribution s
 4. Keep copied workflow versions current in external repositories.
 5. After the first public deploy, verify the live demo report, quickstart docs, and release surfaces.
 6. Keep Discussions categories, pinned onboarding discussion, and issue template contact links aligned with the public funnel.
+7. Keep the self-dogfooding note path aligned across release notes, Announcements, and README proof surfaces.
 
 ## npm publishing
 
@@ -27,6 +28,7 @@ These are the smallest manual steps needed to activate the public distribution s
 3. Set the repository homepage URL to `https://yscjrh.github.io/ai-visibility-auditor/` once the first deploy succeeds.
 4. Verify the live demo report URL:
    `https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html`
+5. Treat the Pages site as the canonical audit target for self-dogfooding public source material.
 
 ## GitHub Actions runtime
 
@@ -58,6 +60,12 @@ Also pin one onboarding discussion:
 
 - `Start here: share your first AnswerLens run`
 
+Use `Announcements` for maintainer dogfood notes:
+
+- what AnswerLens found on itself
+- one clarity, proof, structure, or conversion change made because of that run
+- a short before / after or self-audit snapshot when available
+
 Keep `.github/ISSUE_TEMPLATE/config.yml` aligned with that routing so first-time users are nudged toward Discussions instead of opening a vague issue.
 
 ## Optional credibility and research setup
@@ -69,10 +77,12 @@ Keep `.github/ISSUE_TEMPLATE/config.yml` aligned with that routing so first-time
 
 - README, roadmap, release notes, and Pages should all agree on the latest released version
 - README should remain the canonical home, while the release surface acts as the second front door
+- Pages should remain the canonical audit target for self-dogfooding public source material
 - README, quickstart docs, release notes, and Pages should all present the same first-run funnel
 - The live demo link in README should resolve to the Pages-hosted sample report
 - The copied workflow versions in docs should match the repository defaults
 - Discussions and Issues should describe the same routing as the docs
+- release notes and Announcements should describe self-dogfooding improvements in the same language as the docs
 - npm publish copy should mention both trusted publishing and `NPM_TOKEN`
 
 ## Current no-token path

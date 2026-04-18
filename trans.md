@@ -5,6 +5,7 @@
 >
 > 规范化入口：本 workstream 的仓库级摘要与执行边界已整理到 [docs/activation-plan.md](docs/activation-plan.md)。
 > GitHub-native 增长与包装实践已整理到 [docs/github-growth-plan.md](docs/github-growth-plan.md)。
+> 自我应用传播闭环已整理到 [docs/self-dogfooding.md](docs/self-dogfooding.md)。
 
 ---
 
