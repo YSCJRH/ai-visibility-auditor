@@ -296,6 +296,92 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         `<li><a href="${escapeHtml(new URL(`examples/static-good/${artifact}`, siteUrl).href)}">${escapeHtml(artifact)}</a></li>`
     )
     .join("");
+  const proofPageUrls = {
+    pricing: new URL("pricing/", siteUrl).href,
+    security: new URL("security/", siteUrl).href,
+    faq: new URL("faq/", siteUrl).href,
+    compare: new URL("compare/", siteUrl).href,
+    integrations: new URL("integrations/", siteUrl).href,
+    productMarketing: new URL("use-case/product-marketing/", siteUrl).href,
+    developerAdvocacy: new URL("use-case/developer-advocacy/", siteUrl).href,
+    openSource: new URL("use-case/open-source-maintainers/", siteUrl).href
+  };
+  const pricingTable = `
+    <table>
+      <thead>
+        <tr><th>Surface</th><th>Cost model</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>CLI audit</td><td>$0 provider cost</td><td>Basic <code>audit</code> runs do not require provider API keys.</td></tr>
+        <tr><td>Eval runs</td><td>Bring your own provider bill</td><td>OpenAI and Perplexity usage stays in your own account.</td></tr>
+        <tr><td>GitHub Action</td><td>Your repository runner minutes</td><td>The Action keeps the same artifact contract used by local runs.</td></tr>
+        <tr><td>Release assets and Pages</td><td>$0 to download</td><td>Demo bundles, the compiled site, and docs stay publicly accessible.</td></tr>
+      </tbody>
+    </table>`;
+  const securityTable = `
+    <table>
+      <thead>
+        <tr><th>Concern</th><th>AnswerLens approach</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Secrets</td><td>Provider keys stay in your own shell, CI environment, or Actions secrets.</td></tr>
+        <tr><td>Hosted control plane</td><td>No hosted AnswerLens SaaS is required for the CLI, the GitHub Action, or the static report flow.</td></tr>
+        <tr><td>Review trail</td><td>Use pull requests, Action logs, uploaded artifacts, and repo history as the audit trail.</td></tr>
+        <tr><td>Public sharing</td><td>Share <code>share-summary.md</code> or <code>pr-snippet.md</code> and keep raw payloads private.</td></tr>
+      </tbody>
+    </table>`;
+  const compareTable = `
+    <table>
+      <thead>
+        <tr><th>Dimension</th><th>AnswerLens</th><th>Dashboard-first AI visibility tools</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Primary output</td><td>Repo-native reports, scorecards, and fix lists</td><td>Managed monitoring views and dashboards</td></tr>
+        <tr><td>Operating model</td><td>CLI-first, GitHub-native, and BYOK</td><td>Usually hosted and dashboard-centered</td></tr>
+        <tr><td>Review workflow</td><td>PRs, release notes, Pages, and artifacts</td><td>Vendor UI plus exported summaries</td></tr>
+        <tr><td>Guardrails</td><td>No consumer UI scraping and no ranking promises</td><td>Varies by vendor and monitoring method</td></tr>
+      </tbody>
+    </table>`;
+  const integrationsTable = `
+    <table>
+      <thead>
+        <tr><th>Integration surface</th><th>What it does</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>GitHub Action</td><td>Runs the same artifact contract in pull requests, workflow_dispatch runs, and artifact uploads.</td></tr>
+        <tr><td>OpenAI and Perplexity eval</td><td>Adds eval-mode benchmarking when you want answer quality checks on top of audit.</td></tr>
+        <tr><td>Search Console import</td><td>Validates key-page evidence against imported page-level Search Console exports.</td></tr>
+        <tr><td>Bing / IndexNow helper</td><td>Adds helper-mode validation and candidate URL preparation without live submission.</td></tr>
+        <tr><td>Release assets and Pages</td><td>Turns demo outputs and docs into reusable public distribution surfaces.</td></tr>
+      </tbody>
+    </table>`;
+  const faqQuestions = [
+    {
+      question: "What does AnswerLens audit?",
+      answer:
+        "AnswerLens audits whether a product site is easy for AI systems to read, cite, compare, and recommend through reviewable artifacts such as share summaries, scorecards, and recommendations."
+    },
+    {
+      question: "Does AnswerLens scrape consumer AI apps?",
+      answer:
+        "No. AnswerLens keeps the non-goal explicit: no consumer AI UI scraping and no ranking guarantees on answer surfaces."
+    },
+    {
+      question: "Do I need provider API keys to try it?",
+      answer:
+        "Not for a basic audit run. Provider keys are only needed when you want eval-mode benchmarking on top of the core site audit."
+    },
+    {
+      question: "How do I start in under five minutes?",
+      answer:
+        "Start with the live demo report, then run the 60-second fixture demo, then use the 5-minute real-site quickstart before wiring the GitHub Action."
+    },
+    {
+      question: "How does pricing work today?",
+      answer:
+        "The project is open source, the CLI and Pages docs are public, and eval costs follow a BYOK model because provider usage stays in your own account."
+    }
+  ];
 
   const pages: PageSpec[] = [
     {
@@ -317,6 +403,21 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         <section class="section grid">
           ${renderPanel("Recommended first-run path", "Activation funnel", `<p><a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open the live demo report</a> is the primary entry point.</p><p>Then continue with <a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">Run the 60-second fixture demo</a> or <a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Add the GitHub Action</a>.</p><p>After the fixture run, bridge into real adoption with <a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a> before wiring CI. Use <a href="${escapeHtml(new URL("releases/", siteUrl).href)}">the latest release</a> as the second public front door.</p><p>At every step, start with <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`)}
           ${renderPanel("Public proof block", "Artifact proof", `${renderSiteIdentity(shareSummary.site)}${firstIssue ? `<p><strong>Top issue:</strong> ${escapeHtml(firstIssue.title)} (${escapeHtml(firstIssue.severity)}) - ${escapeHtml(firstIssue.fixHint)}</p>` : "<p><strong>Top issue:</strong> none</p>"}${firstFix ? `<p><strong>Top fix:</strong> ${escapeHtml(firstFix.title)} - ${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p><strong>Top fix:</strong> none</p>"}<p>Open artifacts in order: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p><ul>${publicArtifactLinks}</ul>`)}
+        </section>
+        <section class="section grid">
+          ${renderPanel("Public proof pages", "Coverage", `<p>AnswerLens now publishes public proof surfaces that explain packaging, trust, FAQs, comparisons, and integrations without drifting into dashboard-first packaging.</p><ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.pricing)}">Pricing and packaging</a>: explain the open-source, BYOK, and release-asset cost model.`,
+            `<a href="${escapeHtml(proofPageUrls.security)}">Security and trust</a>: explain secrets, review flow, and non-goals in one page.`,
+            `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">Docs index</a>: activation references, scoring notes, and GitHub Action usage.`,
+            `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: answer first-run questions in visible, citable language.`,
+            `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: explain how AnswerLens differs from dashboard-first AI visibility tools.`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">Integrations</a>: show the GitHub-native and validation surfaces together.`
+          ])}</ul>`)}
+          ${renderPanel("Use-case coverage", "Team fit", `<p>These use-case pages explain where AnswerLens fits before a team adopts it in CI.</p><ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.productMarketing)}">Product marketing teams</a>: turn homepage, pricing, and comparison gaps into reviewable fixes.`,
+            `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">Developer advocacy teams</a>: strengthen docs, proof pages, and self-serve evaluation paths.`,
+            `<a href="${escapeHtml(proofPageUrls.openSource)}">Open-source maintainers</a>: use README, releases, Pages, and artifacts as the public distribution stack.`
+          ])}</ul>`)}
         </section>`,
       jsonLd: [
         {
@@ -407,6 +508,191 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       }
     },
     {
+      route: "pricing/",
+      filePath: path.join(outDir, "pricing", "index.html"),
+      title: "Open-source pricing and packaging",
+      description: "Open-source pricing, packaging, BYOK evaluation, and release-asset distribution for AnswerLens.",
+      body: `<section class="hero"><p class="eyebrow">Pricing and packaging</p><h1>Pricing for AnswerLens is open-source, BYOK, and artifact-first.</h1><p>AnswerLens is not a hosted dashboard with seat-based licensing. The code, Pages docs, example reports, and release assets are public. The only variable costs appear when you choose to run eval-mode benchmarking with your own provider account or consume your own GitHub runner minutes.</p></section>
+        <section class="section grid">
+          ${renderPanel("What costs $0", "Open surfaces", `<ul>${renderList([
+            "The open-source repository, Pages site, and live demo report.",
+            "The CLI workflow for a basic `audit` run with no provider key.",
+            "The reusable GitHub Action contract and release asset downloads.",
+            "Local fixture demos, report bundles, and static review artifacts."
+          ])}</ul>`)}
+          ${renderPanel("Where variable cost appears", "BYOK model", pricingTable)}
+        </section>
+        <section class="section grid">
+          ${renderPanel("Packaging choices", "How teams adopt", `<p>Teams usually start with the live demo report, move to one local real-site audit, and then wire the same output contract into the GitHub Action. The package and release surfaces are intentionally simple:</p><ul>${renderList([
+            "<code>@answerlens/cli</code> for CLI installs and dry-run packaging.",
+            "The root GitHub Action for pull-request and workflow-based adoption.",
+            "Release assets for tarballs, demo bundles, and the compiled site bundle.",
+            "Pages as the public proof surface for docs, examples, playbooks, pricing, and trust."
+          ])}</ul><p>That model keeps pricing legible: open source for the product surface, BYOK for optional eval usage, and no hosted AnswerLens control plane fee today.</p>`)}
+        </section>`,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: "AnswerLens pricing and packaging",
+        description: "Open-source pricing and packaging details for AnswerLens.",
+        url: new URL("pricing/", siteUrl).href
+      }
+    },
+    {
+      route: "security/",
+      filePath: path.join(outDir, "security", "index.html"),
+      title: "Security, trust, and review guardrails",
+      description: "Security and trust model for AnswerLens: BYOK secrets, no hosted control plane, and reviewable GitHub artifacts.",
+      body: `<section class="hero"><p class="eyebrow">Security and trust</p><h1>Security for AnswerLens starts with no hosted control plane.</h1><p>AnswerLens is designed so that teams can audit public product sites and review results inside GitHub-native workflows without sending their repo history or provider keys to a separate AnswerLens SaaS. It keeps the guardrails explicit: no consumer AI UI scraping, no ranking guarantees, and no dashboard-first rewrite.</p></section>
+        <section class="section grid">
+          ${renderPanel("Trust model", "What stays under your control", `<ul>${renderList([
+            "Provider API keys stay in your own shell, CI environment, or GitHub Actions secrets.",
+            "The core `audit` workflow can run without provider keys at all.",
+            "AnswerLens writes reviewable artifacts such as `share-summary.md`, `scorecard.md`, and `recommendations.md` into your own run directory.",
+            "Public sharing should use summary artifacts, while raw provider payloads stay private."
+          ])}</ul>`)}
+          ${renderPanel("Review and deployment model", "Operational detail", securityTable)}
+        </section>
+        <section class="section grid">
+          ${renderPanel("Known limits", "Guardrails", `<ul>${renderList([
+            "AnswerLens does not claim SOC 2, ISO 27001, HIPAA, or other compliance programs for a hosted service because it is not operating as a hosted AnswerLens SaaS today.",
+            "The project does not scrape consumer AI interfaces to fabricate visibility claims.",
+            "The product does not promise rankings or placement on answer surfaces.",
+            "Teams should still review artifacts before posting them to public issues, PRs, or release notes."
+          ])}</ul><p>That keeps the trust story direct: use your own deployment path, your own secrets handling, and your own repository review process.</p>`)}
+        </section>`,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: "AnswerLens security and trust",
+        description: "Security and trust model for AnswerLens.",
+        url: new URL("security/", siteUrl).href
+      }
+    },
+    {
+      route: "faq/",
+      filePath: path.join(outDir, "faq", "index.html"),
+      title: "First-run FAQ and guardrails",
+      description: "Frequently asked questions about what AnswerLens is, how it works, and what it does not claim.",
+      body: `<section class="hero"><p class="eyebrow">First-run FAQ</p><h1>AnswerLens FAQ for new visitors and evaluators.</h1><p>This page answers the recurring first-run questions in visible, citable language so teams can understand the workflow before they wire it into GitHub or compare it with dashboard-first tools.</p></section>
+        <section class="section grid">
+          ${renderPanel("Common questions", "What people ask first", faqQuestions.map((entry) => `<h2>${escapeHtml(entry.question)}</h2><p>${escapeHtml(entry.answer)}</p>`).join(""))}
+        </section>`,
+      jsonLd: [
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqQuestions.map((entry) => ({
+            "@type": "Question",
+            name: entry.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: entry.answer
+            }
+          }))
+        }
+      ]
+    },
+    {
+      route: "compare/",
+      filePath: path.join(outDir, "compare", "index.html"),
+      title: "AnswerLens compared with dashboard-first tools",
+      description: "How AnswerLens differs from dashboard-first AI visibility tools such as Profound, Peec AI, and Otterly.",
+      body: `<section class="hero"><p class="eyebrow">Compare</p><h1>AnswerLens fits teams that want repo-native audits instead of dashboard-first packaging.</h1><p>Tools such as Profound, Peec AI, and Otterly may fit teams that want managed monitoring or broader hosted visibility products. AnswerLens fits a different workflow: a CLI-first, GitHub-native audit layer that produces shareable artifacts and keeps BYOK evaluation explicit.</p></section>
+        <section class="section grid">
+          ${renderPanel("Declared comparison set", "Current public comparison", `<ul>${renderList([
+            "Profound: AI visibility platform with a hosted monitoring posture.",
+            "Peec AI: AI search monitoring workflow with a productized SaaS surface.",
+            "Otterly: AI visibility monitoring aimed at managed, ongoing tracking."
+          ])}</ul>`)}
+          ${renderPanel("How the workflow differs", "Repo-native vs dashboard-first", compareTable)}
+        </section>
+        <section class="section grid">
+          ${renderPanel("When AnswerLens fits", "Decision criteria", `<ul>${renderList([
+            "You want reports, scorecards, and fix lists that move through pull requests, issues, release notes, and Pages.",
+            "You want provider usage to stay in your own account rather than hidden behind a hosted vendor surface.",
+            "You care more about improving source-material quality than claiming rank positions on answer surfaces.",
+            "You want compare-ready, FAQ-ready, and proof-ready content gaps to be visible as artifacts, not only in a monitoring dashboard."
+          ])}</ul>`)}
+        </section>`,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: "AnswerLens compare page",
+        description: "Comparison page for AnswerLens versus dashboard-first AI visibility tools.",
+        url: new URL("compare/", siteUrl).href
+      }
+    },
+    {
+      route: "integrations/",
+      filePath: path.join(outDir, "integrations", "index.html"),
+      title: "GitHub, provider, and validation integrations",
+      description: "GitHub Action, provider adapters, Search Console import, and helper integrations for AnswerLens.",
+      body: `<section class="hero"><p class="eyebrow">Integrations</p><h1>AnswerLens integrations stay GitHub-native and artifact-backed.</h1><p>The integration surface is intentionally narrow: keep the core audit contract stable, add eval providers when you need them, and layer validation imports on top without turning the project into a dashboard-first SaaS.</p></section>
+        <section class="section grid">
+          ${renderPanel("Current integration surfaces", "What ships now", integrationsTable)}
+          ${renderPanel("How teams usually adopt", "Suggested path", `<ol><li>Open the live demo report.</li><li>Run the 60-second fixture demo.</li><li>Run one real-site audit locally.</li><li>Move the same artifact contract into the GitHub Action.</li></ol><p>That sequencing keeps integrations understandable and reviewable instead of turning each surface into a separate product.</p>`)}
+        </section>`,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: "AnswerLens integrations",
+        description: "Integration surfaces for AnswerLens.",
+        url: new URL("integrations/", siteUrl).href
+      }
+    },
+    {
+      route: "use-case/product-marketing/",
+      filePath: path.join(outDir, "use-case", "product-marketing", "index.html"),
+      title: "Use case for product marketing teams",
+      description: "How product marketing teams can use AnswerLens to tighten homepage, proof, and comparison content.",
+      body: `<section class="hero"><p class="eyebrow">Use case</p><h1>AnswerLens for product marketing teams.</h1><p>Product marketing teams use AnswerLens when they need a concrete view of why an AI system might miss the category, flatten the positioning, or skip the proof pages that support a buying decision.</p></section>
+        <section class="section grid">
+          ${renderPanel("Where teams start", "Workflow", `<h2>Audit the public story</h2><p>Start with the homepage, docs, pricing, and compare surfaces. Review the share summary and scorecard first, then move into the recommendations.</p><h2>What gets shipped</h2><p>Teams usually respond by tightening category language, improving proof density, and publishing better pricing, FAQ, and compare content.</p><h2>What improves</h2><p>The result is not a ranking promise. It is stronger source material that gives AI systems better evidence to cite, compare, and recommend.</p>`)}
+        </section>`,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: "AnswerLens for product marketing teams",
+        description: "Use-case page for product marketing teams evaluating AnswerLens.",
+        url: new URL("use-case/product-marketing/", siteUrl).href
+      }
+    },
+    {
+      route: "use-case/developer-advocacy/",
+      filePath: path.join(outDir, "use-case", "developer-advocacy", "index.html"),
+      title: "Use case for developer advocacy teams",
+      description: "How developer advocacy teams can use AnswerLens to strengthen docs, examples, and self-serve proof pages.",
+      body: `<section class="hero"><p class="eyebrow">Use case</p><h1>AnswerLens for developer advocacy teams.</h1><p>Developer advocacy teams use AnswerLens to see whether docs, examples, integrations, and product proof pages are strong enough for AI-mediated discovery and evaluation.</p></section>
+        <section class="section grid">
+          ${renderPanel("Where teams focus", "Docs and proof", `<h2>Strengthen docs visibility</h2><p>Review whether the docs index, setup guidance, and API references are public, scannable, and linked from the homepage and adjacent proof pages.</p><h2>Ship example artifacts</h2><p>Use Pages examples, release bundles, and fixture reports as public teaching tools that can be linked directly in GitHub.</p><h2>Reduce first-run friction</h2><p>Keep the quickstart and GitHub Action path aligned so that new developers can move from the demo to their own repository without guesswork.</p>`)}
+        </section>`,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: "AnswerLens for developer advocacy teams",
+        description: "Use-case page for developer advocacy teams evaluating AnswerLens.",
+        url: new URL("use-case/developer-advocacy/", siteUrl).href
+      }
+    },
+    {
+      route: "use-case/open-source-maintainers/",
+      filePath: path.join(outDir, "use-case", "open-source-maintainers", "index.html"),
+      title: "Use case for open-source maintainers",
+      description: "How open-source maintainers can use AnswerLens on README, Pages, releases, and demo artifacts.",
+      body: `<section class="hero"><p class="eyebrow">Use case</p><h1>AnswerLens for open-source maintainers.</h1><p>Open-source maintainers use AnswerLens when the repository itself is the product entry point and the project needs better README, Pages, release, and artifact surfaces before it needs more product modules.</p></section>
+        <section class="section grid">
+          ${renderPanel("Why maintainers use it", "GitHub-native distribution", `<h2>Audit the repository as public source material</h2><p>Use the README as the canonical home, Pages as the audit target, and release notes as the second front door.</p><h2>Review artifacts in GitHub</h2><p>AnswerLens turns unclear packaging problems into artifacts that can be discussed in issues, pull requests, and Discussions announcements.</p><h2>Repeat the loop</h2><p>That makes self-dogfooding practical: improve public proof pages, rerun the audit, and track whether the next round of feedback is more meaningful.</p>`)}
+        </section>`,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: "AnswerLens for open-source maintainers",
+        description: "Use-case page for open-source maintainers evaluating AnswerLens.",
+        url: new URL("use-case/open-source-maintainers/", siteUrl).href
+      }
+    },
+    {
       route: "playbooks/",
       filePath: path.join(outDir, "playbooks", "index.html"),
       title: "Fix playbooks from current audit artifacts",
@@ -432,6 +718,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   ];
 
   for (const page of pages) {
+    await mkdir(path.dirname(page.filePath), { recursive: true });
     await writeFile(page.filePath, renderLayout(siteUrl, page, updatedAt), "utf8");
   }
 

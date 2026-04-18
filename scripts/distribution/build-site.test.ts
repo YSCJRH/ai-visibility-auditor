@@ -45,17 +45,33 @@ test("build-site writes indexable pages and metadata", async () => {
   await Promise.all([
     access(path.join(outDir, "index.html")),
     access(path.join(outDir, "docs", "index.html")),
+    access(path.join(outDir, "pricing", "index.html")),
+    access(path.join(outDir, "security", "index.html")),
+    access(path.join(outDir, "faq", "index.html")),
+    access(path.join(outDir, "compare", "index.html")),
+    access(path.join(outDir, "integrations", "index.html")),
     access(path.join(outDir, "releases", "index.html")),
     access(path.join(outDir, "examples", "index.html")),
     access(path.join(outDir, "playbooks", "index.html")),
+    access(path.join(outDir, "use-case", "product-marketing", "index.html")),
+    access(path.join(outDir, "use-case", "developer-advocacy", "index.html")),
+    access(path.join(outDir, "use-case", "open-source-maintainers", "index.html")),
     access(path.join(outDir, "sitemap.xml")),
     access(path.join(outDir, "feed.xml")),
     access(path.join(outDir, "robots.txt"))
   ]);
 
-  const [home, docs, releases, examples, demoReport, feed, sitemap] = await Promise.all([
+  const [home, docs, pricing, security, faq, compare, integrations, productMarketing, developerAdvocacy, openSource, releases, examples, demoReport, feed, sitemap] = await Promise.all([
     readFile(path.join(outDir, "index.html"), "utf8"),
     readFile(path.join(outDir, "docs", "index.html"), "utf8"),
+    readFile(path.join(outDir, "pricing", "index.html"), "utf8"),
+    readFile(path.join(outDir, "security", "index.html"), "utf8"),
+    readFile(path.join(outDir, "faq", "index.html"), "utf8"),
+    readFile(path.join(outDir, "compare", "index.html"), "utf8"),
+    readFile(path.join(outDir, "integrations", "index.html"), "utf8"),
+    readFile(path.join(outDir, "use-case", "product-marketing", "index.html"), "utf8"),
+    readFile(path.join(outDir, "use-case", "developer-advocacy", "index.html"), "utf8"),
+    readFile(path.join(outDir, "use-case", "open-source-maintainers", "index.html"), "utf8"),
     readFile(path.join(outDir, "releases", "index.html"), "utf8"),
     readFile(path.join(outDir, "examples", "index.html"), "utf8"),
     readFile(path.join(outDir, "examples", "static-good", "index.html"), "utf8"),
@@ -73,6 +89,13 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /AnswerLens static-good fixture demo/);
   assert.match(home, /stable hostname inside the public demo fixture/);
   assert.match(home, /examples\/static-good\/share-summary\.md/);
+  assert.match(home, /Public proof pages/);
+  assert.match(home, /pricing\/"/);
+  assert.match(home, /security\/"/);
+  assert.match(home, /faq\/"/);
+  assert.match(home, /compare\/"/);
+  assert.match(home, /integrations\/"/);
+  assert.match(home, /use-case\/product-marketing\/"/);
   assert.match(home, /Built by YSCJRH from repo-native docs, releases, and artifacts\./);
   assert.match(home, /primary entry point/);
   assert.match(home, /5-minute real-site audit/);
@@ -85,6 +108,20 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(docs, /Growth plan/);
   assert.match(docs, /Self-dogfooding/);
   assert.match(docs, /Quickstart/);
+  assert.match(pricing, /Pricing for AnswerLens is open-source, BYOK, and artifact-first\./);
+  assert.match(pricing, /\$0 provider cost/);
+  assert.match(pricing, /@answerlens\/cli/);
+  assert.match(security, /Security for AnswerLens starts with no hosted control plane\./);
+  assert.match(security, /no consumer AI UI scraping/);
+  assert.match(faq, /AnswerLens FAQ for new visitors and evaluators\./);
+  assert.match(faq, /FAQPage/);
+  assert.match(compare, /Profound/);
+  assert.match(compare, /Peec AI/);
+  assert.match(compare, /Otterly/);
+  assert.match(integrations, /GitHub-native and artifact-backed/);
+  assert.match(productMarketing, /AnswerLens for product marketing teams\./);
+  assert.match(developerAdvocacy, /AnswerLens for developer advocacy teams\./);
+  assert.match(openSource, /AnswerLens for open-source maintainers\./);
   assert.match(releases, /v0\.3\.0/);
   assert.match(releases, /<title>Release notes and downloadable distribution assets \| AnswerLens<\/title>/);
   assert.match(releases, /Use the latest release/);
@@ -97,6 +134,12 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(demoReport, /AnswerLens static-good fixture demo/);
   assert.match(feed, /AnswerLens releases/);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/examples\//);
+  assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/pricing\//);
+  assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/security\//);
+  assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/faq\//);
+  assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/compare\//);
+  assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/integrations\//);
+  assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/use-case\/product-marketing\//);
   assert.equal(home.includes("\uFFFD"), false);
   assert.equal(examples.includes("\uFFFD"), false);
   assert.equal(demoReport.includes("\uFFFD"), false);
