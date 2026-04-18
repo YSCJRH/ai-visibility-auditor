@@ -18,14 +18,23 @@ The fixture pages use `https://fixture.local` as a stable hostname inside the de
 
 ## What to open first
 
-- `share-summary.md`: fastest human-readable overview
-- `scorecard.md`: readiness score, buckets, top issues, and page inventory
-- `recommendations.md`: prioritized fixes
+1. `share-summary.md`: fastest human-readable overview
+2. `scorecard.md`: readiness score, buckets, top issues, and page inventory
+3. `recommendations.md`: prioritized fixes
+
+Then use:
+
 - `pr-snippet.md`: copy-ready GitHub block
 - `index.html`: static report for browser review
 - `run.json`: machine-readable run metadata
 
 This is the same artifact order used by the README funnel and the real-site quickstart: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
+
+## What to do next
+
+1. If you have not reproduced the report locally yet, run `corepack pnpm demo:fixture`.
+2. When the artifact order makes sense, continue to [docs/quickstart.md](quickstart.md) for one real-site run against your own public site.
+3. Only after one useful local real-site run, move the same `.github/answerlens/` folder shape into [docs/github-action.md](github-action.md).
 
 ## Example conclusion
 

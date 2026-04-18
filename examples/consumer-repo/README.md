@@ -2,6 +2,8 @@
 
 Copy this example into the repository that will run AnswerLens.
 
+This starter bundle is step 4 of the public AnswerLens funnel: use it after the live demo, the local fixture demo, and one useful real-site run from [../../docs/quickstart.md](../../docs/quickstart.md).
+
 The example uses a consumer-repo layout instead of this repository's internal `examples/acme/*` files:
 
 ```text

@@ -97,8 +97,10 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /integrations\/"/);
   assert.match(home, /use-case\/product-marketing\/"/);
   assert.match(home, /Built by YSCJRH from repo-native docs, releases, and artifacts\./);
-  assert.match(home, /primary entry point/);
+  assert.match(home, /Use the public funnel in this order/);
+  assert.match(home, /Run the 60-second fixture demo/);
   assert.match(home, /5-minute real-site audit/);
+  assert.match(home, /Add the GitHub Action/);
   assert.match(home, /twitter:card/);
   assert.match(home, /SoftwareApplication/);
   assert.match(home, /Organization/);
@@ -135,9 +137,12 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(releases, /v0\.3\.0/);
   assert.match(releases, /<title>Release notes and downloadable distribution assets \| AnswerLens<\/title>/);
   assert.match(releases, /Use the latest release/);
+  assert.match(releases, /Run the 60-second fixture demo/);
   assert.match(examples, /<title>Demo report artifacts and fixture outputs \| AnswerLens<\/title>/);
   assert.match(examples, /"@type":"Dataset"/);
   assert.match(examples, /AnswerLens static-good fixture demo/);
+  assert.match(examples, /What to do after the demo/);
+  assert.match(examples, /Add the GitHub Action/);
   assert.doesNotMatch(home, /\/home\/runner\/work\//);
   assert.doesNotMatch(examples, /\/home\/runner\/work\//);
   assert.doesNotMatch(demoReport, /\/home\/runner\/work\//);

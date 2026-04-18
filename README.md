@@ -17,18 +17,14 @@ Open-source. CLI-first. Report-driven. No consumer UI scraping. No ranking promi
 
 ## Start here
 
-Primary entry:
+Recommended path:
 
-- [Open the live demo report](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html): the fastest way to understand the output, the artifact flow, and why the project is reviewable in GitHub. If you are browsing a copy or fork without Pages enabled, use the [repo walkthrough fallback](docs/demo-report.md).
+1. [Open the live demo report](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html): the fastest way to understand the output, the artifact flow, and why the project is reviewable in GitHub. If you are browsing a copy or fork without Pages enabled, use the [repo walkthrough fallback](docs/demo-report.md).
+2. [Run the 60-second fixture demo](#run-the-60-second-fixture-demo): reproduce the same artifact set locally.
+3. [Run a 5-minute real-site audit](docs/quickstart.md): use the same config layout on your own public site before you wire CI.
+4. [Add the GitHub Action](docs/github-action.md): move the same artifact-backed workflow into pull requests, artifact uploads, and `GITHUB_STEP_SUMMARY`.
 
-Secondary entries:
-
-- [Run the 60-second fixture demo](#run-the-60-second-fixture-demo): reproduce the same artifact set locally.
-- [Add the GitHub Action](docs/github-action.md): move the same workflow into pull requests, artifact uploads, and `GITHUB_STEP_SUMMARY`.
-
-Bridge to real adoption:
-
-- After the fixture demo, [run a 5-minute real-site audit](docs/quickstart.md) before you wire CI.
+If you arrive here already knowing you want CI, the Action docs remain public, but the clearest first run is still demo -> fixture -> real-site -> Action.
 
 Across every step, open artifacts in the same order: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
 
@@ -68,13 +64,18 @@ That command audits the local fixture in [examples/fixtures/static-good](example
 
 Inside the demo artifact set, `https://fixture.local` is the stable fixture hostname. It keeps the example crawl reproducible and is not the AnswerLens product site URL.
 
-Open these fixture artifacts first:
+Open these fixture artifacts first, in order:
 
-- `share-summary.md`
-- `scorecard.md`
-- `recommendations.md`
-- `pr-snippet.md`
-- `index.html`
+1. `share-summary.md`
+2. `scorecard.md`
+3. `recommendations.md`
+
+Then use:
+
+- `pr-snippet.md` for a copy-ready GitHub block
+- `index.html` for browser review
+
+Next step: use the same `.github/answerlens/` folder shape in [docs/quickstart.md](docs/quickstart.md) and run one real-site audit before CI.
 
 The first shareable result looks like this:
 
@@ -91,12 +92,14 @@ AI may miss this product because:
 
 - Canonical live demo URL: [Pages sample report](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html)
 - Repo walkthrough fallback: [docs/demo-report.md](docs/demo-report.md)
-- Open these artifacts first:
+- Open these artifacts first, in order:
   - `share-summary.md`
   - `scorecard.md`
   - `recommendations.md`
+- Then use:
   - `pr-snippet.md`
   - `index.html`
+- Next step: run the local fixture demo, then use the real-site quickstart before you move into GitHub Actions.
 
 ## Run a 5-minute real-site audit
 
@@ -105,6 +108,7 @@ Use [docs/quickstart.md](docs/quickstart.md) after the fixture demo and before C
 - Copy the starter bundle shape from [examples/consumer-repo](examples/consumer-repo) into `./.github/answerlens/`.
 - Run one local `audit` against your own public site with the same config layout that later moves into GitHub Actions.
 - Open `share-summary.md`, then `scorecard.md`, then `recommendations.md` before you look at `pr-snippet.md` or `index.html`.
+- If that first real-site run feels useful, carry the same folder shape into [docs/github-action.md](docs/github-action.md).
 
 ## Add the GitHub Action
 
