@@ -174,22 +174,23 @@ function renderSiteIdentity(site: { input: string; baseUrl: string; display?: st
 function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string): string {
   const canonical = new URL(page.route, siteUrl).href;
   const ogImage = new URL("assets/social-preview.png", siteUrl).href;
+  const documentTitle = page.title.includes("AnswerLens") ? page.title : `${page.title} | AnswerLens`;
 
   return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${escapeHtml(page.title)} | AnswerLens</title>
+    <title>${escapeHtml(documentTitle)}</title>
     <meta name="description" content="${escapeHtml(page.description)}" />
     <link rel="canonical" href="${escapeHtml(canonical)}" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="${escapeHtml(page.title)} | AnswerLens" />
+    <meta property="og:title" content="${escapeHtml(documentTitle)}" />
     <meta property="og:description" content="${escapeHtml(page.description)}" />
     <meta property="og:url" content="${escapeHtml(canonical)}" />
     <meta property="og:image" content="${escapeHtml(ogImage)}" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${escapeHtml(page.title)} | AnswerLens" />
+    <meta name="twitter:title" content="${escapeHtml(documentTitle)}" />
     <meta name="twitter:description" content="${escapeHtml(page.description)}" />
     <meta name="twitter:image" content="${escapeHtml(ogImage)}" />
     <meta name="last-modified" content="${escapeHtml(updatedAt)}" />
@@ -222,7 +223,7 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string): strin
         </nav>
       </header>
       ${page.body}
-      <p class="footer">Built from repo-native docs, releases, and artifacts. No consumer AI UI scraping. No ranking promises.</p>
+      <p class="footer">Built by YSCJRH from repo-native docs, releases, and artifacts. No consumer AI UI scraping. No ranking promises.</p>
     </div>
   </body>
 </html>`;
@@ -300,9 +301,9 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     {
       route: "",
       filePath: path.join(outDir, "index.html"),
-      title: "Home",
+      title: "AI visibility audit reports and demo entry points",
       description: `${DESCRIPTION} ${TAGLINE}`,
-      body: `<section class="hero"><p class="eyebrow">${escapeHtml(TAGLINE)}</p><h1>Artifact-first distribution for AI discoverability.</h1><p>${escapeHtml(DESCRIPTION)} It turns audits into share summaries, PR-ready snippets, static reports, release assets, and indexable pages without falling back to dashboard-only workflows.</p></section>
+      body: `<section class="hero"><p class="eyebrow">${escapeHtml(TAGLINE)}</p><h1>AnswerLens makes AI discoverability reviewable in GitHub.</h1><p>${escapeHtml(DESCRIPTION)} It turns audits into share summaries, PR-ready snippets, static reports, release assets, and indexable pages without falling back to dashboard-only workflows.</p></section>
         <section class="section grid">
           <article class="metric"><p class="eyebrow">overallScore</p><p class="metric-value">${escapeHtml(String(shareSummary.metrics.overallScore ?? "pending"))}</p></article>
           <article class="metric"><p class="eyebrow">vavr</p><p class="metric-value">${escapeHtml(String(shareSummary.metrics.vavr ?? "pending"))}</p></article>
@@ -339,9 +340,9 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     {
       route: "docs/",
       filePath: path.join(outDir, "docs", "index.html"),
-      title: "Docs",
-      description: "Canonical docs, concepts, scoring notes, and distribution plan for AnswerLens.",
-      body: `<section class="hero"><p class="eyebrow">Canonical documentation</p><h1>Docs stay in Markdown. Pages compiles the indexable layer.</h1><p>AnswerLens keeps repo docs as the authoring surface and compiles this page to make them easier for search engines, AI systems, and external teams to discover.</p></section><section class="section grid">${docsCards}</section>`,
+      title: "Docs index, concepts, and activation references",
+      description: "Canonical docs, concepts, scoring notes, activation guidance, and distribution references for AnswerLens.",
+      body: `<section class="hero"><p class="eyebrow">Canonical documentation</p><h1>AnswerLens docs stay in Markdown and compile to an indexable layer.</h1><p>AnswerLens keeps repo docs as the authoring surface and compiles this page to make them easier for search engines, AI systems, and external teams to discover.</p></section><section class="section grid">${docsCards}</section>`,
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
@@ -353,7 +354,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     {
       route: "releases/",
       filePath: path.join(outDir, "releases", "index.html"),
-      title: "Releases",
+      title: "Release notes and downloadable distribution assets",
       description: "Release index, version notes, and distribution surfaces compiled from GitHub metadata.",
       body: `<section class="hero"><p class="eyebrow">Versioned distribution</p><h1>Release notes should work like a second front door, not a changelog graveyard.</h1><p>This page is compiled from release metadata so the public version line stays machine-readable, easy to index, and useful for first-run visitors.</p></section>
         <section class="section grid">
@@ -376,7 +377,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     {
       route: "examples/",
       filePath: path.join(outDir, "examples", "index.html"),
-      title: "Examples",
+      title: "Demo report artifacts and fixture outputs",
       description: "Static-good demo artifacts, share summaries, and example report outputs.",
       body: `<section class="hero"><p class="eyebrow">Example dataset</p><h1>Fixture outputs are treated as public example artifacts.</h1><p>The static-good fixture is the stable source for share summaries, scorecards, recommendations, and HTML report outputs.</p></section>
         <section class="section grid">
@@ -408,7 +409,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     {
       route: "playbooks/",
       filePath: path.join(outDir, "playbooks", "index.html"),
-      title: "Playbooks",
+      title: "Fix playbooks from current audit artifacts",
       description: "Fix-oriented pages built from current recommendations and concept docs.",
       body: `<section class="hero"><p class="eyebrow">Fixes and playbooks</p><h1>Playbooks should be grounded in audit artifacts, not generic AI SEO advice.</h1><p>This page compiles the latest example recommendations and points back to the concept docs that explain why those fixes matter.</p></section>
         <section class="section grid">
