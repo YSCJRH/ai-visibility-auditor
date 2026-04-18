@@ -4,6 +4,8 @@ This is the bridge between the fixture demo and the GitHub Action.
 
 Use it when you already understand the sample report and want one real AnswerLens run against your own public site before you wire CI.
 
+If you have not opened the live demo report or run the fixture demo yet, do that first. This guide assumes the artifact order already makes sense and only changes the target from the public fixture to your own site.
+
 ## What you need
 
 - a public site URL
@@ -77,7 +79,7 @@ Then use:
 
 ## Next step: move the same path into CI
 
-Once the local run feels useful, continue to [docs/github-action.md](github-action.md).
+Once the local run feels useful, continue to [docs/github-action.md](github-action.md) and keep the same `.github/answerlens/` folder shape plus the same artifact review order.
 
 The GitHub Action should feel like the same artifact contract on a schedule or pull request, not a different product surface.
 

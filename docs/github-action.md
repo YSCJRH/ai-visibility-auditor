@@ -2,6 +2,8 @@
 
 AnswerLens ships a reusable root Action so teams can keep AI discoverability checks inside GitHub-native workflows instead of rebuilding shell glue in every repository.
 
+Use this page after the live demo report, the fixture demo, and one useful real-site run from [quickstart.md](quickstart.md). If you have not reached that point yet, stop here and use the quickstart first.
+
 For an external repository, start by copying the starter bundle in [examples/consumer-repo](../examples/consumer-repo). The public docs should read from that consumer-repo layout, not from this repository's internal `examples/acme/*` fixtures.
 
 Recommended path:
@@ -10,6 +12,8 @@ Recommended path:
 2. run the fixture demo
 3. run one real local audit with [quickstart.md](quickstart.md)
 4. move the same artifact contract into the GitHub Action
+
+That ordering matters. The Action is the CI version of a workflow that should already make sense locally.
 
 The public interface is:
 
@@ -111,6 +115,8 @@ Optional:
 
 The starter bundle is intentionally generic. Replace the example product, domain, competitor list, and prompt pack before using it on a real site.
 Treat it as the shareable adoption asset for forks, releases, and external setup guides.
+
+If you want one last sanity check before CI, run the command path in [quickstart.md](quickstart.md) and confirm that `share-summary.md`, `scorecard.md`, and `recommendations.md` are enough to explain the run to someone else.
 
 ## What to publish into `GITHUB_STEP_SUMMARY`
 
