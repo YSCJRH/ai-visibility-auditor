@@ -26,7 +26,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: pnpm demo:fixture
+      - run: pnpm demo:consumer-repo
       - uses: actions/upload-artifact@v6
         with:
-          name: static-good-report
-          path: runs/static-good
+          name: answerlens-demo-runs
+          path: |
+            runs/static-good
+            runs/consumer-repo

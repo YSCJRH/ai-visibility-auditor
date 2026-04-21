@@ -29,6 +29,15 @@ jobs:
           competitors: examples/acme/competitors.yaml
           prompts: examples/acme/prompts.yaml
           out-dir: runs/static-good
+      - id: consumer-repo
+        uses: ./
+        with:
+          command: audit
+          site: examples/fixtures/static-good
+          brand: examples/consumer-repo/.github/answerlens/brand.yaml
+          competitors: examples/consumer-repo/.github/answerlens/competitors.yaml
+          prompts: examples/consumer-repo/.github/answerlens/prompts.yaml
+          out-dir: runs/consumer-repo
       - uses: actions/github-script@v8
         with:
           script: |

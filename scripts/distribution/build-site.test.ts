@@ -30,15 +30,36 @@ async function createDemoRun(): Promise<string> {
   return demoRunDir;
 }
 
+async function createConsumerRun(): Promise<string> {
+  const [brand, competitors, prompts] = await Promise.all([
+    loadBrandConfig(path.resolve("examples/consumer-repo/.github/answerlens/brand.yaml")),
+    loadCompetitorsConfig(path.resolve("examples/consumer-repo/.github/answerlens/competitors.yaml")),
+    loadPromptsConfig(path.resolve("examples/consumer-repo/.github/answerlens/prompts.yaml"))
+  ]);
+
+  const audit = await runAudit({
+    siteInput: "./examples/fixtures/static-good",
+    brand,
+    competitors,
+    prompts
+  });
+
+  const consumerRunDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-consumer-run-"));
+  await writeAuditOutputs(consumerRunDir, audit);
+  return consumerRunDir;
+}
+
 test("build-site writes indexable pages and metadata", async () => {
-  const [demoRunDir, outDir] = await Promise.all([
+  const [demoRunDir, consumerRunDir, outDir] = await Promise.all([
     createDemoRun(),
+    createConsumerRun(),
     mkdtemp(path.join(os.tmpdir(), "answerlens-site-"))
   ]);
 
   await buildSite({
     outDir,
     demoRunDir,
+    consumerRunDir,
     releasesPath: path.resolve("scripts/distribution/releases-snapshot.json")
   });
 
@@ -46,6 +67,7 @@ test("build-site writes indexable pages and metadata", async () => {
     access(path.join(outDir, "index.html")),
     access(path.join(outDir, "docs", "index.html")),
     access(path.join(outDir, "starter", "index.html")),
+    access(path.join(outDir, "starter", "example-run", "share-summary.md")),
     access(path.join(outDir, "pricing", "index.html")),
     access(path.join(outDir, "security", "index.html")),
     access(path.join(outDir, "faq", "index.html")),
@@ -121,6 +143,9 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(starter, /The starter bundle is the public adoption asset for external repositories\./);
   assert.match(starter, /\.github\//);
   assert.match(starter, /brand\.yaml/);
+  assert.match(starter, /Starter example run/);
+  assert.match(starter, /Example Product public site/);
+  assert.match(starter, /starter\/example-run\/share-summary\.md/);
   assert.match(starter, /scorecard\.md/);
   assert.match(starter, /examples\/consumer-repo/);
   assert.match(pricing, /Pricing for AnswerLens is open-source, BYOK, and artifact-first\./);
