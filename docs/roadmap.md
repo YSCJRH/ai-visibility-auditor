@@ -17,7 +17,7 @@ Non-goals that stay fixed across roadmap stages:
 
 ## Near-term priorities
 
-Recently completed on `main` and released through `v0.3.1`:
+Recently completed on `main` and released through `v0.3.2`:
 
 - `#9` Schema-text consistency and evidence density rules
 - `#10` Internal link context, anchor quality, and rule registry
@@ -115,6 +115,22 @@ Current status:
 - the repo now exposes both the SPA path and a review fallback path for local operator review
 - `v0.3.1` was released on April 21, 2026
 
+### `v0.3.2`
+
+Primary focus: bilingual public and operator surfaces
+
+Planned outcome:
+
+- add `/en/` and `/zh/` public Pages routes with visible language switching
+- add `README.zh-CN.md` plus `docs/zh/` mirrors for the first-run path and admin guide
+- localize human-readable report outputs and admin/review copy while keeping JSON contracts stable in English
+- make `compare`, `starter`, and `examples` readable for Chinese visitors without changing the canonical adoption sequence
+
+Current status:
+
+- bilingual public Pages, docs mirrors, localized report outputs, and admin/review switching are implemented on `main`
+- `v0.3.2` was released on April 21, 2026
+
 ## GitHub alignment
 
 Current milestone mapping:
@@ -131,6 +147,7 @@ Release planning:
 - `v0.2.3` is released and closes the current validation-layer work for `#11` and `#12`
 - `v0.3.0` is released and ships the connector-focused import and helper layer
 - `v0.3.1` is released and adds the internal admin control surface and review fallback
+- `v0.3.2` is released and adds bilingual public Pages, docs mirrors, localized report surfaces, and admin/review language switching
 
 This document is the canonical public roadmap. README, release notes, and umbrella issues should link back here instead of restating divergent plans.
 
@@ -138,7 +155,7 @@ Canonical distribution follow-through lives in [docs/distribution-plan.md](distr
 
 ## Current operating focus
 
-With `v0.3.1` released on April 21, 2026, near-term work stays focused on activation and adoption hardening rather than net-new connector delivery.
+With `v0.3.2` released on April 21, 2026, near-term work can move into semantic clarity and user-experience uplift across the bilingual public funnel and operator surfaces, while staying inside activation and adoption hardening rather than net-new connector delivery.
 
 - Canonical brief: [docs/activation-plan.md](activation-plan.md)
 - Current umbrella issue: [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33)
