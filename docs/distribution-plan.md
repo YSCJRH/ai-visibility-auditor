@@ -8,7 +8,7 @@ AnswerLens should behave like a self-propagating open-source distribution system
 - The GitHub Pages site is the canonical audit target for self-dogfooding the public source-material surface
 - GitHub repository homepage with a strong README hero, sample visuals, and concept pages
 - GitHub Pages is live at `https://yscjrh.github.io/ai-visibility-auditor/` with homepage, docs, releases, examples, playbooks, sitemap, and feed
-- GitHub releases with attached CLI, demo, and site assets through `v0.3.1`
+- GitHub releases with attached CLI, demo, and site assets through `v0.3.2`
 - Shareable run artifacts such as `share-summary.md`, `share-summary.json`, `pr-snippet.md`, `run.json`, and `index.html`
 - A demo workflow that uploads fixture artifacts
 - A reusable root `action.yml` for `uses: YSCJRH/ai-visibility-auditor@vX`
@@ -87,7 +87,7 @@ Acceptance:
 
 ## Current operating focus
 
-With `v0.3.1` released on April 21, 2026, the near-term distribution bottleneck is activation rather than missing local scaffolding.
+With `v0.3.2` released on April 21, 2026, the near-term distribution bottleneck is semantic clarity and user experience on the now-bilingual public funnel rather than missing local scaffolding.
 
 - Canonical activation brief: [activation-plan.md](activation-plan.md)
 - GitHub-native growth practice: [github-growth-plan.md](github-growth-plan.md)
