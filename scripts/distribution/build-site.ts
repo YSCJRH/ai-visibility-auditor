@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { LOCALE_STORAGE_KEY, type Locale, localeToSlug, t } from "../../packages/i18n/src/index.ts";
@@ -427,7 +427,84 @@ function translateSiteHtml(html: string): string {
     ["Example", "示例"],
     ["Share summary contract", "share summary 契约"],
     ["PR-ready summary", "PR 可直接复用的摘要"],
-    ["Public proof", "公开证明"]
+    ["Public proof", "公开证明"],
+    ["Top issues", "主要问题"],
+    ["Top fixes", "优先修复"],
+    ["Next step", "下一步"],
+    ["Operational detail", "操作细节"],
+    ["Repo-native vs dashboard-first", "Repo-native 与 dashboard-first"],
+    ["Copyable sources", "可复制来源"],
+    ["Latest run excerpt", "最新运行摘录"],
+    ["Example files", "示例文件"],
+    ["Artifacts", "产物"],
+    ["Shareable artifacts", "可分享产物"],
+    ["Site:", "站点："],
+    ["Mode:", "模式："],
+    ["Generated:", "生成时间："],
+    ["Artifact version:", "产物版本："],
+    ["Rule version:", "规则版本："],
+    ["Release notes 应该像第二个公开入口，而不是一座 changelog 坟场。", "发布说明应该像第二个公开入口，而不是一座更新日志坟场。"],
+    ["这一页由 release metadata 编译而成，目的是让公开版本线保持 machine-readable、易于索引，并且对首次访客有用。", "这一页由发布元数据编译而成，目的是让公开版本线保持机器可读、易于索引，并且对首次访客有用。"],
+    ["The open-source repository, Pages site, and live demo report.", "开源仓库、Pages 站点与在线演示报告。"],
+    ["What it does", "它能做什么"],
+    ["Surface", "入口"],
+    ["Cost model", "成本模型"],
+    ["Notes", "说明"],
+    ["CLI audit", "CLI 审计"],
+    ["$0 provider cost", "provider 成本为 $0"],
+    ["Basic <code>audit</code> runs do not require provider API keys.", "基础 <code>audit</code> 运行不需要 provider API key。"],
+    ["Eval runs", "Eval 运行"],
+    ["Bring your own provider bill", "自带 provider 账单"],
+    ["OpenAI and Perplexity usage stays in your own account.", "OpenAI 和 Perplexity 的使用量保留在你自己的账户中。"],
+    ["Your repository runner minutes", "你的仓库 runner 分钟数"],
+    ["The Action keeps the same artifact contract used by local runs.", "这个 Action 复用了与本地运行相同的 artifact 契约。"],
+    ["$0 to download", "下载成本为 $0"],
+    ["Demo bundles, the compiled site, and docs stay publicly accessible.", "demo bundle、编译后站点和文档保持公开可访问。"],
+    ["Concern", "关注点"],
+    ["AnswerLens approach", "AnswerLens 方式"],
+    ["Secrets", "密钥"],
+    ["Provider keys stay in your own shell, CI environment, or Actions secrets.", "provider key 保留在你自己的 shell、CI 环境或 Actions secrets 中。"],
+    ["Hosted control plane", "托管控制平面"],
+    ["No hosted AnswerLens SaaS is required for the CLI, the GitHub Action, or the static report flow.", "无论 CLI、GitHub Action 还是静态报告流，都不需要托管式 AnswerLens SaaS。"],
+    ["Review trail", "审阅轨迹"],
+    ["Use pull requests, Action logs, uploaded artifacts, and repo history as the audit trail.", "可用 pull request、Action 日志、上传产物和仓库历史作为审计轨迹。"],
+    ["Public sharing", "公开分享"],
+    ["Share <code>share-summary.md</code> or <code>pr-snippet.md</code> and keep raw payloads private.", "公开分享时优先使用 <code>share-summary.md</code> 或 <code>pr-snippet.md</code>，原始 payload 保持私有。"],
+    ["Dimension", "维度"],
+    ["Dashboard-first AI visibility tools", "dashboard-first AI 可见性工具"],
+    ["Primary output", "核心产出"],
+    ["Repo-native reports, scorecards, and fix lists", "Repo-native 报告、scorecard 和修复清单"],
+    ["Managed monitoring views and dashboards", "托管式监测视图和 dashboard"],
+    ["Operating model", "运行模式"],
+    ["Usually hosted and dashboard-centered", "通常为托管式、以 dashboard 为中心"],
+    ["Review workflow", "审阅工作流"],
+    ["PRs, release notes, Pages, and artifacts", "PR、release notes、Pages 和 artifacts"],
+    ["Vendor UI plus exported summaries", "厂商 UI 加导出的摘要"],
+    ["No consumer UI scraping and no ranking promises", "不抓取消费级 UI，也不承诺排名"],
+    ["Varies by vendor and monitoring method", "因厂商和监测方式而异"],
+    ["Runs the same artifact contract in pull requests, workflow_dispatch runs, and artifact uploads.", "在 pull request、workflow_dispatch 运行和产物上传中复用同一套 artifact 契约。"],
+    ["Adds eval-mode benchmarking when you want answer quality checks on top of audit.", "当你希望在 audit 之上增加答案质量检查时，补充 eval 模式基准。"],
+    ["Validates key-page evidence against imported page-level Search Console exports.", "用导入的页面级 Search Console 导出结果来校验关键页面证据。"],
+    ["Adds helper-mode validation and candidate URL preparation without live submission.", "在不实时提交的前提下，补充辅助验证和候选 URL 准备。"],
+    ["Turns demo outputs and docs into reusable public distribution surfaces.", "把 demo 输出和文档转成可复用的公开分发表面。"],
+    ["Thin key page", "关键页面内容过薄"],
+    ["Add plain-language explanations, evidence blocks, and stronger sections.", "补充通俗解释、证据模块和更强的章节结构。"],
+    ["Tighten structure and schema alignment on key pages", "强化关键页面的结构与 schema 对齐"],
+    ["Higher extraction quality and fewer ambiguous summaries.", "提高抽取质量，减少含糊总结。"],
+    ["pending eval", "待评估"],
+    ["<code>https://fixture.local</code> is the stable hostname inside the public demo fixture, not the AnswerLens site URL.", "<code>https://fixture.local</code> 是公开演示 fixture 中使用的稳定主机名，不是 AnswerLens 的官网地址。"],
+    ["static-good demo 的 artifacts、share summaries 与示例报告输出。", "static-good demo 的产物、share summary 与示例报告输出。"],
+    ["示例 AnswerLens report artifacts generated from the static-good fixture.", "由 static-good fixture 生成的 AnswerLens 示例报告产物。"],
+    ["fixture 输出会被当作公开示例 artifacts。", "fixture 输出会被当作公开示例产物。"],
+    ["static-good fixture 是 share summaries、scorecards、recommendations 与 HTML report outputs 的稳定来源。", "static-good fixture 是 share summary、scorecard、recommendations 和 HTML 报告输出的稳定来源。"],
+    ["这个公开示例会把 consumer-repo starter bundle 跑在稳定 fixture 上，让外部 adopter 在接自己站点之前，先看到最终 artifacts 长什么样。", "这个公开示例会把 consumer-repo starter bundle 跑在稳定 fixture 上，让外部采用者在接自己站点之前，先看到最终产物长什么样。"],
+    ["before you hand this path to another repository.", "再把这条路径交给另一个仓库。"],
+    ["保持固定的审阅顺序： <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.", "保持固定的审阅顺序：先看 <code>share-summary.md</code>，再看 <code>scorecard.md</code>，最后看 <code>recommendations.md</code>。"],
+    ["示例 files", "示例文件"],
+    ["add plain-language explanations, evidence blocks, and stronger sections.", "补充通俗解释、证据模块和更强的章节结构。"],
+    ["模式： audit", "模式：审计"],
+    ["Integration surface 它能做什么", "集成入口 它能做什么"],
+    ["公开分享 公开分享时优先使用", "公开分享 优先使用"]
   ];
 
   return replacements.reduce((current, [from, to]) => current.split(from).join(to), html);
@@ -513,6 +590,7 @@ function localeIndexPath(outDir: string, route: string, locale: Locale): string 
 }
 
 async function copyLocalizedRun(sourceDir: string, targetDir: string, locale: Locale): Promise<void> {
+  await rm(targetDir, { recursive: true, force: true });
   await cp(sourceDir, targetDir, { recursive: true, force: true });
 
   if (locale === "en") {
@@ -635,6 +713,8 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   await mkdir(path.join(outDir, "en"), { recursive: true });
   await mkdir(path.join(outDir, "zh"), { recursive: true });
   await cp(path.resolve("assets"), path.join(outDir, "assets"), { recursive: true, force: true });
+  await rm(path.join(outDir, "examples", "static-good"), { recursive: true, force: true });
+  await rm(path.join(outDir, "starter", "example-run"), { recursive: true, force: true });
   await cp(demoRunDir, path.join(outDir, "examples", "static-good"), { recursive: true, force: true });
   await cp(consumerRunDir, path.join(outDir, "starter", "example-run"), { recursive: true, force: true });
   await copyLocalizedRun(demoRunDir, path.join(outDir, "en", "examples", "static-good"), "en");

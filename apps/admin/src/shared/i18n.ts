@@ -291,7 +291,7 @@ const issueTitleTranslations: Record<string, string> = {
 };
 
 const fixHintTranslations: Record<string, string> = {
-  "Add plain-language explanations, evidence blocks, and stronger sections.": "补充 plain-language 解释、证据模块和更强的章节结构。",
+  "Add plain-language explanations, evidence blocks, and stronger sections.": "补充通俗解释、证据模块和更强的章节结构。",
   "Name the highest-priority competitors and explain fit differences directly on the page.": "直接在页面中点名优先级最高的竞争对手，并解释适配差异。",
   "Add links from the homepage, docs, product, or adjacent proof pages using descriptive anchors.": "从首页、文档、产品页或相邻证明页添加描述性锚文本链接。",
   "Make the page reachable without a browser-only session.": "让页面在无需仅浏览器会话的情况下可访问。"

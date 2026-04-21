@@ -501,7 +501,7 @@ const fixHintTranslations: Partial<Record<string, string>> = {
   "Add a clear summary of who the page serves and what it proves.": "增加清晰摘要，说明该页面服务谁、证明什么。",
   "Add one descriptive H1 per key page.": "每个关键页面补充一个有明确含义的 H1。",
   "Use a single H1 and demote the rest to lower-level headings.": "只保留一个 H1，其余标题降级为更低层级。",
-  "Add plain-language explanations, evidence blocks, and stronger sections.": "补充 plain-language 解释、证据模块和更强的章节结构。",
+  "Add plain-language explanations, evidence blocks, and stronger sections.": "补充通俗解释、证据模块和更强的章节结构。",
   "Break the page into sections with scannable headings.": "把页面拆成带有可扫描标题的小节。",
   "Render critical content server-side or include HTML fallback text.": "将关键信息改为服务端渲染，或提供 HTML 回退文本。",
   "Add accessible labels to critical controls and buttons.": "为关键控件和按钮补充无障碍标签。",

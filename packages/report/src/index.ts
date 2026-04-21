@@ -125,8 +125,12 @@ function localizeText(value: string, locale: Locale, kind: "issueTitle" | "fixHi
   return translateExpectedOutcome(value, locale);
 }
 
-function renderVavr(value: number | null): string {
-  return value === null ? "pending eval" : `${value}`;
+function renderVavr(value: number | null, locale: Locale): string {
+  if (value === null) {
+    return locale === "zh-CN" ? "待评估" : "pending eval";
+  }
+
+  return `${value}`;
 }
 
 function writeJson(filePath: string, value: unknown): Promise<void> {
@@ -994,7 +998,7 @@ export function renderScorecardMarkdown(result: AuditResult, locale: Locale = "e
       ? result.summary.missingPageTypes.map((pageType) => `- ${pageType}`).join("\n")
       : `- ${t(locale, "report.noIssues")}`;
 
-  return `# ${t(locale, "report.scorecard.title")}\n\n## ${locale === "zh-CN" ? "概览" : "Overview"}\n\n${renderSiteOverviewLines(result.site, locale)}\n- ${t(locale, "report.generated")}: ${result.site.generatedAt}\n- ${t(locale, "run.id")}: ${result.run.id}\n- ${t(locale, "report.overallScore")}: ${result.summary.overallScore}\n- ${t(locale, "report.vavr")}: ${renderVavr(result.summary.vavr)}\n- ${locale === "zh-CN" ? "抓取页面数" : "Crawled pages"}: ${result.summary.crawledPages}\n- ${locale === "zh-CN" ? "发现 URL 数" : "Discovered URLs"}: ${result.summary.discoveredUrls}\n\n## ${locale === "zh-CN" ? "分数" : "Scores"}\n\n| ${locale === "zh-CN" ? "分桶" : "Bucket"} | ${locale === "zh-CN" ? "分数" : "Score"} | ${locale === "zh-CN" ? "问题数" : "Issues"} | ${locale === "zh-CN" ? "错误" : "Errors"} | ${locale === "zh-CN" ? "警告" : "Warnings"} | ${locale === "zh-CN" ? "提示" : "Info"} |\n| --- | ---: | ---: | ---: | ---: | ---: |\n${scores}\n\n## ${locale === "zh-CN" ? "缺失覆盖" : "Missing coverage"}\n\n${missingCoverage}\n\n## ${locale === "zh-CN" ? "主要问题" : "Top issues"}\n\n| ${locale === "zh-CN" ? "严重级别" : "Severity"} | ${locale === "zh-CN" ? "问题" : "Issue"} | ${locale === "zh-CN" ? "范围" : "Scope"} | ${locale === "zh-CN" ? "修复提示" : "Fix hint"} |\n| --- | --- | --- | --- |\n${topIssues}\n\n## ${locale === "zh-CN" ? "建议" : "Recommendations"}\n\n${recommendations}\n\n## ${locale === "zh-CN" ? "页面清单" : "Page inventory"}\n\n| ${locale === "zh-CN" ? "类型" : "Type"} | URL | ${locale === "zh-CN" ? "词数" : "Words"} | JSON-LD | Noindex |\n| --- | --- | ---: | --- | --- |\n${pages}\n`;
+  return `# ${t(locale, "report.scorecard.title")}\n\n## ${locale === "zh-CN" ? "概览" : "Overview"}\n\n${renderSiteOverviewLines(result.site, locale)}\n- ${t(locale, "report.generated")}: ${result.site.generatedAt}\n- ${t(locale, "run.id")}: ${result.run.id}\n- ${t(locale, "report.overallScore")}: ${result.summary.overallScore}\n- ${t(locale, "report.vavr")}: ${renderVavr(result.summary.vavr, locale)}\n- ${locale === "zh-CN" ? "抓取页面数" : "Crawled pages"}: ${result.summary.crawledPages}\n- ${locale === "zh-CN" ? "发现 URL 数" : "Discovered URLs"}: ${result.summary.discoveredUrls}\n\n## ${locale === "zh-CN" ? "分数" : "Scores"}\n\n| ${locale === "zh-CN" ? "分桶" : "Bucket"} | ${locale === "zh-CN" ? "分数" : "Score"} | ${locale === "zh-CN" ? "问题数" : "Issues"} | ${locale === "zh-CN" ? "错误" : "Errors"} | ${locale === "zh-CN" ? "警告" : "Warnings"} | ${locale === "zh-CN" ? "提示" : "Info"} |\n| --- | ---: | ---: | ---: | ---: | ---: |\n${scores}\n\n## ${locale === "zh-CN" ? "缺失覆盖" : "Missing coverage"}\n\n${missingCoverage}\n\n## ${locale === "zh-CN" ? "主要问题" : "Top issues"}\n\n| ${locale === "zh-CN" ? "严重级别" : "Severity"} | ${locale === "zh-CN" ? "问题" : "Issue"} | ${locale === "zh-CN" ? "范围" : "Scope"} | ${locale === "zh-CN" ? "修复提示" : "Fix hint"} |\n| --- | --- | --- | --- |\n${topIssues}\n\n## ${locale === "zh-CN" ? "建议" : "Recommendations"}\n\n${recommendations}\n\n## ${locale === "zh-CN" ? "页面清单" : "Page inventory"}\n\n| ${locale === "zh-CN" ? "类型" : "Type"} | URL | ${locale === "zh-CN" ? "词数" : "Words"} | JSON-LD | Noindex |\n| --- | --- | ---: | --- | --- |\n${pages}\n`;
 }
 
 export function renderScorecardHtml(result: AuditResult, locale: Locale = "en"): string {
@@ -1105,7 +1109,7 @@ export function renderScorecardHtml(result: AuditResult, locale: Locale = "en"):
         <p>${escapeHtml(t(locale, "report.scorecard.title"))}</p>
         <h1>${escapeHtml(siteLabel(result.site))}</h1>
         <p>${escapeHtml(t(locale, "run.id"))}: <strong>${result.run.id}</strong></p>
-        <p>${escapeHtml(t(locale, "report.overallScore"))}: <strong>${result.summary.overallScore}</strong> | ${escapeHtml(t(locale, "report.vavr"))}: <strong>${renderVavr(result.summary.vavr)}</strong></p>
+        <p>${escapeHtml(t(locale, "report.overallScore"))}: <strong>${result.summary.overallScore}</strong> | ${escapeHtml(t(locale, "report.vavr"))}: <strong>${renderVavr(result.summary.vavr, locale)}</strong></p>
         <p>${result.site.generatedAt}</p>
         <p><a href="${locale === "zh-CN" ? "./index.html" : "./index.zh.html"}">${escapeHtml(locale === "zh-CN" ? "English" : "简体中文")}</a></p>
         ${renderSiteHtmlNotes(result.site, locale)}
