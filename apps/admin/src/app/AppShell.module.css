@@ -1,74 +1,165 @@
 .shell {
   position: relative;
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: 19rem minmax(0, 1fr);
   min-height: 100vh;
-  background: var(--canvas);
-  overflow: hidden;
 }
 
-.mainColumn {
-  position: relative;
-  z-index: 1;
+.sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 100vh;
+  padding: 2rem 1.5rem;
+  border-right: 1px solid rgba(0, 255, 255, 0.12);
+  background: linear-gradient(180deg, rgba(13, 9, 34, 0.96), rgba(8, 7, 22, 0.96));
+  backdrop-filter: blur(var(--panel-blur));
+}
+
+.brand {
   display: grid;
-  grid-template-rows: auto 1fr;
-  min-width: 0;
+  gap: 0.6rem;
+}
+
+.brandLabel {
+  color: var(--accent-magenta);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.brandTitle {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 2.1rem;
+  line-height: 0.95;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.brandSummary {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.nav {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.navLink {
+  display: block;
+  border: 1px solid rgba(45, 27, 78, 0.92);
+  padding: 0.9rem 1rem;
+  color: var(--text-strong);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(11, 10, 28, 0.7);
+  transition: border-color 180ms linear, box-shadow 180ms linear, transform 180ms linear;
+}
+
+.navLink:hover,
+.navLink:focus-visible {
+  transform: translateX(2px);
+  border-color: rgba(255, 0, 255, 0.58);
+  box-shadow: var(--glow-sm);
+}
+
+.navLinkActive {
+  border-color: rgba(0, 255, 255, 0.7);
+  color: var(--accent-cyan);
+  box-shadow: var(--glow-sm);
+}
+
+.sidebarCard {
+  border: 1px solid rgba(255, 0, 255, 0.16);
+  background: rgba(16, 14, 40, 0.9);
+  padding: 1rem;
+  box-shadow: var(--glow-sm);
+}
+
+.sidebarEyebrow {
+  margin: 0 0 0.55rem;
+  color: var(--accent-cyan);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.sidebarList {
+  margin: 0;
+  padding-left: 1rem;
+  color: var(--text-muted);
+  display: grid;
+  gap: 0.55rem;
+  line-height: 1.5;
 }
 
 .content {
   min-width: 0;
-  padding: 0 28px 28px;
+  padding: 1.5rem clamp(1rem, 3vw, 2.4rem) 2rem;
 }
 
-.backgroundOrb {
-  position: absolute;
-  top: -120px;
-  right: -100px;
-  width: 420px;
-  height: 420px;
-  border-radius: 999px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 153, 0, 0.24),
-    rgba(255, 0, 255, 0.24)
-  );
-  filter: blur(72px);
-  pointer-events: none;
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem 1rem;
+  margin-bottom: 1.4rem;
+  border: 1px solid rgba(0, 255, 255, 0.12);
+  background: rgba(10, 9, 25, 0.72);
+  backdrop-filter: blur(var(--panel-blur));
 }
 
-.gridFloor {
-  position: absolute;
-  inset: auto -10% -30%;
-  height: 65%;
-  background-image:
-    linear-gradient(transparent 95%, rgba(255, 0, 255, var(--grid-opacity)) 95%),
-    linear-gradient(90deg, transparent 95%, rgba(255, 0, 255, var(--grid-opacity)) 95%);
-  background-size: 48px 48px;
-  transform: perspective(540px) rotateX(76deg) scale(1.7);
-  mask-image: linear-gradient(to bottom, transparent, black 36%, black);
-  pointer-events: none;
+.topbarText {
+  display: grid;
+  gap: 0.35rem;
 }
 
-.scanlines {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(
-      rgba(255, 255, 255, 0) 50%,
-      rgba(0, 0, 0, var(--scanline-opacity)) 50%
-    );
-  background-size: 100% 4px;
-  mix-blend-mode: soft-light;
-  pointer-events: none;
+.topbarTitle {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
 }
 
-@media (max-width: 960px) {
+.topbarSummary {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.main {
+  min-width: 0;
+}
+
+@media (max-width: 980px) {
   .shell {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
+  }
+
+  .sidebar {
+    position: relative;
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.12);
   }
 
   .content {
-    padding: 0 16px 20px;
+    padding-top: 1rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

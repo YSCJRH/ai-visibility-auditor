@@ -51,7 +51,7 @@ export function RunsPage() {
           label="Latest run"
           value={latestRun ? formatScore(latestRun.overallScore) : "Pending"}
           helper={latestRun ? latestRun.siteLabel : "Launch a run from the top bar to seed the workspace."}
-          tone={latestRun?.overallScore !== null && latestRun.overallScore >= 90 ? "success" : "neutral"}
+          tone={latestRun !== null && latestRun.overallScore !== null && latestRun.overallScore >= 90 ? "success" : "neutral"}
         />
         <MetricTile label="Run mix" value={`${auditCount}:${evalCount}`} helper="Audit to eval count across the local workspace." />
       </section>
