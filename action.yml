@@ -77,6 +77,7 @@ runs:
         FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       with:
         node-version: ${{ inputs.node-version }}
+        package-manager-cache: false
     - name: Prepare pnpm via corepack
       shell: pwsh
       run: |
