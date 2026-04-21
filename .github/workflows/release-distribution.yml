@@ -1,9 +1,9 @@
 name: Release Distribution
 
 on:
-      workflow_dispatch:
-        inputs:
-          tag-name:
+  workflow_dispatch:
+    inputs:
+      tag-name:
         description: "Optional semver tag to simulate or publish, for example v0.3.1."
         required: false
         type: string
