@@ -1,10 +1,10 @@
 name: Release Distribution
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag-name:
-        description: "Optional semver tag to simulate or publish, for example v0.3.0."
+      workflow_dispatch:
+        inputs:
+          tag-name:
+        description: "Optional semver tag to simulate or publish, for example v0.3.1."
         required: false
         type: string
   push:
@@ -105,6 +105,8 @@ jobs:
           - Repeated-sample stability summaries in `eval-summary.*` and `share-summary.*`
           - Search Console validation import with dedicated summary artifacts
           - Bing Webmaster validation plus IndexNow helper artifacts
+          - Internal admin console foundation for local run orchestration, preset browsing, and artifact-first review
+          - Review fallback pages under `/review/*` so maintainers can inspect the admin effect without depending on the SPA only
           - Publish-ready CLI bundle and tarball plus repo-native report artifacts
 
           ## Known limits
@@ -113,6 +115,7 @@ jobs:
           - No ranking guarantees
           - Bing and IndexNow stay in helper mode; the first version does not submit live IndexNow requests
           - Search connectors remain import-first; this release does not add live OAuth or API sync
+          - The admin console is an internal operator surface, not a public SaaS or canonical product front door
           - GitHub Pages deployment still depends on repository settings
           - npm publish is skipped unless NPM_TOKEN or trusted publishing is configured
 
@@ -124,6 +127,7 @@ jobs:
           - Manual steps: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/manual-steps.md
           - Quickstart: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/quickstart.md
           - Activation plan: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/activation-plan.md
+          - Admin console guide: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/admin-console.md
 
           ## Current follow-through
 
