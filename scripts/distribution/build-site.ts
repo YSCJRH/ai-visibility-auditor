@@ -61,6 +61,7 @@ type BuildSiteOptions = {
   siteUrl?: string;
   outDir?: string;
   demoRunDir?: string;
+  consumerRunDir?: string;
   releasesPath?: string;
 };
 
@@ -234,15 +235,18 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   const siteUrl = withTrailingSlash(options.siteUrl ?? process.env.ANSWERLENS_SITE_URL ?? defaultSiteUrl(repository));
   const outDir = path.resolve(options.outDir ?? "dist/site");
   const demoRunDir = path.resolve(options.demoRunDir ?? "runs/static-good");
+  const consumerRunDir = path.resolve(options.consumerRunDir ?? "runs/consumer-repo");
   const releasesPath = path.resolve(options.releasesPath ?? "scripts/distribution/releases-snapshot.json");
 
-  const [shareSummary, runManifest, shareSummaryMarkdown, recommendationsMarkdown, exampleMarkdown, releases] = await Promise.all([
+  const [shareSummary, runManifest, shareSummaryMarkdown, recommendationsMarkdown, exampleMarkdown, releases, consumerShareSummary, consumerRunManifest] = await Promise.all([
     readJson<ShareSummary>(path.join(demoRunDir, "share-summary.json")),
     readJson<RunManifest>(path.join(demoRunDir, "run.json")),
     readFile(path.join(demoRunDir, "share-summary.md"), "utf8"),
     readFile(path.join(demoRunDir, "recommendations.md"), "utf8"),
     readFile(path.resolve("examples/shareable-summary.md"), "utf8"),
-    readJson<ReleaseEntry[]>(releasesPath)
+    readJson<ReleaseEntry[]>(releasesPath),
+    readJson<ShareSummary>(path.join(consumerRunDir, "share-summary.json")),
+    readJson<RunManifest>(path.join(consumerRunDir, "run.json"))
   ]);
 
   const updatedAt = formatDate(releases[0]?.published_at, shareSummary.run.generatedAt);
@@ -254,6 +258,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   await mkdir(path.join(outDir, "playbooks"), { recursive: true });
   await cp(path.resolve("assets"), path.join(outDir, "assets"), { recursive: true, force: true });
   await cp(demoRunDir, path.join(outDir, "examples", "static-good"), { recursive: true, force: true });
+  await cp(consumerRunDir, path.join(outDir, "starter", "example-run"), { recursive: true, force: true });
 
   const docsCards = [
     ["docs/activation-plan.md", "Activation plan", "Current operating focus for public entry points and adoption."],
@@ -296,6 +301,16 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     .map(
       (artifact) =>
         `<li><a href="${escapeHtml(new URL(`examples/static-good/${artifact}`, siteUrl).href)}">${escapeHtml(artifact)}</a></li>`
+    )
+    .join("");
+  const starterArtifactLinks = [
+    "share-summary.md",
+    "scorecard.md",
+    "recommendations.md"
+  ]
+    .map(
+      (artifact) =>
+        `<li><a href="${escapeHtml(new URL(`starter/example-run/${artifact}`, siteUrl).href)}">${escapeHtml(artifact)}</a></li>`
     )
     .join("");
   const proofPageUrls = {
@@ -544,6 +559,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           ${renderPanel("Artifact review order", "Review flow", `<ol><li><code>share-summary.md</code></li><li><code>scorecard.md</code></li><li><code>recommendations.md</code></li></ol><p>Then use <code>pr-snippet.md</code> for GitHub copy and <code>run.json</code> for machine-readable metadata.</p>`)}
         </section>
         <section class="section grid">
+          ${renderPanel("Starter example run", "Public proof", `<p><strong>Example site:</strong> ${escapeHtml(siteLabel(consumerRunManifest.site))}</p><p>This public example uses the consumer-repo starter bundle against the stable fixture so external adopters can inspect the resulting artifacts before wiring their own site.</p><ul>${starterArtifactLinks}</ul>`)}
           ${renderPanel("What to do next", "Activation path", `<ol><li><a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a> if you have not done that yet.</li><li>Copy the starter files into the repository you want to audit.</li><li><a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Move into the GitHub Action path</a> when the local run already feels reviewable.</li></ol><p>That keeps the starter bundle positioned as proof of adoption readiness, not as a separate product surface.</p>`)}
           ${renderPanel("Related proof pages", "What this connects to", `<ul>${renderList([
             `<a href="${escapeHtml(new URL("examples/", siteUrl).href)}">Examples</a>: see the live demo artifact set first.`,
