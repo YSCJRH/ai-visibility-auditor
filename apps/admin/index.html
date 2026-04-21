@@ -7,6 +7,71 @@
       content="width=device-width, initial-scale=1.0"
     />
     <title>AnswerLens Admin</title>
+    <script>
+      window.__ANSWERLENS_ADMIN_READY = false;
+      window.__ANSWERLENS_ADMIN_DIAGNOSTICS = [];
+
+      window.__answerlensAdminReport = function (label, detail) {
+        const message = `${label}\n${detail}`;
+        window.__ANSWERLENS_ADMIN_DIAGNOSTICS.push(message);
+        let panel = document.getElementById("answerlens-admin-diagnostics");
+        if (!panel) {
+          panel = document.createElement("pre");
+          panel.id = "answerlens-admin-diagnostics";
+          panel.style.position = "fixed";
+          panel.style.left = "16px";
+          panel.style.right = "16px";
+          panel.style.bottom = "16px";
+          panel.style.zIndex = "99999";
+          panel.style.margin = "0";
+          panel.style.padding = "12px";
+          panel.style.background = "rgba(0,0,0,0.92)";
+          panel.style.border = "1px solid #ff00ff";
+          panel.style.color = "#ff8080";
+          panel.style.whiteSpace = "pre-wrap";
+          panel.style.font = "12px/1.5 monospace";
+          if (document.body) {
+            document.body.appendChild(panel);
+          } else {
+            document.addEventListener("DOMContentLoaded", () => {
+              if (!document.body.contains(panel)) {
+                document.body.appendChild(panel);
+              }
+            });
+          }
+        }
+        panel.textContent = window.__ANSWERLENS_ADMIN_DIAGNOSTICS.join("\n\n");
+      };
+
+      window.addEventListener("error", (event) => {
+        const target = event.target;
+        if (target && target !== window) {
+          const src = target.src || target.href || "unknown-resource";
+          window.__answerlensAdminReport("resource-error", src);
+          return;
+        }
+        window.__answerlensAdminReport(
+          "runtime-error",
+          `${event.message}\n${event.filename}:${event.lineno}:${event.colno}`
+        );
+      }, true);
+
+      window.addEventListener("unhandledrejection", (event) => {
+        window.__answerlensAdminReport(
+          "unhandled-rejection",
+          String(event.reason?.stack || event.reason || "Unknown rejection")
+        );
+      });
+
+      window.setTimeout(() => {
+        if (!window.__ANSWERLENS_ADMIN_READY) {
+          window.__answerlensAdminReport(
+            "boot-timeout",
+            "The SPA did not mark itself ready within 4 seconds."
+          );
+        }
+      }, 4000);
+    </script>
   </head>
   <body>
     <div id="root"></div>

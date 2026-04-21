@@ -190,7 +190,10 @@ If you try AnswerLens on a real site, tell us which artifact helped first.
 
 ```text
 apps/cli           User-facing command entrypoint
+apps/admin         Internal control console for runs, presets, and artifact review
 packages/core      Crawl, extract, audit, scoring, recommendations, config loading
+packages/contracts Browser-safe contracts for the admin console
+packages/admin-runtime File-backed runtime helpers for the admin BFF
 packages/providers Live provider adapters and normalization contracts
 packages/report    Markdown, JSON, and HTML report rendering
 examples/          Demo configs and local fixtures
@@ -377,6 +380,7 @@ See [docs/shareable-summary.md](docs/shareable-summary.md) and [docs/badges.md](
 - Landed on `main` after `v0.2.0`: `#10` internal link context, anchor quality, and rule registry
 - Released in `v0.2.3` on April 15, 2026: `#11` manual rank import and CPS plus `#12` repeated-sample stability summaries
 - Released in `v0.3.0` on April 15, 2026: `#13` Search Console validation import plus `#14` Bing Webmaster / IndexNow helper
+- Released in `v0.3.1` on April 21, 2026: internal admin console foundation, review fallback pages, and operator-facing docs
 - Current operating focus: [docs/activation-plan.md](docs/activation-plan.md)
 - Full public roadmap: [docs/roadmap.md](docs/roadmap.md)
 

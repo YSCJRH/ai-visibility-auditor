@@ -17,7 +17,7 @@ Non-goals that stay fixed across roadmap stages:
 
 ## Near-term priorities
 
-Recently completed on `main` and released through `v0.3.0`:
+Recently completed on `main` and released through `v0.3.1`:
 
 - `#9` Schema-text consistency and evidence density rules
 - `#10` Internal link context, anchor quality, and rule registry
@@ -98,6 +98,23 @@ Current status:
 - `v0.3.0` was released on April 15, 2026
 - connector follow-through should keep using repo-native artifacts instead of introducing a dashboard path
 
+### `v0.3.1`
+
+Primary focus: activation hardening plus the internal operator surface
+
+Planned outcome:
+
+- add an internal control console in `apps/admin` for local run orchestration and artifact review
+- add browser-safe contracts plus an admin runtime layer over `runs/*` and repo-native presets
+- provide a review fallback path so maintainers can inspect the admin effect even while the richer SPA surface continues to harden
+- keep the public product story CLI-first and GitHub-native instead of turning the project into a public dashboard
+
+Current status:
+
+- the internal admin console foundation is implemented on `main`
+- the repo now exposes both the SPA path and a review fallback path for local operator review
+- `v0.3.1` was released on April 21, 2026
+
 ## GitHub alignment
 
 Current milestone mapping:
@@ -113,6 +130,7 @@ Release planning:
 - work intended for `v0.2.2` is already on `main`
 - `v0.2.3` is released and closes the current validation-layer work for `#11` and `#12`
 - `v0.3.0` is released and ships the connector-focused import and helper layer
+- `v0.3.1` is released and adds the internal admin control surface and review fallback
 
 This document is the canonical public roadmap. README, release notes, and umbrella issues should link back here instead of restating divergent plans.
 
@@ -120,7 +138,7 @@ Canonical distribution follow-through lives in [docs/distribution-plan.md](distr
 
 ## Current operating focus
 
-With `v0.3.0` released on April 15, 2026, near-term work shifts from net-new connector delivery to activation and adoption hardening.
+With `v0.3.1` released on April 21, 2026, near-term work stays focused on activation and adoption hardening rather than net-new connector delivery.
 
 - Canonical brief: [docs/activation-plan.md](activation-plan.md)
 - Current umbrella issue: [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33)

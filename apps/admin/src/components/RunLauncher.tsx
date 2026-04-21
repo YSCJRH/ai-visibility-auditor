@@ -120,7 +120,7 @@ export function RunLauncher() {
                 </p>
               </div>
               <button className={styles.close} type="button" aria-label="Close run launcher" onClick={() => setOpen(false)}>
-                ×
+                X
               </button>
             </header>
 
@@ -224,7 +224,7 @@ export function RunLauncher() {
                 <div className={styles.status}>
                   {job ? <StatusBadge label={formatStatus(job.status)} tone={job.status === "failed" ? "error" : "info"} /> : null}
                   {job?.error ? <span className={styles.hint}>{job.error}</span> : null}
-                  {presetsQuery.isLoading ? <span className={styles.hint}>Loading presets…</span> : null}
+                  {presetsQuery.isLoading ? <span className={styles.hint}>Loading presets...</span> : null}
                 </div>
                 <button
                   className={styles.submit}
@@ -232,7 +232,7 @@ export function RunLauncher() {
                   disabled={createRunMutation.isPending || presets.length === 0 || site.trim().length === 0}
                   onClick={() => createRunMutation.mutate()}
                 >
-                  {createRunMutation.isPending || job ? "Launching…" : `Start ${mode}`}
+                  {createRunMutation.isPending || job ? "Launching..." : `Start ${mode}`}
                 </button>
               </footer>
             </div>
