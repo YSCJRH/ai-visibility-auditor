@@ -392,9 +392,12 @@ test("consumer repo starter bundle stays self-consistent", async () => {
     outDir
   ]);
 
-  const [workflow, shareSummary] = await Promise.all([
+  const [workflow, shareSummary, scorecard, recommendations, runManifest] = await Promise.all([
     readFile("./examples/consumer-repo/.github/workflows/answerlens.yml", "utf8"),
-    readFile(path.join(outDir, "share-summary.md"), "utf8")
+    readFile(path.join(outDir, "share-summary.md"), "utf8"),
+    readFile(path.join(outDir, "scorecard.md"), "utf8"),
+    readFile(path.join(outDir, "recommendations.md"), "utf8"),
+    readFile(path.join(outDir, "run.json"), "utf8")
   ]);
 
   assert.match(workflow, /actions\/checkout@v5/);
@@ -403,5 +406,12 @@ test("consumer repo starter bundle stays self-consistent", async () => {
   assert.match(workflow, /\.github\/answerlens\/competitors\.yaml/);
   assert.match(workflow, /\.github\/answerlens\/prompts\.yaml/);
   assert.match(workflow, /YSCJRH\/ai-visibility-auditor@v0\.3\.0/);
+  assert.match(workflow, /Artifact review order/);
+  assert.match(workflow, /scorecard-path/);
+  assert.match(workflow, /recommendations-path/);
   assert.match(shareSummary, /# AnswerLens Share Summary/);
+  assert.match(shareSummary, /Site: Example Product public site/);
+  assert.match(scorecard, /Site: Example Product public site/);
+  assert.match(recommendations, /Site: Example Product public site/);
+  assert.match(runManifest, /"display": "Example Product public site"/);
 });

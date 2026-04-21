@@ -19,7 +19,7 @@ The public interface is:
 
 - `uses: YSCJRH/ai-visibility-auditor@vX`
 - commands: `audit`, `eval`, `manual-import`, `search-console-import`, `bing-indexnow-helper`
-- outputs: `out-dir`, `share-summary-path`, `pr-snippet-path`, `run-json-path`
+- outputs: `out-dir`, `share-summary-path`, `scorecard-path`, `recommendations-path`, `pr-snippet-path`, `run-json-path`
 
 ## Recommended external repo layout
 
@@ -67,6 +67,11 @@ jobs:
         run: |
           cat "${{ steps.answerlens.outputs.share-summary-path }}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Artifact review order" >> "$GITHUB_STEP_SUMMARY"
+          echo "1. \`${{ steps.answerlens.outputs.share-summary-path }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "2. \`${{ steps.answerlens.outputs.scorecard-path }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "3. \`${{ steps.answerlens.outputs.recommendations-path }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "### PR-ready snippet" >> "$GITHUB_STEP_SUMMARY"
           cat "${{ steps.answerlens.outputs.pr-snippet-path }}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -103,6 +108,8 @@ Optional:
 
 - `out-dir`: absolute path to the generated run directory
 - `share-summary-path`: absolute path to `share-summary.md`
+- `scorecard-path`: absolute path to `scorecard.md`
+- `recommendations-path`: absolute path to `recommendations.md`
 - `pr-snippet-path`: absolute path to `pr-snippet.md`
 - `run-json-path`: absolute path to `run.json`
 
@@ -121,6 +128,7 @@ If you want one last sanity check before CI, run the command path in [quickstart
 ## What to publish into `GITHUB_STEP_SUMMARY`
 
 - `share-summary.md` for the human-readable run overview
+- `scorecard-path` and `recommendations-path` as the next two review artifacts after the summary
 - `pr-snippet.md` for the copy-ready block that can move into PRs or issues
 - `run-json-path` as the pointer to the machine-readable manifest
 

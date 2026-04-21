@@ -25,6 +25,11 @@ jobs:
         run: |
           cat "${{ steps.answerlens.outputs.share-summary-path }}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Artifact review order" >> "$GITHUB_STEP_SUMMARY"
+          echo "1. \`${{ steps.answerlens.outputs.share-summary-path }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "2. \`${{ steps.answerlens.outputs.scorecard-path }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "3. \`${{ steps.answerlens.outputs.recommendations-path }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "### PR-ready snippet" >> "$GITHUB_STEP_SUMMARY"
           cat "${{ steps.answerlens.outputs.pr-snippet-path }}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
