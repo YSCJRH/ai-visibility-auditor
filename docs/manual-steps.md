@@ -33,8 +33,10 @@ These are the smallest manual steps needed to activate the public distribution s
 ## GitHub Actions runtime
 
 1. Keep self-hosted runners on a version compatible with Node 24-based JavaScript actions.
-2. If you maintain copied workflows outside this repository, prefer the same major action versions used here:
+2. The root `AnswerLens` Action provisions pnpm with Corepack, so copied adopter workflows do not need a separate `pnpm/action-setup` step when they call `uses: YSCJRH/ai-visibility-auditor@vX`.
+3. If you maintain copied workflows outside this repository, prefer the same major action versions used here:
    `actions/checkout@v5`, `actions/setup-node@v5`, `actions/github-script@v8`, and `actions/upload-artifact@v6`.
+4. Remaining Node 20 deprecation annotations may still come from GitHub-maintained Pages and artifact actions until their upstream runtime metadata is fully refreshed.
 
 ## GitHub repository settings
 

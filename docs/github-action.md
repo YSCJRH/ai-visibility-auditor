@@ -153,6 +153,7 @@ This repository uses the same root Action via `uses: ./` in its fixture workflow
 
 ## Runtime note
 
+- The root Action provisions pnpm with Corepack, so external repositories that call `uses: YSCJRH/ai-visibility-auditor@vX` do not need to add `pnpm/action-setup` separately.
 - Repository workflows are hardened for the GitHub Actions Node 24 transition.
 - Self-hosted runners should stay on a runner version compatible with Node 24-based actions.
 - For copied workflows, prefer the same major versions documented in [docs/manual-steps.md](manual-steps.md): `actions/checkout@v5`, `actions/setup-node@v5`, `actions/github-script@v8`, and `actions/upload-artifact@v6`.

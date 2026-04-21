@@ -72,17 +72,18 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - uses: pnpm/action-setup@v4
-      env:
-        FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-      with:
-        version: ${{ inputs.pnpm-version }}
-        run_install: false
     - uses: actions/setup-node@v5
       env:
         FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       with:
         node-version: ${{ inputs.node-version }}
+    - name: Prepare pnpm via corepack
+      shell: pwsh
+      run: |
+        Set-StrictMode -Version Latest
+        corepack enable
+        corepack prepare "pnpm@${{ inputs.pnpm-version }}" --activate
+        pnpm --version
     - name: Install AnswerLens dependencies
       shell: pwsh
       run: |
