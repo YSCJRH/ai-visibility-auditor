@@ -250,6 +250,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   await mkdir(path.join(outDir, "docs"), { recursive: true });
   await mkdir(path.join(outDir, "releases"), { recursive: true });
   await mkdir(path.join(outDir, "examples"), { recursive: true });
+  await mkdir(path.join(outDir, "starter"), { recursive: true });
   await mkdir(path.join(outDir, "playbooks"), { recursive: true });
   await cp(path.resolve("assets"), path.join(outDir, "assets"), { recursive: true, force: true });
   await cp(demoRunDir, path.join(outDir, "examples", "static-good"), { recursive: true, force: true });
@@ -259,6 +260,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     ["docs/github-growth-plan.md", "Growth plan", "GitHub-native packaging, funnel, and community strategy."],
     ["docs/self-dogfooding.md", "Self-dogfooding", "How AnswerLens uses its own audit mindset on public source-material surfaces."],
     ["docs/quickstart.md", "Quickstart", "Run one real-site audit before you wire CI."],
+    ["docs/starter-bundle.md", "Starter bundle", "Public external-repo layout for the GitHub Action adoption path."],
     ["docs/roadmap.md", "Roadmap", "Canonical public roadmap and issue sequencing."],
     ["docs/distribution-plan.md", "Distribution plan", "P0, P1, and P2 distribution surfaces and metrics."],
     ["docs/manual-steps.md", "Manual steps", "Minimal GitHub, npm, and Pages setup checklist."],
@@ -302,6 +304,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     faq: new URL("faq/", siteUrl).href,
     compare: new URL("compare/", siteUrl).href,
     integrations: new URL("integrations/", siteUrl).href,
+    starter: new URL("starter/", siteUrl).href,
     productMarketing: new URL("use-case/product-marketing/", siteUrl).href,
     developerAdvocacy: new URL("use-case/developer-advocacy/", siteUrl).href,
     openSource: new URL("use-case/open-source-maintainers/", siteUrl).href
@@ -409,6 +412,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             `<a href="${escapeHtml(proofPageUrls.pricing)}">Pricing and packaging</a>: explain the open-source, BYOK, and release-asset cost model.`,
             `<a href="${escapeHtml(proofPageUrls.security)}">Security and trust</a>: explain secrets, review flow, and non-goals in one page.`,
             `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">Docs index</a>: activation references, scoring notes, and GitHub Action usage.`,
+            `<a href="${escapeHtml(proofPageUrls.starter)}">Starter bundle</a>: show the external <code>.github/answerlens/</code> layout before CI adoption.`,
             `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: answer first-run questions in visible, citable language.`,
             `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: explain how AnswerLens differs from dashboard-first AI visibility tools.`,
             `<a href="${escapeHtml(proofPageUrls.integrations)}">Integrations</a>: show the GitHub-native and validation surfaces together.`
@@ -449,6 +453,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: first-run questions in visible, citable language.`,
         `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: how AnswerLens differs from Profound, Peec AI, and Otterly.`,
         `<a href="${escapeHtml(proofPageUrls.integrations)}">Integrations</a>: GitHub Action, providers, and validation helpers.`,
+        `<a href="${escapeHtml(proofPageUrls.starter)}">Starter bundle</a>: external-repo layout and artifact review order.`,
         `<a href="${escapeHtml(proofPageUrls.productMarketing)}">Product marketing teams</a>: homepage and proof-page hardening.`,
         `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">Developer advocacy teams</a>: docs, examples, and self-serve proof.`,
         `<a href="${escapeHtml(proofPageUrls.openSource)}">Open-source maintainers</a>: README, Pages, releases, and artifact-first distribution.`
@@ -500,7 +505,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           ${renderPanel("Latest run excerpt", "Artifacts", `<pre class="markdown">${escapeHtml(shareSummaryMarkdown.trim())}</pre>`)}
         </section>
         <section class="section grid">
-          ${renderPanel("What to do after the demo", "Next step", `<ol><li><a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">Run the 60-second fixture demo</a> if you want the same artifact set locally.</li><li><a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a> against your own public site.</li><li><a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Add the GitHub Action</a> only after one useful local real-site run.</li></ol><p>Keep the review order stable: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`)}
+          ${renderPanel("What to do after the demo", "Next step", `<ol><li><a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">Run the 60-second fixture demo</a> if you want the same artifact set locally.</li><li><a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a> against your own public site.</li><li><a href="${escapeHtml(proofPageUrls.starter)}">Open the starter bundle overview</a> before you hand this path to another repository.</li><li><a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Add the GitHub Action</a> only after one useful local real-site run.</li></ol><p>Keep the review order stable: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`)}
         </section>`,
       jsonLd: {
         "@context": "https://schema.org",
@@ -512,6 +517,47 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           "@type": "Organization",
           name: "YSCJRH"
         }
+      }
+    },
+    {
+      route: "starter/",
+      filePath: path.join(outDir, "starter", "index.html"),
+      title: "Starter bundle for external GitHub repositories",
+      description: "Public starter-bundle overview for copying AnswerLens into another repository with a GitHub-native layout.",
+      body: `<section class="hero"><p class="eyebrow">Starter bundle</p><h1>The starter bundle is the public adoption asset for external repositories.</h1><p>Use this page when you want to explain the AnswerLens GitHub Action path before sending someone into raw repo files. It keeps the external layout, artifact order, and next step visible in one place.</p></section>
+        <section class="section grid">
+          ${renderPanel("Copy this layout", "External repo shape", `<pre class="markdown">.github/\n  answerlens/\n    brand.yaml\n    competitors.yaml\n    prompts.yaml\n  workflows/\n    answerlens.yml</pre><p>This is the same layout used by <a href="${escapeHtml(repoBlob("examples/consumer-repo/README.md"))}">examples/consumer-repo</a>.</p>`)}
+          ${renderPanel("What each file does", "File roles", `<ul>${renderList([
+            "<code>brand.yaml</code>: product name, domain, proof-page hints, and optional <code>site_display_name</code>.",
+            "<code>competitors.yaml</code>: the declared comparison set for the category you actually sell into.",
+            "<code>prompts.yaml</code>: buyer, comparison, and citation questions for your real audience.",
+            "<code>answerlens.yml</code>: the GitHub Action workflow that runs the same artifact contract in CI."
+          ])}</ul>`)}
+        </section>
+        <section class="section grid">
+          ${renderPanel("Starter files", "Copyable sources", `<ul>${renderList([
+            `<a href="${escapeHtml(repoBlob("examples/consumer-repo/.github/answerlens/brand.yaml"))}">brand.yaml</a>`,
+            `<a href="${escapeHtml(repoBlob("examples/consumer-repo/.github/answerlens/competitors.yaml"))}">competitors.yaml</a>`,
+            `<a href="${escapeHtml(repoBlob("examples/consumer-repo/.github/answerlens/prompts.yaml"))}">prompts.yaml</a>`,
+            `<a href="${escapeHtml(repoBlob("examples/consumer-repo/.github/workflows/answerlens.yml"))}">answerlens.yml</a>`
+          ])}</ul>`)}
+          ${renderPanel("Artifact review order", "Review flow", `<ol><li><code>share-summary.md</code></li><li><code>scorecard.md</code></li><li><code>recommendations.md</code></li></ol><p>Then use <code>pr-snippet.md</code> for GitHub copy and <code>run.json</code> for machine-readable metadata.</p>`)}
+        </section>
+        <section class="section grid">
+          ${renderPanel("What to do next", "Activation path", `<ol><li><a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a> if you have not done that yet.</li><li>Copy the starter files into the repository you want to audit.</li><li><a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Move into the GitHub Action path</a> when the local run already feels reviewable.</li></ol><p>That keeps the starter bundle positioned as proof of adoption readiness, not as a separate product surface.</p>`)}
+          ${renderPanel("Related proof pages", "What this connects to", `<ul>${renderList([
+            `<a href="${escapeHtml(new URL("examples/", siteUrl).href)}">Examples</a>: see the live demo artifact set first.`,
+            `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">Docs</a>: activation references, scoring notes, and canonical Markdown.`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">Integrations</a>: see how the starter bundle fits into the GitHub-native workflow.`,
+            `<a href="${escapeHtml(new URL("releases/", siteUrl).href)}">Releases</a>: use release assets as the second public front door.`
+          ])}</ul>`)}
+        </section>`,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: "AnswerLens starter bundle",
+        description: "Public starter-bundle overview for external GitHub repositories.",
+        url: new URL("starter/", siteUrl).href
       }
     },
     {
@@ -654,11 +700,13 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         <section class="section grid">
           ${renderPanel("Current integration surfaces", "What ships now", integrationsTable)}
           ${renderPanel("How teams usually adopt", "Suggested path", `<ol><li>Open the live demo report.</li><li>Run the 60-second fixture demo.</li><li>Run one real-site audit locally.</li><li>Move the same artifact contract into the GitHub Action.</li></ol><p>That sequencing keeps integrations understandable and reviewable instead of turning each surface into a separate product.</p>`)}
+          ${renderPanel("Starter bundle", "External adoption", `<p>The external-repo path is public and copyable, not hidden in internal fixtures.</p><p>Use the <a href="${escapeHtml(proofPageUrls.starter)}">starter bundle overview</a> when you need a citable explanation of the <code>.github/answerlens/</code> layout before handing someone the raw example files.</p><p>That keeps the Action path legible for forks, releases, and external setup guides.</p>`)}
           ${renderPanel("Related proof pages", "What this connects to", `<ul>${renderList([
             `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: answer first-run workflow questions.`,
             `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: explain how the GitHub-native path differs from dashboard-first products.`,
             `<a href="${escapeHtml(proofPageUrls.pricing)}">Pricing</a>: explain where Action and eval usage create variable cost.`,
             `<a href="${escapeHtml(proofPageUrls.security)}">Security</a>: explain secret handling and review trail expectations.`,
+            `<a href="${escapeHtml(proofPageUrls.starter)}">Starter bundle</a>: show the external-repo layout and artifact review order.`,
             `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">Developer advocacy teams</a>: connect integrations to docs and examples.`
           ])}</ul>`)}
         </section>`,

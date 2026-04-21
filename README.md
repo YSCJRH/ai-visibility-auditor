@@ -114,6 +114,8 @@ Use [docs/quickstart.md](docs/quickstart.md) after the fixture demo and before C
 
 Start with [docs/github-action.md](docs/github-action.md) and copy the external starter bundle from [examples/consumer-repo](examples/consumer-repo).
 
+If you want a public, citable overview of that path before opening raw repo files, use the [starter bundle overview](https://yscjrh.github.io/ai-visibility-auditor/starter/).
+
 If you have not run one real local audit yet, use [docs/quickstart.md](docs/quickstart.md) first. The Action should feel like the CI version of the same artifact-backed workflow, not a separate adoption path.
 
 Treat the starter bundle as the shareable adoption asset for forks, releases, and external setup guides.

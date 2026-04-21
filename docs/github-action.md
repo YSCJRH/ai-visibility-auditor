@@ -6,6 +6,8 @@ Use this page after the live demo report, the fixture demo, and one useful real-
 
 For an external repository, start by copying the starter bundle in [examples/consumer-repo](../examples/consumer-repo). The public docs should read from that consumer-repo layout, not from this repository's internal `examples/acme/*` fixtures.
 
+If you want a public walkthrough before you open the raw repo files, start with the live starter-bundle overview on Pages: [yscjrh.github.io/ai-visibility-auditor/starter/](https://yscjrh.github.io/ai-visibility-auditor/starter/).
+
 Recommended path:
 
 1. open the live demo report
@@ -119,6 +121,7 @@ Optional:
 - Copy [examples/consumer-repo/.github/answerlens/competitors.yaml](../examples/consumer-repo/.github/answerlens/competitors.yaml)
 - Copy [examples/consumer-repo/.github/answerlens/prompts.yaml](../examples/consumer-repo/.github/answerlens/prompts.yaml)
 - Copy [examples/consumer-repo/.github/workflows/answerlens.yml](../examples/consumer-repo/.github/workflows/answerlens.yml)
+- Public overview: [docs/starter-bundle.md](starter-bundle.md) and [Pages starter surface](https://yscjrh.github.io/ai-visibility-auditor/starter/)
 
 The starter bundle is intentionally generic. Replace the example product, domain, competitor list, and prompt pack before using it on a real site.
 Treat it as the shareable adoption asset for forks, releases, and external setup guides.
