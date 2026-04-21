@@ -141,7 +141,7 @@ export function RunDetailPage() {
                     <p className={pageStyles.scoreCardTitle}>{bucket}</p>
                     <p className={pageStyles.scoreCardValue}>{typeof score.score === "number" ? `${score.score}/100` : "Pending"}</p>
                     <p className={pageStyles.scoreCardMeta}>
-                      {score.issueCount} issues · {score.warnCount} warnings · {score.infoCount} info
+                      {score.issueCount} issues | {score.warnCount} warnings | {score.infoCount} info
                     </p>
                   </article>
                 ))}

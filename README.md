@@ -190,7 +190,10 @@ If you try AnswerLens on a real site, tell us which artifact helped first.
 
 ```text
 apps/cli           User-facing command entrypoint
+apps/admin         Internal control console for runs, presets, and artifact review
 packages/core      Crawl, extract, audit, scoring, recommendations, config loading
+packages/contracts Browser-safe contracts for the admin console
+packages/admin-runtime File-backed runtime helpers for the admin BFF
 packages/providers Live provider adapters and normalization contracts
 packages/report    Markdown, JSON, and HTML report rendering
 examples/          Demo configs and local fixtures

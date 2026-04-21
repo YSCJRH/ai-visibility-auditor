@@ -12,11 +12,12 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
-          <Route element={<AppShell />}>
+          <Route path="/" element={<AppShell />}>
             <Route index element={<Navigate to="/runs" replace />} />
-            <Route path="/runs" element={<RunsPage />} />
-            <Route path="/runs/:runId" element={<RunDetailPage />} />
-            <Route path="/presets" element={<PresetsPage />} />
+            <Route path="runs" element={<RunsPage />} />
+            <Route path="runs/:runId" element={<RunDetailPage />} />
+            <Route path="presets" element={<PresetsPage />} />
+            <Route path="*" element={<Navigate to="/runs" replace />} />
           </Route>
         </Routes>
       </Router>
