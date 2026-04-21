@@ -1,0 +1,100 @@
+.viewer {
+  display: grid;
+  gap: 1rem;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.tab {
+  border: 1px solid rgba(45, 27, 78, 1);
+  background: rgba(10, 9, 26, 0.72);
+  color: var(--text-muted);
+  padding: 0.65rem 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+}
+
+.tabActive {
+  border-color: rgba(0, 255, 255, 0.6);
+  color: var(--accent-cyan);
+  box-shadow: var(--glow-sm);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.action {
+  border: 1px solid rgba(255, 0, 255, 0.24);
+  background: transparent;
+  color: var(--text-strong);
+  padding: 0.65rem 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.surface {
+  min-height: 28rem;
+  border: 1px solid rgba(0, 255, 255, 0.16);
+  background: rgba(8, 8, 20, 0.86);
+  overflow: hidden;
+}
+
+.content {
+  max-height: 70vh;
+  overflow: auto;
+  padding: 1rem 1.1rem;
+}
+
+.content pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-mono);
+  color: var(--text-strong);
+}
+
+.markdown {
+  color: var(--text-strong);
+  line-height: 1.7;
+}
+
+.markdown :global(h1),
+.markdown :global(h2),
+.markdown :global(h3) {
+  color: var(--accent-cyan);
+  font-family: var(--font-heading);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.markdown :global(code) {
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.1rem 0.35rem;
+  font-family: var(--font-mono);
+}
+
+.frame {
+  width: 100%;
+  height: 70vh;
+  border: 0;
+  background: white;
+}

@@ -6,6 +6,7 @@ coverage/
 .DS_Store
 Thumbs.db
 *.log
+*.tsbuildinfo
 seofull.md
 runs/*
 !runs/.gitkeep

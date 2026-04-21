@@ -1,0 +1,144 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  justify-items: end;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 3, 9, 0.68);
+  backdrop-filter: blur(8px);
+}
+
+.drawer {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  width: min(540px, 100%);
+  height: 100%;
+  padding: 24px;
+  border-left: 1px solid rgba(0, 255, 255, 0.18);
+  background: rgba(10, 11, 28, 0.96);
+  overflow: auto;
+}
+
+.header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.title {
+  margin: 6px 0 8px;
+  font-family: "Orbitron", sans-serif;
+  font-size: 1.4rem;
+}
+
+.copy {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.form {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.modeGroup {
+  display: flex;
+  gap: 10px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.label {
+  color: var(--text-muted);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.input,
+.select {
+  min-height: 46px;
+  width: 100%;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-strong);
+}
+
+.evalGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.presetCard {
+  padding: 16px;
+  border: 1px solid rgba(0, 255, 255, 0.18);
+  background: rgba(14, 18, 41, 0.88);
+}
+
+.presetTitle {
+  margin: 8px 0 6px;
+  font-size: 1rem;
+}
+
+.presetCopy {
+  margin: 0 0 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.presetList,
+.noteList {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-muted);
+  display: grid;
+  gap: 8px;
+}
+
+.error {
+  margin: 0;
+  color: var(--state-danger);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.footerCopy {
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .drawer {
+    width: 100%;
+    padding: 18px 16px;
+  }
+
+  .evalGrid,
+  .footer {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+}

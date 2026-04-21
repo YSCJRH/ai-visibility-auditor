@@ -1,0 +1,160 @@
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  margin: 0 0 0.45rem;
+  color: var(--accent-cyan);
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 3vw, 2.6rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.description {
+  margin: 0.65rem 0 0;
+  max-width: 44rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+}
+
+.metricTile {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg, rgba(19, 17, 48, 0.95), rgba(12, 11, 30, 0.92));
+  padding: 1rem 1.1rem 1rem;
+  box-shadow: var(--glow-sm);
+}
+
+.metricTile::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 0, 255, 0.85), rgba(0, 255, 255, 0.85));
+}
+
+.metricLabel {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.metricValue {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-heading);
+  font-size: clamp(1.6rem, 3vw, 2.35rem);
+  line-height: 1;
+}
+
+.metricHelper {
+  margin: 0.55rem 0 0;
+  color: var(--text-subtle);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.toneSuccess {
+  color: var(--state-success);
+}
+
+.toneWarn {
+  color: var(--state-warning);
+}
+
+.toneError {
+  color: var(--state-danger);
+}
+
+.toneInfo {
+  color: var(--accent-cyan);
+}
+
+.toneNeutral {
+  color: var(--text-strong);
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid currentColor;
+  padding: 0.32rem 0.68rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: rgba(6, 5, 22, 0.68);
+}
+
+.statusBadge::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 0.8rem currentColor;
+}
+
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.button {
+  border: 1px solid var(--border-active);
+  background: transparent;
+  color: var(--text-strong);
+  padding: 0.78rem 1.05rem;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: transform 180ms linear, box-shadow 180ms linear, background-color 180ms linear;
+}
+
+.button:hover,
+.button:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: var(--glow-md);
+}
+
+.buttonPrimary {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.buttonPrimary:hover,
+.buttonPrimary:focus-visible {
+  background: rgba(0, 255, 255, 0.12);
+}
+
+.buttonSecondary {
+  border-color: rgba(255, 0, 255, 0.45);
+}
+
+.buttonSecondary:hover,
+.buttonSecondary:focus-visible {
+  background: rgba(255, 0, 255, 0.1);
+}
