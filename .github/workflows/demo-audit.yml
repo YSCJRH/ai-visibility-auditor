@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   push:
     paths:
+      - 'action.yml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
       - 'examples/**'
       - 'apps/**'
       - 'packages/**'
