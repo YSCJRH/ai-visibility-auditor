@@ -91,6 +91,7 @@ jobs:
           ## Start here
 
           - Open the live demo report: https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html
+          - Run the 60-second fixture demo: https://github.com/YSCJRH/ai-visibility-auditor#run-the-60-second-fixture-demo
           - Run a 5-minute real-site audit: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/quickstart.md
           - Add the GitHub Action: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/github-action.md
           - Download assets from this release: CLI tarball, demo audit bundle, and compiled site bundle
