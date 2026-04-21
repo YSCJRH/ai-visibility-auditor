@@ -405,6 +405,14 @@ function renderMetricValue(value: number | string | null, locale: Locale): strin
   return String(value);
 }
 
+function renderRunKind(value: string, locale: Locale): string {
+  if (value === "audit" || value === "eval" || value === "manual-import" || value === "validation-import") {
+    return t(locale, `kind.${value}`);
+  }
+
+  return value;
+}
+
 function manualRankValidationLine(metrics: ShareSummary["metrics"], locale: Locale): string | null {
   const competitivePositionScore = metrics.competitivePositionScore;
   const rankCoverageRate = metrics.rankCoverageRate;
@@ -521,8 +529,8 @@ ${t(locale, "brand.positioning")}
 
 ## ${t(locale, "report.run")}
 
-${renderSiteOverviewLines(summary.site)}
-- ${t(locale, "run.mode")}: ${summary.run.mode}
+${renderSiteOverviewLines(summary.site, locale)}
+- ${t(locale, "run.mode")}: ${renderRunKind(summary.run.mode, locale)}
 - ${t(locale, "run.id")}: ${summary.run.id}
 - ${t(locale, "run.generated")}: ${summary.run.generatedAt}
 - ${t(locale, "run.ruleVersion")}: ${summary.run.ruleVersion}

@@ -43,12 +43,14 @@ type ReleaseEntry = {
   body?: string;
 };
 
+type LocalizedText = string | Partial<Record<Locale, string>>;
+
 type PageSpec = {
   route: string;
   filePath?: string;
-  title: string;
-  description: string;
-  body: string;
+  title: LocalizedText;
+  description: LocalizedText;
+  body: LocalizedText;
   jsonLd: unknown;
 };
 
@@ -120,15 +122,23 @@ function formatDate(value: string | undefined, fallback: string): string {
   return Number.isNaN(date.getTime()) ? fallback : date.toISOString();
 }
 
-function formatReadableDate(value: string | undefined, fallback: string): string {
+function resolveLocalizedText(value: LocalizedText, locale: Locale): string {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return value[locale] ?? value.en ?? "";
+}
+
+function formatReadableDate(value: string | undefined, fallback: string, locale: Locale = "en"): string {
   const date = new Date(value ?? fallback);
   if (Number.isNaN(date.getTime())) {
     return fallback;
   }
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale === "zh-CN" ? "zh-CN" : "en-US", {
     year: "numeric",
-    month: "short",
+    month: locale === "zh-CN" ? "numeric" : "short",
     day: "numeric"
   }).format(date);
 }
@@ -521,7 +531,10 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale
   const canonical = new URL(localizedRoute, siteUrl).href;
   const xDefaultHref = new URL(page.route, siteUrl).href;
   const ogImage = new URL("assets/social-preview.png", siteUrl).href;
-  const documentTitle = page.title.includes("AnswerLens") ? page.title : `${page.title} | AnswerLens`;
+  const pageTitle = resolveLocalizedText(page.title, locale);
+  const pageDescription = resolveLocalizedText(page.description, locale);
+  const pageBody = resolveLocalizedText(page.body, locale);
+  const documentTitle = pageTitle.includes("AnswerLens") ? pageTitle : `${pageTitle} | AnswerLens`;
 
   const rendered = `<!doctype html>
 <html lang="${locale === "zh-CN" ? "zh-CN" : "en"}">
@@ -529,19 +542,19 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${escapeHtml(documentTitle)}</title>
-    <meta name="description" content="${escapeHtml(page.description)}" />
+    <meta name="description" content="${escapeHtml(pageDescription)}" />
     <link rel="canonical" href="${escapeHtml(canonical)}" />
     <link rel="alternate" hreflang="en" href="${escapeHtml(new URL(localizePath(page.route, "en"), siteUrl).href)}" />
     <link rel="alternate" hreflang="zh-CN" href="${escapeHtml(new URL(localizePath(page.route, "zh-CN"), siteUrl).href)}" />
     <link rel="alternate" hreflang="x-default" href="${escapeHtml(xDefaultHref)}" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="${escapeHtml(documentTitle)}" />
-    <meta property="og:description" content="${escapeHtml(page.description)}" />
+    <meta property="og:description" content="${escapeHtml(pageDescription)}" />
     <meta property="og:url" content="${escapeHtml(canonical)}" />
     <meta property="og:image" content="${escapeHtml(ogImage)}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(documentTitle)}" />
-    <meta name="twitter:description" content="${escapeHtml(page.description)}" />
+    <meta name="twitter:description" content="${escapeHtml(pageDescription)}" />
     <meta name="twitter:image" content="${escapeHtml(ogImage)}" />
     <meta name="last-modified" content="${escapeHtml(updatedAt)}" />
     <style>
@@ -574,7 +587,7 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale
         </nav>
       </header>
       ${renderLanguageSelector(siteUrl, page.route, locale)}
-      ${page.body}
+      ${pageBody}
       <p class="footer">${escapeHtml(t(locale, "footer.distribution"))}</p>
     </div>
   </body>
@@ -692,12 +705,25 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   const consumerRunDir = path.resolve(options.consumerRunDir ?? "runs/consumer-repo");
   const releasesPath = path.resolve(options.releasesPath ?? "scripts/distribution/releases-snapshot.json");
 
-  const [shareSummary, runManifest, shareSummaryMarkdown, recommendationsMarkdown, exampleMarkdown, releases, consumerShareSummary, consumerRunManifest] = await Promise.all([
+  const [
+    shareSummary,
+    runManifest,
+    shareSummaryMarkdown,
+    shareSummaryMarkdownZh,
+    recommendationsMarkdown,
+    exampleMarkdown,
+    exampleMarkdownZh,
+    releases,
+    consumerShareSummary,
+    consumerRunManifest
+  ] = await Promise.all([
     readJson<ShareSummary>(path.join(demoRunDir, "share-summary.json")),
     readJson<RunManifest>(path.join(demoRunDir, "run.json")),
     readFile(path.join(demoRunDir, "share-summary.md"), "utf8"),
+    readFile(path.join(demoRunDir, "share-summary.zh.md"), "utf8"),
     readFile(path.join(demoRunDir, "recommendations.md"), "utf8"),
     readFile(path.resolve("examples/shareable-summary.md"), "utf8"),
+    readFile(path.resolve("examples/shareable-summary.zh.md"), "utf8"),
     readJson<ReleaseEntry[]>(releasesPath),
     readJson<ShareSummary>(path.join(consumerRunDir, "share-summary.json")),
     readJson<RunManifest>(path.join(consumerRunDir, "run.json"))
@@ -820,6 +846,18 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         <tr><td>Operating model</td><td>CLI-first, GitHub-native, and BYOK</td><td>Usually hosted and dashboard-centered</td></tr>
         <tr><td>Review workflow</td><td>PRs, release notes, Pages, and artifacts</td><td>Vendor UI plus exported summaries</td></tr>
         <tr><td>Guardrails</td><td>No consumer UI scraping and no ranking promises</td><td>Varies by vendor and monitoring method</td></tr>
+      </tbody>
+    </table>`;
+  const compareTableZh = `
+    <table>
+      <thead>
+        <tr><th>维度</th><th>AnswerLens</th><th>dashboard-first AI 可见性工具</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>主要产物</td><td>仓库内可审阅的报告、scorecard 和修复清单</td><td>托管式监测视图和 dashboard</td></tr>
+        <tr><td>工作方式</td><td>CLI-first、GitHub-native、BYOK</td><td>通常是托管式、以 dashboard 为中心</td></tr>
+        <tr><td>协作位置</td><td>PR、release、Pages 与 artifacts</td><td>厂商 UI 加导出摘要</td></tr>
+        <tr><td>边界</td><td>不抓取消费级 AI UI，也不承诺答案面排名</td><td>取决于厂商与监测方式</td></tr>
       </tbody>
     </table>`;
   const integrationsTable = `
@@ -964,9 +1002,16 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     {
       route: "examples/",
       filePath: path.join(outDir, "examples", "index.html"),
-      title: "Demo report artifacts and fixture outputs",
-      description: "Static-good demo artifacts, share summaries, and example report outputs.",
-      body: `<section class="hero"><p class="eyebrow">Example dataset</p><h1>Fixture outputs are treated as public example artifacts.</h1><p>The static-good fixture is the stable source for share summaries, scorecards, recommendations, and HTML report outputs.</p></section>
+      title: {
+        en: "Demo report artifacts and fixture outputs",
+        "zh-CN": "演示报告产物与 fixture 输出"
+      },
+      description: {
+        en: "Static-good demo artifacts, share summaries, and example report outputs.",
+        "zh-CN": "static-good 演示的公开产物、分享摘要与示例报告输出。"
+      },
+      body: {
+        en: `<section class="hero"><p class="eyebrow">Example dataset</p><h1>Fixture outputs are treated as public example artifacts.</h1><p>The static-good fixture is the stable source for share summaries, scorecards, recommendations, and HTML report outputs.</p></section>
         <section class="section grid">
           ${renderPanel("Latest demo run", "Run metadata", `<ul>${renderList([
             `Site: ${escapeHtml(siteLabel(runManifest.site))}`,
@@ -984,6 +1029,25 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         <section class="section grid">
           ${renderPanel("What to do after the demo", "Next step", `<ol><li><a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">Run the 60-second fixture demo</a> if you want the same artifact set locally.</li><li><a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a> against your own public site.</li><li><a href="${escapeHtml(proofPageUrls.starter)}">Open the starter bundle overview</a> before you hand this path to another repository.</li><li><a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Add the GitHub Action</a> only after one useful local real-site run.</li></ol><p>Keep the review order stable: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`)}
         </section>`,
+        "zh-CN": `<section class="hero"><p class="eyebrow">示例数据集</p><h1>这套 fixture 输出就是公开演示产物。</h1><p>static-good fixture 是 live demo、分享摘要、scorecard、recommendations 和 HTML 报告的稳定来源，适合先理解产物长什么样，再决定是否跑到自己的站点上。</p></section>
+        <section class="section grid">
+          ${renderPanel("最新演示运行", "运行元数据", `<ul>${renderList([
+            `站点：${escapeHtml(siteLabel(runManifest.site))}`,
+            `模式：${escapeHtml(runManifest.kind === "audit" ? "审计" : runManifest.kind)}`,
+            `生成时间：${escapeHtml(formatReadableDate(runManifest.generatedAt, shareSummary.run.generatedAt, "zh-CN"))}`,
+            `产物版本：${escapeHtml(shareSummary.run.artifactVersion)}`,
+            `规则版本：${escapeHtml(shareSummary.run.ruleVersion)}`
+          ])}</ul>${runManifest.site.baseUrl === "https://fixture.local" ? "<p><code>https://fixture.local</code> 是公开演示 fixture 中使用的稳定主机名，不是 AnswerLens 的官网地址。</p>" : ""}`)}
+          ${renderPanel("这次演示会生成哪些文件", "产物", `<ul>${artifactLinks}</ul>`)}
+        </section>
+        <section class="section grid">
+          ${renderPanel("分享摘要示例", "示例", `<pre class="markdown">${escapeHtml(exampleMarkdownZh.trim())}</pre>`)}
+          ${renderPanel("本次运行的摘要摘录", "产物", `<pre class="markdown">${escapeHtml(shareSummaryMarkdownZh.trim())}</pre>`)}
+        </section>
+        <section class="section grid">
+          ${renderPanel("看完演示后，下一步怎么走", "下一步", `<ol><li><a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">先跑 60 秒 fixture 演示</a>，把同一组 artifacts 在本地复现出来。</li><li><a href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">再跑 5 分钟真实站点审计</a>，看自己的公开站点会暴露出什么问题。</li><li><a href="${escapeHtml(proofPageUrls.starter)}">然后看 starter bundle 总览</a>，理解这条路径如何交给另一个仓库复用。</li><li><a href="${escapeHtml(repoBlob("docs/zh/github-action.md"))}">最后再接 GitHub Action</a>，把同一套审阅契约搬进 CI。</li></ol><p>审阅顺序保持不变：先看 <code>share-summary.md</code>，再看 <code>scorecard.md</code>，最后看 <code>recommendations.md</code>。</p>`)}
+        </section>`
+      },
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "Dataset",
@@ -999,9 +1063,16 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     {
       route: "starter/",
       filePath: path.join(outDir, "starter", "index.html"),
-      title: "Starter bundle for external GitHub repositories",
-      description: "Public starter-bundle overview for copying AnswerLens into another repository with a GitHub-native layout.",
-      body: `<section class="hero"><p class="eyebrow">Starter bundle</p><h1>The starter bundle is the public adoption asset for external repositories.</h1><p>Use this page when you want to explain the AnswerLens GitHub Action path before sending someone into raw repo files. It keeps the external layout, artifact order, and next step visible in one place.</p></section>
+      title: {
+        en: "Starter bundle for external GitHub repositories",
+        "zh-CN": "面向外部 GitHub 仓库的 starter bundle"
+      },
+      description: {
+        en: "Public starter-bundle overview for copying AnswerLens into another repository with a GitHub-native layout.",
+        "zh-CN": "公开说明如何把 AnswerLens 复制到另一个仓库，并沿用同一套 GitHub-native 工作流。"
+      },
+      body: {
+        en: `<section class="hero"><p class="eyebrow">Starter bundle</p><h1>The starter bundle is the public adoption asset for external repositories.</h1><p>Use this page when you want to explain the AnswerLens GitHub Action path before sending someone into raw repo files. It keeps the external layout, artifact order, and next step visible in one place.</p></section>
         <section class="section grid">
           ${renderPanel("Copy this layout", "External repo shape", `<pre class="markdown">.github/\n  answerlens/\n    brand.yaml\n    competitors.yaml\n    prompts.yaml\n  workflows/\n    answerlens.yml</pre><p>This is the same layout used by <a href="${escapeHtml(repoBlob("examples/consumer-repo/README.md"))}">examples/consumer-repo</a>.</p>`)}
           ${renderPanel("What each file does", "File roles", `<ul>${renderList([
@@ -1030,6 +1101,36 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             `<a href="${escapeHtml(new URL("releases/", siteUrl).href)}">Releases</a>: use release assets as the second public front door.`
           ])}</ul>`)}
         </section>`,
+        "zh-CN": `<section class="hero"><p class="eyebrow">starter bundle</p><h1>这是一条面向外部仓库的公开接入路径。</h1><p>当你想把 AnswerLens 的 GitHub Action 路径讲清楚，但又不想一上来就把人丢进原始仓库文件时，就先给他看这一页。它把目录布局、审阅顺序和下一步动作都集中放在一个地方。</p></section>
+        <section class="section grid">
+          ${renderPanel("先按这套目录准备仓库", "外部仓库结构", `<pre class="markdown">.github/\n  answerlens/\n    brand.yaml\n    competitors.yaml\n    prompts.yaml\n  workflows/\n    answerlens.yml</pre><p>这就是 <a href="${escapeHtml(repoBlob("examples/consumer-repo/README.md"))}">examples/consumer-repo</a> 使用的同一套目录结构。</p>`)}
+          ${renderPanel("每个文件分别负责什么", "文件职责", `<ul>${renderList([
+            "<code>brand.yaml</code>：定义产品名、域名、proof-page 提示，以及可选的 <code>site_display_name</code>。",
+            "<code>competitors.yaml</code>：声明你真正要打进去的竞品集合。",
+            "<code>prompts.yaml</code>：写给真实买家与评估场景的比较、引用和推荐问题。",
+            "<code>answerlens.yml</code>：把同一套 artifact 契约跑进 CI 的 GitHub Action workflow。"
+          ])}</ul>`)}
+        </section>
+        <section class="section grid">
+          ${renderPanel("可直接复制的 starter 文件", "可复制来源", `<ul>${renderList([
+            `<a href="${escapeHtml(repoBlob("examples/consumer-repo/.github/answerlens/brand.yaml"))}">brand.yaml</a>`,
+            `<a href="${escapeHtml(repoBlob("examples/consumer-repo/.github/answerlens/competitors.yaml"))}">competitors.yaml</a>`,
+            `<a href="${escapeHtml(repoBlob("examples/consumer-repo/.github/answerlens/prompts.yaml"))}">prompts.yaml</a>`,
+            `<a href="${escapeHtml(repoBlob("examples/consumer-repo/.github/workflows/answerlens.yml"))}">answerlens.yml</a>`
+          ])}</ul>`)}
+          ${renderPanel("先按这个顺序审阅", "审阅流", `<ol><li><code>share-summary.md</code></li><li><code>scorecard.md</code></li><li><code>recommendations.md</code></li></ol><p>看完这三份之后，再用 <code>pr-snippet.md</code> 处理 GitHub 文案，用 <code>run.json</code> 处理机器可读元数据。</p>`)}
+        </section>
+        <section class="section grid">
+          ${renderPanel("先看这次 starter 示例运行", "公开证明", `<p><strong>示例站点：</strong> ${escapeHtml(siteLabel(consumerRunManifest.site))}</p><p>这个公开示例会把 consumer-repo starter bundle 跑在稳定 fixture 上，让外部采用者在接自己站点之前，先看清最终产物会是什么样。</p><ul>${starterArtifactLinks}</ul>`)}
+          ${renderPanel("把它接进真实仓库时怎么走", "激活路径", `<ol><li><a href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">先跑 5 分钟真实站点审计</a>，如果你还没做过这一步。</li><li>把 starter 文件复制到你要审计的仓库里。</li><li><a href="${escapeHtml(repoBlob("docs/zh/github-action.md"))}">再进入 GitHub Action 路径</a>，前提是本地运行已经足够可审阅。</li></ol><p>这样 starter bundle 才会继续保持“准备好接入”的证明资产，而不是被误读成另一套独立产品。</p>`)}
+          ${renderPanel("这页应该和哪些公开页一起看", "相关证明页面", `<ul>${renderList([
+            `<a href="${escapeHtml(new URL("examples/", siteUrl).href)}">示例页</a>：先看 live demo 的 artifact 组合。`,
+            `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">文档页</a>：继续看 activation 参考、评分说明和规范 Markdown。`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">集成页</a>：看 starter bundle 如何嵌进 GitHub-native 工作流。`,
+            `<a href="${escapeHtml(new URL("releases/", siteUrl).href)}">发布页</a>：把 release assets 当作第二个公开入口。`
+          ])}</ul>`)}
+        </section>`
+      },
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "WebPage",
@@ -1134,9 +1235,16 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     {
       route: "compare/",
       filePath: path.join(outDir, "compare", "index.html"),
-      title: "AnswerLens compared with Profound, Peec AI, and Otterly",
-      description: "How AnswerLens differs from dashboard-first AI visibility tools such as Profound, Peec AI, and Otterly.",
-      body: `<section class="hero"><p class="eyebrow">Compare</p><h1>AnswerLens compared with Profound, Peec AI, and Otterly for GitHub-native teams.</h1><p>Compared with Profound, Peec AI, and Otterly, AnswerLens fits teams that want repo-native audits instead of dashboard-first packaging. Those tools may fit teams that want managed monitoring or broader hosted visibility products. AnswerLens keeps a different posture: CLI-first, GitHub-native, artifact-backed, and explicit about BYOK evaluation.</p></section>
+      title: {
+        en: "AnswerLens compared with Profound, Peec AI, and Otterly",
+        "zh-CN": "AnswerLens 与 Profound、Peec AI、Otterly 的对比"
+      },
+      description: {
+        en: "How AnswerLens differs from dashboard-first AI visibility tools such as Profound, Peec AI, and Otterly.",
+        "zh-CN": "说明 AnswerLens 与 Profound、Peec AI、Otterly 等 dashboard-first AI 可见性工具的区别。"
+      },
+      body: {
+        en: `<section class="hero"><p class="eyebrow">Compare</p><h1>AnswerLens compared with Profound, Peec AI, and Otterly for GitHub-native teams.</h1><p>Compared with Profound, Peec AI, and Otterly, AnswerLens fits teams that want repo-native audits instead of dashboard-first packaging. Those tools may fit teams that want managed monitoring or broader hosted visibility products. AnswerLens keeps a different posture: CLI-first, GitHub-native, artifact-backed, and explicit about BYOK evaluation.</p></section>
         <section class="section grid">
           ${renderPanel("Declared comparison set", "Current public comparison", `<ul>${renderList([
             "Profound: AI visibility platform with a hosted monitoring posture.",
@@ -1161,6 +1269,32 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">Developer advocacy teams</a>: see the fit for docs and self-serve evaluation.`
           ])}</ul>`)}
         </section>`,
+        "zh-CN": `<section class="hero"><p class="eyebrow">对比</p><h1>AnswerLens 更适合想把 AI 可发现性工作放回仓库流程里的团队。</h1><p>如果你要的是 repo-native 审计、可进 PR 的 artifacts、以及围绕 README / Pages / release 展开的公开协作路径，AnswerLens 会更贴近这类工作方式。像 Profound、Peec AI、Otterly 这类工具，更适合偏托管监测或 dashboard-first 的使用习惯。</p></section>
+        <section class="section grid">
+          ${renderPanel("当前公开对比对象", "公开对比对象", `<ul>${renderList([
+            "Profound：更偏托管式 AI 可见性平台，强调持续监测与平台视图。",
+            "Peec AI：更像产品化的 AI 搜索监测 SaaS，重心在持续追踪与外部界面。",
+            "Otterly：偏向持续监控型工具，适合长期跟踪而非仓库内审阅。"
+          ])}</ul>`)}
+          ${renderPanel("工作流最核心的区别", "Repo-native 与 dashboard-first", compareTableZh)}
+        </section>
+        <section class="section grid">
+          ${renderPanel("什么时候更适合选 AnswerLens", "决策标准", `<ul>${renderList([
+            "你需要的是能进入 pull request、issue、release notes 和 Pages 的报告、scorecard 与修复清单。",
+            "你希望 provider 使用量留在自己的账户里，而不是被包在托管厂商表面之后。",
+            "你更在意把源材料写清楚、补齐证据和对比能力，而不是追求一个平台上的“排名承诺”。",
+            "你想让 compare / FAQ / proof page 这类内容缺口，作为 artifacts 明确暴露出来，而不是只出现在监控 dashboard 里。"
+          ])}</ul>`)}
+          ${renderPanel("相关公开页应该一起看", "互链", `<ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.pricing)}">定价页</a>：对比打包方式和成本姿态。`,
+            `<a href="${escapeHtml(proofPageUrls.security)}">安全页</a>：对比信任模型和审阅方式。`,
+            `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>：对比首次试用问题与边界说明。`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">集成页</a>：对比 GitHub-native 工作流入口。`,
+            `<a href="${escapeHtml(proofPageUrls.productMarketing)}">产品营销团队</a>：看首页、pricing、proof page 这类场景是否更贴合。`,
+            `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">开发者关系团队</a>：看文档、示例和自助试用路径的适配度。`
+          ])}</ul>`)}
+        </section>`
+      },
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "WebPage",
