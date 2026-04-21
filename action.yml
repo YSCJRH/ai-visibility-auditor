@@ -56,6 +56,12 @@ outputs:
   share-summary-path:
     description: "Absolute path to share-summary.md."
     value: ${{ steps.run-answerlens.outputs.share_summary_path }}
+  scorecard-path:
+    description: "Absolute path to scorecard.md."
+    value: ${{ steps.run-answerlens.outputs.scorecard_path }}
+  recommendations-path:
+    description: "Absolute path to recommendations.md."
+    value: ${{ steps.run-answerlens.outputs.recommendations_path }}
   pr-snippet-path:
     description: "Absolute path to pr-snippet.md."
     value: ${{ steps.run-answerlens.outputs.pr_snippet_path }}
@@ -177,5 +183,7 @@ runs:
 
         "out_dir=$outDir" >> $env:GITHUB_OUTPUT
         "share_summary_path=$([System.IO.Path]::GetFullPath((Join-Path $outDir 'share-summary.md')))" >> $env:GITHUB_OUTPUT
+        "scorecard_path=$([System.IO.Path]::GetFullPath((Join-Path $outDir 'scorecard.md')))" >> $env:GITHUB_OUTPUT
+        "recommendations_path=$([System.IO.Path]::GetFullPath((Join-Path $outDir 'recommendations.md')))" >> $env:GITHUB_OUTPUT
         "pr_snippet_path=$([System.IO.Path]::GetFullPath((Join-Path $outDir 'pr-snippet.md')))" >> $env:GITHUB_OUTPUT
         "run_json_path=$([System.IO.Path]::GetFullPath((Join-Path $outDir 'run.json')))" >> $env:GITHUB_OUTPUT

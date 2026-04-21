@@ -275,8 +275,13 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(githubActionDocs, /uses: YSCJRH\/ai-visibility-auditor@vX/);
   assert.match(githubActionDocs, /bing-indexnow-helper/);
   assert.match(githubActionDocs, /Node 24 transition/);
+  assert.match(githubActionDocs, /scorecard-path/);
+  assert.match(githubActionDocs, /recommendations-path/);
+  assert.match(githubActionDocs, /Artifact review order/);
   assert.match(actionDefinition, /name: "AnswerLens"/);
   assert.match(actionDefinition, /share-summary-path/);
+  assert.match(actionDefinition, /scorecard-path/);
+  assert.match(actionDefinition, /recommendations-path/);
   assert.match(actionDefinition, /bing-input/);
   assert.match(actionDefinition, /actions\/setup-node@v5/);
   assert.match(actionDefinition, /FORCE_JAVASCRIPT_ACTIONS_TO_NODE24/);

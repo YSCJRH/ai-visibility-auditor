@@ -26,4 +26,10 @@ After copying it:
 
 The starter bundle is intentionally minimal. It exists to make the public GitHub Action path copyable, forkable, and easy to reference from README and release docs.
 
+When the workflow runs, review the generated artifacts in this order:
+
+1. `share-summary.md`
+2. `scorecard.md`
+3. `recommendations.md`
+
 If you want one local run before CI, start with [../../docs/quickstart.md](../../docs/quickstart.md) and then move the same `.github/answerlens/` folder into the target repository workflow.

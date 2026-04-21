@@ -122,7 +122,7 @@ The public Action contract is:
 
 - `uses: YSCJRH/ai-visibility-auditor@vX`
 - `command: audit | eval | manual-import | search-console-import | bing-indexnow-helper`
-- outputs: `out-dir`, `share-summary-path`, `pr-snippet-path`, `run-json-path`
+- outputs: `out-dir`, `share-summary-path`, `scorecard-path`, `recommendations-path`, `pr-snippet-path`, `run-json-path`
 
 ## Install or download
 
