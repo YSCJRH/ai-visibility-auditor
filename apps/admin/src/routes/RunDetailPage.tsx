@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import { translateBucket } from "../shared/i18n.ts";
 import { ArtifactViewer } from "../components/ArtifactViewer";
 import { IssueTable } from "../components/IssueTable";
 import { MetricTile } from "../components/MetricTile";
@@ -9,12 +10,14 @@ import { SectionHeader } from "../components/SectionHeader";
 import { StatusBadge } from "../components/StatusBadge";
 import { getRunDetail } from "../lib/api";
 import { formatDateTime, formatKind, formatScore } from "../lib/format";
+import { useLocale } from "../lib/locale";
 import pageStyles from "./PageLayout.module.css";
 import uiStyles from "../components/UI.module.css";
 
 const ARTIFACT_OPENING_ORDER = ["share-summary.md", "scorecard.md", "recommendations.md"];
 
 export function RunDetailPage() {
+  const { locale, t } = useLocale();
   const params = useParams();
   const runId = params.runId ?? "";
 
@@ -28,11 +31,11 @@ export function RunDetailPage() {
   const auditScores = useMemo(() => Object.entries(detail?.auditResult?.scores ?? {}), [detail?.auditResult?.scores]);
 
   if (runQuery.isLoading) {
-    return <p className={pageStyles.emptyState}>Loading run detail...</p>;
+    return <p className={pageStyles.emptyState}>{t("admin.detail.loading")}</p>;
   }
 
   if (runQuery.isError || !detail) {
-    return <p className={pageStyles.emptyState}>Unable to load that run. Return to the runs list and try again.</p>;
+    return <p className={pageStyles.emptyState}>{t("admin.detail.error")}</p>;
   }
 
   const overallScore =
@@ -52,96 +55,94 @@ export function RunDetailPage() {
   return (
     <div className={pageStyles.page}>
       <SectionHeader
-        eyebrow="Run detail"
+        eyebrow={t("admin.detail.eyebrow")}
         title={detail.manifest.site.display ?? detail.manifest.site.input}
-        description={`${formatKind(detail.manifest.kind)} run generated ${formatDateTime(detail.manifest.generatedAt)}. Review the artifact order first, then inspect audit issues and score buckets.`}
-        actions={<StatusBadge label={detail.manifest.kind} tone="info" />}
+        description={t("admin.detail.description", {
+          kind: formatKind(detail.manifest.kind, locale),
+          date: formatDateTime(detail.manifest.generatedAt, locale)
+        })}
+        actions={<StatusBadge label={formatKind(detail.manifest.kind, locale)} tone="info" />}
       />
 
       <section className={uiStyles.metricGrid}>
         <MetricTile
-          label="Overall score"
-          value={formatScore(overallScore)}
+          label={t("admin.detail.overallScore")}
+          value={formatScore(overallScore, locale)}
           tone={overallScore !== null && overallScore >= 90 ? "success" : "info"}
         />
-        <MetricTile label="VAVR" value={formatScore(vavr)} helper="Only populated after eval-backed review." />
-        <MetricTile label="Artifacts" value={String(detail.artifacts.length)} helper="Includes Markdown, HTML, and JSON outputs." />
+        <MetricTile label={t("admin.detail.vavr")} value={formatScore(vavr, locale)} helper={t("admin.detail.vavr.helper")} />
+        <MetricTile label={t("admin.detail.artifacts")} value={String(detail.artifacts.length)} helper={t("admin.detail.artifacts.helper")} />
         <MetricTile
-          label="Key pages"
-          value={pageCount === null ? "Pending" : String(pageCount)}
-          helper="Derived from `site-audit.json` when available."
+          label={t("admin.detail.keyPages")}
+          value={pageCount === null ? t("common.pending") : String(pageCount)}
+          helper={t("admin.detail.keyPages.helper")}
         />
       </section>
 
       <div className={pageStyles.grid}>
         <div className={pageStyles.mainColumn}>
           <section className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>Artifact workspace</p>
-            <h2 className={pageStyles.panelTitle}>Open the report trail in order</h2>
-            <p className={pageStyles.panelBody}>
-              Start with {ARTIFACT_OPENING_ORDER.join(" -> ")}. Use the HTML report for full browsing, then drop back to
-              the raw JSON artifacts if you need machine-contract detail.
-            </p>
+            <p className={pageStyles.panelEyebrow}>{t("admin.detail.workspaceEyebrow")}</p>
+            <h2 className={pageStyles.panelTitle}>{t("admin.detail.workspaceTitle")}</h2>
+            <p className={pageStyles.panelBody}>{t("admin.detail.workspaceBody", { order: ARTIFACT_OPENING_ORDER.join(" -> ") })}</p>
             <ArtifactViewer runId={detail.id} artifacts={detail.artifacts} />
           </section>
 
           <section className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>Audit issues</p>
-            <h2 className={pageStyles.panelTitle}>Top issues</h2>
-            <p className={pageStyles.panelBody}>
-              These come directly from `site-audit.json`, so the UI stays aligned with the artifact contract.
-            </p>
+            <p className={pageStyles.panelEyebrow}>{t("admin.detail.issuesEyebrow")}</p>
+            <h2 className={pageStyles.panelTitle}>{t("admin.detail.issuesTitle")}</h2>
+            <p className={pageStyles.panelBody}>{t("admin.detail.issuesBody")}</p>
             <IssueTable issues={detail.auditResult?.issues.slice(0, 8) ?? []} />
           </section>
 
           <section className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>Fix path</p>
-            <h2 className={pageStyles.panelTitle}>Recommendations</h2>
+            <p className={pageStyles.panelEyebrow}>{t("admin.detail.fixEyebrow")}</p>
+            <h2 className={pageStyles.panelTitle}>{t("admin.detail.fixTitle")}</h2>
             <RecommendationList recommendations={detail.auditResult?.recommendations ?? []} />
           </section>
         </div>
 
         <div className={pageStyles.sideColumn}>
           <section className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>Run manifest</p>
-            <h2 className={pageStyles.panelTitle}>Context</h2>
+            <p className={pageStyles.panelEyebrow}>{t("admin.detail.contextEyebrow")}</p>
+            <h2 className={pageStyles.panelTitle}>{t("admin.detail.contextTitle")}</h2>
             <div className={pageStyles.metaList}>
               <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>Run id</span>
+                <span className={pageStyles.metaLabel}>{t("admin.detail.runId")}</span>
                 <span className={pageStyles.metaValue}>{detail.manifest.run.id}</span>
               </div>
               <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>Site input</span>
+                <span className={pageStyles.metaLabel}>{t("admin.detail.siteInput")}</span>
                 <span className={pageStyles.metaValue}>{detail.manifest.site.input}</span>
               </div>
               <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>Base URL</span>
+                <span className={pageStyles.metaLabel}>{t("admin.detail.baseUrl")}</span>
                 <span className={pageStyles.metaValue}>{detail.manifest.site.baseUrl}</span>
               </div>
               <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>Artifact version</span>
+                <span className={pageStyles.metaLabel}>{t("admin.detail.artifactVersion")}</span>
                 <span className={pageStyles.metaValue}>{detail.manifest.run.artifactVersion}</span>
               </div>
               <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>Rule version</span>
+                <span className={pageStyles.metaLabel}>{t("admin.detail.ruleVersion")}</span>
                 <span className={pageStyles.metaValue}>{detail.manifest.run.ruleVersion}</span>
               </div>
             </div>
           </section>
 
           <section className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>Score buckets</p>
-            <h2 className={pageStyles.panelTitle}>Audit breakdown</h2>
+            <p className={pageStyles.panelEyebrow}>{t("admin.detail.bucketsEyebrow")}</p>
+            <h2 className={pageStyles.panelTitle}>{t("admin.detail.bucketsTitle")}</h2>
             {auditScores.length === 0 ? (
-              <p className={pageStyles.emptyState}>No bucket scores were available for this run.</p>
+              <p className={pageStyles.emptyState}>{t("admin.detail.bucketsEmpty")}</p>
             ) : (
               <div className={pageStyles.scoreGrid}>
                 {auditScores.map(([bucket, score]) => (
                   <article key={bucket} className={pageStyles.scoreCard}>
-                    <p className={pageStyles.scoreCardTitle}>{bucket}</p>
-                    <p className={pageStyles.scoreCardValue}>{typeof score.score === "number" ? `${score.score}/100` : "Pending"}</p>
+                    <p className={pageStyles.scoreCardTitle}>{translateBucket(bucket, locale)}</p>
+                    <p className={pageStyles.scoreCardValue}>{typeof score.score === "number" ? `${score.score}/100` : t("common.pending")}</p>
                     <p className={pageStyles.scoreCardMeta}>
-                      {score.issueCount} issues | {score.warnCount} warnings | {score.infoCount} info
+                      {t("admin.detail.bucketMeta", { issues: score.issueCount, warnings: score.warnCount, info: score.infoCount })}
                     </p>
                   </article>
                 ))}

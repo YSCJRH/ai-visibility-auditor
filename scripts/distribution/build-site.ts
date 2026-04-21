@@ -1,6 +1,7 @@
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { LOCALE_STORAGE_KEY, type Locale, localeToSlug, t } from "../../packages/i18n/src/index.ts";
 
 type ShareSummary = {
   project: string;
@@ -44,7 +45,7 @@ type ReleaseEntry = {
 
 type PageSpec = {
   route: string;
-  filePath: string;
+  filePath?: string;
   title: string;
   description: string;
   body: string;
@@ -172,19 +173,134 @@ function renderSiteIdentity(site: { input: string; baseUrl: string; display?: st
   return lines.join("");
 }
 
-function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string): string {
-  const canonical = new URL(page.route, siteUrl).href;
+function localizePath(route: string, locale: Locale): string {
+  const slug = localeToSlug(locale);
+  return route.length === 0 ? `${slug}/` : `${slug}/${route}`;
+}
+
+function otherLocale(locale: Locale): Locale {
+  return locale === "zh-CN" ? "en" : "zh-CN";
+}
+
+function translateSiteHtml(html: string): string {
+  const replacements: Array<[string, string]> = [
+    ["Home", "首页"],
+    ["Docs", "文档"],
+    ["Releases", "发布"],
+    ["Examples", "示例"],
+    ["Playbooks", "操作手册"],
+    ["AnswerLens makes AI discoverability reviewable in GitHub.", "AnswerLens 让 AI 可发现性在 GitHub 里变得可审阅。"],
+    ["AI visibility audit reports and demo entry points", "AI 可见性审计报告与演示入口"],
+    ["Docs index, concepts, and activation references", "文档索引、概念与激活参考"],
+    ["Release notes and downloadable distribution assets", "发布说明与可下载分发资产"],
+    ["Demo report artifacts and fixture outputs", "演示报告产物与 fixture 输出"],
+    ["Starter bundle for external GitHub repositories", "面向外部 GitHub 仓库的 starter bundle"],
+    ["Open-source pricing and packaging", "开源定价与打包方式"],
+    ["Security, trust, and review guardrails", "安全、信任与审阅边界"],
+    ["First-run FAQ and guardrails", "首次试用 FAQ 与边界说明"],
+    ["AnswerLens compared with Profound, Peec AI, and Otterly", "AnswerLens 与 Profound、Peec AI、Otterly 的对比"],
+    ["GitHub, provider, and validation integrations", "GitHub、provider 与验证集成"],
+    ["Use case for product marketing teams", "面向产品营销团队的使用场景"],
+    ["Use case for developer advocacy teams", "面向开发者关系团队的使用场景"],
+    ["Use case for open-source maintainers", "面向开源维护者的使用场景"],
+    ["Fix playbooks from current audit artifacts", "基于当前审计产物的修复手册"],
+    ["Canonical documentation", "规范文档"],
+    ["Versioned distribution", "版本化分发"],
+    ["Example dataset", "示例数据集"],
+    ["Pricing and packaging", "定价与打包"],
+    ["Security and trust", "安全与信任"],
+    ["First-run FAQ", "首次试用 FAQ"],
+    ["Compare", "对比"],
+    ["Integrations", "集成"],
+    ["Use case", "使用场景"],
+    ["Fixes and playbooks", "修复与手册"],
+    ["Recommended first-run path", "推荐首次试用路径"],
+    ["Public proof block", "公开证明区块"],
+    ["Public proof pages", "公开证明页面"],
+    ["Use-case coverage", "用例覆盖"],
+    ["Proof page map", "证明页面地图"],
+    ["Artifact order", "产物顺序"],
+    ["Use the latest release", "使用最新发布"],
+    ["Latest demo run", "最新演示运行"],
+    ["What to do after the demo", "看完演示后做什么"],
+    ["Starter example run", "starter 示例运行"],
+    ["What to do next", "下一步怎么做"],
+    ["What costs $0", "哪些成本为 $0"],
+    ["Where variable cost appears", "变量成本出现在哪里"],
+    ["Packaging choices", "打包方式"],
+    ["Trust model", "信任模型"],
+    ["Review and deployment model", "审阅与部署模型"],
+    ["Known limits", "已知限制"],
+    ["Common questions", "常见问题"],
+    ["Related proof pages", "相关证明页面"],
+    ["Declared comparison set", "公开对比对象"],
+    ["How the workflow differs", "工作流有何不同"],
+    ["When AnswerLens fits", "何时适合使用 AnswerLens"],
+    ["Current integration surfaces", "当前集成面"],
+    ["How teams usually adopt", "团队常见采用路径"],
+    ["Starter bundle", "starter bundle"],
+    ["Where teams start", "团队从哪里开始"],
+    ["Where teams focus", "团队关注点"],
+    ["Why maintainers use it", "维护者为什么使用它"],
+    ["Current recommendations", "当前建议"],
+    ["Recommended reading", "推荐阅读"],
+    ["Built by YSCJRH from repo-native docs, releases, and artifacts. No consumer AI UI scraping. No ranking promises.", "由 YSCJRH 基于仓库内文档、发布记录与产物构建。无消费级 AI 界面抓取，不承诺答案面排名。"],
+    ["Open the live demo report", "打开在线演示报告"],
+    ["Run the 60-second fixture demo", "运行 60 秒 fixture 演示"],
+    ["Run a 5-minute real-site audit", "运行 5 分钟真实站点审计"],
+    ["Add the GitHub Action", "添加 GitHub Action"],
+    ["Open canonical Markdown", "打开规范 Markdown"],
+    ["Start here", "从这里开始"],
+    ["Artifact proof", "产物证明"],
+    ["Coverage", "覆盖面"],
+    ["Team fit", "团队适配"],
+    ["What to open next", "接下来打开什么"],
+    ["Cross-linking", "互链"],
+    ["What ships now", "当前已交付"],
+    ["Suggested path", "建议路径"],
+    ["External adoption", "外部采用"],
+    ["Workflow", "工作流"],
+    ["What to strengthen", "该强化什么"],
+    ["What to connect", "该连接什么"],
+    ["GitHub-native distribution", "GitHub-native 分发"],
+    ["Concept support", "概念支持"],
+    ["Activation funnel", "激活漏斗"],
+    ["Review flow", "审阅流"],
+    ["Public comparison", "当前公开对比"],
+    ["Decision criteria", "决策标准"],
+    ["What this connects to", "这与什么相连"],
+    ["Current public comparison", "当前公开对比"],
+    ["What people ask first", "大家首先会问什么"],
+    ["What it does", "它能做什么"]
+  ];
+
+  return replacements.reduce((current, [from, to]) => current.split(from).join(to), html);
+}
+
+function renderLanguageSelector(siteUrl: string, route: string, locale: Locale): string {
+  const current = localeToSlug(locale);
+  const alternate = localeToSlug(otherLocale(locale));
+  return `<div class="locale-switcher"><span>${escapeHtml(t(locale, "lang.label"))}:</span> <a href="${escapeHtml(new URL(localizePath(route, locale), siteUrl).href)}">${escapeHtml(current === "en" ? t(locale, "lang.english") : t(locale, "lang.chinese"))}</a> / <a href="${escapeHtml(new URL(localizePath(route, otherLocale(locale)), siteUrl).href)}">${escapeHtml(alternate === "en" ? t(locale, "lang.english") : t(locale, "lang.chinese"))}</a></div>`;
+}
+
+function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale: Locale): string {
+  const localizedRoute = localizePath(page.route, locale);
+  const canonical = new URL(localizedRoute, siteUrl).href;
+  const xDefaultHref = new URL(page.route, siteUrl).href;
   const ogImage = new URL("assets/social-preview.png", siteUrl).href;
   const documentTitle = page.title.includes("AnswerLens") ? page.title : `${page.title} | AnswerLens`;
 
-  return `<!doctype html>
-<html lang="en">
+  const rendered = `<!doctype html>
+<html lang="${locale === "zh-CN" ? "zh-CN" : "en"}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${escapeHtml(documentTitle)}</title>
     <meta name="description" content="${escapeHtml(page.description)}" />
     <link rel="canonical" href="${escapeHtml(canonical)}" />
+    <link rel="alternate" hreflang="en" href="${escapeHtml(new URL(localizePath(page.route, "en"), siteUrl).href)}" />
+    <link rel="alternate" hreflang="zh-CN" href="${escapeHtml(new URL(localizePath(page.route, "zh-CN"), siteUrl).href)}" />
+    <link rel="alternate" hreflang="x-default" href="${escapeHtml(xDefaultHref)}" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="${escapeHtml(documentTitle)}" />
     <meta property="og:description" content="${escapeHtml(page.description)}" />
@@ -200,6 +316,7 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string): strin
       *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;background:radial-gradient(circle at top left,rgba(96,120,255,.16),transparent 24%),radial-gradient(circle at bottom right,rgba(125,240,210,.14),transparent 20%),linear-gradient(180deg,#0b1630 0%,var(--bg) 100%);color:var(--ink)}
       a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}.shell{width:min(1180px,calc(100vw - 32px));margin:0 auto;padding:24px 0 56px}.topbar,.hero,.panel,.metric{border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:0 20px 40px rgba(2,8,18,.35)}
       .topbar{display:flex;gap:16px;justify-content:space-between;align-items:center;padding:16px 20px}.nav{display:flex;gap:12px;flex-wrap:wrap}.nav a{padding:10px 14px;border-radius:999px;border:1px solid var(--line)}
+      .locale-switcher{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.92rem}
       .hero,.panel,.metric{padding:22px}.hero h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.2rem);line-height:1.05}.hero p,.muted{color:var(--muted)}.eyebrow{margin:0 0 10px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-size:.78rem}
       .section{margin-top:24px}.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.metric-value{margin:0;font-size:2rem;font-weight:700}
       .panel h2{margin-top:0}.markdown{margin:0;padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(8,18,37,.95);white-space:pre-wrap;overflow:auto;font-family:"Consolas","SFMono-Regular",monospace;line-height:1.5}
@@ -212,22 +329,125 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string): strin
       <header class="topbar">
         <div>
           <strong>AnswerLens</strong>
-          <p class="muted">${escapeHtml(DESCRIPTION)} ${escapeHtml(TAGLINE)}</p>
+          <p class="muted">${escapeHtml(t(locale, "brand.description"))} ${escapeHtml(t(locale, "brand.tagline"))}</p>
         </div>
         <nav class="nav">
-          <a href="${escapeHtml(new URL("", siteUrl).href)}">Home</a>
-          <a href="${escapeHtml(new URL("docs/", siteUrl).href)}">Docs</a>
-          <a href="${escapeHtml(new URL("releases/", siteUrl).href)}">Releases</a>
-          <a href="${escapeHtml(new URL("examples/", siteUrl).href)}">Examples</a>
-          <a href="${escapeHtml(new URL("playbooks/", siteUrl).href)}">Playbooks</a>
-          <a href="${escapeHtml(REPO_URL)}">GitHub</a>
+          <a href="${escapeHtml(new URL(localizePath("", locale), siteUrl).href)}">${escapeHtml(t(locale, "nav.home"))}</a>
+          <a href="${escapeHtml(new URL(localizePath("docs/", locale), siteUrl).href)}">${escapeHtml(t(locale, "nav.docs"))}</a>
+          <a href="${escapeHtml(new URL(localizePath("releases/", locale), siteUrl).href)}">${escapeHtml(t(locale, "nav.releases"))}</a>
+          <a href="${escapeHtml(new URL(localizePath("examples/", locale), siteUrl).href)}">${escapeHtml(t(locale, "nav.examples"))}</a>
+          <a href="${escapeHtml(new URL(localizePath("playbooks/", locale), siteUrl).href)}">${escapeHtml(t(locale, "nav.playbooks"))}</a>
+          <a href="${escapeHtml(REPO_URL)}">${escapeHtml(t(locale, "nav.github"))}</a>
         </nav>
       </header>
+      ${renderLanguageSelector(siteUrl, page.route, locale)}
       ${page.body}
-      <p class="footer">Built by YSCJRH from repo-native docs, releases, and artifacts. No consumer AI UI scraping. No ranking promises.</p>
+      <p class="footer">${escapeHtml(t(locale, "footer.distribution"))}</p>
     </div>
   </body>
 </html>`;
+
+  const localizedLinks = localizeAbsoluteSiteLinks(rendered, siteUrl, locale);
+  const localizedDocs = localizeRepoDocLinks(localizedLinks, locale);
+  return locale === "zh-CN" ? translateSiteHtml(localizedDocs) : localizedDocs;
+}
+
+function localeIndexPath(outDir: string, route: string, locale: Locale): string {
+  return path.join(outDir, localizePath(route, locale), "index.html");
+}
+
+async function copyLocalizedRun(sourceDir: string, targetDir: string, locale: Locale): Promise<void> {
+  await cp(sourceDir, targetDir, { recursive: true, force: true });
+
+  if (locale === "en") {
+    return;
+  }
+
+  const localizedMarkdownFiles = [
+    "share-summary",
+    "scorecard",
+    "recommendations",
+    "pr-snippet",
+    "eval-summary",
+    "before-after-diff",
+    "citation-gap-matrix",
+    "search-console-summary",
+    "bing-summary",
+    "indexnow-summary"
+  ];
+
+  for (const baseName of localizedMarkdownFiles) {
+    const zhPath = path.join(targetDir, `${baseName}.zh.md`);
+    const basePath = path.join(targetDir, `${baseName}.md`);
+    try {
+      await cp(zhPath, basePath, { force: true });
+    } catch {
+      // ignore when that artifact does not exist for this run type
+    }
+  }
+
+  try {
+    await cp(path.join(targetDir, "index.zh.html"), path.join(targetDir, "index.html"), { force: true });
+  } catch {
+    // ignore when the localized HTML report has not been emitted
+  }
+}
+
+function renderLocaleRedirectPage(siteUrl: string, route: string): string {
+  const fallback = new URL(localizePath(route, "en"), siteUrl).href;
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="refresh" content="0; url=${escapeHtml(fallback)}" />
+    <link rel="canonical" href="${escapeHtml(fallback)}" />
+    <script>
+      (function () {
+        var stored = window.localStorage.getItem(${JSON.stringify(LOCALE_STORAGE_KEY)});
+        var preferred = stored || (navigator.languages && navigator.languages[0]) || navigator.language || "en";
+        var target = /^zh/i.test(preferred) ? ${JSON.stringify(new URL(localizePath(route, "zh-CN"), siteUrl).href)} : ${JSON.stringify(fallback)};
+        window.location.replace(target);
+      })();
+    </script>
+    <title>AnswerLens locale redirect</title>
+  </head>
+  <body>
+    <p><a href="${escapeHtml(fallback)}">Continue</a></p>
+  </body>
+</html>`;
+}
+
+function localizeAbsoluteSiteLinks(html: string, siteUrl: string, locale: Locale): string {
+  const slug = localeToSlug(locale);
+  const escapedBase = siteUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return html.replace(
+    new RegExp(`(href|src)="${escapedBase}(?!assets/|feed\\.xml|sitemap\\.xml|robots\\.txt|en/|zh/)([^"]*)"`, "g"),
+    (match, attr: string, route: string) => {
+      if (route.length === 0) {
+        return match;
+      }
+      return `${attr}="${siteUrl}${slug}/${route}"`;
+    }
+  );
+}
+
+function localizeRepoDocLinks(html: string, locale: Locale): string {
+  if (locale !== "zh-CN") {
+    return html;
+  }
+
+  const replacements: Array<[string, string]> = [
+    ["/blob/main/docs/quickstart.md", "/blob/main/docs/zh/quickstart.md"],
+    ["/blob/main/docs/github-action.md", "/blob/main/docs/zh/github-action.md"],
+    ["/blob/main/docs/manual-steps.md", "/blob/main/docs/zh/manual-steps.md"],
+    ["/blob/main/docs/activation-plan.md", "/blob/main/docs/zh/activation-plan.md"],
+    ["/blob/main/docs/distribution-plan.md", "/blob/main/docs/zh/distribution-plan.md"],
+    ["/blob/main/docs/admin-console.md", "/blob/main/docs/zh/admin-console.md"],
+    ["/blob/main/README.md", "/blob/main/README.zh-CN.md"]
+  ];
+
+  return replacements.reduce((current, [from, to]) => current.split(from).join(to), html);
 }
 
 export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
@@ -256,9 +476,15 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   await mkdir(path.join(outDir, "examples"), { recursive: true });
   await mkdir(path.join(outDir, "starter"), { recursive: true });
   await mkdir(path.join(outDir, "playbooks"), { recursive: true });
+  await mkdir(path.join(outDir, "en"), { recursive: true });
+  await mkdir(path.join(outDir, "zh"), { recursive: true });
   await cp(path.resolve("assets"), path.join(outDir, "assets"), { recursive: true, force: true });
   await cp(demoRunDir, path.join(outDir, "examples", "static-good"), { recursive: true, force: true });
   await cp(consumerRunDir, path.join(outDir, "starter", "example-run"), { recursive: true, force: true });
+  await copyLocalizedRun(demoRunDir, path.join(outDir, "en", "examples", "static-good"), "en");
+  await copyLocalizedRun(demoRunDir, path.join(outDir, "zh", "examples", "static-good"), "zh-CN");
+  await copyLocalizedRun(consumerRunDir, path.join(outDir, "en", "starter", "example-run"), "en");
+  await copyLocalizedRun(consumerRunDir, path.join(outDir, "zh", "starter", "example-run"), "zh-CN");
 
   const docsCards = [
     ["docs/activation-plan.md", "Activation plan", "Current operating focus for public entry points and adoption."],
@@ -831,13 +1057,22 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     }
   ];
 
+  await writeFile(path.join(outDir, "index.html"), renderLocaleRedirectPage(siteUrl, ""), "utf8");
+
   for (const page of pages) {
-    await mkdir(path.dirname(page.filePath), { recursive: true });
-    await writeFile(page.filePath, renderLayout(siteUrl, page, updatedAt), "utf8");
+    await mkdir(path.dirname(page.filePath ?? path.join(outDir, page.route, "index.html")), { recursive: true });
+    await writeFile(page.filePath ?? path.join(outDir, page.route, "index.html"), renderLocaleRedirectPage(siteUrl, page.route), "utf8");
+    await mkdir(path.dirname(localeIndexPath(outDir, page.route, "en")), { recursive: true });
+    await mkdir(path.dirname(localeIndexPath(outDir, page.route, "zh-CN")), { recursive: true });
+    await writeFile(localeIndexPath(outDir, page.route, "en"), renderLayout(siteUrl, page, updatedAt, "en"), "utf8");
+    await writeFile(localeIndexPath(outDir, page.route, "zh-CN"), renderLayout(siteUrl, page, updatedAt, "zh-CN"), "utf8");
   }
 
   const sitemap = pages
-    .map((page) => `<url><loc>${escapeHtml(new URL(page.route, siteUrl).href)}</loc><lastmod>${escapeHtml(updatedAt)}</lastmod></url>`)
+    .flatMap((page) => [
+      `<url><loc>${escapeHtml(new URL(localizePath(page.route, "en"), siteUrl).href)}</loc><lastmod>${escapeHtml(updatedAt)}</lastmod></url>`,
+      `<url><loc>${escapeHtml(new URL(localizePath(page.route, "zh-CN"), siteUrl).href)}</loc><lastmod>${escapeHtml(updatedAt)}</lastmod></url>`
+    ])
     .join("");
   await writeFile(
     path.join(outDir, "sitemap.xml"),

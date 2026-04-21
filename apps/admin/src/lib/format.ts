@@ -1,39 +1,34 @@
 import type { AdminRunStatus, ArtifactEntry, AuditIssue, AuditRecommendation, RunKind } from "@answerlens/contracts";
+import { type Locale, formatDate, translateRunKind, translateStatus } from "../shared/i18n.ts";
 
-const dateFormatter = new Intl.DateTimeFormat("en", {
-  month: "short",
-  day: "numeric",
-  hour: "2-digit",
-  minute: "2-digit"
-});
-
-export function formatDateTime(value: string | undefined): string {
+export function formatDateTime(value: string | undefined, locale: Locale): string {
   if (!value) {
-    return "Pending";
+    return locale === "zh-CN" ? "待生成" : "Pending";
   }
 
-  return dateFormatter.format(new Date(value));
+  return formatDate(
+    value,
+    locale,
+    {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }
+  );
 }
 
-export function formatKind(kind: RunKind): string {
-  if (kind === "validation-import") {
-    return "Validation import";
-  }
-
-  if (kind === "manual-import") {
-    return "Manual import";
-  }
-
-  return kind.charAt(0).toUpperCase() + kind.slice(1);
+export function formatKind(kind: RunKind, locale: Locale): string {
+  return translateRunKind(kind, locale);
 }
 
-export function formatStatus(status: AdminRunStatus): string {
-  return status.charAt(0).toUpperCase() + status.slice(1);
+export function formatStatus(status: AdminRunStatus, locale: Locale): string {
+  return translateStatus(status, locale);
 }
 
-export function formatScore(value: number | null): string {
+export function formatScore(value: number | null, locale: Locale): string {
   if (value === null) {
-    return "Pending";
+    return locale === "zh-CN" ? "待生成" : "Pending";
   }
 
   return `${value}/100`;
@@ -67,12 +62,6 @@ export function artifactTone(
   return "neutral";
 }
 
-export function humanizeSlug(value: string): string {
-  return value
-    .replace(/[-_]/g, " ")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
 export function downloadTextFile(filename: string, content: string, type = "text/plain;charset=utf-8"): void {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
@@ -83,10 +72,7 @@ export function downloadTextFile(filename: string, content: string, type = "text
   URL.revokeObjectURL(url);
 }
 
-export function openTextInNewTab(
-  content: string,
-  type = "text/plain;charset=utf-8"
-): void {
+export function openTextInNewTab(content: string, type = "text/plain;charset=utf-8"): void {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   window.open(url, "_blank", "noopener,noreferrer");

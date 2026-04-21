@@ -410,8 +410,8 @@ test("consumer repo starter bundle stays self-consistent", async () => {
   assert.match(workflow, /scorecard-path/);
   assert.match(workflow, /recommendations-path/);
   assert.match(shareSummary, /# AnswerLens Share Summary/);
-  assert.match(shareSummary, /Site: Example Product public site/);
-  assert.match(scorecard, /Site: Example Product public site/);
-  assert.match(recommendations, /Site: Example Product public site/);
+  assert.match(shareSummary, /Demo site: Example Product public site/);
+  assert.match(scorecard, /Demo site: Example Product public site/);
+  assert.match(recommendations, /Demo site: Example Product public site/);
   assert.match(runManifest, /"display": "Example Product public site"/);
 });

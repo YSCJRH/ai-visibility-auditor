@@ -4,12 +4,14 @@ import { useNavigate } from "react-router-dom";
 import type { CreateAuditRunInput, CreateEvalRunInput, RunJobRecord } from "@answerlens/contracts";
 import { createAuditRun, createEvalRun, getRunJob, listConfigPresets } from "../lib/api";
 import { formatStatus } from "../lib/format";
+import { useLocale } from "../lib/locale";
 import { StatusBadge } from "./StatusBadge";
 import styles from "./RunLauncher.module.css";
 
 type LaunchMode = "audit" | "eval";
 
 export function RunLauncher() {
+  const { locale, t } = useLocale();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -46,7 +48,7 @@ export function RunLauncher() {
   const createRunMutation = useMutation({
     mutationFn: async () => {
       if (!selectedPreset) {
-        throw new Error("Select a preset before launching a run.");
+        throw new Error(t("admin.launcher.selectPresetError"));
       }
 
       if (mode === "audit") {
@@ -59,7 +61,8 @@ export function RunLauncher() {
         site,
         provider,
         model: model.trim().length > 0 ? model.trim() : undefined,
-        samples
+        samples,
+        locale
       };
       return createEvalRun(payload);
     },
@@ -96,7 +99,7 @@ export function RunLauncher() {
   return (
     <>
       <button className={styles.trigger} type="button" onClick={() => setOpen(true)}>
-        Launch run
+        {t("admin.launch")}
       </button>
 
       {open ? (
@@ -110,16 +113,13 @@ export function RunLauncher() {
           >
             <header className={styles.header}>
               <div>
-                <p className={styles.eyebrow}>Run launcher</p>
+                <p className={styles.eyebrow}>{t("admin.launcher.eyebrow")}</p>
                 <h2 className={styles.title} id="run-launcher-title">
-                  Start an AnswerLens run
+                  {t("admin.launcher.title")}
                 </h2>
-                <p className={styles.summary}>
-                  Choose a repo preset, set the target site, and let the BFF write a fresh file-backed run into
-                  `runs/*`.
-                </p>
+                <p className={styles.summary}>{t("admin.launcher.summary")}</p>
               </div>
-              <button className={styles.close} type="button" aria-label="Close run launcher" onClick={() => setOpen(false)}>
+              <button className={styles.close} type="button" aria-label={t("admin.launcher.close")} onClick={() => setOpen(false)}>
                 X
               </button>
             </header>
@@ -131,20 +131,20 @@ export function RunLauncher() {
                   className={`${styles.modeButton} ${mode === "audit" ? styles.modeButtonActive : ""}`}
                   onClick={() => setMode("audit")}
                 >
-                  Audit
+                  {t("admin.launcher.mode.audit")}
                 </button>
                 <button
                   type="button"
                   className={`${styles.modeButton} ${mode === "eval" ? styles.modeButtonActive : ""}`}
                   onClick={() => setMode("eval")}
                 >
-                  Eval
+                  {t("admin.launcher.mode.eval")}
                 </button>
               </div>
 
               <div className={styles.grid}>
                 <label className={styles.field}>
-                  <span className={styles.label}>Preset</span>
+                  <span className={styles.label}>{t("admin.launcher.preset")}</span>
                   <select
                     className={styles.select}
                     value={selectedPreset?.id ?? ""}
@@ -165,19 +165,19 @@ export function RunLauncher() {
                 </label>
 
                 <label className={`${styles.field} ${styles.fieldWide}`}>
-                  <span className={styles.label}>Site input</span>
+                  <span className={styles.label}>{t("admin.launcher.site")}</span>
                   <input
                     className={styles.input}
                     value={site}
                     onChange={(event) => setSite(event.target.value)}
-                    placeholder="https://example.com or ./examples/fixtures/static-good"
+                    placeholder={t("admin.launcher.site.placeholder")}
                   />
                 </label>
 
                 {mode === "eval" ? (
                   <>
                     <label className={styles.field}>
-                      <span className={styles.label}>Provider</span>
+                      <span className={styles.label}>{t("admin.launcher.provider")}</span>
                       <select
                         className={styles.select}
                         value={provider}
@@ -189,7 +189,7 @@ export function RunLauncher() {
                     </label>
 
                     <label className={styles.field}>
-                      <span className={styles.label}>Samples</span>
+                      <span className={styles.label}>{t("admin.launcher.samples")}</span>
                       <input
                         className={styles.input}
                         type="number"
@@ -201,12 +201,12 @@ export function RunLauncher() {
                     </label>
 
                     <label className={`${styles.field} ${styles.fieldWide}`}>
-                      <span className={styles.label}>Model override</span>
+                      <span className={styles.label}>{t("admin.launcher.model")}</span>
                       <input
                         className={styles.input}
                         value={model}
                         onChange={(event) => setModel(event.target.value)}
-                        placeholder="Optional, defaults to the provider's standard model"
+                        placeholder={t("admin.launcher.model.placeholder")}
                       />
                     </label>
                   </>
@@ -215,16 +215,16 @@ export function RunLauncher() {
 
               {selectedPreset ? (
                 <p className={styles.hint}>
-                  Default target: <strong>{selectedPreset.defaultSiteInput}</strong>. Files: {selectedPreset.brandPath},{" "}
+                  {t("admin.launcher.defaultTarget")}: <strong>{selectedPreset.defaultSiteInput}</strong>. {t("admin.launcher.files")}: {selectedPreset.brandPath},{" "}
                   {selectedPreset.competitorsPath}, {selectedPreset.promptsPath}.
                 </p>
               ) : null}
 
               <footer className={styles.footer}>
                 <div className={styles.status}>
-                  {job ? <StatusBadge label={formatStatus(job.status)} tone={job.status === "failed" ? "error" : "info"} /> : null}
+                  {job ? <StatusBadge label={formatStatus(job.status, locale)} tone={job.status === "failed" ? "error" : "info"} /> : null}
                   {job?.error ? <span className={styles.hint}>{job.error}</span> : null}
-                  {presetsQuery.isLoading ? <span className={styles.hint}>Loading presets...</span> : null}
+                  {presetsQuery.isLoading ? <span className={styles.hint}>{t("admin.launcher.loadingPresets")}</span> : null}
                 </div>
                 <button
                   className={styles.submit}
@@ -232,7 +232,7 @@ export function RunLauncher() {
                   disabled={createRunMutation.isPending || presets.length === 0 || site.trim().length === 0}
                   onClick={() => createRunMutation.mutate()}
                 >
-                  {createRunMutation.isPending || job ? "Launching..." : `Start ${mode}`}
+                  {createRunMutation.isPending || job ? t("admin.launcher.launching") : t("admin.launcher.start", { mode: mode === "audit" ? t("admin.launcher.mode.audit") : t("admin.launcher.mode.eval") })}
                 </button>
               </footer>
             </div>

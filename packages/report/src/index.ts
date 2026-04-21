@@ -2,9 +2,20 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { AuditResult, IndexNowHelperResult, SearchValidationResult } from "../../core/src/types.ts";
 import type { ContentBrief, EvalResult } from "../../core/src/eval.ts";
-import { BUCKET_LABELS } from "../../core/src/audit.ts";
 import { summarizeEvalDiff } from "../../core/src/eval.ts";
 import { ensureDir } from "../../core/src/utils.ts";
+import {
+  type Locale,
+  t,
+  translateBucket,
+  translateExpectedOutcome,
+  translateFixHint,
+  translateIssueTitle,
+  translateMetricKey,
+  translateRecommendationRationale,
+  translateRecommendationTitle,
+  translateSeverity
+} from "../../i18n/src/index.ts";
 
 type RunKind = "audit" | "eval" | "manual-import" | "validation-import";
 
@@ -98,6 +109,22 @@ interface ShareSummary {
 const SHARE_DISCLAIMER =
   "AnswerLens does not scrape consumer AI UIs, auto-post content, or guarantee answer-surface rankings.";
 
+function localizeText(value: string, locale: Locale, kind: "issueTitle" | "fixHint" | "recommendationTitle" | "rationale" | "expectedOutcome"): string {
+  if (kind === "issueTitle") {
+    return translateIssueTitle(value, locale);
+  }
+  if (kind === "fixHint") {
+    return translateFixHint(value, locale);
+  }
+  if (kind === "recommendationTitle") {
+    return translateRecommendationTitle(value, locale);
+  }
+  if (kind === "rationale") {
+    return translateRecommendationRationale(value, locale);
+  }
+  return translateExpectedOutcome(value, locale);
+}
+
 function renderVavr(value: number | null): string {
   return value === null ? "pending eval" : `${value}`;
 }
@@ -138,23 +165,23 @@ function fixtureHostNote(site: Pick<AuditResult["site"], "baseUrl">): string | n
   return "https://fixture.local is the stable fixture hostname inside this public demo, not the AnswerLens site URL.";
 }
 
-function renderSiteOverviewLines(site: AuditResult["site"]): string {
-  const lines = [`- Site: ${siteLabel(site)}`];
+function renderSiteOverviewLines(site: AuditResult["site"], locale: Locale = "en"): string {
+  const lines = [`- ${t(locale, "site.demo")}: ${siteLabel(site)}`];
 
   const note = fixtureHostNote(site);
   if (note) {
-    lines.push(`- Demo host note: ${note}`);
+    lines.push(`- ${t(locale, "site.note.fixture")}`);
   }
 
   return lines.join("\n");
 }
 
-function renderSiteHtmlNotes(site: AuditResult["site"]): string {
+function renderSiteHtmlNotes(site: AuditResult["site"], locale: Locale = "en"): string {
   const notes: string[] = [];
 
   const note = fixtureHostNote(site);
   if (note) {
-    notes.push(`<p><code>https://fixture.local</code> is the stable fixture hostname inside this public demo, not the AnswerLens site URL.</p>`);
+    notes.push(`<p>${escapeHtml(t(locale, "site.note.fixture"))}</p>`);
   }
 
   return notes.join("");
@@ -191,13 +218,18 @@ function topRecommendations(result: AuditResult): ShareSummary["topRecommendatio
 function auditArtifacts(): string[] {
   return [
     "share-summary.md",
+    "share-summary.zh.md",
     "share-summary.json",
     "pr-snippet.md",
+    "pr-snippet.zh.md",
     "scorecard.md",
+    "scorecard.zh.md",
     "recommendations.md",
+    "recommendations.zh.md",
     "issues.json",
     "site-audit.json",
     "index.html",
+    "index.zh.html",
     "normalized-pages.json",
     "competitor-diff.md",
     "run.json"
@@ -208,10 +240,13 @@ function evalArtifacts(): string[] {
   return [
     ...auditArtifacts(),
     "eval-summary.md",
+    "eval-summary.zh.md",
     "eval-summary.json",
     "eval-results.json",
     "before-after-diff.md",
+    "before-after-diff.zh.md",
     "citation-gap-matrix.md",
+    "citation-gap-matrix.zh.md",
     "citation-gap-matrix.json"
   ];
 }
@@ -220,6 +255,7 @@ function validationArtifacts(): string[] {
   return [
     ...auditArtifacts(),
     "search-console-summary.md",
+    "search-console-summary.zh.md",
     "search-console-summary.json",
     "search-console-pages.json"
   ];
@@ -229,9 +265,11 @@ function bingHelperArtifacts(): string[] {
   return [
     ...auditArtifacts(),
     "bing-summary.md",
+    "bing-summary.zh.md",
     "bing-summary.json",
     "bing-pages.json",
     "indexnow-summary.md",
+    "indexnow-summary.zh.md",
     "indexnow-summary.json",
     "indexnow-candidates.json"
   ];
@@ -355,25 +393,25 @@ function buildValidationShareSummary(
   };
 }
 
-function renderMetricValue(value: number | string | null): string {
+function renderMetricValue(value: number | string | null, locale: Locale): string {
   if (value === null) {
-    return "pending eval";
+    return t(locale, "common.pending");
   }
 
   return String(value);
 }
 
-function manualRankValidationLine(metrics: ShareSummary["metrics"]): string | null {
+function manualRankValidationLine(metrics: ShareSummary["metrics"], locale: Locale): string | null {
   const competitivePositionScore = metrics.competitivePositionScore;
   const rankCoverageRate = metrics.rankCoverageRate;
   if (typeof competitivePositionScore !== "number" || typeof rankCoverageRate !== "number") {
     return null;
   }
 
-  return `Manual validation: CPS ${competitivePositionScore} across ${rankCoverageRate}% ranked samples.`;
+  return t(locale, "report.manualValidation", { score: competitivePositionScore, coverage: rankCoverageRate });
 }
 
-function stabilitySummaryLine(metrics: ShareSummary["metrics"]): string | null {
+function stabilitySummaryLine(metrics: ShareSummary["metrics"], locale: Locale): string | null {
   const repeatedPromptCount = metrics.repeatedPromptCount;
   const stablePromptRate = metrics.stablePromptRate;
   const unstablePromptCount = metrics.unstablePromptCount;
@@ -386,10 +424,14 @@ function stabilitySummaryLine(metrics: ShareSummary["metrics"]): string | null {
     return null;
   }
 
-  return `Stability: ${stablePromptRate}% of repeated prompt groups were stable (${unstablePromptCount} unstable across ${repeatedPromptCount} repeated prompts).`;
+  return t(locale, "report.stability", {
+    stableRate: stablePromptRate,
+    unstableCount: unstablePromptCount,
+    repeatedCount: repeatedPromptCount
+  });
 }
 
-function searchValidationLine(metrics: ShareSummary["metrics"]): string | null {
+function searchValidationLine(metrics: ShareSummary["metrics"], locale: Locale): string | null {
   const keyPagesWithEvidence = metrics.keyPagesWithEvidence;
   const keyPagesWithoutEvidence = metrics.keyPagesWithoutEvidence;
   const validationLabel = typeof metrics.validationLabel === "string" ? metrics.validationLabel : "Search Console";
@@ -402,19 +444,23 @@ function searchValidationLine(metrics: ShareSummary["metrics"]): string | null {
     return null;
   }
 
-  return `${validationLabel} validation: ${keyPagesWithEvidence}/${total} key pages show ${validationLabel} evidence.`;
+  return t(locale, "report.searchValidation", {
+    label: validationLabel,
+    withEvidence: keyPagesWithEvidence,
+    total
+  });
 }
 
-function indexNowHelperLine(metrics: ShareSummary["metrics"]): string | null {
+function indexNowHelperLine(metrics: ShareSummary["metrics"], locale: Locale): string | null {
   const indexNowCandidateCount = metrics.indexNowCandidateCount;
   if (typeof indexNowCandidateCount !== "number" || indexNowCandidateCount < 1) {
     return null;
   }
 
-  return `IndexNow helper: prepared ${indexNowCandidateCount} candidate URLs for submission planning.`;
+  return t(locale, "report.indexNow", { count: indexNowCandidateCount });
 }
 
-function renderShareSummaryMarkdown(summary: ShareSummary): string {
+function renderShareSummaryMarkdown(summary: ShareSummary, locale: Locale = "en"): string {
   const metricRows = Object.entries(summary.metrics)
     .filter(
       ([key]) =>
@@ -434,105 +480,115 @@ function renderShareSummaryMarkdown(summary: ShareSummary): string {
           "indexNowCandidateCount"
         ].includes(key)
     )
-    .map(([key, value]) => `| ${escapeTableCell(key)} | ${escapeTableCell(renderMetricValue(value))} |`)
+    .map(([key, value]) => `| ${escapeTableCell(translateMetricKey(key, locale))} | ${escapeTableCell(renderMetricValue(value, locale))} |`)
     .join("\n");
-  const manualValidation = manualRankValidationLine(summary.metrics);
-  const stabilitySummary = stabilitySummaryLine(summary.metrics);
-  const searchValidation = searchValidationLine(summary.metrics);
-  const indexNowHelper = indexNowHelperLine(summary.metrics);
+  const manualValidation = manualRankValidationLine(summary.metrics, locale);
+  const stabilitySummary = stabilitySummaryLine(summary.metrics, locale);
+  const searchValidation = searchValidationLine(summary.metrics, locale);
+  const indexNowHelper = indexNowHelperLine(summary.metrics, locale);
 
   const issues =
     summary.topIssues.length > 0
-      ? summary.topIssues.map((issue) => `- **${issue.title}** (${issue.severity}, ${issue.scope}): ${issue.fixHint}`).join("\n")
-      : "- none";
+      ? summary.topIssues
+          .map(
+            (issue) =>
+              `- **${localizeText(issue.title, locale, "issueTitle")}** (${translateSeverity(issue.severity, locale)}, ${issue.scope}): ${localizeText(issue.fixHint, locale, "fixHint")}`
+          )
+          .join("\n")
+      : `- ${t(locale, "report.noIssues")}`;
 
   const recommendations =
     summary.topRecommendations.length > 0
       ? summary.topRecommendations
-          .map((recommendation) => `- **${recommendation.title}**: ${recommendation.expectedOutcome}`)
+          .map(
+            (recommendation) =>
+              `- **${localizeText(recommendation.title, locale, "recommendationTitle")}**: ${localizeText(recommendation.expectedOutcome, locale, "expectedOutcome")}`
+          )
           .join("\n")
-      : "- none";
+      : `- ${t(locale, "report.noIssues")}`;
 
   const artifacts = summary.artifacts.map((artifact) => `- [${artifact}](${artifact})`).join("\n");
 
-  return `# AnswerLens Share Summary
+  return `# ${t(locale, "report.shareSummary.title")}
 
-> ${summary.tagline}
+> ${t(locale, "brand.tagline")}
 
-${summary.positioning}
+${t(locale, "brand.positioning")}
 
-## Run
+## ${t(locale, "report.run")}
 
 ${renderSiteOverviewLines(summary.site)}
-- Mode: ${summary.run.mode}
-- Run ID: ${summary.run.id}
-- Generated: ${summary.run.generatedAt}
-- Rule version: ${summary.run.ruleVersion}
+- ${t(locale, "run.mode")}: ${summary.run.mode}
+- ${t(locale, "run.id")}: ${summary.run.id}
+- ${t(locale, "run.generated")}: ${summary.run.generatedAt}
+- ${t(locale, "run.ruleVersion")}: ${summary.run.ruleVersion}
 
-## Metrics
+## ${t(locale, "report.metrics")}
 
-| Metric | Value |
+| ${t(locale, "report.metricLabel")} | ${t(locale, "report.metricValue")} |
 | --- | --- |
 ${metricRows}
 
 ${manualValidation ? `${manualValidation}\n` : ""}${stabilitySummary ? `${stabilitySummary}\n` : ""}${searchValidation ? `${searchValidation}\n` : ""}${indexNowHelper ? `${indexNowHelper}\n` : ""}
 
-## AI may miss this product because
+## ${t(locale, "report.issues")}
 
 ${issues}
 
-## Top fixes
+## ${t(locale, "report.fixes")}
 
 ${recommendations}
 
-## Shareable artifacts
+## ${t(locale, "report.artifacts")}
 
 ${artifacts}
 
-## Guardrails
+## ${t(locale, "report.guardrails")}
 
-${summary.disclaimer}
+${t(locale, "brand.disclaimer")}
 `;
 }
 
-function renderPrSnippetMarkdown(summary: ShareSummary): string {
+function renderPrSnippetMarkdown(summary: ShareSummary, locale: Locale = "en"): string {
   const topIssues =
     summary.topIssues.length > 0
-      ? summary.topIssues.map((issue) => `- ${issue.title}: ${issue.fixHint}`).join("\n")
-      : "- none";
+      ? summary.topIssues
+          .map((issue) => `- ${localizeText(issue.title, locale, "issueTitle")}: ${localizeText(issue.fixHint, locale, "fixHint")}`)
+          .join("\n")
+      : `- ${t(locale, "report.noIssues")}`;
 
   const topFixes =
     summary.topRecommendations.length > 0
-      ? summary.topRecommendations.map((recommendation) => `- ${recommendation.title}`).join("\n")
-      : "- none";
+      ? summary.topRecommendations.map((recommendation) => `- ${localizeText(recommendation.title, locale, "recommendationTitle")}`).join("\n")
+      : `- ${t(locale, "report.noIssues")}`;
 
-  const score = renderMetricValue(summary.metrics.overallScore);
-  const vavr = renderMetricValue(summary.metrics.vavr ?? null);
-  const manualValidation = manualRankValidationLine(summary.metrics);
+  const score = renderMetricValue(summary.metrics.overallScore, locale);
+  const vavr = renderMetricValue(summary.metrics.vavr ?? null, locale);
+  const manualValidation = manualRankValidationLine(summary.metrics, locale);
 
-  return `## AnswerLens audit
+  return `## ${t(locale, "report.pr.title")}
 
-**${summary.tagline}** Readiness: **${score}/100**. VAVR: **${vavr}**.
+**${t(locale, "brand.tagline")}** Readiness: **${score}/100**. VAVR: **${vavr}**.
 
 ${manualValidation ? `${manualValidation}\n` : ""}
 
-### AI may miss this product because
+### ${t(locale, "report.pr.issueHeading")}
 
 ${topIssues}
 
-### Recommended next fixes
+### ${t(locale, "report.pr.fixHeading")}
 
 ${topFixes}
 
 <details>
-<summary>Artifacts and guardrails</summary>
+<summary>${t(locale, "report.pr.artifacts")}</summary>
 
 - Scorecard: \`scorecard.md\`
 - Recommendations: \`recommendations.md\`
 - Share summary: \`share-summary.md\`
 - Machine-readable summary: \`share-summary.json\`
 
-${summary.disclaimer}
+${t(locale, "brand.disclaimer")}
 
 </details>
 `;
@@ -549,11 +605,13 @@ async function readShareSummary(outDir: string): Promise<ShareSummary | null> {
 
 async function writeShareOutputs(outDir: string, summary: ShareSummary): Promise<void> {
   await writeJson(path.join(outDir, "share-summary.json"), summary);
-  await writeFile(path.join(outDir, "share-summary.md"), renderShareSummaryMarkdown(summary), "utf8");
-  await writeFile(path.join(outDir, "pr-snippet.md"), renderPrSnippetMarkdown(summary), "utf8");
+  await writeFile(path.join(outDir, "share-summary.md"), renderShareSummaryMarkdown(summary, "en"), "utf8");
+  await writeFile(path.join(outDir, "share-summary.zh.md"), renderShareSummaryMarkdown(summary, "zh-CN"), "utf8");
+  await writeFile(path.join(outDir, "pr-snippet.md"), renderPrSnippetMarkdown(summary, "en"), "utf8");
+  await writeFile(path.join(outDir, "pr-snippet.zh.md"), renderPrSnippetMarkdown(summary, "zh-CN"), "utf8");
 }
 
-function renderRecommendationsMarkdown(result: AuditResult): string {
+function renderRecommendationsMarkdown(result: AuditResult, locale: Locale = "en"): string {
   const blocks =
     result.recommendations.length > 0
       ? result.recommendations
@@ -561,14 +619,14 @@ function renderRecommendationsMarkdown(result: AuditResult): string {
             const relatedIssues =
               recommendation.relatedIssues.length > 0
                 ? recommendation.relatedIssues.map((issue) => `- ${issue}`).join("\n")
-                : "- none";
+                : `- ${t(locale, "report.noIssues")}`;
 
-            return `## ${recommendation.title}\n\n- Rationale: ${recommendation.rationale}\n- Expected outcome: ${recommendation.expectedOutcome}\n\n### Related issues\n\n${relatedIssues}`;
+            return `## ${localizeText(recommendation.title, locale, "recommendationTitle")}\n\n- ${locale === "zh-CN" ? "原因" : "Rationale"}: ${localizeText(recommendation.rationale, locale, "rationale")}\n- ${locale === "zh-CN" ? "预期结果" : "Expected outcome"}: ${localizeText(recommendation.expectedOutcome, locale, "expectedOutcome")}\n\n### ${t(locale, "report.relatedIssues")}\n\n${relatedIssues}`;
           })
           .join("\n\n")
-      : "No recommendations were generated for this run.";
+      : t(locale, "report.noRecommendations");
 
-  return `# AnswerLens Recommendations\n\n${renderSiteOverviewLines(result.site)}\n- Generated: ${result.site.generatedAt}\n- Overall score: ${result.summary.overallScore}\n\n${blocks}\n`;
+  return `# ${t(locale, "report.recommendations.title")}\n\n${renderSiteOverviewLines(result.site, locale)}\n- ${t(locale, "report.generated")}: ${result.site.generatedAt}\n- ${t(locale, "report.overallScore")}: ${result.summary.overallScore}\n\n${blocks}\n`;
 }
 
 function buildAuditRunManifest(result: AuditResult): RunManifest {
@@ -589,13 +647,18 @@ function buildAuditRunManifest(result: AuditResult): RunManifest {
       "site-audit.json",
       "issues.json",
       "recommendations.md",
+      "recommendations.zh.md",
       "scorecard.md",
+      "scorecard.zh.md",
       "index.html",
+      "index.zh.html",
       "normalized-pages.json",
       "competitor-diff.md",
       "share-summary.md",
+      "share-summary.zh.md",
       "share-summary.json",
       "pr-snippet.md",
+      "pr-snippet.zh.md",
       "run.json"
     ]
   };
@@ -631,19 +694,27 @@ function buildEvalRunManifest(result: EvalResult): RunManifest {
       "site-audit.json",
       "issues.json",
       "recommendations.md",
+      "recommendations.zh.md",
       "scorecard.md",
+      "scorecard.zh.md",
       "index.html",
+      "index.zh.html",
       "normalized-pages.json",
       "competitor-diff.md",
       "eval-results.json",
       "eval-summary.md",
+      "eval-summary.zh.md",
       "eval-summary.json",
       "before-after-diff.md",
+      "before-after-diff.zh.md",
       "citation-gap-matrix.json",
       "citation-gap-matrix.md",
+      "citation-gap-matrix.zh.md",
       "share-summary.md",
+      "share-summary.zh.md",
       "share-summary.json",
       "pr-snippet.md",
+      "pr-snippet.zh.md",
       "content-briefs/*.md",
       "briefs/*.md",
       "run.json",
@@ -677,16 +748,22 @@ function buildValidationRunManifest(audit: AuditResult, result: SearchValidation
       "site-audit.json",
       "issues.json",
       "recommendations.md",
+      "recommendations.zh.md",
       "scorecard.md",
+      "scorecard.zh.md",
       "index.html",
+      "index.zh.html",
       "normalized-pages.json",
       "competitor-diff.md",
       "search-console-summary.json",
       "search-console-summary.md",
+      "search-console-summary.zh.md",
       "search-console-pages.json",
       "share-summary.md",
+      "share-summary.zh.md",
       "share-summary.json",
       "pr-snippet.md",
+      "pr-snippet.zh.md",
       "run.json"
     ]
   };
@@ -855,7 +932,7 @@ function buildCitationGapMatrix(result: EvalResult) {
   };
 }
 
-function renderCitationGapMatrixMarkdown(result: EvalResult): string {
+function renderCitationGapMatrixMarkdown(result: EvalResult, locale: Locale = "en"): string {
   const matrix = buildCitationGapMatrix(result);
   const rows = matrix.rows
     .map(
@@ -864,7 +941,7 @@ function renderCitationGapMatrixMarkdown(result: EvalResult): string {
     )
     .join("\n");
 
-  return `# AnswerLens Citation Gap Matrix\n\n${renderSiteOverviewLines(result.site)}\n- Provider: ${result.provider.name}\n- Model: ${result.provider.model}\n- Samples: ${result.summary.sampleCount}\n- Citation gaps: ${matrix.summary.citationGapCount}\n- Competitor exclusion gaps: ${matrix.summary.competitorExclusionGapCount}\n\n| Prompt | Category | Sample | Pack | Accurate mention | Owned citation | Trusted citation | Citation gap | Competitor excluded | Competitors mentioned |\n| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- |\n${rows}\n`;
+  return `# ${locale === "zh-CN" ? "AnswerLens 引用缺口矩阵" : "AnswerLens Citation Gap Matrix"}\n\n${renderSiteOverviewLines(result.site, locale)}\n- ${locale === "zh-CN" ? "提供方" : "Provider"}: ${result.provider.name}\n- ${locale === "zh-CN" ? "模型" : "Model"}: ${result.provider.model}\n- ${locale === "zh-CN" ? "样本数" : "Samples"}: ${result.summary.sampleCount}\n- ${locale === "zh-CN" ? "引用缺口数" : "Citation gaps"}: ${matrix.summary.citationGapCount}\n- ${locale === "zh-CN" ? "竞争对手排除缺口数" : "Competitor exclusion gaps"}: ${matrix.summary.competitorExclusionGapCount}\n\n| ${locale === "zh-CN" ? "提示词" : "Prompt"} | ${locale === "zh-CN" ? "类别" : "Category"} | ${locale === "zh-CN" ? "样本" : "Sample"} | ${locale === "zh-CN" ? "分组" : "Pack"} | ${locale === "zh-CN" ? "准确提及" : "Accurate mention"} | ${locale === "zh-CN" ? "自有引用" : "Owned citation"} | ${locale === "zh-CN" ? "可信引用" : "Trusted citation"} | ${locale === "zh-CN" ? "引用缺口" : "Citation gap"} | ${locale === "zh-CN" ? "排除竞争对手" : "Competitor excluded"} | ${locale === "zh-CN" ? "提及的竞争对手" : "Competitors mentioned"} |\n| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- |\n${rows}\n`;
 }
 async function writeBriefOutputs(outDir: string, briefs: ContentBrief[]): Promise<void> {
   if (briefs.length === 0) {
@@ -879,17 +956,20 @@ async function writeBriefOutputs(outDir: string, briefs: ContentBrief[]): Promis
   }
 }
 
-export function renderScorecardMarkdown(result: AuditResult): string {
+export function renderScorecardMarkdown(result: AuditResult, locale: Locale = "en"): string {
   const scores = Object.entries(result.scores)
     .map(
       ([bucket, score]) =>
-        `| ${BUCKET_LABELS[bucket as keyof typeof BUCKET_LABELS]} | ${score.score} | ${score.issueCount} | ${score.errorCount} | ${score.warnCount} | ${score.infoCount} |`
+        `| ${translateBucket(bucket, locale)} | ${score.score} | ${score.issueCount} | ${score.errorCount} | ${score.warnCount} | ${score.infoCount} |`
     )
     .join("\n");
 
   const topIssues = result.issues
     .slice(0, 10)
-    .map((issue) => `| ${issue.severity} | ${issue.title} | ${issue.pageUrl ?? "site"} | ${issue.fixHint} |`)
+    .map(
+      (issue) =>
+        `| ${translateSeverity(issue.severity, locale)} | ${localizeText(issue.title, locale, "issueTitle")} | ${issue.pageUrl ?? t(locale, "scope.site")} | ${localizeText(issue.fixHint, locale, "fixHint")} |`
+    )
     .join("\n");
 
   const pages = result.pages
@@ -904,27 +984,27 @@ export function renderScorecardMarkdown(result: AuditResult): string {
       ? result.recommendations
           .map(
             (recommendation) =>
-              `- **${recommendation.title}**: ${recommendation.rationale} Expected outcome: ${recommendation.expectedOutcome}`
+              `- **${localizeText(recommendation.title, locale, "recommendationTitle")}**: ${localizeText(recommendation.rationale, locale, "rationale")} ${locale === "zh-CN" ? "预期结果" : "Expected outcome"}: ${localizeText(recommendation.expectedOutcome, locale, "expectedOutcome")}`
           )
           .join("\n")
-      : "- none";
+      : `- ${t(locale, "report.noIssues")}`;
 
   const missingCoverage =
     result.summary.missingPageTypes.length > 0
       ? result.summary.missingPageTypes.map((pageType) => `- ${pageType}`).join("\n")
-      : "- none";
+      : `- ${t(locale, "report.noIssues")}`;
 
-  return `# AnswerLens Scorecard\n\n## Overview\n\n${renderSiteOverviewLines(result.site)}\n- Generated: ${result.site.generatedAt}\n- Run ID: ${result.run.id}\n- Overall score: ${result.summary.overallScore}\n- VAVR: ${renderVavr(result.summary.vavr)}\n- Crawled pages: ${result.summary.crawledPages}\n- Discovered URLs: ${result.summary.discoveredUrls}\n\n## Scores\n\n| Bucket | Score | Issues | Errors | Warnings | Info |\n| --- | ---: | ---: | ---: | ---: | ---: |\n${scores}\n\n## Missing coverage\n\n${missingCoverage}\n\n## Top issues\n\n| Severity | Issue | Scope | Fix hint |\n| --- | --- | --- | --- |\n${topIssues}\n\n## Recommendations\n\n${recommendations}\n\n## Page inventory\n\n| Type | URL | Words | JSON-LD | Noindex |\n| --- | --- | ---: | --- | --- |\n${pages}\n`;
+  return `# ${t(locale, "report.scorecard.title")}\n\n## ${locale === "zh-CN" ? "概览" : "Overview"}\n\n${renderSiteOverviewLines(result.site, locale)}\n- ${t(locale, "report.generated")}: ${result.site.generatedAt}\n- ${t(locale, "run.id")}: ${result.run.id}\n- ${t(locale, "report.overallScore")}: ${result.summary.overallScore}\n- ${t(locale, "report.vavr")}: ${renderVavr(result.summary.vavr)}\n- ${locale === "zh-CN" ? "抓取页面数" : "Crawled pages"}: ${result.summary.crawledPages}\n- ${locale === "zh-CN" ? "发现 URL 数" : "Discovered URLs"}: ${result.summary.discoveredUrls}\n\n## ${locale === "zh-CN" ? "分数" : "Scores"}\n\n| ${locale === "zh-CN" ? "分桶" : "Bucket"} | ${locale === "zh-CN" ? "分数" : "Score"} | ${locale === "zh-CN" ? "问题数" : "Issues"} | ${locale === "zh-CN" ? "错误" : "Errors"} | ${locale === "zh-CN" ? "警告" : "Warnings"} | ${locale === "zh-CN" ? "提示" : "Info"} |\n| --- | ---: | ---: | ---: | ---: | ---: |\n${scores}\n\n## ${locale === "zh-CN" ? "缺失覆盖" : "Missing coverage"}\n\n${missingCoverage}\n\n## ${locale === "zh-CN" ? "主要问题" : "Top issues"}\n\n| ${locale === "zh-CN" ? "严重级别" : "Severity"} | ${locale === "zh-CN" ? "问题" : "Issue"} | ${locale === "zh-CN" ? "范围" : "Scope"} | ${locale === "zh-CN" ? "修复提示" : "Fix hint"} |\n| --- | --- | --- | --- |\n${topIssues}\n\n## ${locale === "zh-CN" ? "建议" : "Recommendations"}\n\n${recommendations}\n\n## ${locale === "zh-CN" ? "页面清单" : "Page inventory"}\n\n| ${locale === "zh-CN" ? "类型" : "Type"} | URL | ${locale === "zh-CN" ? "词数" : "Words"} | JSON-LD | Noindex |\n| --- | --- | ---: | --- | --- |\n${pages}\n`;
 }
 
-export function renderScorecardHtml(result: AuditResult): string {
+export function renderScorecardHtml(result: AuditResult, locale: Locale = "en"): string {
   const bucketCards = Object.entries(result.scores)
     .map(
       ([bucket, score]) => `
       <div class="card">
-        <h3>${BUCKET_LABELS[bucket as keyof typeof BUCKET_LABELS]}</h3>
+        <h3>${translateBucket(bucket, locale)}</h3>
         <p class="score">${score.score}</p>
-        <p>${score.issueCount} issues</p>
+        <p>${score.issueCount} ${locale === "zh-CN" ? "个问题" : "issues"}</p>
       </div>`
     )
     .join("");
@@ -934,10 +1014,10 @@ export function renderScorecardHtml(result: AuditResult): string {
     .map(
       (issue) => `
       <tr>
-        <td>${issue.severity}</td>
-        <td>${issue.title}</td>
-        <td>${issue.pageUrl ?? "site"}</td>
-        <td>${issue.fixHint}</td>
+        <td>${translateSeverity(issue.severity, locale)}</td>
+        <td>${escapeHtml(localizeText(issue.title, locale, "issueTitle"))}</td>
+        <td>${issue.pageUrl ?? t(locale, "scope.site")}</td>
+        <td>${escapeHtml(localizeText(issue.fixHint, locale, "fixHint"))}</td>
       </tr>`
     )
     .join("");
@@ -947,21 +1027,21 @@ export function renderScorecardHtml(result: AuditResult): string {
       ? result.recommendations
           .map(
             (recommendation) =>
-              `<li><strong>${recommendation.title}</strong><br />${recommendation.rationale}<br /><em>${recommendation.expectedOutcome}</em></li>`
+              `<li><strong>${escapeHtml(localizeText(recommendation.title, locale, "recommendationTitle"))}</strong><br />${escapeHtml(localizeText(recommendation.rationale, locale, "rationale"))}<br /><em>${escapeHtml(localizeText(recommendation.expectedOutcome, locale, "expectedOutcome"))}</em></li>`
           )
           .join("")
-      : "<li>No recommendations generated.</li>";
+      : `<li>${escapeHtml(t(locale, "report.noRecommendations"))}</li>`;
 
   const missingCoverage =
     result.summary.missingPageTypes.length > 0
-      ? result.summary.missingPageTypes.map((pageType) => `<li>${pageType}</li>`).join("")
-      : "<li>none</li>";
+      ? result.summary.missingPageTypes.map((pageType) => `<li>${escapeHtml(pageType)}</li>`).join("")
+      : `<li>${escapeHtml(t(locale, "report.noIssues"))}</li>`;
 
   return `<!doctype html>
-<html lang="en">
+<html lang="${locale === "zh-CN" ? "zh-CN" : "en"}">
   <head>
     <meta charset="utf-8" />
-    <title>AnswerLens report</title>
+    <title>${escapeHtml(t(locale, "report.scorecard.title"))}</title>
     <style>
       :root {
         color-scheme: light;
@@ -1022,29 +1102,30 @@ export function renderScorecardHtml(result: AuditResult): string {
   <body>
     <main>
       <section class="hero">
-        <p>AnswerLens scorecard</p>
+        <p>${escapeHtml(t(locale, "report.scorecard.title"))}</p>
         <h1>${escapeHtml(siteLabel(result.site))}</h1>
-        <p>Run ID: <strong>${result.run.id}</strong></p>
-        <p>Overall score: <strong>${result.summary.overallScore}</strong> | VAVR: <strong>${renderVavr(result.summary.vavr)}</strong></p>
+        <p>${escapeHtml(t(locale, "run.id"))}: <strong>${result.run.id}</strong></p>
+        <p>${escapeHtml(t(locale, "report.overallScore"))}: <strong>${result.summary.overallScore}</strong> | ${escapeHtml(t(locale, "report.vavr"))}: <strong>${renderVavr(result.summary.vavr)}</strong></p>
         <p>${result.site.generatedAt}</p>
-        ${renderSiteHtmlNotes(result.site)}
+        <p><a href="${locale === "zh-CN" ? "./index.html" : "./index.zh.html"}">${escapeHtml(locale === "zh-CN" ? "English" : "简体中文")}</a></p>
+        ${renderSiteHtmlNotes(result.site, locale)}
       </section>
       <section class="grid">${bucketCards}</section>
       <section class="panel">
-        <h2>Missing coverage</h2>
+        <h2>${locale === "zh-CN" ? "缺失覆盖" : "Missing coverage"}</h2>
         <ul>${missingCoverage}</ul>
       </section>
       <section class="panel" style="margin-top: 20px;">
-        <h2>Top issues</h2>
+        <h2>${locale === "zh-CN" ? "主要问题" : "Top issues"}</h2>
         <table>
           <thead>
-            <tr><th>Severity</th><th>Issue</th><th>Scope</th><th>Fix hint</th></tr>
+            <tr><th>${locale === "zh-CN" ? "严重级别" : "Severity"}</th><th>${locale === "zh-CN" ? "问题" : "Issue"}</th><th>${locale === "zh-CN" ? "范围" : "Scope"}</th><th>${locale === "zh-CN" ? "修复提示" : "Fix hint"}</th></tr>
           </thead>
           <tbody>${issueRows}</tbody>
         </table>
       </section>
       <section class="panel" style="margin-top: 20px;">
-        <h2>Recommendations</h2>
+        <h2>${locale === "zh-CN" ? "建议" : "Recommendations"}</h2>
         <ul>${recommendations}</ul>
       </section>
     </main>
@@ -1052,11 +1133,11 @@ export function renderScorecardHtml(result: AuditResult): string {
 </html>`;
 }
 
-export function renderEvalSummaryMarkdown(result: EvalResult): string {
+export function renderEvalSummaryMarkdown(result: EvalResult, locale: Locale = "en"): string {
   const manualRankSection =
     result.summary.competitivePositionScore === null
       ? ""
-      : `\n\n## Manual rank validation\n\n- Competitive position score: ${result.summary.competitivePositionScore}\n- Rank coverage: ${result.summary.rankCoverageRate}%\n`;
+      : `\n\n## ${locale === "zh-CN" ? "人工排名验证" : "Manual rank validation"}\n\n- ${locale === "zh-CN" ? "竞争位置分数" : "Competitive position score"}: ${result.summary.competitivePositionScore}\n- ${locale === "zh-CN" ? "排名覆盖率" : "Rank coverage"}: ${result.summary.rankCoverageRate}%\n`;
   const repeatedPromptGroups = result.promptGroups.filter((group) => !group.holdout && group.sampleCount > 1);
   const stabilityRows = repeatedPromptGroups
     .map(
@@ -1067,7 +1148,7 @@ export function renderEvalSummaryMarkdown(result: EvalResult): string {
   const stabilitySection =
     repeatedPromptGroups.length === 0
       ? ""
-      : `\n\n## Stability summary\n\n- Repeated prompt groups: ${result.summary.repeatedPromptCount}\n- Stable repeated prompts: ${result.summary.stablePromptRate}%\n- Unstable repeated prompts: ${result.summary.unstablePromptCount}\n\n| Prompt | Category | Samples | Pack | Stable | Consensus | Spread note |\n| --- | --- | ---: | --- | --- | ---: | --- |\n${stabilityRows}\n`;
+      : `\n\n## ${locale === "zh-CN" ? "稳定性摘要" : "Stability summary"}\n\n- ${locale === "zh-CN" ? "重复提示词组数" : "Repeated prompt groups"}: ${result.summary.repeatedPromptCount}\n- ${locale === "zh-CN" ? "稳定的重复提示词" : "Stable repeated prompts"}: ${result.summary.stablePromptRate}%\n- ${locale === "zh-CN" ? "不稳定的重复提示词" : "Unstable repeated prompts"}: ${result.summary.unstablePromptCount}\n\n| ${locale === "zh-CN" ? "提示词" : "Prompt"} | ${locale === "zh-CN" ? "类别" : "Category"} | ${locale === "zh-CN" ? "样本数" : "Samples"} | ${locale === "zh-CN" ? "分组" : "Pack"} | ${locale === "zh-CN" ? "稳定" : "Stable"} | ${locale === "zh-CN" ? "一致率" : "Consensus"} | ${locale === "zh-CN" ? "差异说明" : "Spread note"} |\n| --- | --- | ---: | --- | --- | ---: | --- |\n${stabilityRows}\n`;
 
   const promptRows = result.prompts
     .map(
@@ -1081,10 +1162,10 @@ export function renderEvalSummaryMarkdown(result: EvalResult): string {
       ? result.briefs.map((brief) => `- ${brief.type}: ${brief.title}`).join("\n")
       : "- none";
 
-  return `# AnswerLens Eval Summary\n\n## Overview\n\n${renderSiteOverviewLines(result.site)}\n- Provider: ${result.provider.name}\n- Model: ${result.provider.model}\n- Generated: ${result.generatedAt}\n- Benchmark prompt count: ${result.summary.promptCount}\n- Holdout prompt count: ${result.summary.holdoutPromptCount}\n- Sample count: ${result.summary.sampleCount}\n- Locale: ${result.summary.locale ?? "default"}\n- VAVR: ${result.summary.vavr}\n\n## Metrics\n\n- Mention rate: ${result.summary.mentionRate}\n- Accurate mention rate: ${result.summary.accurateMentionRate}\n- Owned citation rate: ${result.summary.ownedCitationRate}\n- Trusted citation rate: ${result.summary.trustedCitationRate}\n- Recommendation rate: ${result.summary.recommendationRate}\n- Misrepresentation rate: ${result.summary.misrepresentationRate}\n- Competitor exclusion gap: ${result.summary.competitorExclusionGap}\n- Fact coverage score: ${result.summary.factCoverageScore}\n- Accuracy rate: ${result.summary.accuracyRate}${manualRankSection}${stabilitySection}\n\n## Prompt results\n\n| Prompt | Category | Sample | Pack | VAVR | Accurate mention | Citations | Recommended |\n| --- | --- | ---: | --- | ---: | --- | ---: | --- |\n${promptRows}\n\n## Generated briefs\n\n${briefList}\n`;
+  return `# ${t(locale, "report.evalSummary.title")}\n\n## ${locale === "zh-CN" ? "概览" : "Overview"}\n\n${renderSiteOverviewLines(result.site, locale)}\n- ${locale === "zh-CN" ? "提供方" : "Provider"}: ${result.provider.name}\n- ${locale === "zh-CN" ? "模型" : "Model"}: ${result.provider.model}\n- ${t(locale, "report.generated")}: ${result.generatedAt}\n- ${locale === "zh-CN" ? "基准提示词数" : "Benchmark prompt count"}: ${result.summary.promptCount}\n- ${locale === "zh-CN" ? "保留集提示词数" : "Holdout prompt count"}: ${result.summary.holdoutPromptCount}\n- ${locale === "zh-CN" ? "样本数" : "Sample count"}: ${result.summary.sampleCount}\n- Locale: ${result.summary.locale ?? "default"}\n- ${t(locale, "report.vavr")}: ${result.summary.vavr}\n\n## ${t(locale, "report.metrics")}\n\n- ${locale === "zh-CN" ? "提及率" : "Mention rate"}: ${result.summary.mentionRate}\n- ${locale === "zh-CN" ? "准确提及率" : "Accurate mention rate"}: ${result.summary.accurateMentionRate}\n- ${locale === "zh-CN" ? "自有引用率" : "Owned citation rate"}: ${result.summary.ownedCitationRate}\n- ${locale === "zh-CN" ? "可信引用率" : "Trusted citation rate"}: ${result.summary.trustedCitationRate}\n- ${locale === "zh-CN" ? "推荐率" : "Recommendation rate"}: ${result.summary.recommendationRate}\n- ${locale === "zh-CN" ? "误表述率" : "Misrepresentation rate"}: ${result.summary.misrepresentationRate}\n- ${locale === "zh-CN" ? "竞争对手排除缺口" : "Competitor exclusion gap"}: ${result.summary.competitorExclusionGap}\n- ${locale === "zh-CN" ? "事实覆盖分" : "Fact coverage score"}: ${result.summary.factCoverageScore}\n- ${locale === "zh-CN" ? "准确率" : "Accuracy rate"}: ${result.summary.accuracyRate}${manualRankSection}${stabilitySection}\n\n## ${locale === "zh-CN" ? "提示词结果" : "Prompt results"}\n\n| ${locale === "zh-CN" ? "提示词" : "Prompt"} | ${locale === "zh-CN" ? "类别" : "Category"} | ${locale === "zh-CN" ? "样本" : "Sample"} | ${locale === "zh-CN" ? "分组" : "Pack"} | VAVR | ${locale === "zh-CN" ? "准确提及" : "Accurate mention"} | ${locale === "zh-CN" ? "引用数" : "Citations"} | ${locale === "zh-CN" ? "是否推荐" : "Recommended"} |\n| --- | --- | ---: | --- | ---: | --- | ---: | --- |\n${promptRows}\n\n## ${locale === "zh-CN" ? "生成的 brief" : "Generated briefs"}\n\n${briefList}\n`;
 }
 
-export function renderSearchValidationSummaryMarkdown(result: SearchValidationResult, title: string): string {
+export function renderSearchValidationSummaryMarkdown(result: SearchValidationResult, title: string, locale: Locale = "en"): string {
   const keyProofRows = result.keyPageCoverage
     .sort((left, right) => right.impressions - left.impressions || left.pageUrl.localeCompare(right.pageUrl))
     .map(
@@ -1110,10 +1191,10 @@ export function renderSearchValidationSummaryMarkdown(result: SearchValidationRe
 
   return `# ${title}
 
-## Overview
+## ${locale === "zh-CN" ? "概览" : "Overview"}
 
-${renderSiteOverviewLines(result.site)}
-- Source: ${result.source.input}
+${renderSiteOverviewLines(result.site, locale)}
+- ${locale === "zh-CN" ? "来源" : "Source"}: ${result.source.input}
 - Imported pages: ${result.summary.importedPageCount}
 - Matched audit pages: ${result.summary.matchedAuditPageCount}
 - Out-of-scope pages: ${result.summary.outOfScopePageCount}
@@ -1122,19 +1203,19 @@ ${renderSiteOverviewLines(result.site)}
 - Total clicks: ${result.summary.totalClicks}
 - Total impressions: ${result.summary.totalImpressions}
 
-## Key page evidence coverage
+## ${locale === "zh-CN" ? "关键页面证据覆盖" : "Key page evidence coverage"}
 
 | Page type | Page | Evidence | Impressions | Clicks |
 | --- | --- | --- | ---: | ---: |
 ${keyProofRows || "| none | none | no | 0 | 0 |"}
 
-## Top pages by impressions
+## ${locale === "zh-CN" ? "按 impressions 排名的页面" : "Top pages by impressions"}
 
 | Page | Matched type | Impressions | Clicks | Position |
 | --- | --- | ---: | ---: | ---: |
 ${topPageRows || "| none | n/a | 0 | 0 | 0 |"}
 
-## Validation findings
+## ${locale === "zh-CN" ? "验证发现" : "Validation findings"}
 
 | Severity | Finding | Page type | Page | Evidence |
 | --- | --- | --- | --- | --- |
@@ -1142,31 +1223,31 @@ ${findingRows}
 `;
 }
 
-export function renderSearchConsoleSummaryMarkdown(result: SearchValidationResult): string {
-  return renderSearchValidationSummaryMarkdown(result, "AnswerLens Search Console Summary");
+export function renderSearchConsoleSummaryMarkdown(result: SearchValidationResult, locale: Locale = "en"): string {
+  return renderSearchValidationSummaryMarkdown(result, locale === "zh-CN" ? "AnswerLens Search Console 摘要" : "AnswerLens Search Console Summary", locale);
 }
 
-export function renderBingSummaryMarkdown(result: SearchValidationResult): string {
-  return renderSearchValidationSummaryMarkdown(result, "AnswerLens Bing Webmaster Summary");
+export function renderBingSummaryMarkdown(result: SearchValidationResult, locale: Locale = "en"): string {
+  return renderSearchValidationSummaryMarkdown(result, locale === "zh-CN" ? "AnswerLens Bing Webmaster 摘要" : "AnswerLens Bing Webmaster Summary", locale);
 }
 
-export function renderIndexNowSummaryMarkdown(result: IndexNowHelperResult): string {
+export function renderIndexNowSummaryMarkdown(result: IndexNowHelperResult, locale: Locale = "en"): string {
   const candidateRows = result.candidates
     .map((candidate) => `| ${candidate.pageType} | ${candidate.url} | ${escapeTableCell(candidate.reason)} |`)
     .join("\n");
 
-  return `# AnswerLens IndexNow Helper Summary
+  return `# ${locale === "zh-CN" ? "AnswerLens IndexNow 辅助摘要" : "AnswerLens IndexNow Helper Summary"}
 
-## Overview
+## ${locale === "zh-CN" ? "概览" : "Overview"}
 
-${renderSiteOverviewLines(result.site)}
-- Generated: ${result.generatedAt}
+${renderSiteOverviewLines(result.site, locale)}
+- ${t(locale, "report.generated")}: ${result.generatedAt}
 - Host: ${result.summary.host}
 - Endpoint: ${result.summary.endpoint}
 - Candidate URLs: ${result.summary.candidateCount}
 - Key page candidates: ${result.summary.keyPageCandidateCount}
 
-## Candidate URLs
+## ${locale === "zh-CN" ? "候选 URL" : "Candidate URLs"}
 
 | Page type | URL | Reason |
 | --- | --- | --- |
@@ -1174,9 +1255,9 @@ ${candidateRows || "| none | none | none |"}
 `;
 }
 
-export function renderEvalDiffMarkdown(current: EvalResult, previous: EvalResult | null): string {
+export function renderEvalDiffMarkdown(current: EvalResult, previous: EvalResult | null, locale: Locale = "en"): string {
   if (!previous) {
-    return `# AnswerLens Before/After Diff\n\nNo previous eval-results.json was found in this output directory, so this run becomes the baseline.\n`;
+    return `# ${locale === "zh-CN" ? "AnswerLens 前后对比" : "AnswerLens Before/After Diff"}\n\n${locale === "zh-CN" ? "当前输出目录中没有找到上一份 eval-results.json，因此本次运行将成为基线。" : "No previous eval-results.json was found in this output directory, so this run becomes the baseline."}\n`;
   }
 
   const rows = summarizeEvalDiff(current, previous)
@@ -1186,7 +1267,7 @@ export function renderEvalDiffMarkdown(current: EvalResult, previous: EvalResult
     )
     .join("\n");
 
-  return `# AnswerLens Before/After Diff\n\n| Metric | Before | After | Delta |\n| --- | ---: | ---: | ---: |\n${rows}\n`;
+  return `# ${locale === "zh-CN" ? "AnswerLens 前后对比" : "AnswerLens Before/After Diff"}\n\n| ${locale === "zh-CN" ? "指标" : "Metric"} | ${locale === "zh-CN" ? "之前" : "Before"} | ${locale === "zh-CN" ? "之后" : "After"} | Delta |\n| --- | ---: | ---: | ---: |\n${rows}\n`;
 }
 
 export function renderBriefMarkdown(brief: ContentBrief): string {
@@ -1210,9 +1291,12 @@ export async function writeAuditOutputs(outDir: string, result: AuditResult): Pr
   const shareSummary = buildAuditShareSummary(result);
   await writeJson(path.join(outDir, "site-audit.json"), result);
   await writeJson(path.join(outDir, "issues.json"), result.issues);
-  await writeFile(path.join(outDir, "scorecard.md"), renderScorecardMarkdown(result), "utf8");
-  await writeFile(path.join(outDir, "recommendations.md"), renderRecommendationsMarkdown(result), "utf8");
-  await writeFile(path.join(outDir, "index.html"), renderScorecardHtml(result), "utf8");
+  await writeFile(path.join(outDir, "scorecard.md"), renderScorecardMarkdown(result, "en"), "utf8");
+  await writeFile(path.join(outDir, "scorecard.zh.md"), renderScorecardMarkdown(result, "zh-CN"), "utf8");
+  await writeFile(path.join(outDir, "recommendations.md"), renderRecommendationsMarkdown(result, "en"), "utf8");
+  await writeFile(path.join(outDir, "recommendations.zh.md"), renderRecommendationsMarkdown(result, "zh-CN"), "utf8");
+  await writeFile(path.join(outDir, "index.html"), renderScorecardHtml(result, "en"), "utf8");
+  await writeFile(path.join(outDir, "index.zh.html"), renderScorecardHtml(result, "zh-CN"), "utf8");
   await writeJson(path.join(outDir, "normalized-pages.json"), result.pages);
   await writeFile(path.join(outDir, "competitor-diff.md"), renderCompetitorDiffMarkdown(result), "utf8");
   await writeShareOutputs(outDir, shareSummary);
@@ -1224,11 +1308,14 @@ export async function writeEvalOutputs(outDir: string, result: EvalResult, previ
   const previousShareSummary = await readShareSummary(outDir);
   const shareSummary = buildEvalShareSummary(result, previousShareSummary);
   await writeJson(path.join(outDir, "eval-results.json"), result);
-  await writeFile(path.join(outDir, "eval-summary.md"), renderEvalSummaryMarkdown(result), "utf8");
+  await writeFile(path.join(outDir, "eval-summary.md"), renderEvalSummaryMarkdown(result, "en"), "utf8");
+  await writeFile(path.join(outDir, "eval-summary.zh.md"), renderEvalSummaryMarkdown(result, "zh-CN"), "utf8");
   await writeJson(path.join(outDir, "eval-summary.json"), buildEvalSummaryJson(result));
-  await writeFile(path.join(outDir, "before-after-diff.md"), renderEvalDiffMarkdown(result, previous), "utf8");
+  await writeFile(path.join(outDir, "before-after-diff.md"), renderEvalDiffMarkdown(result, previous, "en"), "utf8");
+  await writeFile(path.join(outDir, "before-after-diff.zh.md"), renderEvalDiffMarkdown(result, previous, "zh-CN"), "utf8");
   await writeJson(path.join(outDir, "citation-gap-matrix.json"), buildCitationGapMatrix(result));
-  await writeFile(path.join(outDir, "citation-gap-matrix.md"), renderCitationGapMatrixMarkdown(result), "utf8");
+  await writeFile(path.join(outDir, "citation-gap-matrix.md"), renderCitationGapMatrixMarkdown(result, "en"), "utf8");
+  await writeFile(path.join(outDir, "citation-gap-matrix.zh.md"), renderCitationGapMatrixMarkdown(result, "zh-CN"), "utf8");
   await writeShareOutputs(outDir, shareSummary);
   await writeJson(path.join(outDir, "run.json"), buildEvalRunManifest(result));
   await writeBriefOutputs(outDir, result.briefs);
@@ -1242,7 +1329,8 @@ export async function writeValidationOutputs(
   await ensureDir(outDir);
   const shareSummary = buildValidationShareSummary(audit, result);
   await writeJson(path.join(outDir, "search-console-summary.json"), buildSearchValidationSummaryJson(result));
-  await writeFile(path.join(outDir, "search-console-summary.md"), renderSearchConsoleSummaryMarkdown(result), "utf8");
+  await writeFile(path.join(outDir, "search-console-summary.md"), renderSearchConsoleSummaryMarkdown(result, "en"), "utf8");
+  await writeFile(path.join(outDir, "search-console-summary.zh.md"), renderSearchConsoleSummaryMarkdown(result, "zh-CN"), "utf8");
   await writeJson(path.join(outDir, "search-console-pages.json"), result.pages);
   await writeShareOutputs(outDir, shareSummary);
   await writeJson(path.join(outDir, "run.json"), buildValidationRunManifest(audit, result));
@@ -1260,10 +1348,12 @@ export async function writeBingIndexNowOutputs(
     indexNowCandidateCount: indexNow.summary.candidateCount
   });
   await writeJson(path.join(outDir, "bing-summary.json"), buildSearchValidationSummaryJson(result));
-  await writeFile(path.join(outDir, "bing-summary.md"), renderBingSummaryMarkdown(result), "utf8");
+  await writeFile(path.join(outDir, "bing-summary.md"), renderBingSummaryMarkdown(result, "en"), "utf8");
+  await writeFile(path.join(outDir, "bing-summary.zh.md"), renderBingSummaryMarkdown(result, "zh-CN"), "utf8");
   await writeJson(path.join(outDir, "bing-pages.json"), result.pages);
   await writeJson(path.join(outDir, "indexnow-summary.json"), buildIndexNowSummaryJson(indexNow));
-  await writeFile(path.join(outDir, "indexnow-summary.md"), renderIndexNowSummaryMarkdown(indexNow), "utf8");
+  await writeFile(path.join(outDir, "indexnow-summary.md"), renderIndexNowSummaryMarkdown(indexNow, "en"), "utf8");
+  await writeFile(path.join(outDir, "indexnow-summary.zh.md"), renderIndexNowSummaryMarkdown(indexNow, "zh-CN"), "utf8");
   await writeJson(path.join(outDir, "indexnow-candidates.json"), indexNow.candidates);
   await writeShareOutputs(outDir, shareSummary);
   await writeJson(path.join(outDir, "run.json"), buildBingHelperRunManifest(audit, result, indexNow));

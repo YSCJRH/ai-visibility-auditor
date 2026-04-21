@@ -117,6 +117,33 @@
   backdrop-filter: blur(var(--panel-blur));
 }
 
+.topbarActions {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.localePicker {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.localeLabel {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.localeSelect {
+  min-width: 8rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(0, 255, 255, 0.22);
+  background: rgba(11, 10, 28, 0.84);
+  color: var(--text-strong);
+  font: inherit;
+}
+
 .topbarText {
   display: grid;
   gap: 0.35rem;
@@ -159,6 +186,11 @@
 
 @media (max-width: 720px) {
   .topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topbarActions {
     flex-direction: column;
     align-items: stretch;
   }

@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import ReactMarkdown from "react-markdown";
+import type { Locale } from "../shared/i18n.ts";
 import type { ArtifactEntry } from "@answerlens/contracts";
+import ReactMarkdown from "react-markdown";
 import { artifactRawUrl, getArtifactContent } from "../lib/api";
 import { artifactTone, downloadTextFile, openTextInNewTab } from "../lib/format";
+import { useLocale } from "../lib/locale";
 import { StatusBadge } from "./StatusBadge";
 import styles from "./ArtifactViewer.module.css";
 
@@ -14,18 +16,37 @@ type ArtifactViewerProps = {
   artifacts: ArtifactEntry[];
 };
 
+function preferredArtifactName(name: string, locale: Locale): string {
+  if (locale === "zh-CN" && name.endsWith(".md") && !name.endsWith(".zh.md")) {
+    return name.replace(/\.md$/, ".zh.md");
+  }
+  if (locale === "zh-CN" && name === "index.html") {
+    return "index.zh.html";
+  }
+  return name;
+}
+
 export function ArtifactViewer({ runId, artifacts }: ArtifactViewerProps) {
-  const [selectedArtifactName, setSelectedArtifactName] = useState(artifacts[0]?.name ?? "");
+  const { locale, t } = useLocale();
+  const visibleArtifacts = useMemo(
+    () => artifacts.filter((artifact) => !artifact.name.endsWith(".zh.md") && artifact.name !== "index.zh.html"),
+    [artifacts]
+  );
+  const [selectedArtifactName, setSelectedArtifactName] = useState(preferredArtifactName(visibleArtifacts[0]?.name ?? "", locale));
   const selectedArtifact = useMemo(
     () => artifacts.find((artifact) => artifact.name === selectedArtifactName) ?? artifacts[0] ?? null,
     [artifacts, selectedArtifactName]
   );
 
   useEffect(() => {
-    if (!selectedArtifact && artifacts[0]) {
-      setSelectedArtifactName(artifacts[0].name);
+    if (!visibleArtifacts[0]) {
+      return;
     }
-  }, [artifacts, selectedArtifact]);
+    const preferred = preferredArtifactName(visibleArtifacts[0].name, locale);
+    if (!selectedArtifactName) {
+      setSelectedArtifactName(preferred);
+    }
+  }, [locale, selectedArtifactName, visibleArtifacts]);
 
   const artifactQuery = useQuery({
     queryKey: ["artifact", runId, selectedArtifact?.name],
@@ -49,30 +70,30 @@ export function ArtifactViewer({ runId, artifacts }: ArtifactViewerProps) {
     <section className={styles.viewer}>
       <div className={styles.toolbar}>
         <div className={styles.tabs} role="tablist" aria-label="Artifacts">
-          {artifacts.map((artifact) => (
-            <button
-              key={artifact.name}
-              type="button"
-              role="tab"
-              className={`${styles.tab} ${artifact.name === selectedArtifact.name ? styles.tabActive : ""}`}
-              onClick={() => setSelectedArtifactName(artifact.name)}
-            >
-              {artifact.name}
-            </button>
-          ))}
+          {visibleArtifacts.map((artifact) => {
+            const effectiveName = preferredArtifactName(artifact.name, locale);
+            return (
+              <button
+                key={artifact.name}
+                type="button"
+                role="tab"
+                className={`${styles.tab} ${effectiveName === selectedArtifact.name ? styles.tabActive : ""}`}
+                onClick={() => setSelectedArtifactName(effectiveName)}
+              >
+                {artifact.name}
+              </button>
+            );
+          })}
         </div>
 
         <div className={styles.actions}>
-          <StatusBadge
-            label={selectedArtifact.contentType}
-            tone={artifactTone(selectedArtifact, PRIMARY_ARTIFACTS)}
-          />
+          <StatusBadge label={selectedArtifact.contentType} tone={artifactTone(selectedArtifact, PRIMARY_ARTIFACTS)} />
           <a className={styles.action} href={rawUrl} target="_blank" rel="noreferrer">
-            Open raw
+            {t("common.openRaw")}
           </a>
           {selectedArtifact.contentType === "html" ? (
             <a className={styles.action} href={rawUrl} download={selectedArtifact.name}>
-              Download
+              {t("common.download")}
             </a>
           ) : (
             <>
@@ -86,7 +107,7 @@ export function ArtifactViewer({ runId, artifacts }: ArtifactViewerProps) {
                   downloadTextFile(selectedArtifact.name, artifactQuery.data, contentType);
                 }}
               >
-                Download
+                {t("common.download")}
               </button>
               <button
                 className={styles.action}
@@ -98,7 +119,7 @@ export function ArtifactViewer({ runId, artifacts }: ArtifactViewerProps) {
                   openTextInNewTab(artifactQuery.data, contentType);
                 }}
               >
-                Open preview
+                {t("common.openPreview")}
               </button>
             </>
           )}
@@ -110,8 +131,8 @@ export function ArtifactViewer({ runId, artifacts }: ArtifactViewerProps) {
           <iframe className={styles.frame} title={selectedArtifact.name} src={rawUrl} />
         ) : (
           <div className={styles.content}>
-            {artifactQuery.isLoading ? <p>Loading artifact…</p> : null}
-            {artifactQuery.isError ? <p>Unable to load {selectedArtifact.name}.</p> : null}
+            {artifactQuery.isLoading ? <p>{t("common.loadingArtifact")}</p> : null}
+            {artifactQuery.isError ? <p>{t("common.unableToLoadArtifact", { name: selectedArtifact.name })}</p> : null}
             {artifactQuery.data && selectedArtifact.contentType === "markdown" ? (
               <div className={styles.markdown}>
                 <ReactMarkdown>{artifactQuery.data}</ReactMarkdown>
