@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "types": ["vite/client"]
+  },
+  "include": ["src"],
+  "exclude": [
+    "src/routes/**/*",
+    "src/app/AppShell.tsx",
+    "src/components/RunLauncher.tsx",
+    "src/components/ArtifactViewer.tsx",
+    "src/lib/api.ts"
+  ],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

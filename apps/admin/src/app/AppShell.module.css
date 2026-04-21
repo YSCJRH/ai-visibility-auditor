@@ -1,0 +1,74 @@
+.shell {
+  position: relative;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--canvas);
+  overflow: hidden;
+}
+
+.mainColumn {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+}
+
+.content {
+  min-width: 0;
+  padding: 0 28px 28px;
+}
+
+.backgroundOrb {
+  position: absolute;
+  top: -120px;
+  right: -100px;
+  width: 420px;
+  height: 420px;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 153, 0, 0.24),
+    rgba(255, 0, 255, 0.24)
+  );
+  filter: blur(72px);
+  pointer-events: none;
+}
+
+.gridFloor {
+  position: absolute;
+  inset: auto -10% -30%;
+  height: 65%;
+  background-image:
+    linear-gradient(transparent 95%, rgba(255, 0, 255, var(--grid-opacity)) 95%),
+    linear-gradient(90deg, transparent 95%, rgba(255, 0, 255, var(--grid-opacity)) 95%);
+  background-size: 48px 48px;
+  transform: perspective(540px) rotateX(76deg) scale(1.7);
+  mask-image: linear-gradient(to bottom, transparent, black 36%, black);
+  pointer-events: none;
+}
+
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      rgba(255, 255, 255, 0) 50%,
+      rgba(0, 0, 0, var(--scanline-opacity)) 50%
+    );
+  background-size: 100% 4px;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+@media (max-width: 960px) {
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .content {
+    padding: 0 16px 20px;
+  }
+}
