@@ -26,15 +26,16 @@ jobs:
       HAS_NPM_TRUSTED_PUBLISH: ${{ vars.ANSWERLENS_ENABLE_NPM_TRUSTED_PUBLISH == 'true' }}
     steps:
       - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.33.0
-          run_install: false
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: pnpm
+          package-manager-cache: false
           registry-url: https://registry.npmjs.org
+      - name: Prepare pnpm via corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.33.0 --activate
+          pnpm --version
       - run: pnpm install --frozen-lockfile
       - name: Resolve release tag
         shell: bash
