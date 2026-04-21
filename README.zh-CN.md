@@ -19,14 +19,30 @@ AnswerLens 是一个 CLI-first、GitHub-native 的 AI 可见性审计器，面�
 
 ## 从这里开始
 
-推荐顺序：
+一条路径，四个步骤：
 
-1. [打开在线演示报告](https://yscjrh.github.io/ai-visibility-auditor/zh/examples/static-good/index.html)：最快理解输出、artifact 流和为什么它适合在 GitHub 里审阅。
-2. [运行 60 秒 fixture 演示](README.md#run-the-60-second-fixture-demo)：在本地复现同一组 artifacts。
-3. [运行 5 分钟真实站点审计](docs/zh/quickstart.md)：先在自己的公开站点上跑通同一套配置，再接 CI。
-4. [添加 GitHub Action](docs/zh/github-action.md)：把同一套 artifact-first 工作流搬进 PR、artifact 上传和 `GITHUB_STEP_SUMMARY`。
+1. [打开在线演示报告](https://yscjrh.github.io/ai-visibility-auditor/zh/examples/static-good/index.html)
+   最快理解输出、artifact 流，以及为什么这套工作流适合在 GitHub 中审阅。
+2. [运行 60 秒 fixture 演示](README.md#run-the-60-second-fixture-demo)
+   在本地复现同一组 artifacts，让这条路径从“看懂”变成“亲手跑通”。
+3. [运行 5 分钟真实站点审计](docs/zh/quickstart.md)
+   先把同一套配置跑到自己的公开站点上，再去接 CI。
+4. [添加 GitHub Action](docs/zh/github-action.md)
+   把同一套 artifact-first 工作流搬进 PR、artifact 上传和 `GITHUB_STEP_SUMMARY`。
 
-每一步都先按这个顺序看 artifacts：`share-summary.md`，然后 `scorecard.md`，最后 `recommendations.md`。
+主入口：
+- 在线演示报告
+
+辅助入口：
+- 60 秒 fixture 演示
+- GitHub Action 文档，但前提是一轮本地运行已经足够可审阅
+
+桥接步骤：
+- 在 fixture 演示和 CI 接入之间，先跑一轮真实站点 quickstart
+
+每一步都保持同样的 artifact 顺序：`share-summary.md`，然后 `scorecard.md`，最后 `recommendations.md`。
+
+如果你一开始就知道自己要接 CI，Action 文档当然仍然公开可用；但最清晰的首次路径仍然是 demo -> fixture -> real-site -> Action。
 
 ## 你会得到什么
 

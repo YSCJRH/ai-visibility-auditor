@@ -51,6 +51,8 @@ export function RunDetailPage() {
       : typeof detail.shareSummary?.metrics.keyPageCount === "number"
         ? detail.shareSummary.metrics.keyPageCount
         : null;
+  const topIssue = detail.shareSummary?.topIssues[0] ?? detail.auditResult?.issues[0] ?? null;
+  const topRecommendation = detail.shareSummary?.topRecommendations[0] ?? detail.auditResult?.recommendations[0] ?? null;
 
   return (
     <div className={pageStyles.page}>
@@ -81,6 +83,38 @@ export function RunDetailPage() {
 
       <div className={pageStyles.grid}>
         <div className={pageStyles.mainColumn}>
+          <section className={pageStyles.panel}>
+            <p className={pageStyles.panelEyebrow}>{t("admin.detail.signalEyebrow")}</p>
+            <h2 className={pageStyles.panelTitle}>{t("admin.detail.signalTitle")}</h2>
+            <p className={pageStyles.panelBody}>{t("admin.detail.signalBody")}</p>
+            <div className={pageStyles.metaList}>
+              <div className={pageStyles.metaRow}>
+                <span className={pageStyles.metaLabel}>{t("admin.detail.topIssue")}</span>
+                <span className={pageStyles.metaValue}>
+                  {topIssue ? `${topIssue.title}${"severity" in topIssue ? ` (${topIssue.severity})` : ""} - ${topIssue.fixHint}` : t("admin.detail.none")}
+                </span>
+              </div>
+              <div className={pageStyles.metaRow}>
+                <span className={pageStyles.metaLabel}>{t("admin.detail.topFix")}</span>
+                <span className={pageStyles.metaValue}>
+                  {topRecommendation ? `${topRecommendation.title} - ${topRecommendation.expectedOutcome}` : t("admin.detail.none")}
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <section className={pageStyles.panel}>
+            <p className={pageStyles.panelEyebrow}>{t("admin.detail.nextEyebrow")}</p>
+            <h2 className={pageStyles.panelTitle}>{t("admin.detail.nextTitle")}</h2>
+            <p className={pageStyles.panelBody}>{t("admin.detail.nextBody")}</p>
+            <ol className={pageStyles.orderedList}>
+              <li>{t("admin.detail.nextStep1")}</li>
+              <li>{t("admin.detail.nextStep2")}</li>
+              <li>{t("admin.detail.nextStep3")}</li>
+              <li>{t("admin.detail.nextStep4")}</li>
+            </ol>
+          </section>
+
           <section className={pageStyles.panel}>
             <p className={pageStyles.panelEyebrow}>{t("admin.detail.workspaceEyebrow")}</p>
             <h2 className={pageStyles.panelTitle}>{t("admin.detail.workspaceTitle")}</h2>

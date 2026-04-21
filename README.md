@@ -19,16 +19,30 @@ Open-source. CLI-first. Report-driven. No consumer UI scraping. No ranking promi
 
 ## Start here
 
-Recommended path:
+One path, four steps:
 
-1. [Open the live demo report](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html): the fastest way to understand the output, the artifact flow, and why the project is reviewable in GitHub. If you are browsing a copy or fork without Pages enabled, use the [repo walkthrough fallback](docs/demo-report.md).
-2. [Run the 60-second fixture demo](#run-the-60-second-fixture-demo): reproduce the same artifact set locally.
-3. [Run a 5-minute real-site audit](docs/quickstart.md): use the same config layout on your own public site before you wire CI.
-4. [Add the GitHub Action](docs/github-action.md): move the same artifact-backed workflow into pull requests, artifact uploads, and `GITHUB_STEP_SUMMARY`.
+1. [Open the live demo report](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html)
+   The fastest way to understand the output, artifact flow, and why the project is reviewable in GitHub.
+   If you are browsing a fork or copy without Pages enabled, use the [repo walkthrough fallback](docs/demo-report.md).
+2. [Run the 60-second fixture demo](#run-the-60-second-fixture-demo)
+   Reproduce the same artifact set locally so the workflow feels concrete.
+3. [Run a 5-minute real-site audit](docs/quickstart.md)
+   Bridge from the demo into your own public site before you wire CI.
+4. [Add the GitHub Action](docs/github-action.md)
+   Move the same artifact-backed workflow into pull requests, artifact uploads, and `GITHUB_STEP_SUMMARY`.
 
-If you arrive here already knowing you want CI, the Action docs remain public, but the clearest first run is still demo -> fixture -> real-site -> Action.
+Primary entry: the live demo report.
 
-Across every step, open artifacts in the same order: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
+Secondary entries:
+- the 60-second fixture demo
+- the GitHub Action docs, once one local run already feels reviewable
+
+Bridge step:
+- use the real-site quickstart between the fixture demo and CI adoption
+
+Across every step, keep the artifact order fixed: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
+
+If you already know you want CI, the Action docs remain public, but the clearest first run is still demo -> fixture -> real-site -> Action.
 
 ## What you get
 
