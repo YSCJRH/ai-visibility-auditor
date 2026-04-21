@@ -21,6 +21,5 @@
     "src/components/RunLauncher.tsx",
     "src/components/ArtifactViewer.tsx",
     "src/lib/api.ts"
-  ],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  ]
 }

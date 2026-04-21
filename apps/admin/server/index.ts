@@ -2,6 +2,18 @@ import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  LOCALE_COOKIE_KEY,
+  type Locale,
+  formatDate,
+  normalizeLocale,
+  setLocaleCookieHeader,
+  translateFixHint,
+  translateIssueTitle,
+  translateRunKind,
+  translateSeverity,
+  translateStatus
+} from "../src/shared/i18n.ts";
+import {
   createAuditRun,
   createEvalRun,
   getRunDetail,
@@ -39,17 +51,40 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
-function formatDateTime(value: string): string {
-  return new Intl.DateTimeFormat("en", {
+function formatDateTime(value: string, locale: Locale): string {
+  return formatDate(value, locale, {
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit"
-  }).format(new Date(value));
+  });
 }
 
 function formatScore(value: number | null): string {
   return value === null ? "Pending" : `${value}/100`;
+}
+
+function parseCookie(header: string | undefined, key: string): string | null {
+  if (!header) {
+    return null;
+  }
+
+  const parts = header.split(";").map((segment) => segment.trim());
+  for (const part of parts) {
+    const [name, ...rest] = part.split("=");
+    if (name === key) {
+      return decodeURIComponent(rest.join("="));
+    }
+  }
+
+  return null;
+}
+
+function resolveReviewLocale(request: express.Request): Locale {
+  const query = typeof request.query.lang === "string" ? request.query.lang : null;
+  const cookie = parseCookie(request.headers.cookie, LOCALE_COOKIE_KEY);
+  const acceptLanguage = request.headers["accept-language"];
+  return normalizeLocale(query ?? cookie ?? acceptLanguage ?? "en");
 }
 
 function renderReviewShell(title: string, body: string): string {
@@ -347,8 +382,17 @@ function renderReviewShell(title: string, body: string): string {
 </html>`;
 }
 
+function reviewUrl(pathname: string, locale: Locale): string {
+  return `${pathname}?lang=${locale === "zh-CN" ? "zh" : "en"}`;
+}
+
+function renderReviewLocaleSwitch(pathname: string, locale: Locale): string {
+  return `<div style="display:flex;gap:8px;align-items:center;color:var(--text-muted);font-size:0.85rem;"><span>${locale === "zh-CN" ? "语言" : "Language"}:</span><a href="${escapeHtml(reviewUrl(pathname, "en"))}">English</a><span>/</span><a href="${escapeHtml(reviewUrl(pathname, "zh-CN"))}">简体中文</a></div>`;
+}
+
 function renderRunsReviewPage(
-  runs: Awaited<ReturnType<typeof listRuns>>
+  runs: Awaited<ReturnType<typeof listRuns>>,
+  locale: Locale
 ): string {
   const averageScore =
     runs.length > 0
@@ -366,81 +410,84 @@ function renderRunsReviewPage(
           <strong>${escapeHtml(run.siteLabel)}</strong>
           <div class="subtle">${escapeHtml(run.siteInput)}</div>
         </td>
-        <td>${escapeHtml(run.kind)}</td>
+        <td>${escapeHtml(translateRunKind(run.kind, locale))}</td>
         <td>${escapeHtml(formatScore(run.overallScore))}</td>
-        <td><span class="status ${run.status === "completed" ? "success" : "info"}">${escapeHtml(run.status)}</span></td>
-        <td>${escapeHtml(formatDateTime(run.generatedAt))}</td>
+        <td><span class="status ${run.status === "completed" ? "success" : "info"}">${escapeHtml(translateStatus(run.status, locale))}</span></td>
+        <td>${escapeHtml(formatDateTime(run.generatedAt, locale))}</td>
       </tr>`
     )
     .join("");
 
   return renderReviewShell(
-    "AnswerLens Admin Review - Runs",
+    locale === "zh-CN" ? "AnswerLens Admin Review - 运行" : "AnswerLens Admin Review - Runs",
     `<div class="shell">
       <aside class="sidebar">
         <div>
-          <div class="brand-label">Internal control console</div>
+          <div class="brand-label">${locale === "zh-CN" ? "内部控制台" : "Internal control console"}</div>
           <h1 class="brand-title">AnswerLens Admin Review</h1>
-          <p class="brand-copy">A server-rendered review surface over the same local runs and presets that power the internal admin console.</p>
+          <p class="brand-copy">${locale === "zh-CN" ? "围绕同一批本地 runs 与 presets 的服务端审阅面，可用于快速审核内部控制台效果。" : "A server-rendered review surface over the same local runs and presets that power the internal admin console."}</p>
         </div>
         <nav class="nav">
-          <a class="active" href="/review/runs">Runs</a>
+          <a class="active" href="${escapeHtml(reviewUrl("/review/runs", locale))}">${locale === "zh-CN" ? "运行" : "Runs"}</a>
         </nav>
         <section class="sidebar-card">
-          <p class="sidebar-eyebrow">Review order</p>
-          <p class="sidebar-copy">Open <code>share-summary.md</code> first, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>
+          <p class="sidebar-eyebrow">${locale === "zh-CN" ? "审阅顺序" : "Review order"}</p>
+          <p class="sidebar-copy">${locale === "zh-CN" ? "先打开" : "Open"} <code>share-summary.md</code> ${locale === "zh-CN" ? "，再看" : "first, then"} <code>scorecard.md</code> ${locale === "zh-CN" ? "，最后看" : "then"} <code>recommendations.md</code>.</p>
         </section>
       </aside>
       <main class="content">
         <section class="topbar">
           <div>
-            <p class="topbar-title">CI for AI discoverability</p>
-            <p class="topbar-copy">This page is server-rendered so you can review the admin effect immediately, even while the SPA line is still being hardened.</p>
+            <p class="topbar-title">${locale === "zh-CN" ? "面向 AI 可发现性的 CI" : "CI for AI discoverability"}</p>
+            <p class="topbar-copy">${locale === "zh-CN" ? "该页面为服务端渲染，因此即使 SPA 仍在继续硬化，你也能立刻审阅后台效果。" : "This page is server-rendered so you can review the admin effect immediately, even while the SPA line is still being hardened."}</p>
           </div>
-          <a class="button" href="/runs">Open SPA path</a>
+          <div style="display:grid;gap:0.75rem;justify-items:end;">
+            ${renderReviewLocaleSwitch("/review/runs", locale)}
+            <a class="button" href="/runs">${locale === "zh-CN" ? "打开 SPA 路径" : "Open SPA path"}</a>
+          </div>
         </section>
         <div class="page">
           <header>
-            <p class="eyebrow">Runs workspace</p>
-            <h1 class="title">Review the latest file-backed runs</h1>
-            <p class="description">This review surface reads the real local run workspace. Use it to inspect score movement, recent runs, and the artifact-first flow before the richer SPA shell is finalized.</p>
+            <p class="eyebrow">${locale === "zh-CN" ? "运行工作区" : "Runs workspace"}</p>
+            <h1 class="title">${locale === "zh-CN" ? "查看最新的文件型运行结果" : "Review the latest file-backed runs"}</h1>
+            <p class="description">${locale === "zh-CN" ? "这个审阅面直接读取真实的本地 run 工作区。你可以在更完整的 SPA 壳层完善前，先检查分数变化、最近运行和以产物为先的审阅流。" : "This review surface reads the real local run workspace. Use it to inspect score movement, recent runs, and the artifact-first flow before the richer SPA shell is finalized."}</p>
           </header>
           <section class="metric-grid">
             <div class="panel metric">
-              <div class="metric-label">Total runs</div>
+              <div class="metric-label">${locale === "zh-CN" ? "运行总数" : "Total runs"}</div>
               <div class="metric-value">${runs.length}</div>
-              <div class="metric-helper">Artifacts currently readable from <code>runs/*</code>.</div>
+              <div class="metric-helper">${locale === "zh-CN" ? "当前可从" : "Artifacts currently readable from"} <code>runs/*</code>${locale === "zh-CN" ? " 读取的产物。" : "."}</div>
             </div>
             <div class="panel metric">
-              <div class="metric-label">Average score</div>
+              <div class="metric-label">${locale === "zh-CN" ? "平均分" : "Average score"}</div>
               <div class="metric-value">${escapeHtml(formatScore(averageScore))}</div>
-              <div class="metric-helper">A quick pulse across the current local history.</div>
+              <div class="metric-helper">${locale === "zh-CN" ? "快速感知当前本地历史结果的状态。" : "A quick pulse across the current local history."}</div>
             </div>
             <div class="panel metric">
-              <div class="metric-label">Latest run</div>
+              <div class="metric-label">${locale === "zh-CN" ? "最新运行" : "Latest run"}</div>
               <div class="metric-value">${escapeHtml(formatScore(latestRun?.overallScore ?? null))}</div>
-              <div class="metric-helper">${escapeHtml(latestRun?.siteLabel ?? "No run available yet.")}</div>
+              <div class="metric-helper">${escapeHtml(latestRun?.siteLabel ?? (locale === "zh-CN" ? "还没有可用运行。" : "No run available yet."))}</div>
             </div>
             <div class="panel metric">
-              <div class="metric-label">Run mix</div>
+              <div class="metric-label">${locale === "zh-CN" ? "运行构成" : "Run mix"}</div>
               <div class="metric-value">${auditCount}:${evalCount}</div>
-              <div class="metric-helper">Audit to eval count in the local workspace.</div>
+              <div class="metric-helper">${locale === "zh-CN" ? "本地工作区中的 audit 与 eval 数量比。" : "Audit to eval count in the local workspace."}</div>
             </div>
           </section>
           <section class="panel">
-            <p class="eyebrow">Runs table</p>
-            <h2 class="card-title">Current local runs</h2>
-            <p class="card-copy">Each row links to a richer detail view with artifact links and top audit findings.</p>
+            <p class="eyebrow">${locale === "zh-CN" ? "运行表" : "Runs table"}</p>
+            <h2 class="card-title">${locale === "zh-CN" ? "当前本地运行" : "Current local runs"}</h2>
+            <p class="card-copy">${locale === "zh-CN" ? "每一行都会链接到更丰富的详情页，包含产物入口和主要审计发现。" : "Each row links to a richer detail view with artifact links and top audit findings."}</p>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Run</th>
-                    <th>Site</th>
-                    <th>Kind</th>
-                    <th>Score</th>
-                    <th>Status</th>
-                    <th>Generated</th>
+                    <th>${locale === "zh-CN" ? "运行" : "Run"}</th>
+                    <th>${locale === "zh-CN" ? "站点" : "Site"}</th>
+                    <th>${locale === "zh-CN" ? "类型" : "Kind"}</th>
+                    <th>${locale === "zh-CN" ? "分数" : "Score"}</th>
+                    <th>${locale === "zh-CN" ? "状态" : "Status"}</th>
+                    <th>${locale === "zh-CN" ? "生成时间" : "Generated"}</th>
                   </tr>
                 </thead>
                 <tbody>${rows}</tbody>
@@ -454,7 +501,8 @@ function renderRunsReviewPage(
 }
 
 function renderRunDetailReviewPage(
-  detail: Awaited<ReturnType<typeof getRunDetail>>
+  detail: Awaited<ReturnType<typeof getRunDetail>>,
+  locale: Locale
 ): string {
   const overallScore =
     typeof detail.manifest.summary.overallScore === "number"
@@ -504,7 +552,7 @@ function renderRunDetailReviewPage(
         <section class="topbar">
           <div>
             <p class="topbar-title">Run detail</p>
-            <p class="topbar-copy">${escapeHtml(detail.manifest.kind)} run generated ${escapeHtml(formatDateTime(detail.manifest.generatedAt))}</p>
+            <p class="topbar-copy">${escapeHtml(translateRunKind(detail.manifest.kind, locale))} ${locale === "zh-CN" ? "运行生成于" : "run generated"} ${escapeHtml(formatDateTime(detail.manifest.generatedAt, locale))}</p>
           </div>
           <a class="button" href="/api/runs/${encodeURIComponent(detail.id)}">Open JSON detail</a>
         </section>
@@ -639,14 +687,17 @@ export function createServer(): express.Express {
     }
   });
 
-  app.get("/review", (_request, response) => {
-    response.redirect("/review/runs");
+  app.get("/review", (request, response) => {
+    const locale = resolveReviewLocale(request);
+    response.redirect(reviewUrl("/review/runs", locale));
   });
 
-  app.get("/review/runs", async (_request, response, next) => {
+  app.get("/review/runs", async (request, response, next) => {
     try {
+      const locale = resolveReviewLocale(request);
+      response.setHeader("Set-Cookie", setLocaleCookieHeader(locale));
       response.type("text/html; charset=utf-8");
-      response.send(renderRunsReviewPage(await listRuns()));
+      response.send(renderRunsReviewPage(await listRuns(), locale));
     } catch (error) {
       next(error);
     }
@@ -654,8 +705,10 @@ export function createServer(): express.Express {
 
   app.get("/review/runs/:runId", async (request, response, next) => {
     try {
+      const locale = resolveReviewLocale(request);
+      response.setHeader("Set-Cookie", setLocaleCookieHeader(locale));
       response.type("text/html; charset=utf-8");
-      response.send(renderRunDetailReviewPage(await getRunDetail(request.params.runId)));
+      response.send(renderRunDetailReviewPage(await getRunDetail(request.params.runId), locale));
     } catch (error) {
       next(error);
     }

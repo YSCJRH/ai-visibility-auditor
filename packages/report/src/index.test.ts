@@ -95,14 +95,14 @@ test("report renderers expose expected audit and eval sections", async () => {
   const expectedHoldoutCount = prompts.prompts.filter((promptCase) => promptCase.holdout).length;
 
   assert.equal(audit.site.display, "AnswerLens static-good fixture demo");
-  assert.match(scorecard, /Site: AnswerLens static-good fixture demo/);
-  assert.match(scorecard, /Demo host note: https:\/\/fixture\.local is the stable fixture hostname inside this public demo/);
+  assert.match(scorecard, /Demo site: AnswerLens static-good fixture demo/);
+  assert.match(scorecard, /https:\/\/fixture\.local is the stable fixture hostname inside the public demo fixture/);
   assert.match(scorecard, /VAVR: /);
   assert.match(scorecardHtml, /AnswerLens static-good fixture demo/);
   assert.match(scorecardHtml, /Overall score: <strong>/);
   assert.match(scorecardHtml, / \| VAVR: <strong>/);
   assert.equal(scorecardHtml.includes(String.fromCharCode(0x74ba)), false);
-  assert.match(fallbackScorecard, /Site: \.\/examples\/fixtures\/static-good/);
+  assert.match(fallbackScorecard, /Demo site: \.\/examples\/fixtures\/static-good/);
   assert.match(evalSummary, /# AnswerLens Eval Summary/);
   assert.match(evalSummary, /Accurate mention rate/);
   assert.doesNotMatch(evalSummary, /Manual rank validation/);
@@ -208,7 +208,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.ok(shareSummary.topRecommendations.length > 0);
   assert.ok(shareSummary.artifacts.includes("pr-snippet.md"));
   assert.match(shareSummaryMarkdown, /# AnswerLens Share Summary/);
-  assert.match(shareSummaryMarkdown, /Site: AnswerLens static-good fixture demo/);
+  assert.match(shareSummaryMarkdown, /Demo site: AnswerLens static-good fixture demo/);
   assert.doesNotMatch(shareSummaryMarkdown, /Source target:/);
   assert.match(shareSummaryMarkdown, /AI may miss this product because/);
   assert.match(shareSummaryMarkdown, /does not scrape consumer AI UIs/);
@@ -218,7 +218,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(prSnippet, /CI for AI discoverability/);
   assert.match(prSnippet, /<details>/);
   assert.match(recommendations, /# AnswerLens Recommendations/);
-  assert.match(recommendations, /Site: AnswerLens static-good fixture demo/);
+  assert.match(recommendations, /Demo site: AnswerLens static-good fixture demo/);
   assert.match(htmlReport, / \| VAVR: <strong>/);
   assert.match(htmlReport, /AnswerLens static-good fixture demo/);
   assert.doesNotMatch(htmlReport, /Source target:/);

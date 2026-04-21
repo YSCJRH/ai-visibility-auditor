@@ -5,12 +5,14 @@ import { RunTable } from "../components/RunTable";
 import { SectionHeader } from "../components/SectionHeader";
 import { listRuns } from "../lib/api";
 import { formatScore } from "../lib/format";
+import { useLocale } from "../lib/locale";
 import pageStyles from "./PageLayout.module.css";
 import uiStyles from "../components/UI.module.css";
 
 type KindFilter = "all" | "audit" | "eval";
 
 export function RunsPage() {
+  const { locale, t } = useLocale();
   const [kindFilter, setKindFilter] = useState<KindFilter>("all");
   const runsQuery = useQuery({
     queryKey: ["runs"],
@@ -34,34 +36,34 @@ export function RunsPage() {
   return (
     <div className={pageStyles.page}>
       <SectionHeader
-        eyebrow="Runs workspace"
-        title="Review the latest file-backed runs"
-        description="The admin surface starts from completed artifacts, not charts. Use the run list to jump into the report trail, inspect score shifts, and open the three primary review artifacts in order."
+        eyebrow={t("admin.runs.eyebrow")}
+        title={t("admin.runs.title")}
+        description={t("admin.runs.description")}
       />
 
       <section className={uiStyles.metricGrid}>
-        <MetricTile label="Total runs" value={String(runs.length)} helper="All artifacts currently readable from `runs/*`." />
+        <MetricTile label={t("admin.runs.totalRuns")} value={String(runs.length)} helper={t("admin.runs.totalRuns.helper")} />
         <MetricTile
-          label="Average score"
-          value={formatScore(averageScore)}
-          helper="A quick pulse across the current local history."
+          label={t("admin.runs.averageScore")}
+          value={formatScore(averageScore, locale)}
+          helper={t("admin.runs.averageScore.helper")}
           tone={averageScore !== null && averageScore >= 90 ? "success" : "info"}
         />
         <MetricTile
-          label="Latest run"
-          value={latestRun ? formatScore(latestRun.overallScore) : "Pending"}
-          helper={latestRun ? latestRun.siteLabel : "Launch a run from the top bar to seed the workspace."}
+          label={t("admin.runs.latestRun")}
+          value={latestRun ? formatScore(latestRun.overallScore, locale) : t("common.pending")}
+          helper={latestRun ? latestRun.siteLabel : t("admin.runs.latestRun.helper")}
           tone={latestRun !== null && latestRun.overallScore !== null && latestRun.overallScore >= 90 ? "success" : "neutral"}
         />
-        <MetricTile label="Run mix" value={`${auditCount}:${evalCount}`} helper="Audit to eval count across the local workspace." />
+        <MetricTile label={t("admin.runs.mix")} value={`${auditCount}:${evalCount}`} helper={t("admin.runs.mix.helper")} />
       </section>
 
       <section className={pageStyles.panel}>
         <div className={pageStyles.filterRow}>
           {[
-            { label: "All runs", value: "all" as const },
-            { label: "Audit only", value: "audit" as const },
-            { label: "Eval only", value: "eval" as const }
+            { label: t("admin.runs.filter.all"), value: "all" as const },
+            { label: t("admin.runs.filter.audit"), value: "audit" as const },
+            { label: t("admin.runs.filter.eval"), value: "eval" as const }
           ].map((filter) => (
             <button
               key={filter.value}
@@ -74,10 +76,10 @@ export function RunsPage() {
           ))}
         </div>
 
-        {runsQuery.isLoading ? <p className={pageStyles.emptyState}>Loading runs...</p> : null}
-        {runsQuery.isError ? <p className={pageStyles.emptyState}>Unable to read the run workspace.</p> : null}
+        {runsQuery.isLoading ? <p className={pageStyles.emptyState}>{t("admin.runs.loading")}</p> : null}
+        {runsQuery.isError ? <p className={pageStyles.emptyState}>{t("admin.runs.error")}</p> : null}
         {!runsQuery.isLoading && filteredRuns.length === 0 ? (
-          <p className={pageStyles.emptyState}>No runs matched this filter yet. Launch a fresh audit to seed the workspace.</p>
+          <p className={pageStyles.emptyState}>{t("admin.runs.empty")}</p>
         ) : null}
         {filteredRuns.length > 0 ? <RunTable runs={filteredRuns} /> : null}
       </section>

@@ -1,5 +1,7 @@
 import type { AuditIssue } from "@answerlens/contracts";
-import { issueScope, severityTone } from "../lib/format";
+import { translateFixHint, translateIssueTitle, translateScope, translateSeverity } from "../shared/i18n.ts";
+import { severityTone } from "../lib/format";
+import { useLocale } from "../lib/locale";
 import { StatusBadge } from "./StatusBadge";
 import pageStyles from "../routes/PageLayout.module.css";
 
@@ -8,8 +10,10 @@ type IssueTableProps = {
 };
 
 export function IssueTable({ issues }: IssueTableProps) {
+  const { locale, t } = useLocale();
+
   if (issues.length === 0) {
-    return <p className={pageStyles.emptyState}>No current issues in the audit artifact.</p>;
+    return <p className={pageStyles.emptyState}>{t("admin.issues.empty")}</p>;
   }
 
   return (
@@ -17,24 +21,24 @@ export function IssueTable({ issues }: IssueTableProps) {
       <table className={pageStyles.table}>
         <thead>
           <tr>
-            <th>Severity</th>
-            <th>Issue</th>
-            <th>Scope</th>
-            <th>Fix hint</th>
+            <th>{t("admin.issues.severity")}</th>
+            <th>{t("admin.issues.issue")}</th>
+            <th>{t("admin.issues.scope")}</th>
+            <th>{t("admin.issues.fixHint")}</th>
           </tr>
         </thead>
         <tbody>
           {issues.map((issue) => (
             <tr key={issue.id}>
               <td>
-                <StatusBadge label={issue.severity} tone={severityTone(issue.severity)} />
+                <StatusBadge label={translateSeverity(issue.severity, locale)} tone={severityTone(issue.severity)} />
               </td>
               <td>
-                <strong>{issue.title}</strong>
+                <strong>{translateIssueTitle(issue.title, locale)}</strong>
                 <div className={pageStyles.tableSubtle}>{issue.message}</div>
               </td>
-              <td>{issueScope(issue)}</td>
-              <td>{issue.fixHint}</td>
+              <td>{issue.pageUrl ?? translateScope(issue.scope, locale)}</td>
+              <td>{translateFixHint(issue.fixHint, locale)}</td>
             </tr>
           ))}
         </tbody>
