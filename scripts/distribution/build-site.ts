@@ -159,6 +159,15 @@ function renderPanel(title: string, eyebrow: string, body: string): string {
   return `<article class="panel"><p class="eyebrow">${escapeHtml(eyebrow)}</p><h2>${escapeHtml(title)}</h2>${body}</article>`;
 }
 
+function renderMetric(label: string, value: string, helper: string): string {
+  return `<article class="metric"><p class="metric-label">${escapeHtml(label)}</p><p class="metric-value">${escapeHtml(value)}</p><p class="metric-helper">${escapeHtml(helper)}</p></article>`;
+}
+
+function renderCtaCard(title: string, eyebrow: string, body: string, href: string, linkLabel: string, tone: "primary" | "secondary" = "primary"): string {
+  const className = tone === "primary" ? "ctaLink" : "ctaLink ctaLinkSecondary";
+  return `<article class="panel ctaCard"><div><p class="eyebrow">${escapeHtml(eyebrow)}</p><h2>${escapeHtml(title)}</h2><p>${body}</p></div><a class="${className}" href="${escapeHtml(href)}">${escapeHtml(linkLabel)}</a></article>`;
+}
+
 function siteLabel(site: { input: string; display?: string }): string {
   const display = site.display?.trim();
   return display && display.length > 0 ? display : site.input;
@@ -564,7 +573,8 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale
       .topbar{display:flex;gap:16px;justify-content:space-between;align-items:center;padding:16px 20px}.nav{display:flex;gap:12px;flex-wrap:wrap}.nav a{padding:10px 14px;border-radius:999px;border:1px solid var(--line)}
       .locale-switcher{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.92rem}
       .hero,.panel,.metric{padding:22px}.hero h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.2rem);line-height:1.05}.hero p,.muted{color:var(--muted)}.eyebrow{margin:0 0 10px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-size:.78rem}
-      .section{margin-top:24px}.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.metric-value{margin:0;font-size:2rem;font-weight:700}
+      .section{margin-top:24px}.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.metric-value{margin:6px 0 4px;font-size:2rem;font-weight:700}.metric-label{margin:0;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-size:.78rem}.metric-helper{margin:0;color:var(--muted);font-size:.95rem;line-height:1.45}
+      .ctaGrid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.ctaCard{display:flex;flex-direction:column;justify-content:space-between}.ctaCard p{color:var(--muted)}.ctaLink{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;padding:12px 14px;border-radius:999px;border:1px solid var(--line);color:var(--ink);background:rgba(125,240,210,.92);font-weight:600}.ctaLink:hover{text-decoration:none;filter:brightness(1.04)}.ctaLinkSecondary{background:transparent;color:var(--accent)}.callout{margin-top:16px}
       .panel h2{margin-top:0}.markdown{margin:0;padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(8,18,37,.95);white-space:pre-wrap;overflow:auto;font-family:"Consolas","SFMono-Regular",monospace;line-height:1.5}
       .footer{margin-top:28px;text-align:center;color:var(--muted)}
     </style>
@@ -905,39 +915,124 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     {
       route: "",
       filePath: path.join(outDir, "index.html"),
-      title: "AI visibility audit reports and demo entry points",
-      description: `${DESCRIPTION} ${TAGLINE}`,
-      body: `<section class="hero"><p class="eyebrow">${escapeHtml(TAGLINE)}</p><h1>AnswerLens makes AI discoverability reviewable in GitHub.</h1><p>${escapeHtml(DESCRIPTION)} It turns audits into share summaries, PR-ready snippets, static reports, release assets, and indexable pages without falling back to dashboard-only workflows.</p></section>
+      title: {
+        en: "AI visibility audit reports and demo entry points",
+        "zh-CN": "AI 可见性审计报告与演示入口"
+      },
+      description: {
+        en: `${DESCRIPTION} ${TAGLINE}`,
+        "zh-CN": "AnswerLens 是一个面向产品网站的 CLI-first AI 可发现性审计器。面向 AI 可发现性的 CI。"
+      },
+      body: {
+        en: `<section class="hero"><p class="eyebrow">${escapeHtml(TAGLINE)}</p><h1>AnswerLens turns AI discoverability work into reviewable artifacts.</h1><p>${escapeHtml(DESCRIPTION)} Start with the live demo, inspect one current issue and one next fix, then carry the same workflow into your own site and CI.</p></section>
         <section class="section grid">
-          <article class="metric"><p class="eyebrow">overallScore</p><p class="metric-value">${escapeHtml(String(shareSummary.metrics.overallScore ?? "pending"))}</p></article>
-          <article class="metric"><p class="eyebrow">vavr</p><p class="metric-value">${escapeHtml(String(shareSummary.metrics.vavr ?? "pending"))}</p></article>
-          <article class="metric"><p class="eyebrow">keyPageCount</p><p class="metric-value">${escapeHtml(String(shareSummary.metrics.keyPageCount ?? "pending"))}</p></article>
-          <article class="metric"><p class="eyebrow">latestRelease</p><p class="metric-value">${escapeHtml(releases[0]?.tag_name ?? "pending")}</p></article>
+          ${renderMetric("Demo score", String(shareSummary.metrics.overallScore ?? "pending"), "Current score from the stable public fixture.")}
+          ${renderMetric("Key pages", String(shareSummary.metrics.keyPageCount ?? "pending"), "Critical pages found in the demo site.")}
+          ${renderMetric("First artifact", "share-summary.md", "Open this before scorecard and recommendations.")}
+          ${renderMetric("Latest release", releases[0]?.tag_name ?? "pending", "Current published version line.")}
+        </section>
+        <section class="section">
+          <div class="ctaGrid">
+            ${renderCtaCard(
+              "Open the live demo report",
+              "Primary entry",
+              "See the full artifact trail and understand what a useful run looks like before you install anything.",
+              new URL("examples/static-good/index.html", siteUrl).href,
+              "Open demo"
+            )}
+            ${renderCtaCard(
+              "Run the 60-second fixture demo",
+              "Secondary entry",
+              "Reproduce the same artifact set locally so the workflow feels concrete, not theoretical.",
+              `${REPO_URL}#run-the-60-second-fixture-demo`,
+              "Run fixture",
+              "secondary"
+            )}
+            ${renderCtaCard(
+              "Add the GitHub Action",
+              "Secondary entry",
+              "Use the same artifact contract in pull requests after one local run already feels reviewable.",
+              repoBlob("docs/github-action.md"),
+              "Open Action docs",
+              "secondary"
+            )}
+          </div>
+          <article class="panel callout"><p class="eyebrow">Bridge step</p><h2>Run one real-site audit before CI.</h2><p>After the demo and fixture run, use the <a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">5-minute quickstart</a> on your own public site. That keeps the funnel sequential: demo, fixture, real site, then Action.</p><p>Keep the review order fixed every time: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>. Use <a href="${escapeHtml(new URL("releases/", siteUrl).href)}">the latest release</a> as the second public front door.</p></article>
         </section>
         <section class="section grid">
-          ${renderPanel("Why AI may still miss the site", "Top issues", `<ul>${renderList(shareSummary.topIssues.map((item) => `<strong>${escapeHtml(item.title)}</strong> (${escapeHtml(item.severity)}): ${escapeHtml(item.fixHint)}`))}</ul>`)}
-          ${renderPanel("What teams can ship next", "Top fixes", `<ul>${renderList(shareSummary.topRecommendations.map((item) => `<strong>${escapeHtml(item.title)}</strong>: ${escapeHtml(item.expectedOutcome)}`))}</ul>`)}
-        </section>
-        <section class="section grid">
-          ${renderPanel("Recommended first-run path", "Activation funnel", `<p>Use the public funnel in this order:</p><ol><li><a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open the live demo report</a> to understand the artifact flow.</li><li><a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">Run the 60-second fixture demo</a> to reproduce the same artifact set locally.</li><li><a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a> before wiring CI.</li><li><a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Add the GitHub Action</a> when you want the same artifact contract in pull requests and workflow runs.</li></ol><p>If you arrive here already knowing you want CI, the Action docs remain public, but the clearest first run still moves through the demo and one local audit first. Use <a href="${escapeHtml(new URL("releases/", siteUrl).href)}">the latest release</a> as the second public front door.</p><p>At every step, start with <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`)}
-          ${renderPanel("Public proof block", "Artifact proof", `${renderSiteIdentity(shareSummary.site)}${firstIssue ? `<p><strong>Top issue:</strong> ${escapeHtml(firstIssue.title)} (${escapeHtml(firstIssue.severity)}) - ${escapeHtml(firstIssue.fixHint)}</p>` : "<p><strong>Top issue:</strong> none</p>"}${firstFix ? `<p><strong>Top fix:</strong> ${escapeHtml(firstFix.title)} - ${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p><strong>Top fix:</strong> none</p>"}<p>Open artifacts in order: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p><ul>${publicArtifactLinks}</ul>`)}
-        </section>
-        <section class="section grid">
-          ${renderPanel("Public proof pages", "Coverage", `<p>AnswerLens now publishes public proof surfaces that explain packaging, trust, FAQs, comparisons, and integrations without drifting into dashboard-first packaging.</p><ul>${renderList([
-            `<a href="${escapeHtml(proofPageUrls.pricing)}">Pricing and packaging</a>: explain the open-source, BYOK, and release-asset cost model.`,
-            `<a href="${escapeHtml(proofPageUrls.security)}">Security and trust</a>: explain secrets, review flow, and non-goals in one page.`,
+          ${renderPanel("What the demo says right now", "Current signal", `${renderSiteIdentity(shareSummary.site)}${firstIssue ? `<p><strong>Top issue:</strong> ${escapeHtml(firstIssue.title)} (${escapeHtml(firstIssue.severity)}) - ${escapeHtml(firstIssue.fixHint)}</p>` : "<p><strong>Top issue:</strong> none</p>"}${firstFix ? `<p><strong>Top fix:</strong> ${escapeHtml(firstFix.title)} - ${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p><strong>Top fix:</strong> none</p>"}<p>Open artifacts in order: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p><ul>${publicArtifactLinks}</ul>`)}
+          ${renderPanel("What to read next", "Proof pages", `<p>Use these public pages when you need packaging, trust, FAQ, comparison, and adoption context beyond the demo report.</p><ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.pricing)}">Pricing and packaging</a>: open-source, BYOK, and release-asset cost model.`,
+            `<a href="${escapeHtml(proofPageUrls.security)}">Security and trust</a>: secrets, review flow, and non-goals in one page.`,
             `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">Docs index</a>: activation references, scoring notes, and GitHub Action usage.`,
-            `<a href="${escapeHtml(proofPageUrls.starter)}">Starter bundle</a>: show the external <code>.github/answerlens/</code> layout before CI adoption.`,
-            `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: answer first-run questions in visible, citable language.`,
-            `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: explain how AnswerLens differs from dashboard-first AI visibility tools.`,
-            `<a href="${escapeHtml(proofPageUrls.integrations)}">Integrations</a>: show the GitHub-native and validation surfaces together.`
+            `<a href="${escapeHtml(proofPageUrls.starter)}">Starter bundle</a>: external <code>.github/answerlens/</code> layout before CI adoption.`,
+            `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: first-run questions in visible, citable language.`,
+            `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: how AnswerLens differs from dashboard-first AI visibility tools.`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">Integrations</a>: GitHub-native and validation surfaces together.`
           ])}</ul>`)}
-          ${renderPanel("Use-case coverage", "Team fit", `<p>These use-case pages explain where AnswerLens fits before a team adopts it in CI.</p><ul>${renderList([
+        </section>
+        <section class="section grid">
+          ${renderPanel("Who usually reads next", "Team fit", `<p>These use-case pages explain where AnswerLens fits before a team adopts it in CI.</p><ul>${renderList([
             `<a href="${escapeHtml(proofPageUrls.productMarketing)}">Product marketing teams</a>: turn homepage, pricing, and comparison gaps into reviewable fixes.`,
             `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">Developer advocacy teams</a>: strengthen docs, proof pages, and self-serve evaluation paths.`,
             `<a href="${escapeHtml(proofPageUrls.openSource)}">Open-source maintainers</a>: use README, releases, Pages, and artifacts as the public distribution stack.`
           ])}</ul>`)}
         </section>`,
+        "zh-CN": `<section class="hero"><p class="eyebrow">面向 AI 可发现性的 CI。</p><h1>AnswerLens 把 AI 可发现性工作变成一套可以审阅的产物。</h1><p>AnswerLens 是一个面向产品网站的 CLI-first AI 可发现性审计器。先看 live demo，理解当前问题和下一步修复，再把同一套流程带到你自己的站点和 CI 里。</p></section>
+        <section class="section grid">
+          ${renderMetric("演示分数", String(shareSummary.metrics.overallScore ?? "待生成"), "稳定公开 fixture 的当前得分。")}
+          ${renderMetric("关键页面数", String(shareSummary.metrics.keyPageCount ?? "待生成"), "这次演示里识别出的关键页面数量。")}
+          ${renderMetric("先看哪个产物", "share-summary.md", "先看它，再看 scorecard 和 recommendations。")}
+          ${renderMetric("最新版本", releases[0]?.tag_name ?? "待生成", "当前公开发布的版本线。")}
+        </section>
+        <section class="section">
+          <div class="ctaGrid">
+            ${renderCtaCard(
+              "打开在线演示报告",
+              "主入口",
+              "先看完整 artifact 路径，理解一轮有价值的运行到底会产出什么。",
+              new URL("examples/static-good/index.html", siteUrl).href,
+              "打开演示"
+            )}
+            ${renderCtaCard(
+              "运行 60 秒 fixture 演示",
+              "辅助入口",
+              "把同一组产物在本地复现出来，让这条工作流从“看懂”变成“亲手跑通”。",
+              `${REPO_URL}#run-the-60-second-fixture-demo`,
+              "运行 fixture",
+              "secondary"
+            )}
+            ${renderCtaCard(
+              "添加 GitHub Action",
+              "辅助入口",
+              "当一轮本地运行已经足够可审阅时，再把同一套产物契约搬进 pull request。",
+              repoBlob("docs/zh/github-action.md"),
+              "打开 Action 文档",
+              "secondary"
+            )}
+          </div>
+          <article class="panel callout"><p class="eyebrow">桥接步骤</p><h2>在接 CI 之前，先跑一轮真实站点审计。</h2><p>看完 demo 和 fixture 之后，用 <a href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">5 分钟 quickstart</a> 在你自己的公开站点上跑一轮。这能让漏斗保持顺序：demo、fixture、真实站点、然后才是 Action。</p><p>每一轮都保持同样的审阅顺序：先看 <code>share-summary.md</code>，再看 <code>scorecard.md</code>，最后看 <code>recommendations.md</code>。<a href="${escapeHtml(new URL("releases/", siteUrl).href)}">最新 release</a> 继续作为第二个公开入口。</p></article>
+        </section>
+        <section class="section grid">
+          ${renderPanel("这轮演示现在说明了什么", "当前信号", `${renderSiteIdentity(shareSummary.site)}${firstIssue ? `<p><strong>核心问题：</strong> ${escapeHtml(firstIssue.title)} (${escapeHtml(firstIssue.severity)}) - ${escapeHtml(firstIssue.fixHint)}</p>` : "<p><strong>核心问题：</strong> 无</p>"}${firstFix ? `<p><strong>优先修复：</strong> ${escapeHtml(firstFix.title)} - ${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p><strong>优先修复：</strong> 无</p>"}<p>产物打开顺序保持固定：<code>share-summary.md</code>，然后 <code>scorecard.md</code>，最后 <code>recommendations.md</code>。</p><ul>${publicArtifactLinks}</ul>`)}
+          ${renderPanel("接下来该读哪些公开页", "证明页面", `<p>如果你需要定价、信任、FAQ、对比和接入上下文，而不只是 demo report，就继续看这些公开页。</p><ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.pricing)}">定价与打包</a>：看开源、BYOK 和 release 资产的成本边界。`,
+            `<a href="${escapeHtml(proofPageUrls.security)}">安全与信任</a>：把 secrets、审阅流和非目标放到同一页。`,
+            `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">文档索引</a>：继续看 activation 参考、评分说明和 GitHub Action 用法。`,
+            `<a href="${escapeHtml(proofPageUrls.starter)}">starter bundle</a>：在接 CI 之前先看外部 <code>.github/answerlens/</code> 布局。`,
+            `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>：用可引用的语言回答首次试用问题。`,
+            `<a href="${escapeHtml(proofPageUrls.compare)}">对比页</a>：看 AnswerLens 和 dashboard-first 工具的差异。`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">集成页</a>：把 GitHub-native 和验证层入口放到一起看。`
+          ])}</ul>`)}
+        </section>
+        <section class="section grid">
+          ${renderPanel("哪些团队通常会继续往下看", "团队适配", `<p>这些 use-case 页面会先解释 AnswerLens 适合谁，再进入 CI 采用路径。</p><ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.productMarketing)}">产品营销团队</a>：把首页、pricing 和对比内容缺口变成可审阅的修复项。`,
+            `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">开发者关系团队</a>：强化文档、proof page 和自助试用路径。`,
+            `<a href="${escapeHtml(proofPageUrls.openSource)}">开源维护者</a>：把 README、release、Pages 和 artifacts 当作公开分发栈。`
+          ])}</ul>`)}
+        </section>`
+      },
       jsonLd: [
         {
           "@context": "https://schema.org",
