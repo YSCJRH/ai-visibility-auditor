@@ -1,0 +1,44 @@
+# Starter Bundle
+
+The starter bundle is the public, external-repo-friendly AnswerLens adoption asset.
+
+Use it after the live demo report, the 60-second fixture demo, and one useful real-site run from [quickstart.md](quickstart.md).
+
+## Copy this layout into the repository you want to audit
+
+```text
+.github/
+  answerlens/
+    brand.yaml
+    competitors.yaml
+    prompts.yaml
+  workflows/
+    answerlens.yml
+```
+
+## What each file does
+
+- `brand.yaml`: product name, domain, proof-page hints, and optional `site_display_name`
+- `competitors.yaml`: declared comparison set for the category you actually sell into
+- `prompts.yaml`: buyer, comparison, and citation questions for your real audience
+- `answerlens.yml`: the GitHub Action path that runs the same artifact contract in CI
+
+## Review artifacts in this order
+
+1. `share-summary.md`
+2. `scorecard.md`
+3. `recommendations.md`
+
+Then use `pr-snippet.md` for GitHub copy and `run.json` for machine-readable metadata.
+
+## What this is for
+
+- external repositories that want a copyable `.github/answerlens/` shape
+- release notes or docs that need a stable starter-bundle reference
+- teams that want the GitHub Action to feel like the CI version of the same local workflow
+
+## What to do next
+
+1. Run one real-site audit with [quickstart.md](quickstart.md) if you have not done that yet.
+2. Copy the starter files from [`examples/consumer-repo`](../examples/consumer-repo).
+3. Move into [github-action.md](github-action.md) when the local run already feels reviewable.

@@ -24,6 +24,8 @@ corepack pnpm install
 
 Use the external starter bundle in [../examples/consumer-repo](../examples/consumer-repo) as the source of truth and copy these files into your own working folder:
 
+If you want the same layout explained on a public page first, open [starter-bundle.md](starter-bundle.md) or the live Pages view at [yscjrh.github.io/ai-visibility-auditor/starter/](https://yscjrh.github.io/ai-visibility-auditor/starter/).
+
 ```text
 .github/
   answerlens/

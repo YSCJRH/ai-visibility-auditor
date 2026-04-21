@@ -45,6 +45,7 @@ test("build-site writes indexable pages and metadata", async () => {
   await Promise.all([
     access(path.join(outDir, "index.html")),
     access(path.join(outDir, "docs", "index.html")),
+    access(path.join(outDir, "starter", "index.html")),
     access(path.join(outDir, "pricing", "index.html")),
     access(path.join(outDir, "security", "index.html")),
     access(path.join(outDir, "faq", "index.html")),
@@ -61,9 +62,10 @@ test("build-site writes indexable pages and metadata", async () => {
     access(path.join(outDir, "robots.txt"))
   ]);
 
-  const [home, docs, pricing, security, faq, compare, integrations, productMarketing, developerAdvocacy, openSource, releases, examples, demoReport, feed, sitemap] = await Promise.all([
+  const [home, docs, starter, pricing, security, faq, compare, integrations, productMarketing, developerAdvocacy, openSource, releases, examples, demoReport, feed, sitemap] = await Promise.all([
     readFile(path.join(outDir, "index.html"), "utf8"),
     readFile(path.join(outDir, "docs", "index.html"), "utf8"),
+    readFile(path.join(outDir, "starter", "index.html"), "utf8"),
     readFile(path.join(outDir, "pricing", "index.html"), "utf8"),
     readFile(path.join(outDir, "security", "index.html"), "utf8"),
     readFile(path.join(outDir, "faq", "index.html"), "utf8"),
@@ -95,6 +97,7 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /faq\/"/);
   assert.match(home, /compare\/"/);
   assert.match(home, /integrations\/"/);
+  assert.match(home, /starter\/"/);
   assert.match(home, /use-case\/product-marketing\/"/);
   assert.match(home, /Built by YSCJRH from repo-native docs, releases, and artifacts\./);
   assert.match(home, /Use the public funnel in this order/);
@@ -110,8 +113,16 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(docs, /Growth plan/);
   assert.match(docs, /Self-dogfooding/);
   assert.match(docs, /Quickstart/);
+  assert.match(docs, /Starter bundle/);
   assert.match(docs, /Proof page map/);
+  assert.match(docs, /Starter bundle<\/a>: external-repo layout and artifact review order/);
   assert.match(docs, /Compare<\/a>: how AnswerLens differs from Profound, Peec AI, and Otterly/);
+  assert.match(starter, /<title>Starter bundle for external GitHub repositories \| AnswerLens<\/title>/);
+  assert.match(starter, /The starter bundle is the public adoption asset for external repositories\./);
+  assert.match(starter, /\.github\//);
+  assert.match(starter, /brand\.yaml/);
+  assert.match(starter, /scorecard\.md/);
+  assert.match(starter, /examples\/consumer-repo/);
   assert.match(pricing, /Pricing for AnswerLens is open-source, BYOK, and artifact-first\./);
   assert.match(pricing, /\$0 provider cost/);
   assert.match(pricing, /@answerlens\/cli/);
@@ -127,6 +138,8 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(compare, /Compared with Profound, Peec AI, and Otterly, AnswerLens fits teams/);
   assert.match(compare, /Related proof pages/);
   assert.match(integrations, /GitHub-native and artifact-backed/);
+  assert.match(integrations, /The external-repo path is public and copyable/);
+  assert.match(integrations, /starter\/"/);
   assert.match(integrations, /Related proof pages/);
   assert.match(productMarketing, /AnswerLens for product marketing teams\./);
   assert.match(productMarketing, /Related proof pages/);
@@ -142,6 +155,7 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(examples, /"@type":"Dataset"/);
   assert.match(examples, /AnswerLens static-good fixture demo/);
   assert.match(examples, /What to do after the demo/);
+  assert.match(examples, /Open the starter bundle overview/);
   assert.match(examples, /Add the GitHub Action/);
   assert.doesNotMatch(home, /\/home\/runner\/work\//);
   assert.doesNotMatch(examples, /\/home\/runner\/work\//);
@@ -154,6 +168,7 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/faq\//);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/compare\//);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/integrations\//);
+  assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/starter\//);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/use-case\/product-marketing\//);
   assert.equal(home.includes("\uFFFD"), false);
   assert.equal(examples.includes("\uFFFD"), false);
