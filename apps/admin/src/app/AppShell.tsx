@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useMatch } from "react-router-dom";
 import type { Locale } from "../shared/i18n.ts";
 import { RunLauncher } from "../components/RunLauncher";
 import { useLocale } from "../lib/locale";
@@ -16,6 +16,23 @@ const localeOptions: Array<{ locale: Locale; labelKey: string }> = [
 
 export function AppShell() {
   const { locale, setLocale, t } = useLocale();
+  const runDetailMatch = useMatch("/runs/:runId");
+  const presetsMatch = useMatch("/presets");
+
+  const topbarContext = runDetailMatch
+    ? {
+        title: t("admin.topbar.runDetailTitle"),
+        summary: t("admin.topbar.runDetailSummary")
+      }
+    : presetsMatch
+      ? {
+          title: t("admin.topbar.presetsTitle"),
+          summary: t("admin.topbar.presetsSummary")
+        }
+      : {
+          title: t("admin.topbar.runsTitle"),
+          summary: t("admin.topbar.runsSummary")
+        };
 
   return (
     <div className={styles.shell}>
@@ -39,20 +56,22 @@ export function AppShell() {
         </nav>
 
         <section className={styles.sidebarCard}>
-          <p className={styles.sidebarEyebrow}>{t("admin.scope.title")}</p>
+          <p className={styles.sidebarEyebrow}>{t("admin.sidebar.path.title")}</p>
+          <p className={styles.sidebarBody}>{t("admin.sidebar.path.body")}</p>
           <ul className={styles.sidebarList}>
-            <li>{t("admin.scope.item1")}</li>
-            <li>{t("admin.scope.item2")}</li>
-            <li>{t("admin.scope.item3")}</li>
+            <li>{t("admin.sidebar.path.item1")}</li>
+            <li>{t("admin.sidebar.path.item2")}</li>
+            <li>{t("admin.sidebar.path.item3")}</li>
           </ul>
         </section>
 
         <section className={styles.sidebarCard}>
-          <p className={styles.sidebarEyebrow}>{t("admin.reviewOrder.title")}</p>
+          <p className={styles.sidebarEyebrow}>{t("admin.sidebar.artifacts.title")}</p>
+          <p className={styles.sidebarBody}>{t("admin.sidebar.artifacts.body")}</p>
           <ul className={styles.sidebarList}>
-            <li>{t("admin.reviewOrder.item1")}</li>
-            <li>{t("admin.reviewOrder.item2")}</li>
-            <li>{t("admin.reviewOrder.item3")}</li>
+            <li>{t("admin.sidebar.artifacts.item1")}</li>
+            <li>{t("admin.sidebar.artifacts.item2")}</li>
+            <li>{t("admin.sidebar.artifacts.item3")}</li>
           </ul>
         </section>
       </aside>
@@ -60,8 +79,8 @@ export function AppShell() {
       <div className={styles.content}>
         <header className={styles.topbar}>
           <div className={styles.topbarText}>
-            <p className={styles.topbarTitle}>{t("admin.topbar.title")}</p>
-            <p className={styles.topbarSummary}>{t("admin.topbar.summary")}</p>
+            <p className={styles.topbarTitle}>{topbarContext.title}</p>
+            <p className={styles.topbarSummary}>{topbarContext.summary}</p>
           </div>
           <div className={styles.topbarActions}>
             <label className={styles.localePicker}>

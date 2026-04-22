@@ -1,10 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
+import type { ConfigPresetSummary } from "@answerlens/contracts";
 import { MetricTile } from "../components/MetricTile";
 import { SectionHeader } from "../components/SectionHeader";
 import { listConfigPresets } from "../lib/api";
 import { useLocale } from "../lib/locale";
 import pageStyles from "./PageLayout.module.css";
 import uiStyles from "../components/UI.module.css";
+
+function presetUse(preset: ConfigPresetSummary, t: (key: string) => string): string {
+  if (preset.id === "example-acme") {
+    return t("admin.presets.use.fixture");
+  }
+  if (preset.id === "repo-answerlens") {
+    return t("admin.presets.use.repo");
+  }
+  return t("admin.presets.use.starter");
+}
+
+function presetNextMove(preset: ConfigPresetSummary, t: (key: string) => string): string {
+  if (preset.id === "example-acme") {
+    return t("admin.presets.next.fixture");
+  }
+  if (preset.id === "repo-answerlens") {
+    return t("admin.presets.next.repo");
+  }
+  return t("admin.presets.next.starter");
+}
 
 export function PresetsPage() {
   const { t } = useLocale();
@@ -32,37 +53,55 @@ export function PresetsPage() {
         />
       </section>
 
+      <section className={uiStyles.surfaceCard}>
+        <div className={uiStyles.surfaceInner}>
+          <p className={uiStyles.surfaceEyebrow}>{t("admin.presets.guideEyebrow")}</p>
+          <h2 className={uiStyles.surfaceTitle}>{t("admin.presets.guideTitle")}</h2>
+          <p className={uiStyles.surfaceBody}>{t("admin.presets.guideBody")}</p>
+        </div>
+      </section>
+
       {presetsQuery.isLoading ? <p className={pageStyles.emptyState}>{t("admin.presets.loading")}</p> : null}
       {presetsQuery.isError ? <p className={pageStyles.emptyState}>{t("admin.presets.error")}</p> : null}
 
-      <div className={pageStyles.stack}>
+      <div className={pageStyles.cardGrid}>
         {presets.map((preset) => (
-          <article key={preset.id} className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>{preset.id}</p>
-            <h2 className={pageStyles.panelTitle}>{preset.label}</h2>
-            <p className={pageStyles.panelBody}>{preset.description}</p>
-            <div className={pageStyles.metaList}>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.presets.defaultSite")}</span>
-                <span className={pageStyles.metaValue}>{preset.defaultSiteInput}</span>
-              </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.presets.displayName")}</span>
-                <span className={pageStyles.metaValue}>{preset.siteDisplayName ?? t("admin.presets.displayName.empty")}</span>
-              </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.presets.domain")}</span>
-                <span className={pageStyles.metaValue}>{preset.domain}</span>
-              </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.presets.files")}</span>
-                <span className={pageStyles.metaValue}>
-                  {preset.brandPath}
-                  <br />
-                  {preset.competitorsPath}
-                  <br />
-                  {preset.promptsPath}
-                </span>
+          <article key={preset.id} className={uiStyles.surfaceCard}>
+            <div className={uiStyles.surfaceInner}>
+              <p className={uiStyles.surfaceEyebrow}>{preset.id}</p>
+              <h2 className={uiStyles.surfaceTitle}>{preset.label}</h2>
+              <p className={uiStyles.surfaceBody}>{preset.description}</p>
+              <div className={uiStyles.metaList}>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.presets.purpose")}</span>
+                  <span className={uiStyles.metaValue}>{presetUse(preset, t)}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.presets.nextMove")}</span>
+                  <span className={uiStyles.metaValue}>{presetNextMove(preset, t)}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.presets.defaultSite")}</span>
+                  <span className={uiStyles.metaValue}>{preset.defaultSiteInput}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.presets.displayName")}</span>
+                  <span className={uiStyles.metaValue}>{preset.siteDisplayName ?? t("admin.presets.displayName.empty")}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.presets.domain")}</span>
+                  <span className={uiStyles.metaValue}>{preset.domain}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.presets.files")}</span>
+                  <span className={uiStyles.metaValue}>
+                    {preset.brandPath}
+                    <br />
+                    {preset.competitorsPath}
+                    <br />
+                    {preset.promptsPath}
+                  </span>
+                </div>
               </div>
             </div>
           </article>

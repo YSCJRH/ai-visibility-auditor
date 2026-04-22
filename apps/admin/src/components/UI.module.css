@@ -7,72 +7,82 @@
 }
 
 .eyebrow {
-  margin: 0 0 0.45rem;
-  color: var(--accent-cyan);
-  font-size: 0.8rem;
-  letter-spacing: 0.18em;
+  margin: 0 0 0.6rem;
+  color: var(--foreground-subtle);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .title {
   margin: 0;
   font-family: var(--font-heading);
-  font-size: clamp(1.75rem, 3vw, 2.6rem);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: clamp(1.95rem, 3vw, 2.85rem);
+  line-height: 1.03;
+  letter-spacing: -0.035em;
 }
 
 .description {
-  margin: 0.65rem 0 0;
-  max-width: 44rem;
-  color: var(--text-muted);
-  line-height: 1.6;
+  margin: 0.8rem 0 0;
+  max-width: 46rem;
+  color: var(--foreground-muted);
+  font-size: 1rem;
+  line-height: 1.7;
 }
 
 .metricGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
   gap: 1rem;
 }
 
 .metricTile {
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--border-subtle);
-  background: linear-gradient(180deg, rgba(19, 17, 48, 0.95), rgba(12, 11, 30, 0.92));
-  padding: 1rem 1.1rem 1rem;
-  box-shadow: var(--glow-sm);
+  border-radius: var(--radius-card);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
+    rgba(10, 10, 12, 0.84);
+  padding: 1.15rem 1.15rem 1.2rem;
+  box-shadow: var(--shadow-card);
 }
 
 .metricTile::before {
   content: "";
   position: absolute;
-  inset: 0 auto auto 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(255, 0, 255, 0.85), rgba(0, 255, 255, 0.85));
+  inset: 0;
+  background: radial-gradient(circle at top left, rgba(94, 106, 210, 0.16), transparent 45%);
+  opacity: 0.95;
+  pointer-events: none;
 }
 
 .metricLabel {
+  position: relative;
   margin: 0;
-  color: var(--text-muted);
-  font-size: 0.76rem;
-  letter-spacing: 0.14em;
+  color: var(--foreground-subtle);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .metricValue {
-  margin: 0.55rem 0 0;
+  position: relative;
+  margin: 0.7rem 0 0;
   font-family: var(--font-heading);
-  font-size: clamp(1.6rem, 3vw, 2.35rem);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 600;
   line-height: 1;
+  letter-spacing: -0.045em;
 }
 
 .metricHelper {
-  margin: 0.55rem 0 0;
-  color: var(--text-subtle);
-  font-size: 0.88rem;
-  line-height: 1.5;
+  position: relative;
+  margin: 0.65rem 0 0;
+  color: var(--foreground-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
 }
 
 .toneSuccess {
@@ -88,32 +98,36 @@
 }
 
 .toneInfo {
-  color: var(--accent-cyan);
+  color: var(--accent-bright);
 }
 
 .toneNeutral {
-  color: var(--text-strong);
+  color: var(--foreground);
 }
 
 .statusBadge {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  border: 1px solid currentColor;
-  padding: 0.32rem 0.68rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  background: rgba(6, 5, 22, 0.68);
+  min-height: 2rem;
+  padding: 0.34rem 0.7rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--foreground);
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .statusBadge::before {
   content: "";
-  width: 0.55rem;
-  height: 0.55rem;
+  width: 0.45rem;
+  height: 0.45rem;
   border-radius: 999px;
   background: currentColor;
-  box-shadow: 0 0 0.8rem currentColor;
+  opacity: 0.8;
 }
 
 .buttonRow {
@@ -123,38 +137,342 @@
 }
 
 .button {
-  border: 1px solid var(--border-active);
-  background: transparent;
-  color: var(--text-strong);
-  padding: 0.78rem 1.05rem;
-  font-family: var(--font-mono);
-  font-size: 0.88rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transition: transform 180ms linear, box-shadow 180ms linear, background-color 180ms linear;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--foreground);
+  padding: 0.78rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.1;
+  text-decoration: none;
 }
 
 .button:hover,
 .button:focus-visible {
   transform: translateY(-1px);
-  box-shadow: var(--glow-md);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 10px 24px rgba(0, 0, 0, 0.28);
 }
 
 .buttonPrimary {
-  border-color: var(--accent-cyan);
-  color: var(--accent-cyan);
+  border-color: var(--border-accent);
+  background: linear-gradient(180deg, rgba(104, 114, 217, 0.96), rgba(94, 106, 210, 0.9));
+  color: #ffffff;
+  box-shadow:
+    0 0 0 1px rgba(94, 106, 210, 0.28),
+    0 10px 24px rgba(94, 106, 210, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .buttonPrimary:hover,
 .buttonPrimary:focus-visible {
-  background: rgba(0, 255, 255, 0.12);
+  background: linear-gradient(180deg, rgba(112, 122, 225, 1), rgba(98, 110, 218, 0.96));
 }
 
 .buttonSecondary {
-  border-color: rgba(255, 0, 255, 0.45);
+  border-color: var(--border-default);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--foreground);
 }
 
 .buttonSecondary:hover,
 .buttonSecondary:focus-visible {
-  background: rgba(255, 0, 255, 0.1);
+  border-color: var(--border-hover);
+  background: rgba(255, 255, 255, 0.075);
+}
+
+.surfaceCard {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-default);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018)),
+    rgba(10, 10, 12, 0.84);
+  box-shadow: var(--shadow-card);
+}
+
+.surfaceCardSoft {
+  border-radius: var(--radius-card);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.surfaceInner {
+  padding: 1.2rem 1.25rem;
+}
+
+.surfaceEyebrow {
+  margin: 0 0 0.55rem;
+  color: var(--foreground-subtle);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.surfaceTitle {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1.16rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.surfaceBody {
+  margin: 0.72rem 0 0;
+  color: var(--foreground-muted);
+  line-height: 1.65;
+}
+
+.surfaceMuted {
+  margin: 0.8rem 0 0;
+  color: var(--foreground-subtle);
+  line-height: 1.55;
+}
+
+.orderedList {
+  margin: 0.95rem 0 0;
+  padding-left: 1.15rem;
+  color: var(--foreground);
+  line-height: 1.7;
+}
+
+.orderedList li + li {
+  margin-top: 0.45rem;
+}
+
+.metaList {
+  margin: 0.95rem 0 0;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.metaRow {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.metaLabel {
+  color: var(--foreground-subtle);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.metaValue {
+  color: var(--foreground);
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0.35rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-default);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.segmentedButton {
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--foreground-muted);
+  padding: 0.56rem 0.9rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.segmentedButtonActive {
+  background: rgba(94, 106, 210, 0.18);
+  color: var(--foreground);
+  box-shadow: inset 0 0 0 1px rgba(94, 106, 210, 0.24);
+}
+
+.tableWrap {
+  overflow: hidden;
+  margin-top: 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table th,
+.table td {
+  padding: 1rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: top;
+  text-align: left;
+}
+
+.table tr:last-child td {
+  border-bottom: 0;
+}
+
+.table th {
+  color: var(--foreground-subtle);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.table tbody tr {
+  background: transparent;
+}
+
+.table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.tableSubtle {
+  margin-top: 0.35rem;
+  color: var(--foreground-muted);
+  font-size: 0.87rem;
+  line-height: 1.5;
+}
+
+.tableLink {
+  color: var(--foreground);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.tableLink:hover,
+.tableLink:focus-visible {
+  color: var(--accent-bright);
+}
+
+.listStack {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.listCard {
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-default);
+  background: rgba(255, 255, 255, 0.028);
+  padding: 1rem 1rem 1.05rem;
+}
+
+.listCardTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.listCardBody {
+  margin: 0.55rem 0 0;
+  color: var(--foreground-muted);
+  line-height: 1.62;
+}
+
+.listCardOutcome {
+  margin: 0.8rem 0 0;
+  color: var(--foreground);
+  line-height: 1.58;
+}
+
+.scoreGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.9rem;
+}
+
+.scoreCard {
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-default);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1rem;
+}
+
+.scoreCardTitle {
+  margin: 0;
+  color: var(--foreground-subtle);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.scoreCardValue {
+  margin: 0.55rem 0 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.scoreCardMeta {
+  margin: 0.55rem 0 0;
+  color: var(--foreground-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.emptyState {
+  margin: 0;
+  color: var(--foreground-muted);
+  line-height: 1.65;
+}
+
+@media (max-width: 860px) {
+  .table,
+  .table thead,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tr {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .table tr:last-child {
+    border-bottom: 0;
+  }
+
+  .table td {
+    padding: 0.42rem 0;
+    border: 0;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.24rem;
+    color: var(--foreground-subtle);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
 }

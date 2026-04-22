@@ -1,56 +1,19 @@
 .page {
   display: grid;
-  gap: 1.4rem;
+  gap: 1.5rem;
 }
 
 .grid {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.7fr) minmax(18rem, 1fr);
 }
 
-.mainColumn {
-  grid-column: span 8;
-}
-
+.mainColumn,
 .sideColumn {
-  grid-column: span 4;
-}
-
-.panel {
-  border: 1px solid rgba(0, 255, 255, 0.14);
-  background: linear-gradient(180deg, rgba(18, 16, 46, 0.92), rgba(11, 10, 28, 0.94));
-  padding: 1.1rem;
-  box-shadow: var(--glow-sm);
-}
-
-.panelEyebrow {
-  margin: 0 0 0.45rem;
-  color: var(--accent-cyan);
-  font-size: 0.74rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.panelTitle {
-  margin: 0;
-  font-family: var(--font-heading);
-  font-size: 1.15rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.panelBody {
-  margin: 0.75rem 0 0;
-  color: var(--text-muted);
-  line-height: 1.65;
-}
-
-.panelOutcome {
-  margin: 0.85rem 0 0;
-  color: var(--text-strong);
-  font-size: 0.95rem;
-  line-height: 1.6;
+  display: grid;
+  gap: 1rem;
+  align-content: start;
 }
 
 .stack {
@@ -58,136 +21,31 @@
   gap: 1rem;
 }
 
-.filterRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem;
-}
-
-.filterButton {
-  border: 1px solid rgba(45, 27, 78, 1);
-  background: rgba(8, 7, 22, 0.8);
-  color: var(--text-muted);
-  padding: 0.7rem 0.9rem;
-  font-family: var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.filterButtonActive {
-  border-color: rgba(255, 0, 255, 0.5);
-  color: var(--accent-magenta);
-  box-shadow: var(--glow-sm);
-}
-
-.tableWrap {
-  overflow-x: auto;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 44rem;
-}
-
-.table th,
-.table td {
-  padding: 0.9rem 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  vertical-align: top;
-  text-align: left;
-}
-
-.table th {
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.tableSubtle {
-  margin-top: 0.35rem;
-  color: var(--text-subtle);
-  font-size: 0.84rem;
-  line-height: 1.5;
-}
-
-.tableLink {
-  color: var(--accent-cyan);
-  text-decoration: none;
-}
-
-.tableLink:hover,
-.tableLink:focus-visible {
-  text-decoration: underline;
-}
-
-.metaList {
-  margin: 0;
+.splitCard {
   display: grid;
-  gap: 0.75rem;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.metaRow {
+.cardGrid {
   display: grid;
-  gap: 0.25rem;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
 }
 
-.metaLabel {
-  color: var(--text-muted);
-  font-size: 0.74rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-
-.metaValue {
-  color: var(--text-strong);
-  line-height: 1.55;
-  word-break: break-word;
+.fullSpan {
+  grid-column: 1 / -1;
 }
 
 .emptyState {
   margin: 0;
-  color: var(--text-muted);
-  line-height: 1.6;
+  color: var(--foreground-muted);
+  line-height: 1.65;
 }
 
-.scoreGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  gap: 0.85rem;
-}
-
-.scoreCard {
-  border: 1px solid rgba(255, 0, 255, 0.16);
-  background: rgba(9, 8, 24, 0.76);
-  padding: 0.95rem;
-}
-
-.scoreCardTitle {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.76rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.scoreCardValue {
-  margin: 0.5rem 0 0;
-  font-family: var(--font-heading);
-  font-size: 1.8rem;
-}
-
-.scoreCardMeta {
-  margin: 0.5rem 0 0;
-  color: var(--text-subtle);
-  font-size: 0.84rem;
-  line-height: 1.5;
-}
-
-@media (max-width: 1040px) {
-  .mainColumn,
-  .sideColumn {
-    grid-column: 1 / -1;
+@media (max-width: 1120px) {
+  .grid,
+  .splitCard {
+    grid-template-columns: 1fr;
   }
 }

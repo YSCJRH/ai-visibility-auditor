@@ -159,6 +159,15 @@ function renderPanel(title: string, eyebrow: string, body: string): string {
   return `<article class="panel"><p class="eyebrow">${escapeHtml(eyebrow)}</p><h2>${escapeHtml(title)}</h2>${body}</article>`;
 }
 
+function renderMetric(label: string, value: string, helper: string): string {
+  return `<article class="metric"><p class="metric-label">${escapeHtml(label)}</p><p class="metric-value">${escapeHtml(value)}</p><p class="metric-helper">${escapeHtml(helper)}</p></article>`;
+}
+
+function renderCtaCard(title: string, eyebrow: string, body: string, href: string, linkLabel: string, tone: "primary" | "secondary" = "primary"): string {
+  const className = tone === "primary" ? "ctaLink" : "ctaLink ctaLinkSecondary";
+  return `<article class="panel ctaCard"><div><p class="eyebrow">${escapeHtml(eyebrow)}</p><h2>${escapeHtml(title)}</h2><p>${body}</p></div><a class="${className}" href="${escapeHtml(href)}">${escapeHtml(linkLabel)}</a></article>`;
+}
+
 function siteLabel(site: { input: string; display?: string }): string {
   const display = site.display?.trim();
   return display && display.length > 0 ? display : site.input;
@@ -558,24 +567,81 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale
     <meta name="twitter:image" content="${escapeHtml(ogImage)}" />
     <meta name="last-modified" content="${escapeHtml(updatedAt)}" />
     <style>
-      :root{color-scheme:dark;--bg:#081225;--panel:rgba(16,28,52,.9);--line:rgba(120,168,255,.2);--ink:#eef5ff;--muted:#adc3de;--accent:#7df0d2}
-      *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;background:radial-gradient(circle at top left,rgba(96,120,255,.16),transparent 24%),radial-gradient(circle at bottom right,rgba(125,240,210,.14),transparent 20%),linear-gradient(180deg,#0b1630 0%,var(--bg) 100%);color:var(--ink)}
-      a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}.shell{width:min(1180px,calc(100vw - 32px));margin:0 auto;padding:24px 0 56px}.topbar,.hero,.panel,.metric{border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:0 20px 40px rgba(2,8,18,.35)}
-      .topbar{display:flex;gap:16px;justify-content:space-between;align-items:center;padding:16px 20px}.nav{display:flex;gap:12px;flex-wrap:wrap}.nav a{padding:10px 14px;border-radius:999px;border:1px solid var(--line)}
-      .locale-switcher{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.92rem}
-      .hero,.panel,.metric{padding:22px}.hero h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.2rem);line-height:1.05}.hero p,.muted{color:var(--muted)}.eyebrow{margin:0 0 10px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-size:.78rem}
-      .section{margin-top:24px}.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.metric-value{margin:0;font-size:2rem;font-weight:700}
-      .panel h2{margin-top:0}.markdown{margin:0;padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(8,18,37,.95);white-space:pre-wrap;overflow:auto;font-family:"Consolas","SFMono-Regular",monospace;line-height:1.5}
-      .footer{margin-top:28px;text-align:center;color:var(--muted)}
+      :root{color-scheme:dark;--bg:#05070e;--bg-accent:#0a1020;--surface:rgba(10,15,29,.86);--surface-strong:rgba(13,20,38,.94);--surface-soft:rgba(17,25,46,.8);--line:rgba(148,163,184,.16);--line-strong:rgba(129,140,248,.32);--ink:#f5f7ff;--muted:#99a4bc;--accent:#818cf8;--accent-strong:#c7d2fe;--shadow:0 24px 80px rgba(2,6,23,.42)}
+      *{box-sizing:border-box}
+      html{background:var(--bg)}
+      body{margin:0;min-height:100vh;overflow-x:hidden;font-family:"Segoe UI Variable Display","Aptos","Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.6;letter-spacing:.01em;background:radial-gradient(circle at 12% 0%,rgba(129,140,248,.16),transparent 26%),radial-gradient(circle at 88% 18%,rgba(37,99,235,.12),transparent 24%),linear-gradient(180deg,#070910 0%,var(--bg-accent) 46%,var(--bg) 100%);color:var(--ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+      body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:72px 72px;mask-image:radial-gradient(circle at center,black 30%,transparent 78%)}
+      body::after{content:"";position:fixed;top:-8rem;right:-10rem;width:34rem;height:34rem;pointer-events:none;background:radial-gradient(circle,rgba(99,102,241,.18) 0%,transparent 68%);filter:blur(12px)}
+      a{color:var(--accent-strong);text-decoration-color:rgba(199,210,254,.4);text-underline-offset:.18em}
+      a:hover{text-decoration-color:rgba(199,210,254,.78)}
+      strong{color:var(--ink)}
+      code{padding:.16em .42em;border:1px solid rgba(129,140,248,.16);border-radius:8px;background:rgba(99,102,241,.12);color:#d9e0ff;font-family:"Cascadia Code","SFMono-Regular",Consolas,monospace;font-size:.92em}
+      *:focus-visible{outline:2px solid rgba(199,210,254,.78);outline-offset:3px;border-radius:10px}
+      .shell{position:relative;z-index:1;width:min(1180px,calc(100vw - 32px));margin:0 auto;padding:24px 0 80px}
+      .topbar,.hero,.panel,.metric{position:relative;overflow:hidden;border:1px solid var(--line);background:linear-gradient(180deg,rgba(14,21,39,.88) 0%,rgba(8,12,24,.96) 100%);box-shadow:var(--shadow)}
+      .topbar::before,.hero::before,.panel::before,.metric::before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,rgba(199,210,254,.78),transparent 72%);opacity:.72}
+      .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end;padding:18px 22px;border-radius:22px;background:linear-gradient(180deg,rgba(10,15,29,.88) 0%,rgba(7,11,22,.94) 100%);backdrop-filter:blur(18px)}
+      .brand{display:grid;gap:6px;max-width:44rem}
+      .brand-name{display:inline-flex;align-items:center;gap:12px;width:max-content;color:var(--ink);text-decoration:none;font-size:1.04rem;font-weight:650;letter-spacing:-.02em}
+      .brand-name::before{content:"";width:12px;height:12px;border-radius:4px;background:linear-gradient(135deg,#c7d2fe 0%,#818cf8 45%,#4f46e5 100%);box-shadow:0 0 0 5px rgba(129,140,248,.14)}
+      .brand-copy{margin:0;color:var(--muted);font-size:.96rem;line-height:1.6}
+      .nav{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}
+      .nav a{display:inline-flex;align-items:center;min-height:38px;padding:0 12px;border:1px solid transparent;border-radius:12px;color:var(--muted);text-decoration:none;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+      .nav a:hover{color:var(--ink);border-color:rgba(129,140,248,.18);background:rgba(99,102,241,.1);transform:translateY(-1px)}
+      .locale-switcher{display:inline-flex;align-items:center;gap:8px;margin:14px 4px 0;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(10,15,29,.72);backdrop-filter:blur(12px);color:var(--muted);font-size:.9rem}
+      .locale-switcher a{color:var(--ink)}
+      .content{display:grid;gap:28px;margin-top:24px}
+      .content>.section{margin-top:0}
+      .hero{display:grid;gap:16px;align-content:end;min-height:320px;padding:40px clamp(24px,4vw,44px);border-radius:32px;background:radial-gradient(circle at top right,rgba(129,140,248,.18) 0%,transparent 30%),radial-gradient(circle at 20% 20%,rgba(59,130,246,.12),transparent 24%),linear-gradient(180deg,rgba(16,24,45,.96) 0%,rgba(7,10,20,.98) 100%)}
+      .hero::after{content:"";position:absolute;inset:auto 0 0;height:120px;background:linear-gradient(180deg,transparent,rgba(79,70,229,.08))}
+      .hero h1{position:relative;margin:0;max-width:13ch;font-size:clamp(2.6rem,6vw,4.8rem);line-height:.95;letter-spacing:-.05em}
+      .locale-zh .hero h1{max-width:10ch;font-size:clamp(2.25rem,5vw,4.2rem);line-height:1.02;letter-spacing:-.035em}
+      .hero p,.muted{position:relative;color:var(--muted)}
+      .hero p{margin:0;max-width:62ch;font-size:1.05rem;line-height:1.75}
+      .locale-zh .hero p{max-width:48ch}
+      .eyebrow{position:relative;margin:0;color:var(--accent-strong);font-size:.76rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase}
+      .section{margin-top:30px}
+      .grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));align-items:stretch}
+      .panel,.metric{padding:24px 24px 26px;border-radius:24px}
+      .panel>h2{margin:0 0 14px;font-size:1.18rem;line-height:1.2;letter-spacing:-.025em}
+      .panel h2:not(:first-child){margin-top:24px;font-size:1rem}
+      .panel p{margin:0 0 14px}
+      .panel> :last-child{margin-bottom:0}
+      .panel p,.panel li,.panel td,.metric-helper,.footer{color:var(--muted)}
+      .panel ul,.panel ol{margin:0;padding-left:1.2rem}
+      .panel li+li{margin-top:10px}
+      .panel table{width:100%;border-collapse:collapse}
+      .panel th,.panel td{padding:12px 0;border-bottom:1px solid rgba(148,163,184,.12);text-align:left;vertical-align:top}
+      .panel th{color:var(--ink);font-size:.84rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+      .panel tbody tr:last-child td{border-bottom:none;padding-bottom:0}
+      .metric{display:grid;gap:12px;align-content:start;min-height:188px}
+      .metric-label{margin:0;color:var(--accent-strong);font-size:.75rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase}
+      .metric-value{margin:0;font-size:clamp(2.1rem,4vw,3.25rem);line-height:1;letter-spacing:-.055em;font-weight:650;color:var(--ink)}
+      .metric-helper{margin:0;max-width:26ch;font-size:.97rem;line-height:1.65}
+      .ctaGrid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+      .ctaCard{display:flex;flex-direction:column;justify-content:space-between;min-height:100%}
+      .ctaCard p{color:var(--muted)}
+      .ctaLink{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:max-content;max-width:100%;min-height:48px;margin-top:22px;padding:0 16px;border-radius:14px;border:1px solid rgba(129,140,248,.32);background:linear-gradient(180deg,#8190ff 0%,#6366f1 100%);color:#f8faff;text-decoration:none;font-weight:600;box-shadow:0 14px 36px rgba(79,70,229,.24);transition:transform .18s ease,filter .18s ease,border-color .18s ease,background .18s ease}
+      .ctaLink:hover{text-decoration:none;transform:translateY(-1px);filter:brightness(1.04)}
+      .ctaLinkSecondary{background:rgba(10,15,29,.86);color:var(--ink);box-shadow:none}
+      .ctaLinkSecondary:hover{border-color:rgba(129,140,248,.42);background:rgba(16,24,45,.96)}
+      .callout{margin-top:16px;padding:30px;background:radial-gradient(circle at top right,rgba(129,140,248,.16),transparent 34%),linear-gradient(135deg,rgba(17,25,46,.96) 0%,rgba(8,12,24,.98) 100%);border-color:rgba(129,140,248,.24)}
+      .callout h2{font-size:1.34rem}
+      .markdown{margin:0;padding:18px 20px;border:1px solid rgba(148,163,184,.14);border-radius:18px;background:rgba(5,8,17,.92);white-space:pre-wrap;overflow:auto;font-family:"Cascadia Code","SFMono-Regular",Consolas,monospace;font-size:.94rem;line-height:1.62;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+      .footer{margin:4px 0 0;padding:8px 4px 0;font-size:.92rem;line-height:1.6}
+      @media (max-width:900px){.topbar{grid-template-columns:1fr;align-items:start}.nav{justify-content:flex-start}.hero{min-height:280px}}
+      @media (max-width:720px){.brand-copy{display:none}.nav{gap:6px}.nav a{min-height:34px;padding:0 10px;font-size:.92rem}.panel table{display:block;overflow-x:auto;white-space:nowrap}}
+      @media (max-width:640px){.shell{width:min(100vw - 20px,1180px);padding:12px 0 56px}.topbar{padding:14px 16px;border-radius:18px}.brand-copy{display:none}.nav{gap:4px}.nav a{min-height:32px;padding:0 9px;font-size:.88rem}.locale-switcher{margin-top:10px;padding:7px 10px}.content{gap:20px}.hero{min-height:auto;padding:22px 18px 22px;border-radius:24px}.hero h1{max-width:unset;font-size:clamp(2.05rem,10.4vw,3rem)}.locale-zh .hero h1{font-size:clamp(1.62rem,7.8vw,2.26rem);line-height:1.06}.hero p{font-size:.98rem;line-height:1.68}.locale-zh .hero p{font-size:.92rem;line-height:1.6}.panel,.metric{padding:20px}.grid,.ctaGrid{grid-template-columns:1fr}.ctaLink{width:100%}}
     </style>
     <script type="application/ld+json">${JSON.stringify(page.jsonLd)}</script>
   </head>
-  <body>
+  <body class="${locale === "zh-CN" ? "locale-zh" : "locale-en"}">
     <div class="shell">
       <header class="topbar">
-        <div>
-          <strong>AnswerLens</strong>
-          <p class="muted">${escapeHtml(t(locale, "brand.description"))} ${escapeHtml(t(locale, "brand.tagline"))}</p>
+        <div class="brand">
+          <a class="brand-name" href="${escapeHtml(new URL(localizePath("", locale), siteUrl).href)}">AnswerLens</a>
+          <p class="brand-copy">${escapeHtml(t(locale, "brand.description"))} ${escapeHtml(t(locale, "brand.tagline"))}</p>
         </div>
         <nav class="nav">
           <a href="${escapeHtml(new URL(localizePath("", locale), siteUrl).href)}">${escapeHtml(t(locale, "nav.home"))}</a>
@@ -587,7 +653,9 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale
         </nav>
       </header>
       ${renderLanguageSelector(siteUrl, page.route, locale)}
-      ${pageBody}
+      <main class="content">
+        ${pageBody}
+      </main>
       <p class="footer">${escapeHtml(t(locale, "footer.distribution"))}</p>
     </div>
   </body>
@@ -905,39 +973,124 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     {
       route: "",
       filePath: path.join(outDir, "index.html"),
-      title: "AI visibility audit reports and demo entry points",
-      description: `${DESCRIPTION} ${TAGLINE}`,
-      body: `<section class="hero"><p class="eyebrow">${escapeHtml(TAGLINE)}</p><h1>AnswerLens makes AI discoverability reviewable in GitHub.</h1><p>${escapeHtml(DESCRIPTION)} It turns audits into share summaries, PR-ready snippets, static reports, release assets, and indexable pages without falling back to dashboard-only workflows.</p></section>
+      title: {
+        en: "AI visibility audit reports and demo entry points",
+        "zh-CN": "AI 可见性审计报告与演示入口"
+      },
+      description: {
+        en: `${DESCRIPTION} ${TAGLINE}`,
+        "zh-CN": "AnswerLens 是一个面向产品网站的 CLI-first AI 可发现性审计器。面向 AI 可发现性的 CI。"
+      },
+      body: {
+        en: `<section class="hero"><p class="eyebrow">${escapeHtml(TAGLINE)}</p><h1>AnswerLens turns AI discoverability work into reviewable artifacts.</h1><p>${escapeHtml(DESCRIPTION)} Start with the live demo, inspect one current issue and one next fix, then carry the same workflow into your own site and CI.</p></section>
         <section class="section grid">
-          <article class="metric"><p class="eyebrow">overallScore</p><p class="metric-value">${escapeHtml(String(shareSummary.metrics.overallScore ?? "pending"))}</p></article>
-          <article class="metric"><p class="eyebrow">vavr</p><p class="metric-value">${escapeHtml(String(shareSummary.metrics.vavr ?? "pending"))}</p></article>
-          <article class="metric"><p class="eyebrow">keyPageCount</p><p class="metric-value">${escapeHtml(String(shareSummary.metrics.keyPageCount ?? "pending"))}</p></article>
-          <article class="metric"><p class="eyebrow">latestRelease</p><p class="metric-value">${escapeHtml(releases[0]?.tag_name ?? "pending")}</p></article>
+          ${renderMetric("Demo score", String(shareSummary.metrics.overallScore ?? "pending"), "Current score from the stable public fixture.")}
+          ${renderMetric("Key pages", String(shareSummary.metrics.keyPageCount ?? "pending"), "Critical pages found in the demo site.")}
+          ${renderMetric("First artifact", "share-summary.md", "Open this before scorecard and recommendations.")}
+          ${renderMetric("Latest release", releases[0]?.tag_name ?? "pending", "Current published version line.")}
+        </section>
+        <section class="section">
+          <div class="ctaGrid">
+            ${renderCtaCard(
+              "Open the live demo report",
+              "Primary entry",
+              "See the full artifact trail and understand what a useful run looks like before you install anything.",
+              new URL("examples/static-good/index.html", siteUrl).href,
+              "Open demo"
+            )}
+            ${renderCtaCard(
+              "Run the 60-second fixture demo",
+              "Secondary entry",
+              "Reproduce the same artifact set locally so the workflow feels concrete, not theoretical.",
+              `${REPO_URL}#run-the-60-second-fixture-demo`,
+              "Run fixture",
+              "secondary"
+            )}
+            ${renderCtaCard(
+              "Add the GitHub Action",
+              "Secondary entry",
+              "Use the same artifact contract in pull requests after one local run already feels reviewable.",
+              repoBlob("docs/github-action.md"),
+              "Open Action docs",
+              "secondary"
+            )}
+          </div>
+          <article class="panel callout"><p class="eyebrow">Bridge step</p><h2>Run one real-site audit before CI.</h2><p>After the demo and fixture run, use the <a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">5-minute quickstart</a> on your own public site. That keeps the funnel sequential: demo, fixture, real site, then Action.</p><p>Keep the review order fixed every time: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>. Use <a href="${escapeHtml(new URL("releases/", siteUrl).href)}">the latest release</a> as the second public front door.</p></article>
         </section>
         <section class="section grid">
-          ${renderPanel("Why AI may still miss the site", "Top issues", `<ul>${renderList(shareSummary.topIssues.map((item) => `<strong>${escapeHtml(item.title)}</strong> (${escapeHtml(item.severity)}): ${escapeHtml(item.fixHint)}`))}</ul>`)}
-          ${renderPanel("What teams can ship next", "Top fixes", `<ul>${renderList(shareSummary.topRecommendations.map((item) => `<strong>${escapeHtml(item.title)}</strong>: ${escapeHtml(item.expectedOutcome)}`))}</ul>`)}
-        </section>
-        <section class="section grid">
-          ${renderPanel("Recommended first-run path", "Activation funnel", `<p>Use the public funnel in this order:</p><ol><li><a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open the live demo report</a> to understand the artifact flow.</li><li><a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">Run the 60-second fixture demo</a> to reproduce the same artifact set locally.</li><li><a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a> before wiring CI.</li><li><a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Add the GitHub Action</a> when you want the same artifact contract in pull requests and workflow runs.</li></ol><p>If you arrive here already knowing you want CI, the Action docs remain public, but the clearest first run still moves through the demo and one local audit first. Use <a href="${escapeHtml(new URL("releases/", siteUrl).href)}">the latest release</a> as the second public front door.</p><p>At every step, start with <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`)}
-          ${renderPanel("Public proof block", "Artifact proof", `${renderSiteIdentity(shareSummary.site)}${firstIssue ? `<p><strong>Top issue:</strong> ${escapeHtml(firstIssue.title)} (${escapeHtml(firstIssue.severity)}) - ${escapeHtml(firstIssue.fixHint)}</p>` : "<p><strong>Top issue:</strong> none</p>"}${firstFix ? `<p><strong>Top fix:</strong> ${escapeHtml(firstFix.title)} - ${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p><strong>Top fix:</strong> none</p>"}<p>Open artifacts in order: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p><ul>${publicArtifactLinks}</ul>`)}
-        </section>
-        <section class="section grid">
-          ${renderPanel("Public proof pages", "Coverage", `<p>AnswerLens now publishes public proof surfaces that explain packaging, trust, FAQs, comparisons, and integrations without drifting into dashboard-first packaging.</p><ul>${renderList([
-            `<a href="${escapeHtml(proofPageUrls.pricing)}">Pricing and packaging</a>: explain the open-source, BYOK, and release-asset cost model.`,
-            `<a href="${escapeHtml(proofPageUrls.security)}">Security and trust</a>: explain secrets, review flow, and non-goals in one page.`,
+          ${renderPanel("What the demo says right now", "Current signal", `${renderSiteIdentity(shareSummary.site)}${firstIssue ? `<p><strong>Top issue:</strong> ${escapeHtml(firstIssue.title)} (${escapeHtml(firstIssue.severity)}) - ${escapeHtml(firstIssue.fixHint)}</p>` : "<p><strong>Top issue:</strong> none</p>"}${firstFix ? `<p><strong>Top fix:</strong> ${escapeHtml(firstFix.title)} - ${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p><strong>Top fix:</strong> none</p>"}<p>Open artifacts in order: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p><ul>${publicArtifactLinks}</ul>`)}
+          ${renderPanel("What to read next", "Proof pages", `<p>Use these public pages when you need packaging, trust, FAQ, comparison, and adoption context beyond the demo report.</p><ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.pricing)}">Pricing and packaging</a>: open-source, BYOK, and release-asset cost model.`,
+            `<a href="${escapeHtml(proofPageUrls.security)}">Security and trust</a>: secrets, review flow, and non-goals in one page.`,
             `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">Docs index</a>: activation references, scoring notes, and GitHub Action usage.`,
-            `<a href="${escapeHtml(proofPageUrls.starter)}">Starter bundle</a>: show the external <code>.github/answerlens/</code> layout before CI adoption.`,
-            `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: answer first-run questions in visible, citable language.`,
-            `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: explain how AnswerLens differs from dashboard-first AI visibility tools.`,
-            `<a href="${escapeHtml(proofPageUrls.integrations)}">Integrations</a>: show the GitHub-native and validation surfaces together.`
+            `<a href="${escapeHtml(proofPageUrls.starter)}">Starter bundle</a>: external <code>.github/answerlens/</code> layout before CI adoption.`,
+            `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>: first-run questions in visible, citable language.`,
+            `<a href="${escapeHtml(proofPageUrls.compare)}">Compare</a>: how AnswerLens differs from dashboard-first AI visibility tools.`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">Integrations</a>: GitHub-native and validation surfaces together.`
           ])}</ul>`)}
-          ${renderPanel("Use-case coverage", "Team fit", `<p>These use-case pages explain where AnswerLens fits before a team adopts it in CI.</p><ul>${renderList([
+        </section>
+        <section class="section grid">
+          ${renderPanel("Who usually reads next", "Team fit", `<p>These use-case pages explain where AnswerLens fits before a team adopts it in CI.</p><ul>${renderList([
             `<a href="${escapeHtml(proofPageUrls.productMarketing)}">Product marketing teams</a>: turn homepage, pricing, and comparison gaps into reviewable fixes.`,
             `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">Developer advocacy teams</a>: strengthen docs, proof pages, and self-serve evaluation paths.`,
             `<a href="${escapeHtml(proofPageUrls.openSource)}">Open-source maintainers</a>: use README, releases, Pages, and artifacts as the public distribution stack.`
           ])}</ul>`)}
         </section>`,
+        "zh-CN": `<section class="hero"><p class="eyebrow">面向 AI 可发现性的 CI。</p><h1>AnswerLens 把 AI 可发现性工作变成一套可以审阅的产物。</h1><p>AnswerLens 是一个面向产品网站的 CLI-first AI 可发现性审计器。先看 live demo，理解当前问题和下一步修复，再把同一套流程带到你自己的站点和 CI 里。</p></section>
+        <section class="section grid">
+          ${renderMetric("演示分数", String(shareSummary.metrics.overallScore ?? "待生成"), "稳定公开 fixture 的当前得分。")}
+          ${renderMetric("关键页面数", String(shareSummary.metrics.keyPageCount ?? "待生成"), "这次演示里识别出的关键页面数量。")}
+          ${renderMetric("先看哪个产物", "share-summary.md", "先看它，再看 scorecard 和 recommendations。")}
+          ${renderMetric("最新版本", releases[0]?.tag_name ?? "待生成", "当前公开发布的版本线。")}
+        </section>
+        <section class="section">
+          <div class="ctaGrid">
+            ${renderCtaCard(
+              "打开在线演示报告",
+              "主入口",
+              "先看完整 artifact 路径，理解一轮有价值的运行到底会产出什么。",
+              new URL("examples/static-good/index.html", siteUrl).href,
+              "打开演示"
+            )}
+            ${renderCtaCard(
+              "运行 60 秒 fixture 演示",
+              "辅助入口",
+              "把同一组产物在本地复现出来，让这条工作流从“看懂”变成“亲手跑通”。",
+              `${REPO_URL}#run-the-60-second-fixture-demo`,
+              "运行 fixture",
+              "secondary"
+            )}
+            ${renderCtaCard(
+              "添加 GitHub Action",
+              "辅助入口",
+              "当一轮本地运行已经足够可审阅时，再把同一套产物契约搬进 pull request。",
+              repoBlob("docs/zh/github-action.md"),
+              "打开 Action 文档",
+              "secondary"
+            )}
+          </div>
+          <article class="panel callout"><p class="eyebrow">桥接步骤</p><h2>在接 CI 之前，先跑一轮真实站点审计。</h2><p>看完 demo 和 fixture 之后，用 <a href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">5 分钟 quickstart</a> 在你自己的公开站点上跑一轮。这能让漏斗保持顺序：demo、fixture、真实站点、然后才是 Action。</p><p>每一轮都保持同样的审阅顺序：先看 <code>share-summary.md</code>，再看 <code>scorecard.md</code>，最后看 <code>recommendations.md</code>。<a href="${escapeHtml(new URL("releases/", siteUrl).href)}">最新 release</a> 继续作为第二个公开入口。</p></article>
+        </section>
+        <section class="section grid">
+          ${renderPanel("这轮演示现在说明了什么", "当前信号", `${renderSiteIdentity(shareSummary.site)}${firstIssue ? `<p><strong>核心问题：</strong> ${escapeHtml(firstIssue.title)} (${escapeHtml(firstIssue.severity)}) - ${escapeHtml(firstIssue.fixHint)}</p>` : "<p><strong>核心问题：</strong> 无</p>"}${firstFix ? `<p><strong>优先修复：</strong> ${escapeHtml(firstFix.title)} - ${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p><strong>优先修复：</strong> 无</p>"}<p>产物打开顺序保持固定：<code>share-summary.md</code>，然后 <code>scorecard.md</code>，最后 <code>recommendations.md</code>。</p><ul>${publicArtifactLinks}</ul>`)}
+          ${renderPanel("接下来该读哪些公开页", "证明页面", `<p>如果你需要定价、信任、FAQ、对比和接入上下文，而不只是 demo report，就继续看这些公开页。</p><ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.pricing)}">定价与打包</a>：看开源、BYOK 和 release 资产的成本边界。`,
+            `<a href="${escapeHtml(proofPageUrls.security)}">安全与信任</a>：把 secrets、审阅流和非目标放到同一页。`,
+            `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">文档索引</a>：继续看 activation 参考、评分说明和 GitHub Action 用法。`,
+            `<a href="${escapeHtml(proofPageUrls.starter)}">starter bundle</a>：在接 CI 之前先看外部 <code>.github/answerlens/</code> 布局。`,
+            `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>：用可引用的语言回答首次试用问题。`,
+            `<a href="${escapeHtml(proofPageUrls.compare)}">对比页</a>：看 AnswerLens 和 dashboard-first 工具的差异。`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">集成页</a>：把 GitHub-native 和验证层入口放到一起看。`
+          ])}</ul>`)}
+        </section>
+        <section class="section grid">
+          ${renderPanel("哪些团队通常会继续往下看", "团队适配", `<p>这些 use-case 页面会先解释 AnswerLens 适合谁，再进入 CI 采用路径。</p><ul>${renderList([
+            `<a href="${escapeHtml(proofPageUrls.productMarketing)}">产品营销团队</a>：把首页、pricing 和对比内容缺口变成可审阅的修复项。`,
+            `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">开发者关系团队</a>：强化文档、proof page 和自助试用路径。`,
+            `<a href="${escapeHtml(proofPageUrls.openSource)}">开源维护者</a>：把 README、release、Pages 和 artifacts 当作公开分发栈。`
+          ])}</ul>`)}
+        </section>`
+      },
       jsonLd: [
         {
           "@context": "https://schema.org",

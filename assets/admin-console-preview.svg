@@ -1,142 +1,149 @@
 <svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="160" y1="40" x2="1240" y2="860" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#16031F"/>
-      <stop offset="0.52" stop-color="#0B0422"/>
-      <stop offset="1" stop-color="#070014"/>
+    <linearGradient id="bg" x1="240" y1="40" x2="1180" y2="860" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1B2037"/>
+      <stop offset="0.45" stop-color="#0B0D18"/>
+      <stop offset="1" stop-color="#050506"/>
     </linearGradient>
+    <radialGradient id="glowTop" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(780 110) rotate(90) scale(340 620)">
+      <stop stop-color="#5E6AD2" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#5E6AD2" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowLeft" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(180 520) rotate(90) scale(260 360)">
+      <stop stop-color="#6E58D8" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#6E58D8" stop-opacity="0"/>
+    </radialGradient>
     <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
-      <stop stop-color="#171434"/>
-      <stop offset="1" stop-color="#0D0B22"/>
+      <stop stop-color="rgba(255,255,255,0.05)"/>
+      <stop offset="1" stop-color="rgba(255,255,255,0.02)"/>
     </linearGradient>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#FF9900"/>
-      <stop offset="0.52" stop-color="#FF00FF"/>
-      <stop offset="1" stop-color="#00FFFF"/>
+    <linearGradient id="primary" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#6872D9"/>
+      <stop offset="1" stop-color="#5E6AD2"/>
     </linearGradient>
-    <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="14" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="28" flood-color="#000000" flood-opacity="0.36"/>
     </filter>
-    <filter id="glowMagenta" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="18" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
-      <path d="M48 0H0V48" stroke="#1A2B54" stroke-opacity="0.42"/>
-    </pattern>
   </defs>
 
   <rect width="1440" height="900" rx="28" fill="url(#bg)"/>
-  <rect width="1440" height="900" rx="28" fill="url(#grid)"/>
-  <circle cx="1160" cy="150" r="170" fill="#00FFFF" fill-opacity="0.08" filter="url(#glowCyan)"/>
-  <circle cx="205" cy="760" r="190" fill="#FF00FF" fill-opacity="0.08" filter="url(#glowMagenta)"/>
+  <rect width="1440" height="900" rx="28" fill="url(#glowTop)"/>
+  <rect width="1440" height="900" rx="28" fill="url(#glowLeft)"/>
 
-  <rect x="0" y="0" width="300" height="900" fill="#0D0A21" fill-opacity="0.9"/>
-  <rect x="299" y="0" width="1" height="900" fill="#163457"/>
-
-  <text x="48" y="82" fill="#FF00FF" font-size="18" font-family="Share Tech Mono, monospace" letter-spacing="3">INTERNAL CONTROL CONSOLE</text>
-  <text x="48" y="136" fill="#F4F7FF" font-size="46" font-weight="700" font-family="Orbitron, Arial, sans-serif">ANSWERLENS</text>
-  <text x="48" y="184" fill="#F4F7FF" font-size="46" font-weight="700" font-family="Orbitron, Arial, sans-serif">ADMIN</text>
-  <text x="48" y="234" fill="#C7CCE2" font-size="20" font-family="Inter, Arial, sans-serif">Run orchestration, preset browsing, and</text>
-  <text x="48" y="264" fill="#C7CCE2" font-size="20" font-family="Inter, Arial, sans-serif">artifact-first review for AnswerLens.</text>
-
-  <rect x="36" y="330" width="228" height="64" fill="#11102A" stroke="#00FFFF" stroke-opacity="0.32"/>
-  <text x="62" y="370" fill="#00FFFF" font-size="20" font-family="Share Tech Mono, monospace">RUNS</text>
-
-  <rect x="36" y="410" width="228" height="64" fill="#11102A" stroke="#3A215A"/>
-  <text x="62" y="450" fill="#E5E9F7" font-size="20" font-family="Share Tech Mono, monospace">PRESETS</text>
-
-  <rect x="36" y="544" width="228" height="138" fill="url(#panel)" stroke="#FF00FF" stroke-opacity="0.2"/>
-  <text x="56" y="578" fill="#00FFFF" font-size="15" font-family="Share Tech Mono, monospace" letter-spacing="2">REVIEW ORDER</text>
-  <text x="56" y="622" fill="#E5E9F7" font-size="20" font-family="Inter, Arial, sans-serif">1. share-summary.md</text>
-  <text x="56" y="656" fill="#E5E9F7" font-size="20" font-family="Inter, Arial, sans-serif">2. scorecard.md</text>
-  <text x="56" y="690" fill="#E5E9F7" font-size="20" font-family="Inter, Arial, sans-serif">3. recommendations.md</text>
-
-  <rect x="340" y="36" width="1060" height="92" fill="#0E0D23" fill-opacity="0.9" stroke="#18345B"/>
-  <text x="378" y="72" fill="#FF9900" font-size="15" font-family="Share Tech Mono, monospace" letter-spacing="2">CI FOR AI DISCOVERABILITY</text>
-  <text x="378" y="108" fill="#C7CCE2" font-size="19" font-family="Inter, Arial, sans-serif">Vaporwave shell, calm data plane: internal orchestration for repo presets, file-backed runs, and report review.</text>
-  <rect x="1192" y="56" width="170" height="48" fill="#09111E" stroke="#00FFFF"/>
-  <text x="1221" y="87" fill="#00FFFF" font-size="17" font-family="Share Tech Mono, monospace">LAUNCH RUN</text>
-
-  <text x="340" y="182" fill="#00FFFF" font-size="16" font-family="Share Tech Mono, monospace" letter-spacing="3">RUNS WORKSPACE</text>
-  <text x="340" y="230" fill="#F4F7FF" font-size="42" font-weight="700" font-family="Orbitron, Arial, sans-serif">REVIEW THE LATEST</text>
-  <text x="340" y="276" fill="#F4F7FF" font-size="42" font-weight="700" font-family="Orbitron, Arial, sans-serif">FILE-BACKED RUNS</text>
-  <text x="340" y="320" fill="#C7CCE2" font-size="20" font-family="Inter, Arial, sans-serif">The admin surface starts from completed artifacts, not charts.</text>
-
-  <g>
-    <rect x="340" y="364" width="244" height="118" fill="url(#panel)" stroke="#22305A"/>
-    <rect x="340" y="364" width="244" height="3" fill="url(#accent)"/>
-    <text x="364" y="396" fill="#A9B1D0" font-size="14" font-family="Share Tech Mono, monospace" letter-spacing="2">TOTAL RUNS</text>
-    <text x="364" y="448" fill="#F4F7FF" font-size="54" font-weight="700" font-family="Orbitron, Arial, sans-serif">7</text>
-    <text x="364" y="476" fill="#8E97B7" font-size="16" font-family="Inter, Arial, sans-serif">Artifacts currently readable from runs/*</text>
+  <g opacity="0.05">
+    <path d="M0 80H1440" stroke="white"/>
+    <path d="M0 160H1440" stroke="white"/>
+    <path d="M0 240H1440" stroke="white"/>
+    <path d="M0 320H1440" stroke="white"/>
+    <path d="M0 400H1440" stroke="white"/>
+    <path d="M0 480H1440" stroke="white"/>
+    <path d="M0 560H1440" stroke="white"/>
+    <path d="M0 640H1440" stroke="white"/>
+    <path d="M0 720H1440" stroke="white"/>
+    <path d="M0 800H1440" stroke="white"/>
+    <path d="M120 0V900" stroke="white"/>
+    <path d="M240 0V900" stroke="white"/>
+    <path d="M360 0V900" stroke="white"/>
+    <path d="M480 0V900" stroke="white"/>
+    <path d="M600 0V900" stroke="white"/>
+    <path d="M720 0V900" stroke="white"/>
+    <path d="M840 0V900" stroke="white"/>
+    <path d="M960 0V900" stroke="white"/>
+    <path d="M1080 0V900" stroke="white"/>
+    <path d="M1200 0V900" stroke="white"/>
+    <path d="M1320 0V900" stroke="white"/>
   </g>
 
-  <g>
-    <rect x="606" y="364" width="244" height="118" fill="url(#panel)" stroke="#22305A"/>
-    <rect x="606" y="364" width="244" height="3" fill="url(#accent)"/>
-    <text x="630" y="396" fill="#A9B1D0" font-size="14" font-family="Share Tech Mono, monospace" letter-spacing="2">AVERAGE SCORE</text>
-    <text x="630" y="448" fill="#6FFFD2" font-size="54" font-weight="700" font-family="Orbitron, Arial, sans-serif">93/100</text>
-    <text x="630" y="476" fill="#8E97B7" font-size="16" font-family="Inter, Arial, sans-serif">Quick pulse across the local run history</text>
+  <rect x="0" y="0" width="286" height="900" fill="#0A0B12" fill-opacity="0.84"/>
+  <rect x="286" y="0" width="1" height="900" fill="rgba(255,255,255,0.06)"/>
+
+  <text x="28" y="46" fill="rgba(237,236,239,0.62)" font-size="15" font-family="Inter, Arial, sans-serif" font-weight="600" letter-spacing="1.8">INTERNAL CONTROL CONSOLE</text>
+  <text x="28" y="102" fill="#EDECEF" font-size="58" font-family="Inter, Arial, sans-serif" font-weight="700" letter-spacing="-2.6">AnswerLens</text>
+  <text x="28" y="152" fill="#EDECEF" font-size="58" font-family="Inter, Arial, sans-serif" font-weight="700" letter-spacing="-2.6">Admin</text>
+  <text x="28" y="204" fill="#8D939D" font-size="18" font-family="Inter, Arial, sans-serif">Artifact-first review, run orchestration,</text>
+  <text x="28" y="232" fill="#8D939D" font-size="18" font-family="Inter, Arial, sans-serif">and repo-native presets without a dashboard rewrite.</text>
+
+  <rect x="20" y="296" width="230" height="62" rx="14" fill="rgba(94,106,210,0.14)" stroke="rgba(94,106,210,0.32)"/>
+  <text x="40" y="335" fill="#EDECEF" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="600">Runs</text>
+
+  <rect x="20" y="374" width="230" height="62" rx="14" fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.06)"/>
+  <text x="40" y="413" fill="#8D939D" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="600">Presets</text>
+
+  <rect x="20" y="470" width="230" height="168" rx="18" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.06)"/>
+  <text x="40" y="510" fill="rgba(237,236,239,0.62)" font-size="13" font-family="Inter, Arial, sans-serif" font-weight="600" letter-spacing="1.8">OPERATOR PATH</text>
+  <text x="40" y="550" fill="#8D939D" font-size="18" font-family="Inter, Arial, sans-serif">Choose a preset path, launch a run,</text>
+  <text x="40" y="578" fill="#8D939D" font-size="18" font-family="Inter, Arial, sans-serif">then review summary → scorecard →</text>
+  <text x="40" y="606" fill="#8D939D" font-size="18" font-family="Inter, Arial, sans-serif">recommendations in order.</text>
+
+  <rect x="320" y="24" width="1088" height="126" rx="22" fill="rgba(10,10,12,0.84)" stroke="rgba(255,255,255,0.06)" filter="url(#shadow)"/>
+  <text x="350" y="64" fill="#EDECEF" font-size="28" font-family="Inter, Arial, sans-serif" font-weight="700" letter-spacing="-1.1">Runs workspace</text>
+  <text x="350" y="101" fill="#8D939D" font-size="19" font-family="Inter, Arial, sans-serif">Choose the next run worth opening, then move into artifact-backed review instead of scanning the whole workspace equally.</text>
+  <text x="1158" y="67" fill="rgba(237,236,239,0.62)" font-size="13" font-family="Inter, Arial, sans-serif" font-weight="600" letter-spacing="1.5">LANGUAGE</text>
+  <rect x="1126" y="84" width="114" height="46" rx="12" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)"/>
+  <text x="1150" y="112" fill="#EDECEF" font-size="18" font-family="Inter, Arial, sans-serif" font-weight="600">English</text>
+  <rect x="1258" y="70" width="120" height="56" rx="14" fill="url(#primary)"/>
+  <text x="1286" y="105" fill="white" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Launch run</text>
+
+  <text x="320" y="190" fill="rgba(237,236,239,0.62)" font-size="13" font-family="Inter, Arial, sans-serif" font-weight="600" letter-spacing="1.8">RUNS WORKSPACE</text>
+  <text x="320" y="254" fill="#EDECEF" font-size="68" font-family="Inter, Arial, sans-serif" font-weight="700" letter-spacing="-3.2">Review the latest</text>
+  <text x="320" y="322" fill="#EDECEF" font-size="68" font-family="Inter, Arial, sans-serif" font-weight="700" letter-spacing="-3.2">file-backed runs</text>
+  <text x="320" y="370" fill="#8D939D" font-size="22" font-family="Inter, Arial, sans-serif">The admin surface starts from completed artifacts, not charts.</text>
+
+  <g filter="url(#shadow)">
+    <rect x="320" y="408" width="252" height="156" rx="18" fill="rgba(10,10,12,0.84)" stroke="rgba(255,255,255,0.06)"/>
+    <rect x="320" y="408" width="252" height="2" fill="rgba(199,210,254,0.9)"/>
+    <text x="346" y="446" fill="rgba(237,236,239,0.62)" font-size="14" font-family="Inter, Arial, sans-serif" font-weight="600" letter-spacing="1.5">TOTAL RUNS</text>
+    <text x="346" y="514" fill="#EDECEF" font-size="60" font-family="Inter, Arial, sans-serif" font-weight="700" letter-spacing="-2.4">7</text>
+    <text x="346" y="548" fill="#8D939D" font-size="18" font-family="Inter, Arial, sans-serif">Artifacts currently readable from `runs/*`.</text>
   </g>
 
-  <g>
-    <rect x="872" y="364" width="244" height="118" fill="url(#panel)" stroke="#22305A"/>
-    <rect x="872" y="364" width="244" height="3" fill="url(#accent)"/>
-    <text x="896" y="396" fill="#A9B1D0" font-size="14" font-family="Share Tech Mono, monospace" letter-spacing="2">LATEST RUN</text>
-    <text x="896" y="448" fill="#F4F7FF" font-size="54" font-weight="700" font-family="Orbitron, Arial, sans-serif">100/100</text>
-    <text x="896" y="476" fill="#8E97B7" font-size="16" font-family="Inter, Arial, sans-serif">AnswerLens Pages self-dogfood audit</text>
+  <g filter="url(#shadow)">
+    <rect x="588" y="408" width="252" height="156" rx="18" fill="rgba(10,10,12,0.84)" stroke="rgba(255,255,255,0.06)"/>
+    <rect x="588" y="408" width="252" height="2" fill="rgba(199,210,254,0.9)"/>
+    <text x="614" y="446" fill="rgba(237,236,239,0.62)" font-size="14" font-family="Inter, Arial, sans-serif" font-weight="600" letter-spacing="1.5">AVERAGE SCORE</text>
+    <text x="614" y="514" fill="#6872D9" font-size="60" font-family="Inter, Arial, sans-serif" font-weight="700" letter-spacing="-2.4">88/100</text>
+    <text x="614" y="548" fill="#8D939D" font-size="18" font-family="Inter, Arial, sans-serif">A quick pulse across the local run history.</text>
   </g>
 
-  <g>
-    <rect x="1138" y="364" width="262" height="118" fill="url(#panel)" stroke="#22305A"/>
-    <rect x="1138" y="364" width="262" height="3" fill="url(#accent)"/>
-    <text x="1162" y="396" fill="#A9B1D0" font-size="14" font-family="Share Tech Mono, monospace" letter-spacing="2">RUN MIX</text>
-    <text x="1162" y="448" fill="#F4F7FF" font-size="54" font-weight="700" font-family="Orbitron, Arial, sans-serif">6:1</text>
-    <text x="1162" y="476" fill="#8E97B7" font-size="16" font-family="Inter, Arial, sans-serif">Audit to eval count in the workspace</text>
+  <g filter="url(#shadow)">
+    <rect x="856" y="408" width="252" height="156" rx="18" fill="rgba(10,10,12,0.84)" stroke="rgba(255,255,255,0.06)"/>
+    <rect x="856" y="408" width="252" height="2" fill="rgba(199,210,254,0.9)"/>
+    <text x="882" y="446" fill="rgba(237,236,239,0.62)" font-size="14" font-family="Inter, Arial, sans-serif" font-weight="600" letter-spacing="1.5">LATEST RUN</text>
+    <text x="882" y="514" fill="#6BD0B4" font-size="60" font-family="Inter, Arial, sans-serif" font-weight="700" letter-spacing="-2.4">90/100</text>
+    <text x="882" y="548" fill="#8D939D" font-size="18" font-family="Inter, Arial, sans-serif">AnswerLens static-good fixture demo.</text>
   </g>
 
-  <rect x="340" y="520" width="1060" height="310" fill="url(#panel)" stroke="#20345A"/>
-  <rect x="340" y="520" width="1060" height="3" fill="#00FFFF" fill-opacity="0.55"/>
+  <g filter="url(#shadow)">
+    <rect x="1124" y="408" width="284" height="156" rx="18" fill="rgba(10,10,12,0.84)" stroke="rgba(255,255,255,0.06)"/>
+    <rect x="1124" y="408" width="284" height="2" fill="rgba(199,210,254,0.9)"/>
+    <text x="1150" y="446" fill="rgba(237,236,239,0.62)" font-size="14" font-family="Inter, Arial, sans-serif" font-weight="600" letter-spacing="1.5">RUN MIX</text>
+    <text x="1150" y="514" fill="#EDECEF" font-size="60" font-family="Inter, Arial, sans-serif" font-weight="700" letter-spacing="-2.4">5:0</text>
+    <text x="1150" y="548" fill="#8D939D" font-size="18" font-family="Inter, Arial, sans-serif">Audit to eval count in the local workspace.</text>
+  </g>
 
-  <rect x="368" y="552" width="126" height="42" fill="#11102A" stroke="#FF00FF" stroke-opacity="0.55"/>
-  <text x="397" y="579" fill="#FF7AF2" font-size="16" font-family="Share Tech Mono, monospace">ALL RUNS</text>
-  <rect x="508" y="552" width="138" height="42" fill="#11102A" stroke="#33204F"/>
-  <text x="536" y="579" fill="#D7DCF0" font-size="16" font-family="Share Tech Mono, monospace">AUDIT ONLY</text>
-  <rect x="660" y="552" width="126" height="42" fill="#11102A" stroke="#33204F"/>
-  <text x="692" y="579" fill="#D7DCF0" font-size="16" font-family="Share Tech Mono, monospace">EVAL ONLY</text>
+  <rect x="320" y="590" width="1088" height="258" rx="22" fill="rgba(10,10,12,0.84)" stroke="rgba(255,255,255,0.06)" filter="url(#shadow)"/>
+  <text x="348" y="630" fill="rgba(237,236,239,0.62)" font-size="13" font-family="Inter, Arial, sans-serif" font-weight="600" letter-spacing="1.8">CURRENT FOCUS</text>
+  <text x="348" y="676" fill="#EDECEF" font-size="40" font-family="Inter, Arial, sans-serif" font-weight="700" letter-spacing="-1.8">Open the newest useful run</text>
+  <text x="348" y="710" fill="#8D939D" font-size="18" font-family="Inter, Arial, sans-serif">Use the list as triage, then move into artifact-backed detail.</text>
 
-  <text x="382" y="636" fill="#8E97B7" font-size="14" font-family="Share Tech Mono, monospace" letter-spacing="2">RUN</text>
-  <text x="602" y="636" fill="#8E97B7" font-size="14" font-family="Share Tech Mono, monospace" letter-spacing="2">SITE</text>
-  <text x="938" y="636" fill="#8E97B7" font-size="14" font-family="Share Tech Mono, monospace" letter-spacing="2">KIND</text>
-  <text x="1034" y="636" fill="#8E97B7" font-size="14" font-family="Share Tech Mono, monospace" letter-spacing="2">SCORE</text>
-  <text x="1138" y="636" fill="#8E97B7" font-size="14" font-family="Share Tech Mono, monospace" letter-spacing="2">STATUS</text>
-  <text x="1270" y="636" fill="#8E97B7" font-size="14" font-family="Share Tech Mono, monospace" letter-spacing="2">GENERATED</text>
+  <rect x="348" y="736" width="210" height="54" rx="14" fill="url(#primary)"/>
+  <text x="384" y="770" fill="#FFFFFF" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Open run detail</text>
 
-  <line x1="368" y1="654" x2="1372" y2="654" stroke="#1A2246"/>
+  <rect x="772" y="630" width="608" height="178" rx="18" fill="rgba(255,255,255,0.028)" stroke="rgba(255,255,255,0.05)"/>
+  <text x="802" y="668" fill="rgba(237,236,239,0.62)" font-size="13" font-family="Inter, Arial, sans-serif" font-weight="600" letter-spacing="1.8">RUNS TABLE</text>
+  <text x="802" y="706" fill="#EDECEF" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="600">static-good</text>
+  <text x="1018" y="706" fill="#EDECEF" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">AnswerLens static-good fixture demo</text>
+  <text x="802" y="736" fill="#8D939D" font-size="17" font-family="Inter, Arial, sans-serif">Audit</text>
+  <text x="954" y="736" fill="#EDECEF" font-size="17" font-family="Inter, Arial, sans-serif">90/100</text>
+  <rect x="1096" y="716" width="124" height="34" rx="999" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)"/>
+  <circle cx="1118" cy="733" r="5" fill="#6BD0B4"/>
+  <text x="1132" y="739" fill="#6BD0B4" font-size="14" font-family="Inter, Arial, sans-serif" font-weight="700">COMPLETED</text>
+  <text x="802" y="776" fill="#8D939D" font-size="17" font-family="Inter, Arial, sans-serif">./examples/fixtures/static-good</text>
+  <line x1="802" y1="790" x2="1348" y2="790" stroke="rgba(255,255,255,0.08)"/>
 
-  <text x="382" y="703" fill="#00FFFF" font-size="18" font-family="Share Tech Mono, monospace">web-audit-pages-2026-04-21</text>
-  <text x="602" y="693" fill="#F4F7FF" font-size="18" font-family="Inter, Arial, sans-serif">AnswerLens Pages site</text>
-  <text x="602" y="719" fill="#8E97B7" font-size="15" font-family="Inter, Arial, sans-serif">https://yscjrh.github.io/ai-visibility-auditor/</text>
-  <text x="938" y="703" fill="#F4F7FF" font-size="17" font-family="Inter, Arial, sans-serif">Audit</text>
-  <text x="1034" y="703" fill="#6FFFD2" font-size="18" font-family="Orbitron, Arial, sans-serif">100/100</text>
-  <rect x="1138" y="676" width="116" height="34" fill="#09111E" stroke="#6FFFD2"/>
-  <text x="1160" y="698" fill="#6FFFD2" font-size="14" font-family="Share Tech Mono, monospace">COMPLETED</text>
-  <text x="1270" y="703" fill="#D7DCF0" font-size="17" font-family="Inter, Arial, sans-serif">Apr 21, 10:07</text>
-
-  <line x1="368" y1="736" x2="1372" y2="736" stroke="#1A2246"/>
-  <text x="382" y="785" fill="#00FFFF" font-size="18" font-family="Share Tech Mono, monospace">static-good-fixture-demo</text>
-  <text x="602" y="775" fill="#F4F7FF" font-size="18" font-family="Inter, Arial, sans-serif">AnswerLens static-good fixture demo</text>
-  <text x="602" y="801" fill="#8E97B7" font-size="15" font-family="Inter, Arial, sans-serif">./examples/fixtures/static-good</text>
-  <text x="938" y="785" fill="#F4F7FF" font-size="17" font-family="Inter, Arial, sans-serif">Audit</text>
-  <text x="1034" y="785" fill="#F4F7FF" font-size="18" font-family="Orbitron, Arial, sans-serif">90/100</text>
-  <rect x="1138" y="758" width="116" height="34" fill="#09111E" stroke="#6FFFD2"/>
-  <text x="1160" y="780" fill="#6FFFD2" font-size="14" font-family="Share Tech Mono, monospace">COMPLETED</text>
-  <text x="1270" y="785" fill="#D7DCF0" font-size="17" font-family="Inter, Arial, sans-serif">Apr 21, 10:07</text>
+  <text x="802" y="826" fill="#6872D9" font-size="16" font-family="Inter, Arial, sans-serif" font-weight="700">share-summary.md</text>
+  <text x="968" y="826" fill="#8D939D" font-size="16" font-family="Inter, Arial, sans-serif">→</text>
+  <text x="996" y="826" fill="#6872D9" font-size="16" font-family="Inter, Arial, sans-serif" font-weight="700">scorecard.md</text>
+  <text x="1132" y="826" fill="#8D939D" font-size="16" font-family="Inter, Arial, sans-serif">→</text>
+  <text x="1160" y="826" fill="#6872D9" font-size="16" font-family="Inter, Arial, sans-serif" font-weight="700">recommendations.md</text>
 </svg>

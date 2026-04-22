@@ -1,33 +1,45 @@
-@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600&family=Share+Tech+Mono&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
   color-scheme: dark;
   font-family: "Inter", system-ui, sans-serif;
-  --font-heading: "Orbitron", sans-serif;
-  --font-mono: "Share Tech Mono", monospace;
-  --canvas: #090014;
-  --shell: rgba(9, 7, 24, 0.96);
-  --surface: rgba(18, 16, 46, 0.88);
-  --surface-elevated: rgba(24, 18, 56, 0.94);
-  --surface-code: rgba(8, 8, 20, 0.92);
-  --text-strong: #eef3ff;
-  --text-muted: rgba(214, 221, 242, 0.78);
-  --text-subtle: rgba(180, 188, 210, 0.58);
-  --border-subtle: rgba(45, 27, 78, 1);
-  --border-active: rgba(0, 255, 255, 0.55);
-  --accent-magenta: #ff00ff;
-  --accent-cyan: #00ffff;
-  --accent-orange: #ff9900;
-  --state-success: #6fffd2;
-  --state-warning: #ffbf4d;
-  --state-danger: #ff688b;
-  --state-info: #69e8ff;
-  --glow-sm: 0 0 1.4rem rgba(0, 255, 255, 0.08);
-  --glow-md: 0 0 1.8rem rgba(255, 0, 255, 0.16);
-  --focus-ring: 0 0 0 2px rgba(0, 255, 255, 0.3);
-  --scanline-opacity: 0.08;
-  --grid-opacity: 0.14;
-  --panel-blur: 14px;
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "SFMono-Regular", "Cascadia Code", Consolas, monospace;
+  --background-deep: #020203;
+  --background-base: #050506;
+  --background-elevated: #0a0a0c;
+  --surface: rgba(255, 255, 255, 0.045);
+  --surface-hover: rgba(255, 255, 255, 0.08);
+  --surface-elevated: rgba(255, 255, 255, 0.06);
+  --surface-code: rgba(12, 13, 17, 0.94);
+  --foreground: #edecef;
+  --foreground-muted: #8d939d;
+  --foreground-subtle: rgba(237, 236, 239, 0.62);
+  --accent: #5e6ad2;
+  --accent-bright: #6872d9;
+  --accent-glow: rgba(94, 106, 210, 0.24);
+  --border-default: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.1);
+  --border-accent: rgba(94, 106, 210, 0.32);
+  --state-success: #6bd0b4;
+  --state-warning: #f4bf67;
+  --state-danger: #f07b9e;
+  --state-info: #9ca7ff;
+  --radius-card: 18px;
+  --radius-control: 12px;
+  --radius-pill: 999px;
+  --shadow-card:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 10px 40px rgba(0, 0, 0, 0.36),
+    0 24px 80px rgba(0, 0, 0, 0.22);
+  --shadow-hover:
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 18px 52px rgba(0, 0, 0, 0.42),
+    0 0 80px rgba(94, 106, 210, 0.14);
+  --focus-ring: 0 0 0 2px rgba(94, 106, 210, 0.45);
+  --motion-standard: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  --page-width: 1360px;
 }
 
 * {
@@ -40,14 +52,20 @@ body,
   min-height: 100%;
 }
 
+html {
+  background: var(--background-deep);
+}
+
 body {
   margin: 0;
+  font-family: var(--font-body);
   background:
-    radial-gradient(circle at 78% 18%, rgba(0, 255, 255, 0.15), transparent 18rem),
-    radial-gradient(circle at 18% 82%, rgba(255, 0, 255, 0.12), transparent 18rem),
-    linear-gradient(180deg, rgba(255, 153, 0, 0.08), transparent 18rem),
-    var(--canvas);
-  color: var(--text-strong);
+    radial-gradient(circle at 50% -10%, rgba(94, 106, 210, 0.26), transparent 34rem),
+    radial-gradient(circle at 0% 35%, rgba(98, 79, 206, 0.12), transparent 28rem),
+    radial-gradient(circle at 100% 22%, rgba(64, 86, 209, 0.12), transparent 24rem),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24rem),
+    var(--background-base);
+  color: var(--foreground);
 }
 
 body::before,
@@ -59,22 +77,21 @@ body::after {
 }
 
 body::before {
-  opacity: var(--grid-opacity);
-  background-image:
-    linear-gradient(rgba(255, 0, 255, 0.16) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 255, 0.16) 1px, transparent 1px);
-  background-size: 36px 36px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.3));
+  background:
+    radial-gradient(circle at 20% 18%, rgba(94, 106, 210, 0.12), transparent 14rem),
+    radial-gradient(circle at 78% 14%, rgba(94, 106, 210, 0.1), transparent 16rem),
+    radial-gradient(circle at 56% 80%, rgba(94, 106, 210, 0.08), transparent 20rem);
+  filter: blur(20px);
+  opacity: 0.92;
 }
 
 body::after {
-  opacity: var(--scanline-opacity);
-  background:
-    linear-gradient(
-      rgba(18, 16, 20, 0) 50%,
-      rgba(0, 0, 0, 0.32) 50%
-    );
-  background-size: 100% 4px;
+  opacity: 0.028;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent 85%);
 }
 
 a,
@@ -101,8 +118,17 @@ button,
 input,
 select,
 textarea {
-  transition: box-shadow 180ms linear, border-color 180ms linear, color 180ms linear, background-color 180ms linear,
-    transform 180ms linear;
+  transition:
+    border-color var(--motion-standard),
+    background-color var(--motion-standard),
+    box-shadow var(--motion-standard),
+    color var(--motion-standard),
+    opacity var(--motion-standard),
+    transform var(--motion-standard);
+}
+
+a {
+  color: inherit;
 }
 
 a:focus-visible,
@@ -114,8 +140,19 @@ textarea:focus-visible {
   box-shadow: var(--focus-ring);
 }
 
+input,
+select,
+textarea {
+  color: var(--foreground);
+}
+
+::selection {
+  background: rgba(94, 106, 210, 0.38);
+  color: #ffffff;
+}
+
 strong {
-  color: var(--text-strong);
+  color: var(--foreground);
 }
 
 @media (prefers-reduced-motion: reduce) {

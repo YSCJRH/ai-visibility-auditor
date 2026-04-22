@@ -1,108 +1,123 @@
 .shell {
   position: relative;
   display: grid;
-  grid-template-columns: 19rem minmax(0, 1fr);
+  grid-template-columns: 16.5rem minmax(0, 1fr);
   min-height: 100vh;
 }
 
 .sidebar {
   position: sticky;
   top: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: grid;
+  align-content: start;
+  gap: 1rem;
   min-height: 100vh;
-  padding: 2rem 1.5rem;
-  border-right: 1px solid rgba(0, 255, 255, 0.12);
-  background: linear-gradient(180deg, rgba(13, 9, 34, 0.96), rgba(8, 7, 22, 0.96));
-  backdrop-filter: blur(var(--panel-blur));
+  padding: 1.5rem 1.25rem;
+  border-right: 1px solid var(--border-default);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 35%),
+    rgba(8, 8, 11, 0.76);
+  backdrop-filter: blur(24px);
 }
 
 .brand {
   display: grid;
-  gap: 0.6rem;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
 }
 
 .brandLabel {
-  color: var(--accent-magenta);
-  font-size: 0.78rem;
-  letter-spacing: 0.18em;
+  color: var(--foreground-subtle);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .brandTitle {
   margin: 0;
   font-family: var(--font-heading);
-  font-size: 2.1rem;
-  line-height: 0.95;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
 }
 
 .brandSummary {
   margin: 0;
-  color: var(--text-muted);
-  line-height: 1.55;
+  color: var(--foreground-muted);
+  font-size: 0.94rem;
+  line-height: 1.6;
 }
 
 .nav {
   display: grid;
-  gap: 0.6rem;
+  gap: 0.45rem;
 }
 
 .navLink {
   display: block;
-  border: 1px solid rgba(45, 27, 78, 0.92);
-  padding: 0.9rem 1rem;
-  color: var(--text-strong);
+  padding: 0.78rem 0.9rem;
+  border-radius: var(--radius-control);
+  border: 1px solid transparent;
+  color: var(--foreground-muted);
   text-decoration: none;
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  background: rgba(11, 10, 28, 0.7);
-  transition: border-color 180ms linear, box-shadow 180ms linear, transform 180ms linear;
+  font-size: 0.94rem;
+  font-weight: 600;
+  background: transparent;
 }
 
 .navLink:hover,
 .navLink:focus-visible {
-  transform: translateX(2px);
-  border-color: rgba(255, 0, 255, 0.58);
-  box-shadow: var(--glow-sm);
+  color: var(--foreground);
+  border-color: var(--border-default);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .navLinkActive {
-  border-color: rgba(0, 255, 255, 0.7);
-  color: var(--accent-cyan);
-  box-shadow: var(--glow-sm);
+  border-color: var(--border-accent);
+  background: rgba(94, 106, 210, 0.14);
+  color: var(--foreground);
+  box-shadow: inset 0 0 0 1px rgba(94, 106, 210, 0.08);
 }
 
 .sidebarCard {
-  border: 1px solid rgba(255, 0, 255, 0.16);
-  background: rgba(16, 14, 40, 0.9);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-default);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015)),
+    rgba(10, 10, 12, 0.76);
   padding: 1rem;
-  box-shadow: var(--glow-sm);
 }
 
 .sidebarEyebrow {
-  margin: 0 0 0.55rem;
-  color: var(--accent-cyan);
-  font-size: 0.75rem;
-  letter-spacing: 0.16em;
+  margin: 0 0 0.5rem;
+  color: var(--foreground-subtle);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.sidebarBody {
+  margin: 0 0 0.7rem;
+  color: var(--foreground-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
 }
 
 .sidebarList {
   margin: 0;
   padding-left: 1rem;
-  color: var(--text-muted);
+  color: var(--foreground);
   display: grid;
-  gap: 0.55rem;
-  line-height: 1.5;
+  gap: 0.5rem;
+  line-height: 1.55;
 }
 
 .content {
   min-width: 0;
-  padding: 1.5rem clamp(1rem, 3vw, 2.4rem) 2rem;
+  padding: 1.5rem clamp(1rem, 3vw, 2.25rem) 2rem;
 }
 
 .topbar {
@@ -110,38 +125,46 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.85rem 1rem 1rem;
-  margin-bottom: 1.4rem;
-  border: 1px solid rgba(0, 255, 255, 0.12);
-  background: rgba(10, 9, 25, 0.72);
-  backdrop-filter: blur(var(--panel-blur));
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.05rem;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-default);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+    rgba(10, 10, 12, 0.8);
+  box-shadow: var(--shadow-card);
 }
 
 .topbarActions {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .localePicker {
   display: grid;
-  gap: 0.3rem;
+  gap: 0.32rem;
 }
 
 .localeLabel {
-  color: var(--text-muted);
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
+  color: var(--foreground-subtle);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .localeSelect {
-  min-width: 8rem;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid rgba(0, 255, 255, 0.22);
-  background: rgba(11, 10, 28, 0.84);
-  color: var(--text-strong);
-  font: inherit;
+  min-width: 8.5rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--foreground);
+  appearance: none;
 }
 
 .topbarText {
@@ -151,23 +174,25 @@
 
 .topbarTitle {
   margin: 0;
-  font-size: 0.8rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--accent-orange);
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
 }
 
 .topbarSummary {
   margin: 0;
-  color: var(--text-muted);
-  line-height: 1.55;
+  max-width: 42rem;
+  color: var(--foreground-muted);
+  line-height: 1.6;
 }
 
 .main {
   min-width: 0;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1024px) {
   .shell {
     grid-template-columns: 1fr;
   }
@@ -175,8 +200,24 @@
   .sidebar {
     position: relative;
     min-height: auto;
+    padding: 1.25rem 1rem 0;
     border-right: 0;
-    border-bottom: 1px solid rgba(0, 255, 255, 0.12);
+    border-bottom: 1px solid var(--border-default);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .brand,
+  .nav {
+    grid-column: 1 / -1;
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .navLink {
+    flex: 1 1 10rem;
   }
 
   .content {
@@ -185,13 +226,47 @@
 }
 
 @media (max-width: 720px) {
+  .sidebar {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .brand {
+    gap: 0.35rem;
+  }
+
+  .brandSummary {
+    display: none;
+  }
+
+  .sidebarCard {
+    display: none;
+  }
+
   .topbar {
     flex-direction: column;
     align-items: stretch;
+    padding: 0.9rem;
+  }
+
+  .topbarTitle {
+    font-size: 1.08rem;
+  }
+
+  .topbarSummary {
+    display: none;
   }
 
   .topbarActions {
-    flex-direction: column;
-    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .localePicker {
+    width: 100%;
+  }
+
+  .localeSelect {
+    width: 100%;
   }
 }

@@ -5,63 +5,106 @@
 
 .toolbar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.85rem;
   flex-wrap: wrap;
 }
 
 .tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  gap: 0.55rem;
 }
 
 .tab {
-  border: 1px solid rgba(45, 27, 78, 1);
-  background: rgba(10, 9, 26, 0.72);
-  color: var(--text-muted);
-  padding: 0.65rem 0.85rem;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--foreground-muted);
+  padding: 0.58rem 0.88rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .tabActive {
-  border-color: rgba(0, 255, 255, 0.6);
-  color: var(--accent-cyan);
-  box-shadow: var(--glow-sm);
+  border-color: var(--border-accent);
+  background: rgba(94, 106, 210, 0.16);
+  color: var(--foreground);
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  gap: 0.55rem;
+  justify-content: flex-end;
 }
 
 .action {
-  border: 1px solid rgba(255, 0, 255, 0.24);
-  background: transparent;
-  color: var(--text-strong);
-  padding: 0.65rem 0.85rem;
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--foreground);
+  padding: 0.6rem 0.82rem;
+  font-size: 0.82rem;
+  font-weight: 600;
   text-decoration: none;
 }
 
 .surface {
   min-height: 28rem;
-  border: 1px solid rgba(0, 255, 255, 0.16);
-  background: rgba(8, 8, 20, 0.86);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-default);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.012)),
+    rgba(10, 10, 12, 0.88);
   overflow: hidden;
+}
+
+.orderCallout {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.025);
+  padding: 0.95rem 1rem;
+}
+
+.orderEyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--foreground-subtle);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.orderTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.orderBody {
+  margin: 0.45rem 0 0;
+  color: var(--foreground-muted);
+  line-height: 1.55;
+}
+
+.orderList {
+  margin: 0.65rem 0 0;
+  padding-left: 1.15rem;
+  color: var(--foreground);
+  line-height: 1.65;
 }
 
 .content {
   max-height: 70vh;
   overflow: auto;
-  padding: 1rem 1.1rem;
+  padding: 1rem;
 }
 
 .content pre {
@@ -69,26 +112,35 @@
   white-space: pre-wrap;
   word-break: break-word;
   font-family: var(--font-mono);
-  color: var(--text-strong);
+  color: var(--foreground);
+  line-height: 1.65;
 }
 
 .markdown {
-  color: var(--text-strong);
-  line-height: 1.7;
+  color: var(--foreground);
+  line-height: 1.75;
 }
 
 .markdown :global(h1),
 .markdown :global(h2),
 .markdown :global(h3) {
-  color: var(--accent-cyan);
+  margin-top: 1.3em;
+  margin-bottom: 0.5em;
+  color: var(--foreground);
   font-family: var(--font-heading);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.markdown :global(p),
+.markdown :global(li) {
+  color: var(--foreground);
 }
 
 .markdown :global(code) {
-  background: rgba(255, 255, 255, 0.04);
-  padding: 0.1rem 0.35rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.16rem 0.38rem;
+  border-radius: 8px;
   font-family: var(--font-mono);
 }
 
@@ -96,5 +148,21 @@
   width: 100%;
   height: 70vh;
   border: 0;
-  background: white;
+  background: #ffffff;
+}
+
+@media (max-width: 760px) {
+  .toolbar {
+    align-items: stretch;
+  }
+
+  .actions {
+    justify-content: flex-start;
+  }
+
+  .content,
+  .frame {
+    max-height: none;
+    height: 60vh;
+  }
 }

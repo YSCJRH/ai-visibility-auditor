@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { MetricTile } from "../components/MetricTile";
 import { RunTable } from "../components/RunTable";
 import { SectionHeader } from "../components/SectionHeader";
 import { listRuns } from "../lib/api";
-import { formatScore } from "../lib/format";
+import { formatDateTime, formatScore } from "../lib/format";
 import { useLocale } from "../lib/locale";
 import pageStyles from "./PageLayout.module.css";
 import uiStyles from "../components/UI.module.css";
@@ -58,8 +59,55 @@ export function RunsPage() {
         <MetricTile label={t("admin.runs.mix")} value={`${auditCount}:${evalCount}`} helper={t("admin.runs.mix.helper")} />
       </section>
 
-      <section className={pageStyles.panel}>
-        <div className={pageStyles.filterRow}>
+      <div className={pageStyles.grid}>
+        <section className={`${uiStyles.surfaceCard} ${pageStyles.mainColumn}`}>
+          <div className={uiStyles.surfaceInner}>
+            <p className={uiStyles.surfaceEyebrow}>{t("admin.runs.guideEyebrow")}</p>
+            <h2 className={uiStyles.surfaceTitle}>{t("admin.runs.guideTitle")}</h2>
+            <p className={uiStyles.surfaceBody}>{t("admin.runs.guideBody")}</p>
+          {latestRun ? (
+            <div className={uiStyles.metaList}>
+              <div className={uiStyles.metaRow}>
+                <span className={uiStyles.metaLabel}>{t("admin.runs.latestRun")}</span>
+                <span className={uiStyles.metaValue}>{latestRun.siteLabel}</span>
+              </div>
+              <div className={uiStyles.metaRow}>
+                <span className={uiStyles.metaLabel}>{t("admin.table.score")}</span>
+                <span className={uiStyles.metaValue}>{formatScore(latestRun.overallScore, locale)}</span>
+              </div>
+              <div className={uiStyles.metaRow}>
+                <span className={uiStyles.metaLabel}>{t("admin.table.generated")}</span>
+                <span className={uiStyles.metaValue}>{formatDateTime(latestRun.generatedAt, locale)}</span>
+              </div>
+              <div className={uiStyles.buttonRow}>
+                <Link className={`${uiStyles.button} ${uiStyles.buttonPrimary}`} to={`/runs/${latestRun.id}`}>
+                  {t("admin.runs.guideOpen")}
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <p className={pageStyles.emptyState}>{t("admin.runs.guideEmpty")}</p>
+          )}
+          </div>
+        </section>
+
+        <section className={`${uiStyles.surfaceCard} ${pageStyles.sideColumn}`}>
+          <div className={uiStyles.surfaceInner}>
+            <p className={uiStyles.surfaceEyebrow}>{t("admin.runs.nextEyebrow")}</p>
+            <h2 className={uiStyles.surfaceTitle}>{t("admin.runs.nextTitle")}</h2>
+            <p className={uiStyles.surfaceBody}>{t("admin.runs.nextBody")}</p>
+            <ol className={uiStyles.orderedList}>
+            <li>{t("admin.runs.nextStep1")}</li>
+            <li>{t("admin.runs.nextStep2")}</li>
+            <li>{t("admin.runs.nextStep3")}</li>
+          </ol>
+          </div>
+        </section>
+      </div>
+
+      <section className={uiStyles.surfaceCard}>
+        <div className={uiStyles.surfaceInner}>
+        <div className={uiStyles.segmented}>
           {[
             { label: t("admin.runs.filter.all"), value: "all" as const },
             { label: t("admin.runs.filter.audit"), value: "audit" as const },
@@ -68,7 +116,7 @@ export function RunsPage() {
             <button
               key={filter.value}
               type="button"
-              className={`${pageStyles.filterButton} ${kindFilter === filter.value ? pageStyles.filterButtonActive : ""}`}
+              className={`${uiStyles.segmentedButton} ${kindFilter === filter.value ? uiStyles.segmentedButtonActive : ""}`}
               onClick={() => setKindFilter(filter.value)}
             >
               {filter.label}
@@ -82,6 +130,7 @@ export function RunsPage() {
           <p className={pageStyles.emptyState}>{t("admin.runs.empty")}</p>
         ) : null}
         {filteredRuns.length > 0 ? <RunTable runs={filteredRuns} /> : null}
+        </div>
       </section>
     </div>
   );
