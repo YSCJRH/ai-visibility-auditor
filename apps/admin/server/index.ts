@@ -406,7 +406,10 @@ function renderReviewShell(title: string, body: string, locale: Locale): string 
         .sidebar { border-right: 0; border-bottom: 1px solid var(--border-subtle); }
       }
       @media (max-width: 760px) {
-        .topbar { flex-direction: column; }
+        .sidebar { padding-bottom: 0.75rem; }
+        .brand-copy, .sidebar-card, .topbar-copy { display: none; }
+        .topbar { flex-direction: column; padding: 0.9rem; }
+        .topbar-title { font-size: 1.02rem; }
         table, thead, tbody, tr, td { display: block; width: 100%; }
         thead { display: none; }
         tr { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,.05); }

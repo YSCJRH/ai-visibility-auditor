@@ -228,11 +228,34 @@
 @media (max-width: 720px) {
   .sidebar {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .brand {
+    gap: 0.35rem;
+  }
+
+  .brandSummary {
+    display: none;
+  }
+
+  .sidebarCard {
+    display: none;
   }
 
   .topbar {
     flex-direction: column;
     align-items: stretch;
+    padding: 0.9rem;
+  }
+
+  .topbarTitle {
+    font-size: 1.08rem;
+  }
+
+  .topbarSummary {
+    display: none;
   }
 
   .topbarActions {

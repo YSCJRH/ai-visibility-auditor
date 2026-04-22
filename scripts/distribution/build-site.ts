@@ -632,7 +632,7 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale
       .footer{margin:4px 0 0;padding:8px 4px 0;font-size:.92rem;line-height:1.6}
       @media (max-width:900px){.topbar{grid-template-columns:1fr;align-items:start}.nav{justify-content:flex-start}.hero{min-height:280px}}
       @media (max-width:720px){.panel table{display:block;overflow-x:auto;white-space:nowrap}}
-      @media (max-width:640px){.shell{width:min(100vw - 20px,1180px);padding:12px 0 56px}.topbar{padding:16px 18px;border-radius:18px}.locale-switcher{margin-top:12px}.content{gap:20px}.hero{min-height:auto;padding:28px 20px 24px;border-radius:24px}.hero h1{max-width:unset;font-size:clamp(2.25rem,12vw,3.4rem)}.locale-zh .hero h1{font-size:clamp(2rem,10vw,3rem)}.panel,.metric{padding:20px}.grid,.ctaGrid{grid-template-columns:1fr}.ctaLink{width:100%}}
+      @media (max-width:640px){.shell{width:min(100vw - 20px,1180px);padding:12px 0 56px}.topbar{padding:16px 18px;border-radius:18px}.locale-switcher{margin-top:12px}.content{gap:20px}.hero{min-height:auto;padding:28px 20px 24px;border-radius:24px}.hero h1{max-width:unset;font-size:clamp(2.25rem,12vw,3.4rem)}.locale-zh .hero h1{font-size:clamp(1.82rem,8.8vw,2.62rem);line-height:1.04}.locale-zh .hero p{font-size:.98rem;line-height:1.68}.panel,.metric{padding:20px}.grid,.ctaGrid{grid-template-columns:1fr}.ctaLink{width:100%}}
     </style>
     <script type="application/ld+json">${JSON.stringify(page.jsonLd)}</script>
   </head>
