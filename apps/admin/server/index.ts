@@ -447,7 +447,7 @@ function renderRunsReviewPage(
   const rows = runs
     .map(
       (run) => `<tr>
-        <td><a href="/review/runs/${encodeURIComponent(run.id)}"><code>${escapeHtml(run.id)}</code></a></td>
+        <td><a href="${escapeHtml(reviewUrl(`/review/runs/${encodeURIComponent(run.id)}`, locale))}"><code>${escapeHtml(run.id)}</code></a></td>
         <td>
           <strong>${escapeHtml(run.siteLabel)}</strong>
           <div class="subtle">${escapeHtml(run.siteInput)}</div>
@@ -567,10 +567,10 @@ function renderRunDetailReviewPage(
   const issueBlocks = issues
     .map(
       (issue) => `<article class="issue-item">
-        <div><span class="status ${issue.severity === "error" ? "danger" : issue.severity === "warn" ? "info" : "info"}">${escapeHtml(issue.severity)}</span></div>
-        <h3 style="margin:0.7rem 0 0.3rem;">${escapeHtml(issue.title)}</h3>
+        <div><span class="status ${issue.severity === "error" ? "danger" : issue.severity === "warn" ? "info" : "info"}">${escapeHtml(translateSeverity(issue.severity, locale))}</span></div>
+        <h3 style="margin:0.7rem 0 0.3rem;">${escapeHtml(translateIssueTitle(issue.title, locale))}</h3>
         <p class="subtle" style="margin:0;">${escapeHtml(issue.message)}</p>
-        <p style="margin:0.7rem 0 0;"><strong>Fix:</strong> ${escapeHtml(issue.fixHint)}</p>
+        <p style="margin:0.7rem 0 0;"><strong>${locale === "zh-CN" ? "修复：" : "Fix:"}</strong> ${escapeHtml(translateFixHint(issue.fixHint, locale))}</p>
       </article>`
     )
     .join("");

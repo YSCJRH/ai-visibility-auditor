@@ -631,8 +631,8 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale
       .markdown{margin:0;padding:18px 20px;border:1px solid rgba(148,163,184,.14);border-radius:18px;background:rgba(5,8,17,.92);white-space:pre-wrap;overflow:auto;font-family:"Cascadia Code","SFMono-Regular",Consolas,monospace;font-size:.94rem;line-height:1.62;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
       .footer{margin:4px 0 0;padding:8px 4px 0;font-size:.92rem;line-height:1.6}
       @media (max-width:900px){.topbar{grid-template-columns:1fr;align-items:start}.nav{justify-content:flex-start}.hero{min-height:280px}}
-      @media (max-width:720px){.panel table{display:block;overflow-x:auto;white-space:nowrap}}
-      @media (max-width:640px){.shell{width:min(100vw - 20px,1180px);padding:12px 0 56px}.topbar{padding:16px 18px;border-radius:18px}.locale-switcher{margin-top:12px}.content{gap:20px}.hero{min-height:auto;padding:28px 20px 24px;border-radius:24px}.hero h1{max-width:unset;font-size:clamp(2.25rem,12vw,3.4rem)}.locale-zh .hero h1{font-size:clamp(1.82rem,8.8vw,2.62rem);line-height:1.04}.locale-zh .hero p{font-size:.98rem;line-height:1.68}.panel,.metric{padding:20px}.grid,.ctaGrid{grid-template-columns:1fr}.ctaLink{width:100%}}
+      @media (max-width:720px){.brand-copy{display:none}.nav{gap:6px}.nav a{min-height:34px;padding:0 10px;font-size:.92rem}.panel table{display:block;overflow-x:auto;white-space:nowrap}}
+      @media (max-width:640px){.shell{width:min(100vw - 20px,1180px);padding:12px 0 56px}.topbar{padding:14px 16px;border-radius:18px}.locale-switcher{margin-top:10px;padding:7px 10px}.content{gap:20px}.hero{min-height:auto;padding:24px 18px 22px;border-radius:24px}.hero h1{max-width:unset;font-size:clamp(2.15rem,11vw,3.2rem)}.locale-zh .hero h1{font-size:clamp(1.72rem,8.2vw,2.4rem);line-height:1.05}.hero p{font-size:1rem;line-height:1.7}.locale-zh .hero p{font-size:.95rem;line-height:1.64}.panel,.metric{padding:20px}.grid,.ctaGrid{grid-template-columns:1fr}.ctaLink{width:100%}}
     </style>
     <script type="application/ld+json">${JSON.stringify(page.jsonLd)}</script>
   </head>
