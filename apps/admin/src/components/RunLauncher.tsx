@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import type { CreateAuditRunInput, CreateEvalRunInput, RunJobRecord } from "@answerlens/contracts";
+import { EVAL_PROFILE_PRESETS, type CreateAuditRunInput, type CreateEvalRunInput, type EvalProfileName, type RunJobRecord } from "@answerlens/contracts";
 import { createAuditRun, createEvalRun, getRunJob, listConfigPresets } from "../lib/api";
 import { formatStatus } from "../lib/format";
 import { useLocale } from "../lib/locale";
@@ -39,6 +39,7 @@ export function RunLauncher() {
   const [presetId, setPresetId] = useState("");
   const [site, setSite] = useState("");
   const [provider, setProvider] = useState<"" | "openai" | "perplexity">("");
+  const [profile, setProfile] = useState<"" | EvalProfileName>("");
   const [model, setModel] = useState("");
   const [samples, setSamples] = useState(1);
   const [localeOverride, setLocaleOverride] = useState("");
@@ -74,12 +75,26 @@ export function RunLauncher() {
     }
 
     setProvider(selectedPreset.runtimeDefaults?.provider ?? "");
+    setProfile("");
     setModel(selectedPreset.runtimeDefaults?.model ?? "");
     setSamples(selectedPreset.runtimeDefaults?.samples ?? 1);
     setLocaleOverride(selectedPreset.runtimeDefaults?.locale ?? "");
     setTimeoutMs(selectedPreset.runtimeDefaults?.timeoutMs ?? 60000);
     setBaseUrl(selectedPreset.runtimeDefaults?.baseUrl ?? "");
   }, [selectedPreset?.id]);
+
+  useEffect(() => {
+    if (!profile) {
+      return;
+    }
+
+    const next = EVAL_PROFILE_PRESETS[profile].defaults;
+    setProvider(next.provider);
+    setModel(next.model);
+    setSamples(next.samples);
+    setLocaleOverride(next.locale ?? "");
+    setTimeoutMs(next.timeoutMs);
+  }, [profile]);
 
   const createRunMutation = useMutation({
     mutationFn: async () => {
@@ -96,6 +111,7 @@ export function RunLauncher() {
         presetId: selectedPreset.id,
         site,
         runtimePath: selectedPreset.runtimePath,
+        profile: profile || undefined,
         provider:
           provider !== "" && provider !== selectedPreset.runtimeDefaults?.provider ? provider : undefined,
         model:
@@ -226,6 +242,22 @@ export function RunLauncher() {
                 {mode === "eval" ? (
                   <>
                     <label className={styles.field}>
+                      <span className={styles.label}>{t("admin.launcher.profile")}</span>
+                      <select
+                        className={styles.select}
+                        value={profile}
+                        onChange={(event) => setProfile(event.target.value as "" | EvalProfileName)}
+                      >
+                        <option value="">{t("admin.launcher.profile.default")}</option>
+                        {Object.values(EVAL_PROFILE_PRESETS).map((entry) => (
+                          <option key={entry.id} value={entry.id}>
+                            {entry.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className={styles.field}>
                       <span className={styles.label}>{t("admin.launcher.provider")}</span>
                       <select
                         className={styles.select}
@@ -304,6 +336,13 @@ export function RunLauncher() {
                   <p className={styles.hint}>
                     {t("admin.launcher.presetGuide")}: <strong>{presetUse(selectedPreset.id, t)}</strong>
                   </p>
+                  {profile ? (
+                    <p className={styles.hint}>
+                      {t("admin.launcher.profile")}:{" "}
+                      <strong>{EVAL_PROFILE_PRESETS[profile].label}</strong>.{" "}
+                      {EVAL_PROFILE_PRESETS[profile].description}
+                    </p>
+                  ) : null}
                   {selectedPreset.runtimeDefaults ? (
                     <p className={styles.hint}>
                       {t("admin.launcher.runtime")}: <strong>{selectedPreset.runtimePath}</strong>.{" "}

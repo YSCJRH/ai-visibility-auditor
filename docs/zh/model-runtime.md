@@ -180,10 +180,29 @@ OPENAI_API_KEY=... corepack pnpm eval -- https://example.com \
 根 Action 用的是同一套规则：
 
 - 如果传了 `runtime` input，就用那份文件
+- 如果传了 `profile` input，就把它当作一组推荐覆盖的短手
 - 否则默认尝试读取 `brand.yaml` 同目录下的 `runtime.yaml`
 - `provider`、`model`、`samples`、`locale`、`timeout-ms`、`base-url` 继续作为临时覆盖
 
 这样外部仓库可以把默认模型配置留在 starter bundle 里，而不用在 workflow 里重复抄一遍。
+
+## 可执行的 profile alias
+
+AnswerLens 现在提供三种显式 profile alias，可作为临时覆盖的短手：
+
+- `fast-first-eval`
+- `self-dogfood-stability`
+- `high-confidence-review`
+
+当你想在不改 `runtime.yaml` 的情况下，快速切换到一组推荐默认值时，就用它们。
+
+优先级仍然是：
+
+1. 单个显式字段
+2. profile alias
+3. `runtime.yaml`
+4. 环境变量回退
+5. adapter 默认值
 
 ## Admin 控制台
 

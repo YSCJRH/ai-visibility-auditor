@@ -103,6 +103,34 @@ test("resolveEvalRuntime applies override > runtime > env > default precedence",
   assert.equal(resolved.baseUrl.value, "https://override.example");
 });
 
+test("resolveEvalRuntime applies profile values before runtime defaults", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-runtime-profile-"));
+  const runtimePath = await writeRuntimeFile(
+    tempDir,
+    `runtime:
+  eval:
+    provider: openai
+    model: gpt-5-mini
+    locale: en-US
+    samples: 1
+    timeout_ms: 60000
+`
+  );
+
+  const resolved = await resolveEvalRuntime({
+    runtimePath,
+    profile: "high-confidence-review",
+    env: {}
+  });
+
+  assert.equal(resolved.provider.value, "openai");
+  assert.equal(resolved.provider.source, "profile");
+  assert.equal(resolved.model.value, "gpt-5");
+  assert.equal(resolved.model.source, "profile");
+  assert.equal(resolved.samples.value, 1);
+  assert.equal(resolved.locale.value, "en-US");
+});
+
 test("resolveEvalRuntime falls back to env and provider defaults", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-runtime-env-"));
   const runtimePath = await writeRuntimeFile(

@@ -102,6 +102,7 @@ Optional:
 
 - `out-dir` default: `runs/answerlens`
 - `runtime` for an explicit `runtime.yaml` path
+- `profile` for a temporary eval profile alias
 - `provider` as an `eval` override
 - `model`
 - `samples`
@@ -114,9 +115,10 @@ Optional:
 For `eval`, the Action now follows the same rule as the CLI:
 
 1. explicit Action inputs
-2. `runtime.yaml`
-3. provider-specific environment fallbacks
-4. adapter defaults
+2. `profile`
+3. `runtime.yaml`
+4. provider-specific environment fallbacks
+5. adapter defaults
 
 If you do not set `runtime`, AnswerLens tries `runtime.yaml` next to `brand.yaml`.
 

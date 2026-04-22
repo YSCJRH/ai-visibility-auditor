@@ -242,7 +242,7 @@ OPENAI_API_KEY=... corepack pnpm eval -- https://example.com \
 
 That command auto-loads `./.github/answerlens/runtime.yaml` from the same directory as `brand.yaml`.
 
-Use flags such as `--provider`, `--model`, `--samples`, `--locale`, `--timeout-ms`, and `--base-url` only when you want a temporary override.
+Use flags such as `--profile`, `--provider`, `--model`, `--samples`, `--locale`, `--timeout-ms`, and `--base-url` only when you want a temporary override.
 
 Perplexity runs use the same command shape with `PERPLEXITY_API_KEY`. The full precedence rules and scenario matrix live in [docs/model-runtime.md](docs/model-runtime.md).
 

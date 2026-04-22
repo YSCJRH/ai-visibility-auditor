@@ -24,6 +24,9 @@ inputs:
   runtime:
     description: "Optional path to runtime.yaml for eval defaults. Defaults to a sibling runtime.yaml next to brand.yaml."
     required: false
+  profile:
+    description: "Optional eval profile alias: fast-first-eval, self-dogfood-stability, or high-confidence-review."
+    required: false
   provider:
     description: "Optional eval provider override."
     required: false
@@ -165,6 +168,10 @@ runs:
         if ($command -eq 'eval') {
           if (-not [string]::IsNullOrWhiteSpace('${{ inputs.runtime }}')) {
             $args += @('--runtime', (Resolve-AnswerLensInput '${{ inputs.runtime }}'))
+          }
+
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.profile }}')) {
+            $args += @('--profile', '${{ inputs.profile }}')
           }
 
           if (-not [string]::IsNullOrWhiteSpace('${{ inputs.provider }}')) {

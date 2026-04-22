@@ -180,10 +180,29 @@ OPENAI_API_KEY=... corepack pnpm eval -- https://example.com \
 The root Action uses the same rule:
 
 - if `runtime` input is set, use that file
+- if `profile` input is set, use that recommended alias as a shorthand bundle of overrides
 - otherwise, try `runtime.yaml` next to `brand.yaml`
 - `provider`, `model`, `samples`, `locale`, `timeout-ms`, and `base-url` stay as temporary overrides
 
 That lets external repositories keep a clean starter layout without hardcoding model defaults into the workflow itself.
+
+## Executable profile aliases
+
+AnswerLens now ships three explicit profile aliases for temporary overrides:
+
+- `fast-first-eval`
+- `self-dogfood-stability`
+- `high-confidence-review`
+
+Use them when you want a shorthand on top of `runtime.yaml`, without rewriting the YAML itself.
+
+Priority stays:
+
+1. individual explicit fields
+2. profile alias
+3. `runtime.yaml`
+4. env fallback
+5. adapter defaults
 
 ## Admin console
 

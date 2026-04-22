@@ -116,9 +116,10 @@ The goal is not to approve a new dashboard pattern. The goal is to verify that a
 2. Pick a preset source
 3. Set a site input
 4. Choose `audit` or `eval`
-5. For `eval`, confirm the preset's `runtime.yaml` defaults and only override provider/model/locale/timeout/base URL when you want a temporary change
-6. Wait for the queued job to finish
-7. Land in the run detail page for artifact review
+5. For `eval`, confirm the preset's `runtime.yaml` defaults and only override them directly when you want a temporary change
+6. If you want a recommended bundle of temporary overrides, choose a `profile` alias such as `fast-first-eval`, `self-dogfood-stability`, or `high-confidence-review`
+7. Wait for the queued job to finish
+8. Land in the run detail page for artifact review
 
 The console writes the same file-backed outputs into `runs/*`. It does not invent a second artifact format.
 For `eval`, the launcher reads `runtime.yaml` next to `brand.yaml`, keeps secrets in environment variables, and uses explicit form inputs only as temporary overrides. See [model-runtime.md](model-runtime.md) for the full precedence rules.

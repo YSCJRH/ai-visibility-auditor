@@ -15,6 +15,7 @@ import {
 } from "../../../packages/core/src/index.ts";
 import { resolveEvalRuntime } from "../../../packages/runtime-config/src/index.ts";
 import type { RuntimeProviderName } from "../../../packages/runtime-config/src/index.ts";
+import type { EvalProfileName } from "../../../packages/contracts/src/index.ts";
 import { normalizeDomain } from "../../../packages/core/src/utils.ts";
 import type { RunMode } from "../../../packages/core/src/index.ts";
 import type { Citation, ProviderName, ProviderResponse, SearchResult } from "../../../packages/providers/src/index.ts";
@@ -125,7 +126,7 @@ function printHelp(): void {
 
 Usage:
   corepack pnpm audit <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir>
-  corepack pnpm eval <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> [--runtime <runtime.yaml>] [--provider <openai|perplexity>] [--model <model>] [--samples <n>] [--locale <locale>] [--timeout-ms <ms>] [--base-url <url>]
+  corepack pnpm eval <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> [--runtime <runtime.yaml>] [--profile <fast-first-eval|self-dogfood-stability|high-confidence-review>] [--provider <openai|perplexity>] [--model <model>] [--samples <n>] [--locale <locale>] [--timeout-ms <ms>] [--base-url <url>]
   corepack pnpm manual-import <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --input <responses.json> [--locale <locale>]
   corepack pnpm search-console-import <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --input <gsc-pages.csv>
   corepack pnpm bing-indexnow-helper <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --bing-input <bing-pages.csv>
@@ -354,6 +355,7 @@ async function runEvalCommand(parsed: ParsedArgs, dependencies: CliDependencies)
   const resolvedRuntime = await resolveEvalRuntime({
     brandPath,
     runtimePath: optionalFlag(parsed, "runtime"),
+    profile: optionalFlag(parsed, "profile") as EvalProfileName | undefined,
     provider: optionalFlag(parsed, "provider") as RuntimeProviderName | undefined,
     model: optionalFlag(parsed, "model"),
     locale: optionalFlag(parsed, "locale"),

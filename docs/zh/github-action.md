@@ -45,11 +45,13 @@ AnswerLens 提供一个可复用的根 Action，让团队把 AI 可发现性检�
 对 `eval` 来说，AnswerLens 按同一套顺序解析配置：
 
 1. 显式 Action inputs
-2. `runtime.yaml`
-3. provider-specific 环境变量回退
-4. adapter 默认值
+2. `profile`
+3. `runtime.yaml`
+4. provider-specific 环境变量回退
+5. adapter 默认值
 
 如果你没有传 `runtime` input，AnswerLens 会默认尝试读取 `brand.yaml` 同目录下的 `runtime.yaml`。
+如果你传了 `profile`，它会作为一组推荐覆盖，位于单字段显式输入之后、`runtime.yaml` 之前。
 
 ## 产物审阅顺序
 

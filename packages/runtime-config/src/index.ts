@@ -2,9 +2,10 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import YAML from "yaml";
 import { z } from "zod";
+import { EVAL_PROFILE_PRESETS, type EvalProfileName } from "../../contracts/src/index.ts";
 
 export type RuntimeProviderName = "openai" | "perplexity";
-export type RuntimeConfigSource = "override" | "runtime" | "env" | "default";
+export type RuntimeConfigSource = "override" | "profile" | "runtime" | "env" | "default";
 
 export interface RuntimeConfig {
   runtime: {
@@ -37,6 +38,7 @@ export interface ResolvedEvalRuntime {
 export interface ResolveEvalRuntimeInput {
   brandPath?: string;
   runtimePath?: string;
+  profile?: EvalProfileName;
   provider?: RuntimeProviderName;
   model?: string;
   locale?: string | null;
@@ -113,12 +115,16 @@ function providerBaseUrlFromEnv(provider: RuntimeProviderName, env: NodeJS.Proce
 
 function resolveValue<T>(
   override: T | undefined,
+  profileValue: T | undefined,
   runtimeValue: T | undefined,
   envValue: T | undefined,
   defaultValue: T
 ): ResolvedRuntimeValue<T> {
   if (override !== undefined) {
     return { value: override, source: "override" };
+  }
+  if (profileValue !== undefined) {
+    return { value: profileValue, source: "profile" };
   }
   if (runtimeValue !== undefined) {
     return { value: runtimeValue, source: "runtime" };
@@ -174,12 +180,13 @@ export async function loadRuntimeConfigIfExists(filePath?: string): Promise<Runt
 
 export async function resolveEvalRuntime(input: ResolveEvalRuntimeInput): Promise<ResolvedEvalRuntime> {
   const env = input.env ?? process.env;
+  const profile = input.profile ? EVAL_PROFILE_PRESETS[input.profile] : null;
   const runtimePath =
     resolvePathLike(input.runtimePath) ?? (input.brandPath ? defaultRuntimePathForBrand(input.brandPath) : undefined);
   const runtimeConfig = await loadRuntimeConfigIfExists(runtimePath);
   const runtimeEval = runtimeConfig?.runtime.eval;
 
-  const provider = input.provider ?? runtimeEval?.provider;
+  const provider = input.provider ?? profile?.defaults.provider ?? runtimeEval?.provider;
   if (!provider) {
     throw new Error(
       `Eval provider is required. Set --provider, the Action provider input, or runtime.eval.provider in ${runtimePath ?? "runtime.yaml"}.`
@@ -188,12 +195,15 @@ export async function resolveEvalRuntime(input: ResolveEvalRuntimeInput): Promis
 
   const providerSource: RuntimeConfigSource = input.provider
     ? "override"
+    : profile?.defaults.provider
+      ? "profile"
     : runtimeEval?.provider
       ? "runtime"
       : "default";
 
   const model = resolveValue(
     nonEmpty(input.model),
+    profile?.defaults.model,
     nonEmpty(runtimeEval?.model),
     providerModelFromEnv(provider, env),
     DEFAULT_MODEL_BY_PROVIDER[provider]
@@ -201,6 +211,7 @@ export async function resolveEvalRuntime(input: ResolveEvalRuntimeInput): Promis
 
   const locale = resolveValue<string | null>(
     input.locale === undefined ? undefined : nonEmpty(input.locale) ?? null,
+    profile?.defaults.locale,
     nonEmpty(runtimeEval?.locale),
     undefined,
     null
@@ -208,6 +219,7 @@ export async function resolveEvalRuntime(input: ResolveEvalRuntimeInput): Promis
 
   const samples = resolveValue(
     optionalPositiveInteger(input.samples),
+    optionalPositiveInteger(profile?.defaults.samples),
     optionalPositiveInteger(runtimeEval?.samples),
     undefined,
     1
@@ -215,6 +227,7 @@ export async function resolveEvalRuntime(input: ResolveEvalRuntimeInput): Promis
 
   const timeoutMs = resolveValue(
     optionalPositiveInteger(input.timeoutMs),
+    optionalPositiveInteger(profile?.defaults.timeoutMs),
     optionalPositiveInteger(runtimeEval?.timeout_ms),
     undefined,
     DEFAULT_TIMEOUT_MS
@@ -223,6 +236,7 @@ export async function resolveEvalRuntime(input: ResolveEvalRuntimeInput): Promis
   const providerConfig = runtimeConfig?.runtime.providers?.[provider];
   const baseUrl = resolveValue(
     nonEmpty(input.baseUrl),
+    undefined,
     nonEmpty(providerConfig?.base_url),
     providerBaseUrlFromEnv(provider, env),
     DEFAULT_BASE_URL_BY_PROVIDER[provider]

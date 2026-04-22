@@ -508,6 +508,7 @@ export async function createEvalRun(input: CreateEvalRunInput, options?: Runtime
   const resolvedRuntime = await resolveEvalRuntime({
     brandPath: preset.brandPath,
     runtimePath: resolveMaybeRepoPath(input.runtimePath, options) ?? preset.runtimePath,
+    profile: input.profile,
     provider: input.provider,
     model: input.model,
     locale: input.locale,
