@@ -78,6 +78,6 @@ AnswerLens 是一个 CLI-first、GitHub-native 的 AI 可见性审计器，面�
 - [分发计划](docs/zh/distribution-plan.md)
 - [Admin 控制台说明](docs/zh/admin-console.md)
 
-如果你要跑 live `eval`，请把默认 provider / model / locale / timeout 放进 `runtime.yaml`，把 `OPENAI_API_KEY` 和 `PERPLEXITY_API_KEY` 继续放在环境变量里。完整规则见 [docs/zh/model-runtime.md](docs/zh/model-runtime.md)。
+如果你要跑 live `eval`，请把默认 provider / model / locale / timeout 放进 `runtime.yaml`，把 `OPENAI_API_KEY` 和 `PERPLEXITY_API_KEY` 继续放在环境变量里。完整规则和场景决策表见 [docs/zh/model-runtime.md](docs/zh/model-runtime.md)。
 
 如果你需要完整英文细节、更多命令示例和所有仓库文档，请继续查看 [README.md](README.md) 和 `docs/` 下的英文原文。

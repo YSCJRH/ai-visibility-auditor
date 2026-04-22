@@ -79,6 +79,15 @@ Do not put model runtime values back into:
 
 Current prompt packs in this repository are authored in English and are relatively well-scoped benchmark questions.
 
+### Profile matrix
+
+| Scenario | Provider | Model | Locale | Samples | Why |
+| --- | --- | --- | --- | ---: | --- |
+| First eval on a fixture or external starter | `openai` | `gpt-5-mini` | `en-US` | `1` | Lowest-friction, lowest-cost baseline for a first benchmark pass |
+| AnswerLens self-dogfooding | `openai` | `gpt-5-mini` | `en-US` | `2` | Adds a quick stability read without turning every run into a heavy adjudication pass |
+| Messaging-sensitive re-check on a small prompt set | `openai` | `gpt-5` | `en-US` | `1` | Better for a higher-confidence spot check when the prompt count is intentionally small |
+| Non-English prompt pack | `openai` | `gpt-5-mini` | target locale | `1` | Change locale only when the prompts and target audience are genuinely centered on that language |
+
 That makes this a good default baseline:
 
 - `provider: openai`
@@ -104,6 +113,14 @@ When to override:
 - use `gpt-5` temporarily when you want a higher-confidence adjudication run on a smaller number of high-value prompts
 - switch locale only when the prompt pack and audience are genuinely centered on another language
 - raise samples to `2` or `3` only when you are checking instability, not for every default run
+
+### Current preset mapping
+
+| Preset path | Current default |
+| --- | --- |
+| `examples/acme/runtime.yaml` | `openai / gpt-5-mini / en-US / samples=1` |
+| `examples/consumer-repo/.github/answerlens/runtime.yaml` | `openai / gpt-5-mini / en-US / samples=1` |
+| `.github/answerlens/runtime.yaml` | `openai / gpt-5-mini / en-US / samples=2` |
 
 ## Precedence
 

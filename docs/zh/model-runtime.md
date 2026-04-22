@@ -79,6 +79,15 @@ runtime:
 
 当前仓库里的 prompt pack 基本都是英文编写，而且问题本身也偏“范围清楚、便于复现”的 benchmark prompt。
 
+### 场景决策表
+
+| 场景 | Provider | Model | Locale | Samples | 适用原因 |
+| --- | --- | --- | --- | ---: | --- |
+| 第一次跑 fixture 或 external starter eval | `openai` | `gpt-5-mini` | `en-US` | `1` | 成本最低、速度最快，最适合作为 first benchmark baseline |
+| AnswerLens 自我应用 / self-dogfooding | `openai` | `gpt-5-mini` | `en-US` | `2` | 多一份 sample 来快速看稳定性，但又不把每次 run 都变成重型复核 |
+| 少量高价值 prompt 的高置信度复核 | `openai` | `gpt-5` | `en-US` | `1` | 适合小规模、判断更敏感的 spot check |
+| 非英文 prompt pack | `openai` | `gpt-5-mini` | 目标语言 | `1` | 只有当 prompts 和目标受众本身就是另一种语言时，才切 locale |
+
 因此更适合作为默认 baseline 的是：
 
 - `provider: openai`
@@ -104,6 +113,14 @@ runtime:
 - 当你只跑少量高价值 prompt，而且想要更高置信度时，临时切到 `gpt-5`
 - 只有当 prompt pack 和目标受众本身就是中文或其他语言时，再改 locale
 - 只有在你明确要检查稳定性时，再把 `samples` 提到 `2` 或 `3`
+
+### 当前 preset 对应关系
+
+| Preset 路径 | 当前默认值 |
+| --- | --- |
+| `examples/acme/runtime.yaml` | `openai / gpt-5-mini / en-US / samples=1` |
+| `examples/consumer-repo/.github/answerlens/runtime.yaml` | `openai / gpt-5-mini / en-US / samples=1` |
+| `.github/answerlens/runtime.yaml` | `openai / gpt-5-mini / en-US / samples=2` |
 
 ## 优先级
 
