@@ -26,6 +26,16 @@ function preferredArtifactName(name: string, locale: Locale): string {
   return name;
 }
 
+function alternateArtifactName(name: string, locale: Locale): string {
+  if (locale === "en" && name.endsWith(".zh.md")) {
+    return name.replace(/\.zh\.md$/, ".md");
+  }
+  if (locale === "en" && name === "index.zh.html") {
+    return "index.html";
+  }
+  return preferredArtifactName(name, locale);
+}
+
 export function ArtifactViewer({ runId, artifacts }: ArtifactViewerProps) {
   const { locale, t } = useLocale();
   const visibleArtifacts = useMemo(
@@ -47,6 +57,17 @@ export function ArtifactViewer({ runId, artifacts }: ArtifactViewerProps) {
       setSelectedArtifactName(preferred);
     }
   }, [locale, selectedArtifactName, visibleArtifacts]);
+
+  useEffect(() => {
+    if (!selectedArtifactName) {
+      return;
+    }
+
+    const alternate = alternateArtifactName(selectedArtifactName, locale);
+    if (alternate !== selectedArtifactName && artifacts.some((artifact) => artifact.name === alternate)) {
+      setSelectedArtifactName(alternate);
+    }
+  }, [artifacts, locale, selectedArtifactName]);
 
   const artifactQuery = useQuery({
     queryKey: ["artifact", runId, selectedArtifact?.name],

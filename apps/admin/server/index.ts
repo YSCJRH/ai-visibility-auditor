@@ -60,8 +60,8 @@ function formatDateTime(value: string, locale: Locale): string {
   });
 }
 
-function formatScore(value: number | null): string {
-  return value === null ? "Pending" : `${value}/100`;
+function formatScore(value: number | null, locale: Locale): string {
+  return value === null ? (locale === "zh-CN" ? "待生成" : "Pending") : `${value}/100`;
 }
 
 function parseCookie(header: string | undefined, key: string): string | null {
@@ -97,20 +97,22 @@ function renderReviewShell(title: string, body: string): string {
     <style>
       :root {
         color-scheme: dark;
-        --canvas: #090014;
-        --shell: rgba(9, 7, 24, 0.96);
-        --surface: rgba(18, 16, 46, 0.92);
-        --surface-elevated: rgba(24, 18, 56, 0.94);
-        --text-strong: #eef3ff;
-        --text-muted: rgba(214, 221, 242, 0.78);
-        --text-subtle: rgba(180, 188, 210, 0.58);
-        --accent-magenta: #ff00ff;
-        --accent-cyan: #00ffff;
-        --accent-orange: #ff9900;
-        --state-success: #6fffd2;
-        --state-danger: #ff688b;
-        --border-subtle: rgba(45, 27, 78, 1);
-        --glow-sm: 0 0 1.4rem rgba(0, 255, 255, 0.08);
+        --canvas: #050506;
+        --surface: rgba(255, 255, 255, 0.045);
+        --surface-elevated: rgba(255, 255, 255, 0.06);
+        --text-strong: #edecef;
+        --text-muted: #8d939d;
+        --text-subtle: rgba(237, 236, 239, 0.62);
+        --accent: #5e6ad2;
+        --accent-bright: #6872d9;
+        --state-success: #6bd0b4;
+        --state-danger: #f07b9e;
+        --border-subtle: rgba(255, 255, 255, 0.06);
+        --border-accent: rgba(94, 106, 210, 0.32);
+        --shadow-card:
+          0 0 0 1px rgba(255, 255, 255, 0.05),
+          0 18px 52px rgba(0, 0, 0, 0.38),
+          0 40px 90px rgba(0, 0, 0, 0.18);
       }
 
       * { box-sizing: border-box; }
@@ -118,9 +120,10 @@ function renderReviewShell(title: string, body: string): string {
         margin: 0;
         font-family: Inter, system-ui, sans-serif;
         background:
-          radial-gradient(circle at 78% 18%, rgba(0, 255, 255, 0.15), transparent 18rem),
-          radial-gradient(circle at 18% 82%, rgba(255, 0, 255, 0.12), transparent 18rem),
-          linear-gradient(180deg, rgba(255, 153, 0, 0.08), transparent 18rem),
+          radial-gradient(circle at 50% -10%, rgba(94, 106, 210, 0.24), transparent 34rem),
+          radial-gradient(circle at 0% 34%, rgba(98, 79, 206, 0.12), transparent 28rem),
+          radial-gradient(circle at 100% 18%, rgba(64, 86, 209, 0.12), transparent 24rem),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 22rem),
           var(--canvas);
         color: var(--text-strong);
       }
@@ -129,37 +132,48 @@ function renderReviewShell(title: string, body: string): string {
         position: fixed;
         inset: 0;
         pointer-events: none;
-        opacity: 0.12;
+        opacity: 0.028;
         background-image:
-          linear-gradient(rgba(255, 0, 255, 0.16) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(0, 255, 255, 0.16) 1px, transparent 1px);
-        background-size: 36px 36px;
+          linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+        background-size: 64px 64px;
+        mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent 85%);
       }
-      a { color: var(--accent-cyan); text-decoration: none; }
-      a:hover { text-decoration: underline; }
-      code { font-family: "Share Tech Mono", monospace; }
+      a { color: var(--accent-bright); text-decoration: none; }
+      a:hover { color: var(--text-strong); }
+      code {
+        font-family: "SFMono-Regular", Consolas, monospace;
+        padding: 0.14rem 0.38rem;
+        border-radius: 8px;
+        border: 1px solid rgba(94, 106, 210, 0.18);
+        background: rgba(94, 106, 210, 0.1);
+      }
       .shell {
         display: grid;
-        grid-template-columns: 18rem minmax(0, 1fr);
+        grid-template-columns: 16rem minmax(0, 1fr);
         min-height: 100vh;
       }
       .sidebar {
-        padding: 2rem 1.5rem;
-        border-right: 1px solid rgba(0, 255, 255, 0.12);
-        background: linear-gradient(180deg, rgba(13, 9, 34, 0.96), rgba(8, 7, 22, 0.96));
+        padding: 1.5rem 1.25rem;
+        border-right: 1px solid var(--border-subtle);
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 35%),
+          rgba(8, 8, 11, 0.76);
+        backdrop-filter: blur(24px);
       }
       .brand-label {
-        color: var(--accent-magenta);
-        font-size: 0.78rem;
-        letter-spacing: 0.18em;
+        color: var(--text-subtle);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
       }
       .brand-title {
-        margin: 0.7rem 0 0;
-        font-size: 2.2rem;
-        line-height: 0.95;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+        margin: 0.55rem 0 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        line-height: 1.05;
+        letter-spacing: -0.035em;
       }
       .brand-copy,
       .sidebar-copy {
@@ -168,44 +182,51 @@ function renderReviewShell(title: string, body: string): string {
       }
       .nav {
         display: grid;
-        gap: 0.6rem;
-        margin-top: 1.5rem;
+        gap: 0.45rem;
+        margin-top: 1.2rem;
       }
       .nav a {
         display: block;
-        padding: 0.9rem 1rem;
+        padding: 0.78rem 0.9rem;
         border: 1px solid var(--border-subtle);
-        background: rgba(11, 10, 28, 0.72);
-        font-family: "Share Tech Mono", monospace;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.035);
+        color: var(--text-muted);
+        font-size: 0.94rem;
+        font-weight: 600;
       }
       .nav a.active {
-        border-color: rgba(0, 255, 255, 0.7);
-        box-shadow: var(--glow-sm);
+        border-color: var(--border-accent);
+        background: rgba(94, 106, 210, 0.14);
+        color: var(--text-strong);
       }
       .sidebar-card {
         margin-top: 1rem;
         padding: 1rem;
-        border: 1px solid rgba(255, 0, 255, 0.16);
-        background: rgba(16, 14, 40, 0.9);
+        border: 1px solid var(--border-subtle);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.03);
       }
       .sidebar-eyebrow,
       .eyebrow {
         margin: 0 0 0.5rem;
-        color: var(--accent-cyan);
-        font-size: 0.75rem;
-        letter-spacing: 0.16em;
+        color: var(--text-subtle);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
       }
       .content {
-        padding: 1.5rem clamp(1rem, 3vw, 2.4rem) 2rem;
+        padding: 1.5rem clamp(1rem, 3vw, 2.25rem) 2rem;
       }
       .topbar,
       .panel {
-        border: 1px solid rgba(0, 255, 255, 0.14);
-        background: linear-gradient(180deg, rgba(18, 16, 46, 0.92), rgba(11, 10, 28, 0.94));
-        box-shadow: var(--glow-sm);
+        border: 1px solid var(--border-subtle);
+        border-radius: 18px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+          rgba(10, 10, 12, 0.84);
+        box-shadow: var(--shadow-card);
       }
       .topbar {
         display: flex;
@@ -216,25 +237,25 @@ function renderReviewShell(title: string, body: string): string {
       }
       .topbar-title {
         margin: 0;
-        color: var(--accent-orange);
-        font-size: 0.8rem;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
+        color: var(--text-strong);
+        font-size: 1.15rem;
+        font-weight: 600;
+        letter-spacing: -0.03em;
       }
       .topbar-copy {
         margin: 0.45rem 0 0;
         color: var(--text-muted);
-        line-height: 1.55;
+        line-height: 1.6;
       }
       .button {
         display: inline-block;
         padding: 0.78rem 1rem;
-        border: 1px solid var(--accent-cyan);
-        background: rgba(0, 255, 255, 0.08);
-        color: var(--accent-cyan);
-        font-family: "Share Tech Mono", monospace;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
+        border: 1px solid var(--border-accent);
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(104, 114, 217, 0.96), rgba(94, 106, 210, 0.9));
+        color: #ffffff;
+        font-size: 0.92rem;
+        font-weight: 600;
       }
       .page {
         display: grid;
@@ -243,8 +264,8 @@ function renderReviewShell(title: string, body: string): string {
       .title {
         margin: 0;
         font-size: clamp(1.8rem, 3vw, 2.8rem);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        font-weight: 600;
+        letter-spacing: -0.035em;
       }
       .description {
         margin: 0.75rem 0 0;
@@ -411,7 +432,7 @@ function renderRunsReviewPage(
           <div class="subtle">${escapeHtml(run.siteInput)}</div>
         </td>
         <td>${escapeHtml(translateRunKind(run.kind, locale))}</td>
-        <td>${escapeHtml(formatScore(run.overallScore))}</td>
+        <td>${escapeHtml(formatScore(run.overallScore, locale))}</td>
         <td><span class="status ${run.status === "completed" ? "success" : "info"}">${escapeHtml(translateStatus(run.status, locale))}</span></td>
         <td>${escapeHtml(formatDateTime(run.generatedAt, locale))}</td>
       </tr>`
@@ -460,12 +481,12 @@ function renderRunsReviewPage(
             </div>
             <div class="panel metric">
               <div class="metric-label">${locale === "zh-CN" ? "平均分" : "Average score"}</div>
-              <div class="metric-value">${escapeHtml(formatScore(averageScore))}</div>
+              <div class="metric-value">${escapeHtml(formatScore(averageScore, locale))}</div>
               <div class="metric-helper">${locale === "zh-CN" ? "快速感知当前本地历史结果的状态。" : "A quick pulse across the current local history."}</div>
             </div>
             <div class="panel metric">
               <div class="metric-label">${locale === "zh-CN" ? "最新运行" : "Latest run"}</div>
-              <div class="metric-value">${escapeHtml(formatScore(latestRun?.overallScore ?? null))}</div>
+              <div class="metric-value">${escapeHtml(formatScore(latestRun?.overallScore ?? null, locale))}</div>
               <div class="metric-helper">${escapeHtml(latestRun?.siteLabel ?? (locale === "zh-CN" ? "还没有可用运行。" : "No run available yet."))}</div>
             </div>
             <div class="panel metric">
@@ -565,7 +586,7 @@ function renderRunDetailReviewPage(
           <section class="metric-grid">
             <div class="panel metric">
               <div class="metric-label">Overall score</div>
-              <div class="metric-value">${escapeHtml(formatScore(overallScore))}</div>
+              <div class="metric-value">${escapeHtml(formatScore(overallScore, locale))}</div>
               <div class="metric-helper">Primary readiness score for this run.</div>
             </div>
             <div class="panel metric">

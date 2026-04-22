@@ -1,7 +1,14 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { translateBucket } from "../shared/i18n.ts";
+import {
+  translateBucket,
+  translateExpectedOutcome,
+  translateFixHint,
+  translateIssueTitle,
+  translateRecommendationTitle,
+  translateSeverity
+} from "../shared/i18n.ts";
 import { ArtifactViewer } from "../components/ArtifactViewer";
 import { IssueTable } from "../components/IssueTable";
 import { MetricTile } from "../components/MetricTile";
@@ -83,105 +90,127 @@ export function RunDetailPage() {
 
       <div className={pageStyles.grid}>
         <div className={pageStyles.mainColumn}>
-          <section className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>{t("admin.detail.signalEyebrow")}</p>
-            <h2 className={pageStyles.panelTitle}>{t("admin.detail.signalTitle")}</h2>
-            <p className={pageStyles.panelBody}>{t("admin.detail.signalBody")}</p>
-            <div className={pageStyles.metaList}>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.detail.topIssue")}</span>
-                <span className={pageStyles.metaValue}>
-                  {topIssue ? `${topIssue.title}${"severity" in topIssue ? ` (${topIssue.severity})` : ""} - ${topIssue.fixHint}` : t("admin.detail.none")}
-                </span>
-              </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.detail.topFix")}</span>
-                <span className={pageStyles.metaValue}>
-                  {topRecommendation ? `${topRecommendation.title} - ${topRecommendation.expectedOutcome}` : t("admin.detail.none")}
-                </span>
+          <section className={uiStyles.surfaceCard}>
+            <div className={uiStyles.surfaceInner}>
+              <div className={pageStyles.splitCard}>
+                <div>
+                  <p className={uiStyles.surfaceEyebrow}>{t("admin.detail.signalEyebrow")}</p>
+                  <h2 className={uiStyles.surfaceTitle}>{t("admin.detail.signalTitle")}</h2>
+                  <p className={uiStyles.surfaceBody}>{t("admin.detail.signalBody")}</p>
+                  <div className={uiStyles.metaList}>
+                    <div className={uiStyles.metaRow}>
+                      <span className={uiStyles.metaLabel}>{t("admin.detail.topIssue")}</span>
+                      <span className={uiStyles.metaValue}>
+                        {topIssue
+                          ? `${translateIssueTitle(topIssue.title, locale)}${"severity" in topIssue ? ` (${translateSeverity(topIssue.severity, locale)})` : ""} - ${translateFixHint(topIssue.fixHint, locale)}`
+                          : t("admin.detail.none")}
+                      </span>
+                    </div>
+                    <div className={uiStyles.metaRow}>
+                      <span className={uiStyles.metaLabel}>{t("admin.detail.topFix")}</span>
+                      <span className={uiStyles.metaValue}>
+                        {topRecommendation
+                          ? `${translateRecommendationTitle(topRecommendation.title, locale)} - ${translateExpectedOutcome(topRecommendation.expectedOutcome, locale)}`
+                          : t("admin.detail.none")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <p className={uiStyles.surfaceEyebrow}>{t("admin.detail.nextEyebrow")}</p>
+                  <h2 className={uiStyles.surfaceTitle}>{t("admin.detail.nextTitle")}</h2>
+                  <p className={uiStyles.surfaceBody}>{t("admin.detail.nextBody")}</p>
+                  <ol className={uiStyles.orderedList}>
+                    <li>{t("admin.detail.nextStep1")}</li>
+                    <li>{t("admin.detail.nextStep2")}</li>
+                    <li>{t("admin.detail.nextStep3")}</li>
+                    <li>{t("admin.detail.nextStep4")}</li>
+                  </ol>
+                </div>
               </div>
             </div>
           </section>
 
-          <section className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>{t("admin.detail.nextEyebrow")}</p>
-            <h2 className={pageStyles.panelTitle}>{t("admin.detail.nextTitle")}</h2>
-            <p className={pageStyles.panelBody}>{t("admin.detail.nextBody")}</p>
-            <ol className={pageStyles.orderedList}>
-              <li>{t("admin.detail.nextStep1")}</li>
-              <li>{t("admin.detail.nextStep2")}</li>
-              <li>{t("admin.detail.nextStep3")}</li>
-              <li>{t("admin.detail.nextStep4")}</li>
-            </ol>
+          <section className={uiStyles.surfaceCard}>
+            <div className={uiStyles.surfaceInner}>
+              <p className={uiStyles.surfaceEyebrow}>{t("admin.detail.workspaceEyebrow")}</p>
+              <h2 className={uiStyles.surfaceTitle}>{t("admin.detail.workspaceTitle")}</h2>
+              <p className={uiStyles.surfaceBody}>{t("admin.detail.workspaceBody", { order: ARTIFACT_OPENING_ORDER.join(" -> ") })}</p>
+              <ArtifactViewer runId={detail.id} artifacts={detail.artifacts} />
+            </div>
           </section>
 
-          <section className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>{t("admin.detail.workspaceEyebrow")}</p>
-            <h2 className={pageStyles.panelTitle}>{t("admin.detail.workspaceTitle")}</h2>
-            <p className={pageStyles.panelBody}>{t("admin.detail.workspaceBody", { order: ARTIFACT_OPENING_ORDER.join(" -> ") })}</p>
-            <ArtifactViewer runId={detail.id} artifacts={detail.artifacts} />
-          </section>
+          <div className={pageStyles.cardGrid}>
+            <section className={uiStyles.surfaceCard}>
+              <div className={uiStyles.surfaceInner}>
+                <p className={uiStyles.surfaceEyebrow}>{t("admin.detail.issuesEyebrow")}</p>
+                <h2 className={uiStyles.surfaceTitle}>{t("admin.detail.issuesTitle")}</h2>
+                <p className={uiStyles.surfaceBody}>{t("admin.detail.issuesBody")}</p>
+                <IssueTable issues={detail.auditResult?.issues.slice(0, 8) ?? []} />
+              </div>
+            </section>
 
-          <section className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>{t("admin.detail.issuesEyebrow")}</p>
-            <h2 className={pageStyles.panelTitle}>{t("admin.detail.issuesTitle")}</h2>
-            <p className={pageStyles.panelBody}>{t("admin.detail.issuesBody")}</p>
-            <IssueTable issues={detail.auditResult?.issues.slice(0, 8) ?? []} />
-          </section>
-
-          <section className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>{t("admin.detail.fixEyebrow")}</p>
-            <h2 className={pageStyles.panelTitle}>{t("admin.detail.fixTitle")}</h2>
-            <RecommendationList recommendations={detail.auditResult?.recommendations ?? []} />
-          </section>
+            <section className={uiStyles.surfaceCard}>
+              <div className={uiStyles.surfaceInner}>
+                <p className={uiStyles.surfaceEyebrow}>{t("admin.detail.fixEyebrow")}</p>
+                <h2 className={uiStyles.surfaceTitle}>{t("admin.detail.fixTitle")}</h2>
+                <RecommendationList recommendations={detail.auditResult?.recommendations ?? []} />
+              </div>
+            </section>
+          </div>
         </div>
 
         <div className={pageStyles.sideColumn}>
-          <section className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>{t("admin.detail.contextEyebrow")}</p>
-            <h2 className={pageStyles.panelTitle}>{t("admin.detail.contextTitle")}</h2>
-            <div className={pageStyles.metaList}>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.detail.runId")}</span>
-                <span className={pageStyles.metaValue}>{detail.manifest.run.id}</span>
-              </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.detail.siteInput")}</span>
-                <span className={pageStyles.metaValue}>{detail.manifest.site.input}</span>
-              </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.detail.baseUrl")}</span>
-                <span className={pageStyles.metaValue}>{detail.manifest.site.baseUrl}</span>
-              </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.detail.artifactVersion")}</span>
-                <span className={pageStyles.metaValue}>{detail.manifest.run.artifactVersion}</span>
-              </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.detail.ruleVersion")}</span>
-                <span className={pageStyles.metaValue}>{detail.manifest.run.ruleVersion}</span>
+          <section className={uiStyles.surfaceCard}>
+            <div className={uiStyles.surfaceInner}>
+              <p className={uiStyles.surfaceEyebrow}>{t("admin.detail.contextEyebrow")}</p>
+              <h2 className={uiStyles.surfaceTitle}>{t("admin.detail.contextTitle")}</h2>
+              <div className={uiStyles.metaList}>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.detail.runId")}</span>
+                  <span className={uiStyles.metaValue}>{detail.manifest.run.id}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.detail.siteInput")}</span>
+                  <span className={uiStyles.metaValue}>{detail.manifest.site.input}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.detail.baseUrl")}</span>
+                  <span className={uiStyles.metaValue}>{detail.manifest.site.baseUrl}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.detail.artifactVersion")}</span>
+                  <span className={uiStyles.metaValue}>{detail.manifest.run.artifactVersion}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.detail.ruleVersion")}</span>
+                  <span className={uiStyles.metaValue}>{detail.manifest.run.ruleVersion}</span>
+                </div>
               </div>
             </div>
           </section>
 
-          <section className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>{t("admin.detail.bucketsEyebrow")}</p>
-            <h2 className={pageStyles.panelTitle}>{t("admin.detail.bucketsTitle")}</h2>
+          <section className={uiStyles.surfaceCard}>
+            <div className={uiStyles.surfaceInner}>
+            <p className={uiStyles.surfaceEyebrow}>{t("admin.detail.bucketsEyebrow")}</p>
+            <h2 className={uiStyles.surfaceTitle}>{t("admin.detail.bucketsTitle")}</h2>
             {auditScores.length === 0 ? (
               <p className={pageStyles.emptyState}>{t("admin.detail.bucketsEmpty")}</p>
             ) : (
-              <div className={pageStyles.scoreGrid}>
+              <div className={uiStyles.scoreGrid}>
                 {auditScores.map(([bucket, score]) => (
-                  <article key={bucket} className={pageStyles.scoreCard}>
-                    <p className={pageStyles.scoreCardTitle}>{translateBucket(bucket, locale)}</p>
-                    <p className={pageStyles.scoreCardValue}>{typeof score.score === "number" ? `${score.score}/100` : t("common.pending")}</p>
-                    <p className={pageStyles.scoreCardMeta}>
+                  <article key={bucket} className={uiStyles.scoreCard}>
+                    <p className={uiStyles.scoreCardTitle}>{translateBucket(bucket, locale)}</p>
+                    <p className={uiStyles.scoreCardValue}>{typeof score.score === "number" ? `${score.score}/100` : t("common.pending")}</p>
+                    <p className={uiStyles.scoreCardMeta}>
                       {t("admin.detail.bucketMeta", { issues: score.issueCount, warnings: score.warnCount, info: score.infoCount })}
                     </p>
                   </article>
                 ))}
               </div>
             )}
+            </div>
           </section>
         </div>
       </div>

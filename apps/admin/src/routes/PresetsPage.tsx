@@ -53,51 +53,55 @@ export function PresetsPage() {
         />
       </section>
 
-      <section className={pageStyles.panel}>
-        <p className={pageStyles.panelEyebrow}>{t("admin.presets.guideEyebrow")}</p>
-        <h2 className={pageStyles.panelTitle}>{t("admin.presets.guideTitle")}</h2>
-        <p className={pageStyles.panelBody}>{t("admin.presets.guideBody")}</p>
+      <section className={uiStyles.surfaceCard}>
+        <div className={uiStyles.surfaceInner}>
+          <p className={uiStyles.surfaceEyebrow}>{t("admin.presets.guideEyebrow")}</p>
+          <h2 className={uiStyles.surfaceTitle}>{t("admin.presets.guideTitle")}</h2>
+          <p className={uiStyles.surfaceBody}>{t("admin.presets.guideBody")}</p>
+        </div>
       </section>
 
       {presetsQuery.isLoading ? <p className={pageStyles.emptyState}>{t("admin.presets.loading")}</p> : null}
       {presetsQuery.isError ? <p className={pageStyles.emptyState}>{t("admin.presets.error")}</p> : null}
 
-      <div className={pageStyles.stack}>
+      <div className={pageStyles.cardGrid}>
         {presets.map((preset) => (
-          <article key={preset.id} className={pageStyles.panel}>
-            <p className={pageStyles.panelEyebrow}>{preset.id}</p>
-            <h2 className={pageStyles.panelTitle}>{preset.label}</h2>
-            <p className={pageStyles.panelBody}>{preset.description}</p>
-            <div className={pageStyles.metaList}>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.presets.purpose")}</span>
-                <span className={pageStyles.metaValue}>{presetUse(preset, t)}</span>
-              </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.presets.nextMove")}</span>
-                <span className={pageStyles.metaValue}>{presetNextMove(preset, t)}</span>
-              </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.presets.defaultSite")}</span>
-                <span className={pageStyles.metaValue}>{preset.defaultSiteInput}</span>
-              </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.presets.displayName")}</span>
-                <span className={pageStyles.metaValue}>{preset.siteDisplayName ?? t("admin.presets.displayName.empty")}</span>
-              </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.presets.domain")}</span>
-                <span className={pageStyles.metaValue}>{preset.domain}</span>
-              </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.presets.files")}</span>
-                <span className={pageStyles.metaValue}>
-                  {preset.brandPath}
-                  <br />
-                  {preset.competitorsPath}
-                  <br />
-                  {preset.promptsPath}
-                </span>
+          <article key={preset.id} className={uiStyles.surfaceCard}>
+            <div className={uiStyles.surfaceInner}>
+              <p className={uiStyles.surfaceEyebrow}>{preset.id}</p>
+              <h2 className={uiStyles.surfaceTitle}>{preset.label}</h2>
+              <p className={uiStyles.surfaceBody}>{preset.description}</p>
+              <div className={uiStyles.metaList}>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.presets.purpose")}</span>
+                  <span className={uiStyles.metaValue}>{presetUse(preset, t)}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.presets.nextMove")}</span>
+                  <span className={uiStyles.metaValue}>{presetNextMove(preset, t)}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.presets.defaultSite")}</span>
+                  <span className={uiStyles.metaValue}>{preset.defaultSiteInput}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.presets.displayName")}</span>
+                  <span className={uiStyles.metaValue}>{preset.siteDisplayName ?? t("admin.presets.displayName.empty")}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.presets.domain")}</span>
+                  <span className={uiStyles.metaValue}>{preset.domain}</span>
+                </div>
+                <div className={uiStyles.metaRow}>
+                  <span className={uiStyles.metaLabel}>{t("admin.presets.files")}</span>
+                  <span className={uiStyles.metaValue}>
+                    {preset.brandPath}
+                    <br />
+                    {preset.competitorsPath}
+                    <br />
+                    {preset.promptsPath}
+                  </span>
+                </div>
               </div>
             </div>
           </article>

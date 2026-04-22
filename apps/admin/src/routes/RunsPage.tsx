@@ -60,25 +60,26 @@ export function RunsPage() {
       </section>
 
       <div className={pageStyles.grid}>
-        <section className={`${pageStyles.panel} ${pageStyles.mainColumn}`}>
-          <p className={pageStyles.panelEyebrow}>{t("admin.runs.guideEyebrow")}</p>
-          <h2 className={pageStyles.panelTitle}>{t("admin.runs.guideTitle")}</h2>
-          <p className={pageStyles.panelBody}>{t("admin.runs.guideBody")}</p>
+        <section className={`${uiStyles.surfaceCard} ${pageStyles.mainColumn}`}>
+          <div className={uiStyles.surfaceInner}>
+            <p className={uiStyles.surfaceEyebrow}>{t("admin.runs.guideEyebrow")}</p>
+            <h2 className={uiStyles.surfaceTitle}>{t("admin.runs.guideTitle")}</h2>
+            <p className={uiStyles.surfaceBody}>{t("admin.runs.guideBody")}</p>
           {latestRun ? (
-            <div className={pageStyles.metaList}>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.runs.latestRun")}</span>
-                <span className={pageStyles.metaValue}>{latestRun.siteLabel}</span>
+            <div className={uiStyles.metaList}>
+              <div className={uiStyles.metaRow}>
+                <span className={uiStyles.metaLabel}>{t("admin.runs.latestRun")}</span>
+                <span className={uiStyles.metaValue}>{latestRun.siteLabel}</span>
               </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.table.score")}</span>
-                <span className={pageStyles.metaValue}>{formatScore(latestRun.overallScore, locale)}</span>
+              <div className={uiStyles.metaRow}>
+                <span className={uiStyles.metaLabel}>{t("admin.table.score")}</span>
+                <span className={uiStyles.metaValue}>{formatScore(latestRun.overallScore, locale)}</span>
               </div>
-              <div className={pageStyles.metaRow}>
-                <span className={pageStyles.metaLabel}>{t("admin.table.generated")}</span>
-                <span className={pageStyles.metaValue}>{formatDateTime(latestRun.generatedAt, locale)}</span>
+              <div className={uiStyles.metaRow}>
+                <span className={uiStyles.metaLabel}>{t("admin.table.generated")}</span>
+                <span className={uiStyles.metaValue}>{formatDateTime(latestRun.generatedAt, locale)}</span>
               </div>
-              <div className={pageStyles.buttonRow}>
+              <div className={uiStyles.buttonRow}>
                 <Link className={`${uiStyles.button} ${uiStyles.buttonPrimary}`} to={`/runs/${latestRun.id}`}>
                   {t("admin.runs.guideOpen")}
                 </Link>
@@ -87,22 +88,26 @@ export function RunsPage() {
           ) : (
             <p className={pageStyles.emptyState}>{t("admin.runs.guideEmpty")}</p>
           )}
+          </div>
         </section>
 
-        <section className={`${pageStyles.panel} ${pageStyles.sideColumn}`}>
-          <p className={pageStyles.panelEyebrow}>{t("admin.runs.nextEyebrow")}</p>
-          <h2 className={pageStyles.panelTitle}>{t("admin.runs.nextTitle")}</h2>
-          <p className={pageStyles.panelBody}>{t("admin.runs.nextBody")}</p>
-          <ol className={pageStyles.orderedList}>
+        <section className={`${uiStyles.surfaceCard} ${pageStyles.sideColumn}`}>
+          <div className={uiStyles.surfaceInner}>
+            <p className={uiStyles.surfaceEyebrow}>{t("admin.runs.nextEyebrow")}</p>
+            <h2 className={uiStyles.surfaceTitle}>{t("admin.runs.nextTitle")}</h2>
+            <p className={uiStyles.surfaceBody}>{t("admin.runs.nextBody")}</p>
+            <ol className={uiStyles.orderedList}>
             <li>{t("admin.runs.nextStep1")}</li>
             <li>{t("admin.runs.nextStep2")}</li>
             <li>{t("admin.runs.nextStep3")}</li>
           </ol>
+          </div>
         </section>
       </div>
 
-      <section className={pageStyles.panel}>
-        <div className={pageStyles.filterRow}>
+      <section className={uiStyles.surfaceCard}>
+        <div className={uiStyles.surfaceInner}>
+        <div className={uiStyles.segmented}>
           {[
             { label: t("admin.runs.filter.all"), value: "all" as const },
             { label: t("admin.runs.filter.audit"), value: "audit" as const },
@@ -111,7 +116,7 @@ export function RunsPage() {
             <button
               key={filter.value}
               type="button"
-              className={`${pageStyles.filterButton} ${kindFilter === filter.value ? pageStyles.filterButtonActive : ""}`}
+              className={`${uiStyles.segmentedButton} ${kindFilter === filter.value ? uiStyles.segmentedButtonActive : ""}`}
               onClick={() => setKindFilter(filter.value)}
             >
               {filter.label}
@@ -125,6 +130,7 @@ export function RunsPage() {
           <p className={pageStyles.emptyState}>{t("admin.runs.empty")}</p>
         ) : null}
         {filteredRuns.length > 0 ? <RunTable runs={filteredRuns} /> : null}
+        </div>
       </section>
     </div>
   );

@@ -567,25 +567,79 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale
     <meta name="twitter:image" content="${escapeHtml(ogImage)}" />
     <meta name="last-modified" content="${escapeHtml(updatedAt)}" />
     <style>
-      :root{color-scheme:dark;--bg:#081225;--panel:rgba(16,28,52,.9);--line:rgba(120,168,255,.2);--ink:#eef5ff;--muted:#adc3de;--accent:#7df0d2}
-      *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;background:radial-gradient(circle at top left,rgba(96,120,255,.16),transparent 24%),radial-gradient(circle at bottom right,rgba(125,240,210,.14),transparent 20%),linear-gradient(180deg,#0b1630 0%,var(--bg) 100%);color:var(--ink)}
-      a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}.shell{width:min(1180px,calc(100vw - 32px));margin:0 auto;padding:24px 0 56px}.topbar,.hero,.panel,.metric{border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:0 20px 40px rgba(2,8,18,.35)}
-      .topbar{display:flex;gap:16px;justify-content:space-between;align-items:center;padding:16px 20px}.nav{display:flex;gap:12px;flex-wrap:wrap}.nav a{padding:10px 14px;border-radius:999px;border:1px solid var(--line)}
-      .locale-switcher{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.92rem}
-      .hero,.panel,.metric{padding:22px}.hero h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.2rem);line-height:1.05}.hero p,.muted{color:var(--muted)}.eyebrow{margin:0 0 10px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-size:.78rem}
-      .section{margin-top:24px}.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.metric-value{margin:6px 0 4px;font-size:2rem;font-weight:700}.metric-label{margin:0;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-size:.78rem}.metric-helper{margin:0;color:var(--muted);font-size:.95rem;line-height:1.45}
-      .ctaGrid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.ctaCard{display:flex;flex-direction:column;justify-content:space-between}.ctaCard p{color:var(--muted)}.ctaLink{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;padding:12px 14px;border-radius:999px;border:1px solid var(--line);color:var(--ink);background:rgba(125,240,210,.92);font-weight:600}.ctaLink:hover{text-decoration:none;filter:brightness(1.04)}.ctaLinkSecondary{background:transparent;color:var(--accent)}.callout{margin-top:16px}
-      .panel h2{margin-top:0}.markdown{margin:0;padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(8,18,37,.95);white-space:pre-wrap;overflow:auto;font-family:"Consolas","SFMono-Regular",monospace;line-height:1.5}
-      .footer{margin-top:28px;text-align:center;color:var(--muted)}
+      :root{color-scheme:dark;--bg:#05070e;--bg-accent:#0a1020;--surface:rgba(10,15,29,.86);--surface-strong:rgba(13,20,38,.94);--surface-soft:rgba(17,25,46,.8);--line:rgba(148,163,184,.16);--line-strong:rgba(129,140,248,.32);--ink:#f5f7ff;--muted:#99a4bc;--accent:#818cf8;--accent-strong:#c7d2fe;--shadow:0 24px 80px rgba(2,6,23,.42)}
+      *{box-sizing:border-box}
+      html{background:var(--bg)}
+      body{margin:0;min-height:100vh;overflow-x:hidden;font-family:"Segoe UI Variable Display","Aptos","Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.6;letter-spacing:.01em;background:radial-gradient(circle at 12% 0%,rgba(129,140,248,.16),transparent 26%),radial-gradient(circle at 88% 18%,rgba(37,99,235,.12),transparent 24%),linear-gradient(180deg,#070910 0%,var(--bg-accent) 46%,var(--bg) 100%);color:var(--ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+      body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:72px 72px;mask-image:radial-gradient(circle at center,black 30%,transparent 78%)}
+      body::after{content:"";position:fixed;top:-8rem;right:-10rem;width:34rem;height:34rem;pointer-events:none;background:radial-gradient(circle,rgba(99,102,241,.18) 0%,transparent 68%);filter:blur(12px)}
+      a{color:var(--accent-strong);text-decoration-color:rgba(199,210,254,.4);text-underline-offset:.18em}
+      a:hover{text-decoration-color:rgba(199,210,254,.78)}
+      strong{color:var(--ink)}
+      code{padding:.16em .42em;border:1px solid rgba(129,140,248,.16);border-radius:8px;background:rgba(99,102,241,.12);color:#d9e0ff;font-family:"Cascadia Code","SFMono-Regular",Consolas,monospace;font-size:.92em}
+      *:focus-visible{outline:2px solid rgba(199,210,254,.78);outline-offset:3px;border-radius:10px}
+      .shell{position:relative;z-index:1;width:min(1180px,calc(100vw - 32px));margin:0 auto;padding:24px 0 80px}
+      .topbar,.hero,.panel,.metric{position:relative;overflow:hidden;border:1px solid var(--line);background:linear-gradient(180deg,rgba(14,21,39,.88) 0%,rgba(8,12,24,.96) 100%);box-shadow:var(--shadow)}
+      .topbar::before,.hero::before,.panel::before,.metric::before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,rgba(199,210,254,.78),transparent 72%);opacity:.72}
+      .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end;padding:18px 22px;border-radius:22px;background:linear-gradient(180deg,rgba(10,15,29,.88) 0%,rgba(7,11,22,.94) 100%);backdrop-filter:blur(18px)}
+      .brand{display:grid;gap:6px;max-width:44rem}
+      .brand-name{display:inline-flex;align-items:center;gap:12px;width:max-content;color:var(--ink);text-decoration:none;font-size:1.04rem;font-weight:650;letter-spacing:-.02em}
+      .brand-name::before{content:"";width:12px;height:12px;border-radius:4px;background:linear-gradient(135deg,#c7d2fe 0%,#818cf8 45%,#4f46e5 100%);box-shadow:0 0 0 5px rgba(129,140,248,.14)}
+      .brand-copy{margin:0;color:var(--muted);font-size:.96rem;line-height:1.6}
+      .nav{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}
+      .nav a{display:inline-flex;align-items:center;min-height:38px;padding:0 12px;border:1px solid transparent;border-radius:12px;color:var(--muted);text-decoration:none;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+      .nav a:hover{color:var(--ink);border-color:rgba(129,140,248,.18);background:rgba(99,102,241,.1);transform:translateY(-1px)}
+      .locale-switcher{display:inline-flex;align-items:center;gap:8px;margin:14px 4px 0;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(10,15,29,.72);backdrop-filter:blur(12px);color:var(--muted);font-size:.9rem}
+      .locale-switcher a{color:var(--ink)}
+      .content{display:grid;gap:28px;margin-top:24px}
+      .content>.section{margin-top:0}
+      .hero{display:grid;gap:16px;align-content:end;min-height:320px;padding:40px clamp(24px,4vw,44px);border-radius:32px;background:radial-gradient(circle at top right,rgba(129,140,248,.18) 0%,transparent 30%),radial-gradient(circle at 20% 20%,rgba(59,130,246,.12),transparent 24%),linear-gradient(180deg,rgba(16,24,45,.96) 0%,rgba(7,10,20,.98) 100%)}
+      .hero::after{content:"";position:absolute;inset:auto 0 0;height:120px;background:linear-gradient(180deg,transparent,rgba(79,70,229,.08))}
+      .hero h1{position:relative;margin:0;max-width:13ch;font-size:clamp(2.6rem,6vw,4.8rem);line-height:.95;letter-spacing:-.05em}
+      .hero p,.muted{position:relative;color:var(--muted)}
+      .hero p{margin:0;max-width:62ch;font-size:1.05rem;line-height:1.75}
+      .eyebrow{position:relative;margin:0;color:var(--accent-strong);font-size:.76rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase}
+      .section{margin-top:30px}
+      .grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));align-items:stretch}
+      .panel,.metric{padding:24px 24px 26px;border-radius:24px}
+      .panel>h2{margin:0 0 14px;font-size:1.18rem;line-height:1.2;letter-spacing:-.025em}
+      .panel h2:not(:first-child){margin-top:24px;font-size:1rem}
+      .panel p{margin:0 0 14px}
+      .panel> :last-child{margin-bottom:0}
+      .panel p,.panel li,.panel td,.metric-helper,.footer{color:var(--muted)}
+      .panel ul,.panel ol{margin:0;padding-left:1.2rem}
+      .panel li+li{margin-top:10px}
+      .panel table{width:100%;border-collapse:collapse}
+      .panel th,.panel td{padding:12px 0;border-bottom:1px solid rgba(148,163,184,.12);text-align:left;vertical-align:top}
+      .panel th{color:var(--ink);font-size:.84rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+      .panel tbody tr:last-child td{border-bottom:none;padding-bottom:0}
+      .metric{display:grid;gap:12px;align-content:start;min-height:188px}
+      .metric-label{margin:0;color:var(--accent-strong);font-size:.75rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase}
+      .metric-value{margin:0;font-size:clamp(2.1rem,4vw,3.25rem);line-height:1;letter-spacing:-.055em;font-weight:650;color:var(--ink)}
+      .metric-helper{margin:0;max-width:26ch;font-size:.97rem;line-height:1.65}
+      .ctaGrid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+      .ctaCard{display:flex;flex-direction:column;justify-content:space-between;min-height:100%}
+      .ctaCard p{color:var(--muted)}
+      .ctaLink{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:max-content;max-width:100%;min-height:48px;margin-top:22px;padding:0 16px;border-radius:14px;border:1px solid rgba(129,140,248,.32);background:linear-gradient(180deg,#8190ff 0%,#6366f1 100%);color:#f8faff;text-decoration:none;font-weight:600;box-shadow:0 14px 36px rgba(79,70,229,.24);transition:transform .18s ease,filter .18s ease,border-color .18s ease,background .18s ease}
+      .ctaLink:hover{text-decoration:none;transform:translateY(-1px);filter:brightness(1.04)}
+      .ctaLinkSecondary{background:rgba(10,15,29,.86);color:var(--ink);box-shadow:none}
+      .ctaLinkSecondary:hover{border-color:rgba(129,140,248,.42);background:rgba(16,24,45,.96)}
+      .callout{margin-top:16px;padding:30px;background:radial-gradient(circle at top right,rgba(129,140,248,.16),transparent 34%),linear-gradient(135deg,rgba(17,25,46,.96) 0%,rgba(8,12,24,.98) 100%);border-color:rgba(129,140,248,.24)}
+      .callout h2{font-size:1.34rem}
+      .markdown{margin:0;padding:18px 20px;border:1px solid rgba(148,163,184,.14);border-radius:18px;background:rgba(5,8,17,.92);white-space:pre-wrap;overflow:auto;font-family:"Cascadia Code","SFMono-Regular",Consolas,monospace;font-size:.94rem;line-height:1.62;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+      .footer{margin:4px 0 0;padding:8px 4px 0;font-size:.92rem;line-height:1.6}
+      @media (max-width:900px){.topbar{grid-template-columns:1fr;align-items:start}.nav{justify-content:flex-start}.hero{min-height:280px}}
+      @media (max-width:720px){.panel table{display:block;overflow-x:auto;white-space:nowrap}}
+      @media (max-width:640px){.shell{width:min(100vw - 20px,1180px);padding:12px 0 56px}.topbar{padding:16px 18px;border-radius:18px}.locale-switcher{margin-top:12px}.content{gap:20px}.hero{min-height:auto;padding:28px 20px 24px;border-radius:24px}.hero h1{max-width:unset;font-size:clamp(2.25rem,12vw,3.4rem)}.panel,.metric{padding:20px}.grid,.ctaGrid{grid-template-columns:1fr}.ctaLink{width:100%}}
     </style>
     <script type="application/ld+json">${JSON.stringify(page.jsonLd)}</script>
   </head>
   <body>
     <div class="shell">
       <header class="topbar">
-        <div>
-          <strong>AnswerLens</strong>
-          <p class="muted">${escapeHtml(t(locale, "brand.description"))} ${escapeHtml(t(locale, "brand.tagline"))}</p>
+        <div class="brand">
+          <a class="brand-name" href="${escapeHtml(new URL(localizePath("", locale), siteUrl).href)}">AnswerLens</a>
+          <p class="brand-copy">${escapeHtml(t(locale, "brand.description"))} ${escapeHtml(t(locale, "brand.tagline"))}</p>
         </div>
         <nav class="nav">
           <a href="${escapeHtml(new URL(localizePath("", locale), siteUrl).href)}">${escapeHtml(t(locale, "nav.home"))}</a>
@@ -597,7 +651,9 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale
         </nav>
       </header>
       ${renderLanguageSelector(siteUrl, page.route, locale)}
-      ${pageBody}
+      <main class="content">
+        ${pageBody}
+      </main>
       <p class="footer">${escapeHtml(t(locale, "footer.distribution"))}</p>
     </div>
   </body>
