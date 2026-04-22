@@ -87,9 +87,9 @@ function resolveReviewLocale(request: express.Request): Locale {
   return normalizeLocale(query ?? cookie ?? acceptLanguage ?? "en");
 }
 
-function renderReviewShell(title: string, body: string): string {
+function renderReviewShell(title: string, body: string, locale: Locale): string {
   return `<!doctype html>
-<html lang="en">
+<html lang="${locale === "zh-CN" ? "zh-CN" : "en"}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -230,6 +230,7 @@ function renderReviewShell(title: string, body: string): string {
       }
       .topbar {
         display: flex;
+        align-items: flex-start;
         justify-content: space-between;
         gap: 1rem;
         padding: 1rem;
@@ -248,7 +249,9 @@ function renderReviewShell(title: string, body: string): string {
         line-height: 1.6;
       }
       .button {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         padding: 0.78rem 1rem;
         border: 1px solid var(--border-accent);
         border-radius: 12px;
@@ -286,31 +289,33 @@ function renderReviewShell(title: string, body: string): string {
         position: absolute;
         inset: 0 auto auto 0;
         width: 100%;
-        height: 3px;
-        background: linear-gradient(90deg, #ff00ff, #00ffff);
+        height: 2px;
+        background: linear-gradient(90deg, rgba(199, 210, 254, 0.9), rgba(94, 106, 210, 0.65));
       }
       .metric-label {
-        color: var(--text-muted);
-        font-size: 0.76rem;
-        letter-spacing: 0.14em;
+        color: var(--text-subtle);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
       }
       .metric-value {
         margin-top: 0.55rem;
         font-size: 2rem;
-        font-weight: 700;
+        font-weight: 600;
+        letter-spacing: -0.04em;
       }
       .metric-helper {
         margin-top: 0.45rem;
-        color: var(--text-subtle);
-        line-height: 1.5;
+        color: var(--text-muted);
+        line-height: 1.55;
       }
       .stack { display: grid; gap: 1rem; }
-      .table-wrap { overflow-x: auto; }
+      .table-wrap { overflow: hidden; margin-top: 1rem; border: 1px solid rgba(255,255,255,.05); border-radius: 16px; background: rgba(255,255,255,.025); }
+      .table-scroll { overflow-x: auto; }
       table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 48rem;
       }
       th, td {
         padding: 0.9rem 0.75rem;
@@ -319,9 +324,10 @@ function renderReviewShell(title: string, body: string): string {
         vertical-align: top;
       }
       th {
-        color: var(--text-muted);
-        font-size: 0.75rem;
-        letter-spacing: 0.16em;
+        color: var(--text-subtle);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
       }
       .subtle { color: var(--text-subtle); font-size: 0.85rem; line-height: 1.5; }
@@ -330,32 +336,32 @@ function renderReviewShell(title: string, body: string): string {
         align-items: center;
         gap: 0.45rem;
         padding: 0.32rem 0.68rem;
-        border: 1px solid currentColor;
-        font-size: 0.72rem;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        background: rgba(6, 5, 22, 0.68);
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: 999px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        background: rgba(255,255,255,.04);
       }
       .status::before {
         content: "";
-        width: 0.55rem;
-        height: 0.55rem;
+        width: 0.45rem;
+        height: 0.45rem;
         border-radius: 999px;
         background: currentColor;
       }
       .success { color: var(--state-success); }
       .danger { color: var(--state-danger); }
-      .info { color: var(--accent-cyan); }
+      .info { color: var(--accent-bright); }
       .grid {
         display: grid;
-        grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr);
+        grid-template-columns: minmax(0, 1.7fr) minmax(18rem, 1fr);
         gap: 1rem;
       }
       .card-title {
         margin: 0;
         font-size: 1.15rem;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
+        font-weight: 600;
+        letter-spacing: -0.02em;
       }
       .card-copy {
         margin: 0.75rem 0 0;
@@ -371,14 +377,17 @@ function renderReviewShell(title: string, body: string): string {
       }
       .artifact-list a {
         display: block;
-        padding: 0.8rem 0.9rem;
-        border: 1px solid rgba(45, 27, 78, 1);
-        background: rgba(10, 9, 26, 0.72);
+        padding: 0.9rem 1rem;
+        border: 1px solid rgba(255,255,255,.05);
+        border-radius: 12px;
+        background: rgba(255,255,255,.03);
       }
+      .artifact-list a:hover { background: rgba(255,255,255,.05); }
       .meta-label {
-        color: var(--text-muted);
-        font-size: 0.74rem;
-        letter-spacing: 0.15em;
+        color: var(--text-subtle);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
       }
       .meta-value {
@@ -386,14 +395,23 @@ function renderReviewShell(title: string, body: string): string {
         line-height: 1.5;
       }
       .issue-item {
-        padding: 0.9rem;
-        border: 1px solid rgba(255, 0, 255, 0.14);
-        background: rgba(9, 8, 24, 0.76);
+        padding: 0.95rem 1rem;
+        border: 1px solid rgba(255,255,255,.05);
+        border-radius: 12px;
+        background: rgba(255,255,255,.03);
       }
       @media (max-width: 960px) {
         .shell { grid-template-columns: 1fr; }
         .grid { grid-template-columns: 1fr; }
-        .sidebar { border-right: 0; border-bottom: 1px solid rgba(0, 255, 255, 0.12); }
+        .sidebar { border-right: 0; border-bottom: 1px solid var(--border-subtle); }
+      }
+      @media (max-width: 760px) {
+        .topbar { flex-direction: column; }
+        table, thead, tbody, tr, td { display: block; width: 100%; }
+        thead { display: none; }
+        tr { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,.05); }
+        tr:last-child { border-bottom: 0; }
+        td { padding: 0.42rem 0; border: 0; }
       }
     </style>
   </head>
@@ -500,6 +518,7 @@ function renderRunsReviewPage(
             <h2 class="card-title">${locale === "zh-CN" ? "当前本地运行" : "Current local runs"}</h2>
             <p class="card-copy">${locale === "zh-CN" ? "每一行都会链接到更丰富的详情页，包含产物入口和主要审计发现。" : "Each row links to a richer detail view with artifact links and top audit findings."}</p>
             <div class="table-wrap">
+              <div class="table-scroll">
               <table>
                 <thead>
                   <tr>
@@ -513,11 +532,13 @@ function renderRunsReviewPage(
                 </thead>
                 <tbody>${rows}</tbody>
               </table>
+              </div>
             </div>
           </section>
         </div>
       </main>
-    </div>`
+    </div>`,
+    locale
   );
 }
 
@@ -552,81 +573,85 @@ function renderRunDetailReviewPage(
     .join("");
 
   return renderReviewShell(
-    `AnswerLens Admin Review - ${detail.id}`,
+    locale === "zh-CN" ? `AnswerLens Admin Review - 运行 ${detail.id}` : `AnswerLens Admin Review - ${detail.id}`,
     `<div class="shell">
       <aside class="sidebar">
         <div>
-          <div class="brand-label">Internal control console</div>
-          <h1 class="brand-title">Run detail review</h1>
+          <div class="brand-label">${locale === "zh-CN" ? "内部控制台" : "Internal control console"}</div>
+          <h1 class="brand-title">${locale === "zh-CN" ? "运行详情审阅" : "Run detail review"}</h1>
           <p class="brand-copy">${escapeHtml(detail.manifest.site.display ?? detail.manifest.site.input)}</p>
         </div>
         <nav class="nav">
-          <a href="/review/runs">Back to runs</a>
-          <a class="active" href="/review/runs/${encodeURIComponent(detail.id)}">Current run</a>
+          <a href="${escapeHtml(reviewUrl("/review/runs", locale))}">${locale === "zh-CN" ? "返回运行列表" : "Back to runs"}</a>
+          <a class="active" href="${escapeHtml(reviewUrl(`/review/runs/${encodeURIComponent(detail.id)}`, locale))}">${locale === "zh-CN" ? "当前运行" : "Current run"}</a>
         </nav>
         <section class="sidebar-card">
-          <p class="sidebar-eyebrow">Artifact order</p>
+          <p class="sidebar-eyebrow">${locale === "zh-CN" ? "产物顺序" : "Artifact order"}</p>
           <p class="sidebar-copy"><code>share-summary.md</code> → <code>scorecard.md</code> → <code>recommendations.md</code></p>
         </section>
       </aside>
       <main class="content">
         <section class="topbar">
           <div>
-            <p class="topbar-title">Run detail</p>
+            <p class="topbar-title">${locale === "zh-CN" ? "运行详情" : "Run detail"}</p>
             <p class="topbar-copy">${escapeHtml(translateRunKind(detail.manifest.kind, locale))} ${locale === "zh-CN" ? "运行生成于" : "run generated"} ${escapeHtml(formatDateTime(detail.manifest.generatedAt, locale))}</p>
           </div>
-          <a class="button" href="/api/runs/${encodeURIComponent(detail.id)}">Open JSON detail</a>
+          <div style="display:grid;gap:0.75rem;justify-items:end;">
+            ${renderReviewLocaleSwitch(`/review/runs/${encodeURIComponent(detail.id)}`, locale)}
+            <a class="button" href="/api/runs/${encodeURIComponent(detail.id)}">${locale === "zh-CN" ? "打开 JSON 详情" : "Open JSON detail"}</a>
+          </div>
         </section>
         <div class="page">
           <header>
-            <p class="eyebrow">Artifact workspace</p>
+            <p class="eyebrow">${locale === "zh-CN" ? "产物工作区" : "Artifact workspace"}</p>
             <h1 class="title">${escapeHtml(detail.manifest.site.display ?? detail.manifest.site.input)}</h1>
-            <p class="description">This view is driven by the same run contract as the admin console. It highlights score, context, the artifact opening order, and the top audit issues from <code>site-audit.json</code>.</p>
+            <p class="description">${locale === "zh-CN" ? "这个视图由与 admin console 相同的 run 契约驱动。它会突出显示分数、上下文、产物打开顺序，以及来自" : "This view is driven by the same run contract as the admin console. It highlights score, context, the artifact opening order, and the top audit issues from "} <code>site-audit.json</code>${locale === "zh-CN" ? " 的主要审计问题。" : "."}</p>
           </header>
           <section class="metric-grid">
             <div class="panel metric">
-              <div class="metric-label">Overall score</div>
+              <div class="metric-label">${locale === "zh-CN" ? "总分" : "Overall score"}</div>
               <div class="metric-value">${escapeHtml(formatScore(overallScore, locale))}</div>
-              <div class="metric-helper">Primary readiness score for this run.</div>
+              <div class="metric-helper">${locale === "zh-CN" ? "这次运行的主准备度分数。" : "Primary readiness score for this run."}</div>
             </div>
             <div class="panel metric">
-              <div class="metric-label">Artifacts</div>
+              <div class="metric-label">${locale === "zh-CN" ? "产物数" : "Artifacts"}</div>
               <div class="metric-value">${detail.artifacts.length}</div>
-              <div class="metric-helper">Markdown, HTML, and JSON outputs.</div>
+              <div class="metric-helper">${locale === "zh-CN" ? "Markdown、HTML 和 JSON 输出。" : "Markdown, HTML, and JSON outputs."}</div>
             </div>
             <div class="panel metric">
-              <div class="metric-label">Run id</div>
+              <div class="metric-label">${locale === "zh-CN" ? "运行 ID" : "Run id"}</div>
               <div class="metric-value" style="font-size:1.15rem">${escapeHtml(detail.manifest.run.id)}</div>
-              <div class="metric-helper">The reproducible contract anchor for this run.</div>
+              <div class="metric-helper">${locale === "zh-CN" ? "这次运行可复现的契约锚点。" : "The reproducible contract anchor for this run."}</div>
             </div>
           </section>
           <div class="grid">
             <section class="panel">
-              <p class="eyebrow">Artifacts</p>
-              <h2 class="card-title">Open the report trail</h2>
-              <p class="card-copy">Start with the three primary review artifacts, then inspect raw JSON or the HTML report.</p>
+              <p class="eyebrow">${locale === "zh-CN" ? "产物" : "Artifacts"}</p>
+              <h2 class="card-title">${locale === "zh-CN" ? "按顺序打开报告链路" : "Open the report trail"}</h2>
+              <p class="card-copy">${locale === "zh-CN" ? "先看三份核心审阅产物，再去查看原始 JSON 或 HTML 报告。" : "Start with the three primary review artifacts, then inspect raw JSON or the HTML report."}</p>
               <div class="artifact-list">${artifacts}</div>
             </section>
             <section class="panel">
-              <p class="eyebrow">Context</p>
-              <h2 class="card-title">Run manifest</h2>
+              <p class="eyebrow">${locale === "zh-CN" ? "上下文" : "Context"}</p>
+              <h2 class="card-title">${locale === "zh-CN" ? "运行清单" : "Run manifest"}</h2>
               <div class="meta-list">
-                <div><div class="meta-label">Site input</div><div class="meta-value">${escapeHtml(detail.manifest.site.input)}</div></div>
-                <div><div class="meta-label">Base URL</div><div class="meta-value">${escapeHtml(detail.manifest.site.baseUrl)}</div></div>
-                <div><div class="meta-label">Artifact version</div><div class="meta-value">${escapeHtml(detail.manifest.run.artifactVersion)}</div></div>
-                <div><div class="meta-label">Rule version</div><div class="meta-value">${escapeHtml(detail.manifest.run.ruleVersion)}</div></div>
+                <div><div class="meta-label">${locale === "zh-CN" ? "站点输入" : "Site input"}</div><div class="meta-value">${escapeHtml(detail.manifest.site.input)}</div></div>
+                <div><div class="meta-label">${locale === "zh-CN" ? "基础 URL" : "Base URL"}</div><div class="meta-value">${escapeHtml(detail.manifest.site.baseUrl)}</div></div>
+                <div><div class="meta-label">${locale === "zh-CN" ? "产物版本" : "Artifact version"}</div><div class="meta-value">${escapeHtml(detail.manifest.run.artifactVersion)}</div></div>
+                <div><div class="meta-label">${locale === "zh-CN" ? "规则版本" : "Rule version"}</div><div class="meta-value">${escapeHtml(detail.manifest.run.ruleVersion)}</div></div>
               </div>
             </section>
           </div>
           <section class="panel">
-            <p class="eyebrow">Top issues</p>
-            <h2 class="card-title">Audit findings</h2>
-            <p class="card-copy">A quick slice from <code>site-audit.json</code> so you can review the effect immediately without opening raw artifacts first.</p>
-            <div class="issue-list">${issueBlocks || `<p class="subtle">No current issues in this run.</p>`}</div>
+            <p class="eyebrow">${locale === "zh-CN" ? "主要问题" : "Top issues"}</p>
+            <h2 class="card-title">${locale === "zh-CN" ? "审计发现" : "Audit findings"}</h2>
+            <p class="card-copy">${locale === "zh-CN" ? "从" : "A quick slice from "} <code>site-audit.json</code> ${locale === "zh-CN" ? "中抽出最值得先看的部分，让你无需先打开原始产物也能理解这轮效果。" : "so you can review the effect immediately without opening raw artifacts first."}</p>
+            <div class="issue-list">${issueBlocks || `<p class="subtle">${locale === "zh-CN" ? "这轮运行当前没有问题。" : "No current issues in this run."}</p>`}</div>
           </section>
         </div>
       </main>
-    </div>`
+    </div>`,
+    locale
   );
 }
 
