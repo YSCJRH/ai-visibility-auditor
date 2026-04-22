@@ -30,6 +30,7 @@ After copying it:
 
 The starter bundle is intentionally minimal. It exists to make the public GitHub Action path copyable, forkable, and easy to reference from README and release docs.
 Keep API keys in GitHub secrets or local environment variables. Do not put them into `runtime.yaml`.
+For the first live benchmark pass, the recommended temporary shortcut is `profile: fast-first-eval`.
 
 When the workflow runs, review the generated artifacts in this order:
 

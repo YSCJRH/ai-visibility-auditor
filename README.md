@@ -244,6 +244,8 @@ That command auto-loads `./.github/answerlens/runtime.yaml` from the same direct
 
 Use flags such as `--profile`, `--provider`, `--model`, `--samples`, `--locale`, `--timeout-ms`, and `--base-url` only when you want a temporary override.
 
+For the first live benchmark pass, start with `--profile fast-first-eval`. Use `--profile high-confidence-review` only when you are re-checking a smaller, messaging-sensitive prompt set.
+
 Perplexity runs use the same command shape with `PERPLEXITY_API_KEY`. The full precedence rules and scenario matrix live in [docs/model-runtime.md](docs/model-runtime.md).
 
 ## Manual import
