@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { ConfigPresetSummary } from "@answerlens/contracts";
+import { EVAL_PROFILE_PRESETS, type ConfigPresetSummary } from "@answerlens/contracts";
 import { MetricTile } from "../components/MetricTile";
 import { SectionHeader } from "../components/SectionHeader";
 import { listConfigPresets } from "../lib/api";
@@ -80,6 +80,12 @@ export function PresetsPage() {
                   <span className={uiStyles.metaLabel}>{t("admin.presets.nextMove")}</span>
                   <span className={uiStyles.metaValue}>{presetNextMove(preset, t)}</span>
                 </div>
+                {preset.recommendedProfile ? (
+                  <div className={uiStyles.metaRow}>
+                    <span className={uiStyles.metaLabel}>{t("admin.presets.recommendedProfile")}</span>
+                    <span className={uiStyles.metaValue}>{EVAL_PROFILE_PRESETS[preset.recommendedProfile].label}</span>
+                  </div>
+                ) : null}
                 <div className={uiStyles.metaRow}>
                   <span className={uiStyles.metaLabel}>{t("admin.presets.defaultSite")}</span>
                   <span className={uiStyles.metaValue}>{preset.defaultSiteInput}</span>

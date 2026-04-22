@@ -17,7 +17,7 @@ import {
   writeAuditOutputs,
   writeEvalOutputs
 } from "../../report/src/index.ts";
-import { defaultRuntimePathForBrand, resolveEvalRuntime } from "../../runtime-config/src/index.ts";
+import { defaultRuntimePathForBrand, recommendEvalProfile, resolveEvalRuntime } from "../../runtime-config/src/index.ts";
 import type {
   AdminRunDetail,
   AdminRunListItem,
@@ -348,6 +348,13 @@ export async function listConfigPresets(options?: RuntimeOptions): Promise<Confi
           timeoutMs: runtimeDefaults.timeoutMs.value,
           baseUrl: runtimeDefaults.baseUrl.value
         },
+        recommendedProfile: recommendEvalProfile({
+          provider: runtimeDefaults.provider.value,
+          model: runtimeDefaults.model.value,
+          locale: runtimeDefaults.locale.value,
+          samples: runtimeDefaults.samples.value,
+          timeoutMs: runtimeDefaults.timeoutMs.value
+        }),
         siteDisplayName: brand.brand.site_display_name,
         domain: brand.brand.domain
       } satisfies ConfigPresetSummary;

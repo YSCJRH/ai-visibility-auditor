@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import YAML from "yaml";
 import { z } from "zod";
-import { EVAL_PROFILE_PRESETS, type EvalProfileName } from "../../contracts/src/index.ts";
+import { EVAL_PROFILE_PRESETS, type EvalProfileName, type EvalProfilePreset } from "../../contracts/src/index.ts";
 
 export type RuntimeProviderName = "openai" | "perplexity";
 export type RuntimeConfigSource = "override" | "profile" | "runtime" | "env" | "default";
@@ -46,6 +46,26 @@ export interface ResolveEvalRuntimeInput {
   timeoutMs?: number;
   baseUrl?: string;
   env?: NodeJS.ProcessEnv;
+}
+
+export function recommendEvalProfile(defaults: {
+  provider: RuntimeProviderName;
+  model: string;
+  locale: string | null;
+  samples: number;
+  timeoutMs: number;
+}): EvalProfileName | null {
+  const match = (Object.values(EVAL_PROFILE_PRESETS) as EvalProfilePreset[]).find((profile) => {
+    return (
+      profile.defaults.provider === defaults.provider &&
+      profile.defaults.model === defaults.model &&
+      profile.defaults.locale === defaults.locale &&
+      profile.defaults.samples === defaults.samples &&
+      profile.defaults.timeoutMs === defaults.timeoutMs
+    );
+  });
+
+  return match?.id ?? null;
 }
 
 const runtimeProviderSchema = z.object({

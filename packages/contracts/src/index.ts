@@ -259,6 +259,7 @@ export interface ConfigPresetSummary {
     timeoutMs: number;
     baseUrl: string;
   } | null;
+  recommendedProfile?: EvalProfileName | null;
   siteDisplayName?: string;
   domain: string;
 }

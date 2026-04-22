@@ -145,6 +145,7 @@ Treat it as the shareable adoption asset for forks, releases, and external setup
 Keep secrets such as `OPENAI_API_KEY` and `PERPLEXITY_API_KEY` in repository or organization secrets, not in `runtime.yaml`.
 
 If you want the full model decision tree in one place, use [model-runtime.md](model-runtime.md).
+If you want a temporary shortcut on top of the starter defaults, use `profile: fast-first-eval` before you start hand-tuning individual inputs.
 
 If you want one last sanity check before CI, run the command path in [quickstart.md](quickstart.md) and confirm that `share-summary.md`, `scorecard.md`, and `recommendations.md` are enough to explain the run to someone else.
 

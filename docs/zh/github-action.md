@@ -71,6 +71,7 @@ AnswerLens 提供一个可复用的根 Action，让团队把 AI 可发现性检�
 把 `OPENAI_API_KEY`、`PERPLEXITY_API_KEY` 继续放在 GitHub secrets 里，不要写进 `runtime.yaml`。
 
 完整模型配置规则见 [model-runtime.md](model-runtime.md)。
+如果你只是想先用一档推荐的临时配置开始，可以优先用 `profile: fast-first-eval`，再决定是否改成单字段覆盖。
 
 ## 下一步
 

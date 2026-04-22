@@ -73,6 +73,11 @@ OPENAI_API_KEY=... corepack pnpm eval -- https://www.example.com \
   --out ./runs/answerlens-real-site-eval
 ```
 
+If you want the recommended first-run shortcut without editing individual overrides, use:
+
+- `--profile fast-first-eval` for a low-friction first benchmark pass
+- `--profile high-confidence-review` only when you are running a smaller, messaging-sensitive re-check
+
 Use explicit flags only when you want a temporary override. The full decision tree lives in [model-runtime.md](model-runtime.md).
 
 ## Step 5: open the artifacts in order

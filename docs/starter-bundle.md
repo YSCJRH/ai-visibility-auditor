@@ -26,6 +26,7 @@ Use it after the live demo report, the 60-second fixture demo, and one useful re
 - `answerlens.yml`: the GitHub Action path that runs the same artifact contract in CI
 
 Keep API keys in environment variables or GitHub secrets. Do not put them into `runtime.yaml`.
+For the first live benchmark pass, the recommended temporary shortcut is `fast-first-eval`.
 
 ## Review artifacts in this order
 

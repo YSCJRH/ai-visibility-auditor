@@ -75,7 +75,7 @@ export function RunLauncher() {
     }
 
     setProvider(selectedPreset.runtimeDefaults?.provider ?? "");
-    setProfile("");
+    setProfile(selectedPreset.recommendedProfile ?? "");
     setModel(selectedPreset.runtimeDefaults?.model ?? "");
     setSamples(selectedPreset.runtimeDefaults?.samples ?? 1);
     setLocaleOverride(selectedPreset.runtimeDefaults?.locale ?? "");
@@ -336,6 +336,12 @@ export function RunLauncher() {
                   <p className={styles.hint}>
                     {t("admin.launcher.presetGuide")}: <strong>{presetUse(selectedPreset.id, t)}</strong>
                   </p>
+                  {selectedPreset.recommendedProfile ? (
+                    <p className={styles.hint}>
+                      {t("admin.launcher.recommendedProfile")}:{" "}
+                      <strong>{EVAL_PROFILE_PRESETS[selectedPreset.recommendedProfile].label}</strong>
+                    </p>
+                  ) : null}
                   {profile ? (
                     <p className={styles.hint}>
                       {t("admin.launcher.profile")}:{" "}

@@ -68,6 +68,11 @@ OPENAI_API_KEY=... corepack pnpm eval -- https://www.example.com \
   --out ./runs/answerlens-real-site-eval
 ```
 
+如果你想直接套用推荐的一档临时配置，而不是自己逐项覆盖：
+
+- `--profile fast-first-eval` 适合第一次 benchmark pass
+- `--profile high-confidence-review` 适合少量高价值 prompt 的复核
+
 ## 步骤 5：按顺序打开 artifacts
 
 1. `share-summary.md`
