@@ -34,9 +34,8 @@ inputs:
     description: "Optional provider model override."
     required: false
   samples:
-    description: "Repeated samples for eval runs."
+    description: "Optional repeated-sample override for eval runs."
     required: false
-    default: "1"
   locale:
     description: "Optional locale override."
     required: false
