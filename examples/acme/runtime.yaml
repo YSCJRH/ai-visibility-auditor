@@ -1,8 +1,8 @@
 runtime:
   eval:
     provider: openai
-    model: gpt-5
-    locale: zh-CN
+    model: gpt-5-mini
+    locale: en-US
     samples: 1
     timeout_ms: 60000
 

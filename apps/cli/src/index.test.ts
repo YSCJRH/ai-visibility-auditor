@@ -94,7 +94,7 @@ test("runCli eval writes audit, eval, and raw payload outputs", async () => {
   assert.equal(evalSummaryJson.summary.unstablePromptCount, 0);
   assert.ok(logs.some((entry) => entry.includes("AnswerLens eval complete.")));
   assert.ok(logs.some((entry) => entry.includes("Provider: openai")));
-  assert.ok(logs.some((entry) => entry.includes("Model: gpt-5")));
+  assert.ok(logs.some((entry) => entry.includes("Model: gpt-5-mini")));
 });
 
 test("runCli eval flags override runtime defaults", async () => {
@@ -107,8 +107,8 @@ test("runCli eval flags override runtime defaults", async () => {
     `runtime:
   eval:
     provider: openai
-    model: gpt-5
-    locale: zh-CN
+    model: gpt-5-mini
+    locale: en-US
     samples: 1
     timeout_ms: 60000
   providers:
@@ -497,7 +497,7 @@ test("consumer repo starter bundle stays self-consistent", async () => {
   assert.match(workflow, /\.github\/answerlens\/competitors\.yaml/);
   assert.match(workflow, /\.github\/answerlens\/prompts\.yaml/);
   assert.match(runtimeConfig, /provider: openai/);
-  assert.match(runtimeConfig, /model: gpt-5/);
+  assert.match(runtimeConfig, /model: gpt-5-mini/);
   assert.match(workflow, /YSCJRH\/ai-visibility-auditor@v0\.3\.0/);
   assert.match(workflow, /Artifact review order/);
   assert.match(workflow, /scorecard-path/);

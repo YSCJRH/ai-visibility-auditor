@@ -40,8 +40,8 @@ AnswerLens 会在 `brand.yaml` 同目录下寻找 `runtime.yaml`。
 runtime:
   eval:
     provider: openai
-    model: gpt-5
-    locale: zh-CN
+    model: gpt-5-mini
+    locale: en-US
     samples: 1
     timeout_ms: 60000
 
@@ -74,6 +74,36 @@ runtime:
 - `brand.yaml`
 - `competitors.yaml`
 - `prompts.yaml`
+
+## 推荐的默认策略
+
+当前仓库里的 prompt pack 基本都是英文编写，而且问题本身也偏“范围清楚、便于复现”的 benchmark prompt。
+
+因此更适合作为默认 baseline 的是：
+
+- `provider: openai`
+- `model: gpt-5-mini`
+- `locale: en-US`
+- `samples: 1` 作为 fixture demo 和 external starter 的默认值
+
+对于仓库自己的 self-dogfooding 路径，建议稍微加重一点：
+
+- `provider` 继续用 `openai`
+- `model` 继续用 `gpt-5-mini`
+- `samples` 提到 `2`
+
+原因：
+
+- `gpt-5-mini` 对这类可重复 benchmark prompt 更便宜、更快，能降低第一次接入的成本和摩擦。这一点参考 OpenAI 官方的 [GPT-5 mini 文档](https://platform.openai.com/docs/models/gpt-5-mini)。
+- prompt pack 本身是英文时，`en-US` 是最自然的默认语言。
+- `samples: 1` 适合作为 first eval 的成本下限。
+- 自审或文案敏感的 run 把 `samples` 提到 `2`，可以更快看出稳定性，而不必默认所有 run 都多抽样。
+
+什么时候再覆盖：
+
+- 当你只跑少量高价值 prompt，而且想要更高置信度时，临时切到 `gpt-5`
+- 只有当 prompt pack 和目标受众本身就是中文或其他语言时，再改 locale
+- 只有在你明确要检查稳定性时，再把 `samples` 提到 `2` 或 `3`
 
 ## 优先级
 
@@ -120,9 +150,9 @@ OPENAI_API_KEY=... corepack pnpm eval -- https://example.com \
   --prompts ./.github/answerlens/prompts.yaml \
   --runtime ./custom/runtime.yaml \
   --provider openai \
-  --model gpt-5-mini \
+  --model gpt-5 \
   --samples 2 \
-  --locale en-US \
+  --locale zh-CN \
   --timeout-ms 30000 \
   --base-url https://api.openai.com/v1 \
   --out ./runs/example-eval
@@ -146,5 +176,7 @@ Admin launcher 会读取 preset 的 `runtime.yaml`，并预填：
 - model
 - locale
 - samples
+- timeout
+- base URL
 
-Preset 列表页也会直接显示这些默认值，让操作者在发起 eval 之前就知道会用到哪家 provider、哪个模型。
+Preset 列表页也会直接显示这些默认值，让操作者在发起 eval 之前就知道会用到哪家 provider、哪个模型，以及默认的网络边界。

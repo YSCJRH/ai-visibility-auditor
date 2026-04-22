@@ -18,8 +18,8 @@ test("loadRuntimeConfig reads runtime.yaml", async () => {
     `runtime:
   eval:
     provider: openai
-    model: gpt-5
-    locale: zh-CN
+    model: gpt-5-mini
+    locale: en-US
     samples: 2
     timeout_ms: 45000
   providers:
@@ -30,7 +30,7 @@ test("loadRuntimeConfig reads runtime.yaml", async () => {
 
   const config = await loadRuntimeConfig(runtimePath);
   assert.equal(config.runtime.eval?.provider, "openai");
-  assert.equal(config.runtime.eval?.model, "gpt-5");
+  assert.equal(config.runtime.eval?.model, "gpt-5-mini");
   assert.equal(config.runtime.eval?.samples, 2);
   assert.equal(config.runtime.providers?.openai?.base_url, "https://api.openai.com/v1");
 });
@@ -69,8 +69,8 @@ test("resolveEvalRuntime applies override > runtime > env > default precedence",
     `runtime:
   eval:
     provider: openai
-    model: gpt-5
-    locale: zh-CN
+    model: gpt-5-mini
+    locale: en-US
     samples: 2
     timeout_ms: 45000
   providers:
@@ -96,7 +96,7 @@ test("resolveEvalRuntime applies override > runtime > env > default precedence",
   assert.equal(resolved.provider.source, "override");
   assert.equal(resolved.model.value, "sonar-deep-research");
   assert.equal(resolved.model.source, "override");
-  assert.equal(resolved.locale.value, "zh-CN");
+  assert.equal(resolved.locale.value, "en-US");
   assert.equal(resolved.locale.source, "runtime");
   assert.equal(resolved.samples.value, 3);
   assert.equal(resolved.timeoutMs.value, 30000);
@@ -136,7 +136,7 @@ test("resolveEvalRuntime errors when provider is missing everywhere", async () =
     tempDir,
     `runtime:
   eval:
-    model: gpt-5
+    model: gpt-5-mini
 `
   );
 
