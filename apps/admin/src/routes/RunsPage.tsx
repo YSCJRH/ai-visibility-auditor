@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { MetricTile } from "../components/MetricTile";
 import { RunTable } from "../components/RunTable";
 import { SectionHeader } from "../components/SectionHeader";
 import { listRuns } from "../lib/api";
-import { formatScore } from "../lib/format";
+import { formatDateTime, formatScore } from "../lib/format";
 import { useLocale } from "../lib/locale";
 import pageStyles from "./PageLayout.module.css";
 import uiStyles from "../components/UI.module.css";
@@ -57,6 +58,48 @@ export function RunsPage() {
         />
         <MetricTile label={t("admin.runs.mix")} value={`${auditCount}:${evalCount}`} helper={t("admin.runs.mix.helper")} />
       </section>
+
+      <div className={pageStyles.grid}>
+        <section className={`${pageStyles.panel} ${pageStyles.mainColumn}`}>
+          <p className={pageStyles.panelEyebrow}>{t("admin.runs.guideEyebrow")}</p>
+          <h2 className={pageStyles.panelTitle}>{t("admin.runs.guideTitle")}</h2>
+          <p className={pageStyles.panelBody}>{t("admin.runs.guideBody")}</p>
+          {latestRun ? (
+            <div className={pageStyles.metaList}>
+              <div className={pageStyles.metaRow}>
+                <span className={pageStyles.metaLabel}>{t("admin.runs.latestRun")}</span>
+                <span className={pageStyles.metaValue}>{latestRun.siteLabel}</span>
+              </div>
+              <div className={pageStyles.metaRow}>
+                <span className={pageStyles.metaLabel}>{t("admin.table.score")}</span>
+                <span className={pageStyles.metaValue}>{formatScore(latestRun.overallScore, locale)}</span>
+              </div>
+              <div className={pageStyles.metaRow}>
+                <span className={pageStyles.metaLabel}>{t("admin.table.generated")}</span>
+                <span className={pageStyles.metaValue}>{formatDateTime(latestRun.generatedAt, locale)}</span>
+              </div>
+              <div className={pageStyles.buttonRow}>
+                <Link className={`${uiStyles.button} ${uiStyles.buttonPrimary}`} to={`/runs/${latestRun.id}`}>
+                  {t("admin.runs.guideOpen")}
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <p className={pageStyles.emptyState}>{t("admin.runs.guideEmpty")}</p>
+          )}
+        </section>
+
+        <section className={`${pageStyles.panel} ${pageStyles.sideColumn}`}>
+          <p className={pageStyles.panelEyebrow}>{t("admin.runs.nextEyebrow")}</p>
+          <h2 className={pageStyles.panelTitle}>{t("admin.runs.nextTitle")}</h2>
+          <p className={pageStyles.panelBody}>{t("admin.runs.nextBody")}</p>
+          <ol className={pageStyles.orderedList}>
+            <li>{t("admin.runs.nextStep1")}</li>
+            <li>{t("admin.runs.nextStep2")}</li>
+            <li>{t("admin.runs.nextStep3")}</li>
+          </ol>
+        </section>
+      </div>
 
       <section className={pageStyles.panel}>
         <div className={pageStyles.filterRow}>

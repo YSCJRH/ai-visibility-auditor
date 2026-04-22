@@ -1,10 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
+import type { ConfigPresetSummary } from "@answerlens/contracts";
 import { MetricTile } from "../components/MetricTile";
 import { SectionHeader } from "../components/SectionHeader";
 import { listConfigPresets } from "../lib/api";
 import { useLocale } from "../lib/locale";
 import pageStyles from "./PageLayout.module.css";
 import uiStyles from "../components/UI.module.css";
+
+function presetUse(preset: ConfigPresetSummary, t: (key: string) => string): string {
+  if (preset.id === "example-acme") {
+    return t("admin.presets.use.fixture");
+  }
+  if (preset.id === "repo-answerlens") {
+    return t("admin.presets.use.repo");
+  }
+  return t("admin.presets.use.starter");
+}
+
+function presetNextMove(preset: ConfigPresetSummary, t: (key: string) => string): string {
+  if (preset.id === "example-acme") {
+    return t("admin.presets.next.fixture");
+  }
+  if (preset.id === "repo-answerlens") {
+    return t("admin.presets.next.repo");
+  }
+  return t("admin.presets.next.starter");
+}
 
 export function PresetsPage() {
   const { t } = useLocale();
@@ -32,6 +53,12 @@ export function PresetsPage() {
         />
       </section>
 
+      <section className={pageStyles.panel}>
+        <p className={pageStyles.panelEyebrow}>{t("admin.presets.guideEyebrow")}</p>
+        <h2 className={pageStyles.panelTitle}>{t("admin.presets.guideTitle")}</h2>
+        <p className={pageStyles.panelBody}>{t("admin.presets.guideBody")}</p>
+      </section>
+
       {presetsQuery.isLoading ? <p className={pageStyles.emptyState}>{t("admin.presets.loading")}</p> : null}
       {presetsQuery.isError ? <p className={pageStyles.emptyState}>{t("admin.presets.error")}</p> : null}
 
@@ -42,6 +69,14 @@ export function PresetsPage() {
             <h2 className={pageStyles.panelTitle}>{preset.label}</h2>
             <p className={pageStyles.panelBody}>{preset.description}</p>
             <div className={pageStyles.metaList}>
+              <div className={pageStyles.metaRow}>
+                <span className={pageStyles.metaLabel}>{t("admin.presets.purpose")}</span>
+                <span className={pageStyles.metaValue}>{presetUse(preset, t)}</span>
+              </div>
+              <div className={pageStyles.metaRow}>
+                <span className={pageStyles.metaLabel}>{t("admin.presets.nextMove")}</span>
+                <span className={pageStyles.metaValue}>{presetNextMove(preset, t)}</span>
+              </div>
               <div className={pageStyles.metaRow}>
                 <span className={pageStyles.metaLabel}>{t("admin.presets.defaultSite")}</span>
                 <span className={pageStyles.metaValue}>{preset.defaultSiteInput}</span>
