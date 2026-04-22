@@ -122,6 +122,21 @@ runtime:
 | `examples/consumer-repo/.github/answerlens/runtime.yaml` | `openai / gpt-5-mini / en-US / samples=1` |
 | `.github/answerlens/runtime.yaml` | `openai / gpt-5-mini / en-US / samples=2` |
 
+### 按工作流快速选档
+
+| 工作流 | 推荐选择 | 原因 |
+| --- | --- | --- |
+| 外部 adopter 的第一次 eval | 保持 `runtime.yaml` 默认值，或直接用 `fast-first-eval` | 先用最低摩擦的 baseline 判断这套 prompt pack 有没有价值 |
+| 仓库自审 / self-dogfooding | 保持 `.github/answerlens/runtime.yaml` 默认值，或用 `self-dogfood-stability` | 和仓库自己的稳定性检查路径保持一致 |
+| release 前或文案敏感的小样本复核 | 临时改用 `high-confidence-review` | 适合在真正做决定前跑一轮更强的 adjudication |
+| 跨 provider 的 citation / framing 对照 | 临时改用 `perplexity-cross-check` | 最适合作为已有一轮 OpenAI baseline 之后的第二意见 |
+
+实践规则很简单：
+
+- repo 内长期默认值放在 `runtime.yaml`
+- 场景性的临时切换优先用 profile alias
+- 不要为了单次检查，就把共享默认 provider 来回改动
+
 ## 优先级
 
 `eval` 会按下面的顺序解析配置：

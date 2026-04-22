@@ -1,3 +1,6 @@
+# Default external-starter eval baseline.
+# Keep copyable repo defaults here; use profile aliases such as
+# fast-first-eval, high-confidence-review, or perplexity-cross-check as temporary overrides.
 runtime:
   eval:
     provider: openai

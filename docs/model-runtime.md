@@ -146,6 +146,21 @@ It is usually not the best first default for:
 | `examples/consumer-repo/.github/answerlens/runtime.yaml` | `openai / gpt-5-mini / en-US / samples=1` |
 | `.github/answerlens/runtime.yaml` | `openai / gpt-5-mini / en-US / samples=2` |
 
+### Quick picks by workflow
+
+| Workflow | Recommended choice | Why |
+| --- | --- | --- |
+| External adopter first eval | Keep `runtime.yaml` as-is or use `fast-first-eval` | Best low-friction baseline before you decide whether the prompt pack is even useful |
+| Repo self-dogfooding | Keep `.github/answerlens/runtime.yaml` defaults or use `self-dogfood-stability` | Matches the repo's own repeatable stability-check path |
+| Release or messaging preflight on a small prompt set | Use `high-confidence-review` temporarily | Better when you need a stronger adjudication pass right before a decision |
+| Cross-provider citation check | Use `perplexity-cross-check` temporarily | Best treated as a second opinion after one readable OpenAI baseline |
+
+The practical rule is:
+
+- keep repo-native defaults in `runtime.yaml`
+- use profile aliases for temporary, situation-specific overrides
+- do not keep flipping the shared default provider back and forth for one-off checks
+
 ## Precedence
 
 For `eval`, AnswerLens resolves values in this order:
