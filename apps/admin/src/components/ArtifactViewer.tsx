@@ -127,6 +127,16 @@ export function ArtifactViewer({ runId, artifacts }: ArtifactViewerProps) {
       </div>
 
       <div className={styles.surface}>
+        <div className={styles.orderCallout}>
+          <p className={styles.orderEyebrow}>{t("admin.artifacts.orderEyebrow")}</p>
+          <h3 className={styles.orderTitle}>{t("admin.artifacts.orderTitle")}</h3>
+          <p className={styles.orderBody}>{t("admin.artifacts.orderBody")}</p>
+          <ol className={styles.orderList}>
+            <li>{t("admin.artifacts.orderStep1")}</li>
+            <li>{t("admin.artifacts.orderStep2")}</li>
+            <li>{t("admin.artifacts.orderStep3")}</li>
+          </ol>
+        </div>
         {selectedArtifact.contentType === "html" ? (
           <iframe className={styles.frame} title={selectedArtifact.name} src={rawUrl} />
         ) : (

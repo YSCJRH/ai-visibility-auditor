@@ -133,6 +133,11 @@
   line-height: 1.5;
 }
 
+.hintStack {
+  display: grid;
+  gap: 0.5rem;
+}
+
 .status {
   display: flex;
   align-items: center;

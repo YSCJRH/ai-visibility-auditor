@@ -10,6 +10,26 @@ import styles from "./RunLauncher.module.css";
 
 type LaunchMode = "audit" | "eval";
 
+function presetUse(presetId: string, t: (key: string) => string): string {
+  if (presetId === "example-acme") {
+    return t("admin.launcher.use.fixture");
+  }
+  if (presetId === "repo-answerlens") {
+    return t("admin.launcher.use.repo");
+  }
+  return t("admin.launcher.use.starter");
+}
+
+function presetNextMove(presetId: string, t: (key: string) => string): string {
+  if (presetId === "example-acme") {
+    return t("admin.launcher.next.fixture");
+  }
+  if (presetId === "repo-answerlens") {
+    return t("admin.launcher.next.repo");
+  }
+  return t("admin.launcher.next.starter");
+}
+
 export function RunLauncher() {
   const { locale, t } = useLocale();
   const navigate = useNavigate();
@@ -214,10 +234,18 @@ export function RunLauncher() {
               </div>
 
               {selectedPreset ? (
-                <p className={styles.hint}>
-                  {t("admin.launcher.defaultTarget")}: <strong>{selectedPreset.defaultSiteInput}</strong>. {t("admin.launcher.files")}: {selectedPreset.brandPath},{" "}
-                  {selectedPreset.competitorsPath}, {selectedPreset.promptsPath}.
-                </p>
+                <div className={styles.hintStack}>
+                  <p className={styles.hint}>
+                    {t("admin.launcher.defaultTarget")}: <strong>{selectedPreset.defaultSiteInput}</strong>. {t("admin.launcher.files")}: {selectedPreset.brandPath},{" "}
+                    {selectedPreset.competitorsPath}, {selectedPreset.promptsPath}.
+                  </p>
+                  <p className={styles.hint}>
+                    {t("admin.launcher.presetGuide")}: <strong>{presetUse(selectedPreset.id, t)}</strong>
+                  </p>
+                  <p className={styles.hint}>
+                    {t("admin.launcher.nextMove")}: <strong>{presetNextMove(selectedPreset.id, t)}</strong>
+                  </p>
+                </div>
               ) : null}
 
               <footer className={styles.footer}>

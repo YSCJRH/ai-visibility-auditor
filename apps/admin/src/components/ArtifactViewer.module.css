@@ -58,6 +58,41 @@
   overflow: hidden;
 }
 
+.orderCallout {
+  border-bottom: 1px solid rgba(255, 0, 255, 0.12);
+  background: rgba(15, 13, 34, 0.92);
+  padding: 0.95rem 1.1rem;
+}
+
+.orderEyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--accent-cyan);
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.orderTitle {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.orderBody {
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.orderList {
+  margin: 0.65rem 0 0;
+  padding-left: 1.2rem;
+  color: var(--text-strong);
+  line-height: 1.6;
+}
+
 .content {
   max-height: 70vh;
   overflow: auto;
