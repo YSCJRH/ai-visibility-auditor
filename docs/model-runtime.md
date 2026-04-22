@@ -244,6 +244,8 @@ Priority stays:
 4. env fallback
 5. adapter defaults
 
+If you explicitly override `provider`, AnswerLens will not carry over a profile model from a different provider.
+
 ## Admin console
 
 The admin launcher reads the preset's `runtime.yaml` to prefill:

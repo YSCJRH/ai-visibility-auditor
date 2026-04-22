@@ -221,9 +221,19 @@ export async function resolveEvalRuntime(input: ResolveEvalRuntimeInput): Promis
       ? "runtime"
       : "default";
 
+  const profileDefaults =
+    profile?.defaults && profile.defaults.provider === provider
+      ? profile.defaults
+      : profile?.defaults
+        ? {
+            ...profile.defaults,
+            model: undefined
+          }
+        : undefined;
+
   const model = resolveValue(
     nonEmpty(input.model),
-    profile?.defaults.model,
+    profileDefaults?.model,
     nonEmpty(runtimeEval?.model),
     providerModelFromEnv(provider, env),
     DEFAULT_MODEL_BY_PROVIDER[provider]
@@ -231,7 +241,7 @@ export async function resolveEvalRuntime(input: ResolveEvalRuntimeInput): Promis
 
   const locale = resolveValue<string | null>(
     input.locale === undefined ? undefined : nonEmpty(input.locale) ?? null,
-    profile?.defaults.locale,
+    profileDefaults?.locale,
     nonEmpty(runtimeEval?.locale),
     undefined,
     null
@@ -239,7 +249,7 @@ export async function resolveEvalRuntime(input: ResolveEvalRuntimeInput): Promis
 
   const samples = resolveValue(
     optionalPositiveInteger(input.samples),
-    optionalPositiveInteger(profile?.defaults.samples),
+    optionalPositiveInteger(profileDefaults?.samples),
     optionalPositiveInteger(runtimeEval?.samples),
     undefined,
     1
@@ -247,7 +257,7 @@ export async function resolveEvalRuntime(input: ResolveEvalRuntimeInput): Promis
 
   const timeoutMs = resolveValue(
     optionalPositiveInteger(input.timeoutMs),
-    optionalPositiveInteger(profile?.defaults.timeoutMs),
+    optionalPositiveInteger(profileDefaults?.timeoutMs),
     optionalPositiveInteger(runtimeEval?.timeout_ms),
     undefined,
     DEFAULT_TIMEOUT_MS

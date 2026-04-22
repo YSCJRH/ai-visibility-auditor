@@ -159,6 +159,35 @@ test("resolveEvalRuntime lets a profile alias switch providers", async () => {
   assert.equal(resolved.samples.value, 1);
 });
 
+test("resolveEvalRuntime does not carry a mismatched profile model across an explicit provider override", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-runtime-profile-provider-override-"));
+  const runtimePath = await writeRuntimeFile(
+    tempDir,
+    `runtime:
+  eval:
+    provider: openai
+    model: gpt-5-mini
+    locale: en-US
+    samples: 1
+    timeout_ms: 60000
+`
+  );
+
+  const resolved = await resolveEvalRuntime({
+    runtimePath,
+    provider: "openai",
+    profile: "perplexity-cross-check",
+    env: {}
+  });
+
+  assert.equal(resolved.provider.value, "openai");
+  assert.equal(resolved.provider.source, "override");
+  assert.equal(resolved.model.value, "gpt-5-mini");
+  assert.equal(resolved.model.source, "runtime");
+  assert.equal(resolved.locale.value, "en-US");
+  assert.equal(resolved.samples.value, 1);
+});
+
 test("resolveEvalRuntime falls back to env and provider defaults", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-runtime-env-"));
   const runtimePath = await writeRuntimeFile(

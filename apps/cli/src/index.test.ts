@@ -292,6 +292,61 @@ test("runCli eval perplexity profile alias switches provider defaults", async ()
   assert.equal(calls[0]?.runCount, 1);
 });
 
+test("runCli eval explicit provider override does not keep a mismatched profile model", async () => {
+  process.env.ANSWERLENS_IMPORT_ONLY = "1";
+  const { runCli } = await import("./index.ts");
+  const outDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-cli-profile-provider-override-"));
+  const calls: Array<{
+    provider: string;
+    model?: string;
+    locale?: string;
+    timeoutMs?: number;
+    runCount?: number;
+  }> = [];
+
+  await runCli(
+    [
+      "eval",
+      "./examples/fixtures/missing-evidence",
+      "--brand",
+      "./examples/acme/brand.yaml",
+      "--competitors",
+      "./examples/acme/competitors.yaml",
+      "--prompts",
+      "./examples/acme/prompts.yaml",
+      "--out",
+      outDir,
+      "--profile",
+      "perplexity-cross-check",
+      "--provider",
+      "openai"
+    ],
+    {
+      runProvider: async (provider, request, options) => {
+        calls.push({
+          provider,
+          model: options?.model,
+          locale: options?.locale,
+          timeoutMs: options?.timeoutMs,
+          runCount: options?.runCount
+        });
+        return fakeResponse(request.promptId, options?.sampleIndex ?? 0);
+      },
+      logger: {
+        log() {},
+        error() {}
+      }
+    }
+  );
+
+  assert.ok(calls.length > 0);
+  assert.equal(calls[0]?.provider, "openai");
+  assert.equal(calls[0]?.model, "gpt-5-mini");
+  assert.equal(calls[0]?.locale, "en-US");
+  assert.equal(calls[0]?.timeoutMs, 60000);
+  assert.equal(calls[0]?.runCount, 1);
+});
+
 test("runCli manual-import accepts normalized provider responses", async () => {
   process.env.ANSWERLENS_IMPORT_ONLY = "1";
   const { runCli } = await import("./index.ts");
