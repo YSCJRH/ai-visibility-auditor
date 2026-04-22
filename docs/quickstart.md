@@ -77,6 +77,7 @@ If you want the recommended first-run shortcut without editing individual overri
 
 - `--profile fast-first-eval` for a low-friction first benchmark pass
 - `--profile high-confidence-review` only when you are running a smaller, messaging-sensitive re-check
+- `--profile perplexity-cross-check` only after you already have one readable OpenAI baseline and want a search-shaped second opinion
 
 Use explicit flags only when you want a temporary override. The full decision tree lives in [model-runtime.md](model-runtime.md).
 

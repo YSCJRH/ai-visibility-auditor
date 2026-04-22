@@ -188,11 +188,12 @@ OPENAI_API_KEY=... corepack pnpm eval -- https://example.com \
 
 ## 可执行的 profile alias
 
-AnswerLens 现在提供三种显式 profile alias，可作为临时覆盖的短手：
+AnswerLens 现在提供四种显式 profile alias，可作为临时覆盖的短手：
 
 - `fast-first-eval`
 - `self-dogfood-stability`
 - `high-confidence-review`
+- `perplexity-cross-check`
 
 当你想在不改 `runtime.yaml` 的情况下，快速切换到一组推荐默认值时，就用它们。
 

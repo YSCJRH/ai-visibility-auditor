@@ -1,6 +1,10 @@
 export type RunKind = "audit" | "eval" | "manual-import" | "validation-import";
 export type AdminRunStatus = "queued" | "running" | "completed" | "failed";
-export type EvalProfileName = "fast-first-eval" | "self-dogfood-stability" | "high-confidence-review";
+export type EvalProfileName =
+  | "fast-first-eval"
+  | "self-dogfood-stability"
+  | "high-confidence-review"
+  | "perplexity-cross-check";
 
 export interface EvalProfilePreset {
   id: EvalProfileName;
@@ -47,6 +51,18 @@ export const EVAL_PROFILE_PRESETS: Record<EvalProfileName, EvalProfilePreset> = 
     defaults: {
       provider: "openai",
       model: "gpt-5",
+      locale: "en-US",
+      samples: 1,
+      timeoutMs: 60000
+    }
+  },
+  "perplexity-cross-check": {
+    id: "perplexity-cross-check",
+    label: "Perplexity cross-check",
+    description: "Use after an OpenAI baseline when you want a search-shaped second opinion with fresh citations.",
+    defaults: {
+      provider: "perplexity",
+      model: "sonar",
       locale: "en-US",
       samples: 1,
       timeoutMs: 60000

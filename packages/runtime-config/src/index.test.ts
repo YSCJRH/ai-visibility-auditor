@@ -131,6 +131,34 @@ test("resolveEvalRuntime applies profile values before runtime defaults", async 
   assert.equal(resolved.locale.value, "en-US");
 });
 
+test("resolveEvalRuntime lets a profile alias switch providers", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-runtime-profile-provider-"));
+  const runtimePath = await writeRuntimeFile(
+    tempDir,
+    `runtime:
+  eval:
+    provider: openai
+    model: gpt-5-mini
+    locale: en-US
+    samples: 1
+    timeout_ms: 60000
+`
+  );
+
+  const resolved = await resolveEvalRuntime({
+    runtimePath,
+    profile: "perplexity-cross-check",
+    env: {}
+  });
+
+  assert.equal(resolved.provider.value, "perplexity");
+  assert.equal(resolved.provider.source, "profile");
+  assert.equal(resolved.model.value, "sonar");
+  assert.equal(resolved.model.source, "profile");
+  assert.equal(resolved.locale.value, "en-US");
+  assert.equal(resolved.samples.value, 1);
+});
+
 test("resolveEvalRuntime falls back to env and provider defaults", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-runtime-env-"));
   const runtimePath = await writeRuntimeFile(

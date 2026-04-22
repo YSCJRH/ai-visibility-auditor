@@ -239,6 +239,59 @@ test("runCli eval profile alias supplies recommended defaults", async () => {
   assert.equal(calls[0]?.runCount, 1);
 });
 
+test("runCli eval perplexity profile alias switches provider defaults", async () => {
+  process.env.ANSWERLENS_IMPORT_ONLY = "1";
+  const { runCli } = await import("./index.ts");
+  const outDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-cli-perplexity-profile-"));
+  const calls: Array<{
+    provider: string;
+    model?: string;
+    locale?: string;
+    timeoutMs?: number;
+    runCount?: number;
+  }> = [];
+
+  await runCli(
+    [
+      "eval",
+      "./examples/fixtures/missing-evidence",
+      "--brand",
+      "./examples/acme/brand.yaml",
+      "--competitors",
+      "./examples/acme/competitors.yaml",
+      "--prompts",
+      "./examples/acme/prompts.yaml",
+      "--out",
+      outDir,
+      "--profile",
+      "perplexity-cross-check"
+    ],
+    {
+      runProvider: async (provider, request, options) => {
+        calls.push({
+          provider,
+          model: options?.model,
+          locale: options?.locale,
+          timeoutMs: options?.timeoutMs,
+          runCount: options?.runCount
+        });
+        return fakeResponse(request.promptId, options?.sampleIndex ?? 0);
+      },
+      logger: {
+        log() {},
+        error() {}
+      }
+    }
+  );
+
+  assert.ok(calls.length > 0);
+  assert.equal(calls[0]?.provider, "perplexity");
+  assert.equal(calls[0]?.model, "sonar");
+  assert.equal(calls[0]?.locale, "en-US");
+  assert.equal(calls[0]?.timeoutMs, 60000);
+  assert.equal(calls[0]?.runCount, 1);
+});
+
 test("runCli manual-import accepts normalized provider responses", async () => {
   process.env.ANSWERLENS_IMPORT_ONLY = "1";
   const { runCli } = await import("./index.ts");

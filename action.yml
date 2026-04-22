@@ -25,7 +25,7 @@ inputs:
     description: "Optional path to runtime.yaml for eval defaults. Defaults to a sibling runtime.yaml next to brand.yaml."
     required: false
   profile:
-    description: "Optional eval profile alias: fast-first-eval, self-dogfood-stability, or high-confidence-review."
+    description: "Optional eval profile alias: fast-first-eval, self-dogfood-stability, high-confidence-review, or perplexity-cross-check."
     required: false
   provider:
     description: "Optional eval provider override."

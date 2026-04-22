@@ -126,7 +126,7 @@ function printHelp(): void {
 
 Usage:
   corepack pnpm audit <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir>
-  corepack pnpm eval <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> [--runtime <runtime.yaml>] [--profile <fast-first-eval|self-dogfood-stability|high-confidence-review>] [--provider <openai|perplexity>] [--model <model>] [--samples <n>] [--locale <locale>] [--timeout-ms <ms>] [--base-url <url>]
+  corepack pnpm eval <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> [--runtime <runtime.yaml>] [--profile <fast-first-eval|self-dogfood-stability|high-confidence-review|perplexity-cross-check>] [--provider <openai|perplexity>] [--model <model>] [--samples <n>] [--locale <locale>] [--timeout-ms <ms>] [--base-url <url>]
   corepack pnpm manual-import <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --input <responses.json> [--locale <locale>]
   corepack pnpm search-console-import <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --input <gsc-pages.csv>
   corepack pnpm bing-indexnow-helper <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --bing-input <bing-pages.csv>

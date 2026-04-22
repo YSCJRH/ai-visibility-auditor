@@ -86,6 +86,7 @@ Current prompt packs in this repository are authored in English and are relative
 | First eval on a fixture or external starter | `openai` | `gpt-5-mini` | `en-US` | `1` | Lowest-friction, lowest-cost baseline for a first benchmark pass |
 | AnswerLens self-dogfooding | `openai` | `gpt-5-mini` | `en-US` | `2` | Adds a quick stability read without turning every run into a heavy adjudication pass |
 | Messaging-sensitive re-check on a small prompt set | `openai` | `gpt-5` | `en-US` | `1` | Better for a higher-confidence spot check when the prompt count is intentionally small |
+| Search-shaped second opinion after an OpenAI baseline | `perplexity` | `sonar` | `en-US` | `1` | Use when you want a retrieval-heavy cross-check with live-search-style citations, not a new default baseline |
 | Non-English prompt pack | `openai` | `gpt-5-mini` | target locale | `1` | Change locale only when the prompts and target audience are genuinely centered on that language |
 
 That makes this a good default baseline:
@@ -111,8 +112,31 @@ Why:
 When to override:
 
 - use `gpt-5` temporarily when you want a higher-confidence adjudication run on a smaller number of high-value prompts
+- use Perplexity temporarily when you already have an OpenAI baseline and want a search-shaped second opinion with fresher citation behavior
 - switch locale only when the prompt pack and audience are genuinely centered on another language
 - raise samples to `2` or `3` only when you are checking instability, not for every default run
+
+### When Perplexity is worth the switch
+
+Do not switch the whole repo default to Perplexity just because live web retrieval sounds attractive.
+
+Use it when all three are true:
+
+- you already have one readable OpenAI baseline for the same prompt pack
+- you want to compare citation behavior or search-shaped answer framing, not replace your main benchmark line
+- you are willing to treat it as a second opinion rather than the canonical first pass
+
+That makes Perplexity a good temporary override for:
+
+- competitor or comparison prompts where fresh web retrieval may change the answer frame
+- citation-sensitive spot checks where you want to compare another provider's source selection
+- occasional cross-provider validation before you make a messaging decision
+
+It is usually not the best first default for:
+
+- fixture demos
+- external starter first runs
+- broad prompt packs where you mostly need a cheap, repeatable baseline
 
 ### Current preset mapping
 
@@ -188,11 +212,12 @@ That lets external repositories keep a clean starter layout without hardcoding m
 
 ## Executable profile aliases
 
-AnswerLens now ships three explicit profile aliases for temporary overrides:
+AnswerLens now ships four explicit profile aliases for temporary overrides:
 
 - `fast-first-eval`
 - `self-dogfood-stability`
 - `high-confidence-review`
+- `perplexity-cross-check`
 
 Use them when you want a shorthand on top of `runtime.yaml`, without rewriting the YAML itself.
 

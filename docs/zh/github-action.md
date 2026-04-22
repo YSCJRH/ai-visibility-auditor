@@ -72,6 +72,7 @@ AnswerLens 提供一个可复用的根 Action，让团队把 AI 可发现性检�
 
 完整模型配置规则见 [model-runtime.md](model-runtime.md)。
 如果你只是想先用一档推荐的临时配置开始，可以优先用 `profile: fast-first-eval`，再决定是否改成单字段覆盖。
+如果你已经有一轮可读的 OpenAI baseline，又想做 provider 级别的第二意见检查，可以临时改用 `profile: perplexity-cross-check`，而不是直接把 starter 默认值永久换掉。
 
 ## 下一步
 

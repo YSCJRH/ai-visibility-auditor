@@ -146,6 +146,7 @@ Keep secrets such as `OPENAI_API_KEY` and `PERPLEXITY_API_KEY` in repository or 
 
 If you want the full model decision tree in one place, use [model-runtime.md](model-runtime.md).
 If you want a temporary shortcut on top of the starter defaults, use `profile: fast-first-eval` before you start hand-tuning individual inputs.
+If you already have one readable OpenAI baseline and want a provider-level second opinion, use `profile: perplexity-cross-check` instead of replacing the starter default permanently.
 
 If you want one last sanity check before CI, run the command path in [quickstart.md](quickstart.md) and confirm that `share-summary.md`, `scorecard.md`, and `recommendations.md` are enough to explain the run to someone else.
 

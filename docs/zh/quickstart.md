@@ -72,6 +72,7 @@ OPENAI_API_KEY=... corepack pnpm eval -- https://www.example.com \
 
 - `--profile fast-first-eval` 适合第一次 benchmark pass
 - `--profile high-confidence-review` 适合少量高价值 prompt 的复核
+- `--profile perplexity-cross-check` 适合在已经有一轮 OpenAI baseline 之后，再做一次偏搜索风格的第二意见检查
 
 ## 步骤 5：按顺序打开 artifacts
 
