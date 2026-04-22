@@ -1,0 +1,13 @@
+runtime:
+  eval:
+    provider: openai
+    model: gpt-5
+    locale: zh-CN
+    samples: 1
+    timeout_ms: 60000
+
+  providers:
+    openai:
+      base_url: https://api.openai.com/v1
+    perplexity:
+      base_url: https://api.perplexity.ai

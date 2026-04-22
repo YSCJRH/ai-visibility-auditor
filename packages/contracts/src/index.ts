@@ -197,6 +197,15 @@ export interface ConfigPresetSummary {
   brandPath: string;
   competitorsPath: string;
   promptsPath: string;
+  runtimePath?: string;
+  runtimeDefaults?: {
+    provider: "openai" | "perplexity";
+    model: string;
+    locale: string | null;
+    samples: number;
+    timeoutMs: number;
+    baseUrl: string;
+  } | null;
   siteDisplayName?: string;
   domain: string;
 }
@@ -222,8 +231,11 @@ export interface CreateAuditRunInput {
 export interface CreateEvalRunInput {
   site: string;
   presetId: string;
-  provider: "openai" | "perplexity";
+  provider?: "openai" | "perplexity";
   model?: string;
   samples?: number;
   locale?: string;
+  runtimePath?: string;
+  timeoutMs?: number;
+  baseUrl?: string;
 }

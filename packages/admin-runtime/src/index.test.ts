@@ -36,6 +36,10 @@ test("admin runtime lists presets from repo sources", async () => {
   assert.ok(presets.some((preset) => preset.id === "repo-answerlens"));
   assert.ok(presets.some((preset) => preset.id === "example-acme"));
   assert.ok(presets.some((preset) => preset.id === "example-consumer-repo"));
+  assert.equal(presets[0]?.runtimeDefaults?.provider, "openai");
+  assert.equal(presets[0]?.runtimeDefaults?.model, "gpt-5");
+  assert.equal(presets[0]?.runtimeDefaults?.samples, 1);
+  assert.match(presets[0]?.runtimePath ?? "", /runtime\.yaml$/);
 });
 
 test("admin runtime creates and reads an audit run", async () => {

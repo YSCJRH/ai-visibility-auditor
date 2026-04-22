@@ -102,6 +102,24 @@ export function PresetsPage() {
                     {preset.promptsPath}
                   </span>
                 </div>
+                {preset.runtimePath ? (
+                  <div className={uiStyles.metaRow}>
+                    <span className={uiStyles.metaLabel}>{t("admin.presets.runtime")}</span>
+                    <span className={uiStyles.metaValue}>{preset.runtimePath}</span>
+                  </div>
+                ) : null}
+                {preset.runtimeDefaults ? (
+                  <div className={uiStyles.metaRow}>
+                    <span className={uiStyles.metaLabel}>{t("admin.presets.runtimeDefaults")}</span>
+                    <span className={uiStyles.metaValue}>
+                      {preset.runtimeDefaults.provider}
+                      <br />
+                      {preset.runtimeDefaults.model}
+                      <br />
+                      {(preset.runtimeDefaults.locale ?? t("common.pending"))} · {preset.runtimeDefaults.samples}
+                    </span>
+                  </div>
+                ) : null}
               </div>
             </div>
           </article>

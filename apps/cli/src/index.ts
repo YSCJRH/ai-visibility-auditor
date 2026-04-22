@@ -13,6 +13,8 @@ import {
   runAudit,
   scoreEvalResponses
 } from "../../../packages/core/src/index.ts";
+import { resolveEvalRuntime } from "../../../packages/runtime-config/src/index.ts";
+import type { RuntimeProviderName } from "../../../packages/runtime-config/src/index.ts";
 import { normalizeDomain } from "../../../packages/core/src/utils.ts";
 import type { RunMode } from "../../../packages/core/src/index.ts";
 import type { Citation, ProviderName, ProviderResponse, SearchResult } from "../../../packages/providers/src/index.ts";
@@ -92,6 +94,10 @@ function listFlag(parsed: ParsedArgs, flag: string): string[] {
   );
 }
 
+function optionalFlag(parsed: ParsedArgs, flag: string): string | undefined {
+  return parsed.flags.get(flag)?.[0];
+}
+
 function numberFlag(parsed: ParsedArgs, flag: string, fallback: number): number {
   const value = parsed.flags.get(flag)?.[0];
   if (!value) {
@@ -106,12 +112,20 @@ function numberFlag(parsed: ParsedArgs, flag: string, fallback: number): number 
   return numeric;
 }
 
+function optionalNumberFlag(parsed: ParsedArgs, flag: string): number | undefined {
+  const value = parsed.flags.get(flag)?.[0];
+  if (!value) {
+    return undefined;
+  }
+  return numberFlag(parsed, flag, 1);
+}
+
 function printHelp(): void {
   console.log(`AnswerLens
 
 Usage:
   corepack pnpm audit <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir>
-  corepack pnpm eval <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --provider <openai|perplexity> [--model <model>] [--samples <n>] [--locale <locale>]
+  corepack pnpm eval <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> [--runtime <runtime.yaml>] [--provider <openai|perplexity>] [--model <model>] [--samples <n>] [--locale <locale>] [--timeout-ms <ms>] [--base-url <url>]
   corepack pnpm manual-import <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --input <responses.json> [--locale <locale>]
   corepack pnpm search-console-import <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --input <gsc-pages.csv>
   corepack pnpm bing-indexnow-helper <site-or-fixture> --brand <brand.yaml> --competitors <competitors.yaml> --prompts <prompts.yaml> --out <dir> --bing-input <bing-pages.csv>
@@ -142,11 +156,23 @@ async function writeRawPayloads(outDir: string, responses: ProviderResponse[]): 
 }
 
 async function loadAuditInputs(parsed: ParsedArgs) {
-  return Promise.all([
-    loadBrandConfig(requiredFlag(parsed, "brand")),
-    loadCompetitorsConfig(requiredFlag(parsed, "competitors")),
-    loadPromptsConfig(requiredFlag(parsed, "prompts"))
+  const brandPath = requiredFlag(parsed, "brand");
+  const competitorsPath = requiredFlag(parsed, "competitors");
+  const promptsPath = requiredFlag(parsed, "prompts");
+  const [brand, competitors, prompts] = await Promise.all([
+    loadBrandConfig(brandPath),
+    loadCompetitorsConfig(competitorsPath),
+    loadPromptsConfig(promptsPath)
   ]);
+
+  return {
+    brandPath,
+    competitorsPath,
+    promptsPath,
+    brand,
+    competitors,
+    prompts
+  };
 }
 
 async function runAuditCommand(parsed: ParsedArgs, logger: Logger): Promise<void> {
@@ -156,7 +182,7 @@ async function runAuditCommand(parsed: ParsedArgs, logger: Logger): Promise<void
   }
 
   const outDir = path.resolve(requiredFlag(parsed, "out"));
-  const [brand, competitors, prompts] = await loadAuditInputs(parsed);
+  const { brand, competitors, prompts } = await loadAuditInputs(parsed);
 
   const result = await runAudit({
     siteInput,
@@ -319,11 +345,28 @@ async function runEvalCommand(parsed: ParsedArgs, dependencies: CliDependencies)
   }
 
   const outDir = path.resolve(requiredFlag(parsed, "out"));
-  const provider = requiredFlag(parsed, "provider") as ProviderName;
-  const model = parsed.flags.get("model")?.[0];
-  const locale = parsed.flags.get("locale")?.[0] ?? null;
-  const samples = numberFlag(parsed, "samples", 1);
-  const [brand, competitors, prompts] = await loadAuditInputs(parsed);
+  const {
+    brandPath,
+    brand,
+    competitors,
+    prompts
+  } = await loadAuditInputs(parsed);
+  const resolvedRuntime = await resolveEvalRuntime({
+    brandPath,
+    runtimePath: optionalFlag(parsed, "runtime"),
+    provider: optionalFlag(parsed, "provider") as RuntimeProviderName | undefined,
+    model: optionalFlag(parsed, "model"),
+    locale: optionalFlag(parsed, "locale"),
+    samples: optionalNumberFlag(parsed, "samples"),
+    timeoutMs: optionalNumberFlag(parsed, "timeout-ms"),
+    baseUrl: optionalFlag(parsed, "base-url")
+  });
+  const provider = resolvedRuntime.provider.value;
+  const model = resolvedRuntime.model.value;
+  const locale = resolvedRuntime.locale.value;
+  const samples = resolvedRuntime.samples.value;
+  const timeoutMs = resolvedRuntime.timeoutMs.value;
+  const baseUrl = resolvedRuntime.baseUrl.value;
 
   const audit = await runAudit({
     siteInput,
@@ -355,6 +398,8 @@ async function runEvalCommand(parsed: ParsedArgs, dependencies: CliDependencies)
           },
           {
             model,
+            baseUrl,
+            timeoutMs,
             locale: promptCase.locale ?? locale ?? undefined,
             sampleIndex,
             runCount: samples,
@@ -367,7 +412,7 @@ async function runEvalCommand(parsed: ParsedArgs, dependencies: CliDependencies)
 
   const evalResult = await scoreAndWriteEval(outDir, audit, brand, competitors, prompts, "eval", responses);
   dependencies.logger.log(
-    `AnswerLens eval complete.\n  Site: ${siteInput}\n  Provider: ${provider}\n  VAVR: ${evalResult.summary.vavr}\n  Mention rate: ${evalResult.summary.mentionRate}\n  Samples: ${evalResult.summary.sampleCount}\n  Output: ${outDir}`
+    `AnswerLens eval complete.\n  Site: ${siteInput}\n  Provider: ${provider}\n  Model: ${model}\n  VAVR: ${evalResult.summary.vavr}\n  Mention rate: ${evalResult.summary.mentionRate}\n  Samples: ${evalResult.summary.sampleCount}\n  Output: ${outDir}`
   );
 }
 
@@ -380,7 +425,7 @@ async function runManualImportCommand(parsed: ParsedArgs, dependencies: CliDepen
   const outDir = path.resolve(requiredFlag(parsed, "out"));
   const inputPath = path.resolve(requiredFlag(parsed, "input"));
   const locale = parsed.flags.get("locale")?.[0] ?? null;
-  const [brand, competitors, prompts] = await loadAuditInputs(parsed);
+  const { brand, competitors, prompts } = await loadAuditInputs(parsed);
 
   const audit = await runAudit({
     siteInput,
@@ -414,7 +459,7 @@ async function runSearchConsoleImportCommand(parsed: ParsedArgs, dependencies: C
 
   const outDir = path.resolve(requiredFlag(parsed, "out"));
   const inputPath = path.resolve(requiredFlag(parsed, "input"));
-  const [brand, competitors, prompts] = await loadAuditInputs(parsed);
+  const { brand, competitors, prompts } = await loadAuditInputs(parsed);
 
   const audit = await runAudit({
     siteInput,
@@ -446,7 +491,7 @@ async function runBingIndexNowHelperCommand(parsed: ParsedArgs, dependencies: Cl
 
   const outDir = path.resolve(requiredFlag(parsed, "out"));
   const bingInputPath = path.resolve(requiredFlag(parsed, "bing-input"));
-  const [brand, competitors, prompts] = await loadAuditInputs(parsed);
+  const { brand, competitors, prompts } = await loadAuditInputs(parsed);
 
   const audit = await runAudit({
     siteInput,

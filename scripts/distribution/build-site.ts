@@ -758,6 +758,7 @@ function localizeRepoDocLinks(html: string, locale: Locale): string {
     ["/blob/main/docs/manual-steps.md", "/blob/main/docs/zh/manual-steps.md"],
     ["/blob/main/docs/activation-plan.md", "/blob/main/docs/zh/activation-plan.md"],
     ["/blob/main/docs/distribution-plan.md", "/blob/main/docs/zh/distribution-plan.md"],
+    ["/blob/main/docs/model-runtime.md", "/blob/main/docs/zh/model-runtime.md"],
     ["/blob/main/docs/admin-console.md", "/blob/main/docs/zh/admin-console.md"],
     ["/blob/main/README.md", "/blob/main/README.zh-CN.md"]
   ];
@@ -825,6 +826,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     ["docs/roadmap.md", "Roadmap", "Canonical public roadmap and issue sequencing."],
     ["docs/distribution-plan.md", "Distribution plan", "P0, P1, and P2 distribution surfaces and metrics."],
     ["docs/manual-steps.md", "Manual steps", "Minimal GitHub, npm, and Pages setup checklist."],
+    ["docs/model-runtime.md", "Model runtime", "Repo-native eval defaults, runtime.yaml precedence, and secret boundaries."],
     ["docs/github-action.md", "GitHub Action", "Reusable `uses: owner/repo@vX` contract and outputs."],
     ["docs/scoring.md", "Scoring", "Public scoring model and output contract."],
     ["docs/shareable-summary.md", "Shareable summary", "How run outputs become copy-ready public assets."]

@@ -31,6 +31,7 @@ The public interface is:
     brand.yaml
     competitors.yaml
     prompts.yaml
+    runtime.yaml
   workflows/
     answerlens.yml
 ```
@@ -38,6 +39,7 @@ The public interface is:
 Use the starter files in [examples/consumer-repo/.github](../examples/consumer-repo/.github) as a copyable baseline, then replace the placeholder brand, competitors, prompts, and `site:` URL.
 
 If you want the generated Markdown and HTML artifacts to show a friendlier public label than the raw URL or local path, set `brand.site_display_name` in `brand.yaml`.
+If you plan to run `eval`, keep the default provider, model, locale, and timeout in `runtime.yaml` next to `brand.yaml`.
 
 ## Minimal workflow for an external repository
 
@@ -99,12 +101,24 @@ Required:
 Optional:
 
 - `out-dir` default: `runs/answerlens`
-- `provider` for `eval`
+- `runtime` for an explicit `runtime.yaml` path
+- `provider` as an `eval` override
 - `model`
 - `samples`
 - `locale`
+- `timeout-ms`
+- `base-url`
 - `manual-input` for `manual-import`
 - `bing-input` for `bing-indexnow-helper`
+
+For `eval`, the Action now follows the same rule as the CLI:
+
+1. explicit Action inputs
+2. `runtime.yaml`
+3. provider-specific environment fallbacks
+4. adapter defaults
+
+If you do not set `runtime`, AnswerLens tries `runtime.yaml` next to `brand.yaml`.
 
 ## Outputs
 
@@ -120,11 +134,15 @@ Optional:
 - Copy [examples/consumer-repo/.github/answerlens/brand.yaml](../examples/consumer-repo/.github/answerlens/brand.yaml)
 - Copy [examples/consumer-repo/.github/answerlens/competitors.yaml](../examples/consumer-repo/.github/answerlens/competitors.yaml)
 - Copy [examples/consumer-repo/.github/answerlens/prompts.yaml](../examples/consumer-repo/.github/answerlens/prompts.yaml)
+- Copy [examples/consumer-repo/.github/answerlens/runtime.yaml](../examples/consumer-repo/.github/answerlens/runtime.yaml)
 - Copy [examples/consumer-repo/.github/workflows/answerlens.yml](../examples/consumer-repo/.github/workflows/answerlens.yml)
 - Public overview: [docs/starter-bundle.md](starter-bundle.md) and [Pages starter surface](https://yscjrh.github.io/ai-visibility-auditor/starter/)
 
 The starter bundle is intentionally generic. Replace the example product, domain, competitor list, and prompt pack before using it on a real site.
 Treat it as the shareable adoption asset for forks, releases, and external setup guides.
+Keep secrets such as `OPENAI_API_KEY` and `PERPLEXITY_API_KEY` in repository or organization secrets, not in `runtime.yaml`.
+
+If you want the full model decision tree in one place, use [model-runtime.md](model-runtime.md).
 
 If you want one last sanity check before CI, run the command path in [quickstart.md](quickstart.md) and confirm that `share-summary.md`, `scorecard.md`, and `recommendations.md` are enough to explain the run to someone else.
 
