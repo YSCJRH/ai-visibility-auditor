@@ -492,6 +492,7 @@ test("consumer repo starter bundle stays self-consistent", async () => {
 
   assert.match(workflow, /actions\/checkout@v5/);
   assert.match(workflow, /actions\/upload-artifact@v6/);
+  assert.match(workflow, /runtime\.yaml/);
   assert.match(workflow, /\.github\/answerlens\/brand\.yaml/);
   assert.match(workflow, /\.github\/answerlens\/competitors\.yaml/);
   assert.match(workflow, /\.github\/answerlens\/prompts\.yaml/);

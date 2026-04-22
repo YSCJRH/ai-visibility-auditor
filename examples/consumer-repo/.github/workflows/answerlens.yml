@@ -10,6 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # Keep eval defaults in .github/answerlens/runtime.yaml.
+      # Only add provider/model overrides here when you want a temporary change.
       - id: answerlens
         uses: YSCJRH/ai-visibility-auditor@v0.3.0
         with:
