@@ -216,6 +216,8 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(docs, /Starter bundle<\/a>: external-repo layout and artifact review order/);
   assert.match(starter, /Starter example run/);
   assert.match(starter, /Example Product public site/);
+  assert.match(starter, /runtime\.yaml/);
+  assert.match(starter, /non-secret eval defaults/i);
   assert.match(starter, /starter\/example-run\/share-summary\.md/);
   assert.match(pricing, /Pricing for AnswerLens is open-source, BYOK, and artifact-first\./);
   assert.match(pricing, /\$0 provider cost/);

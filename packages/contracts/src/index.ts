@@ -1,5 +1,74 @@
 export type RunKind = "audit" | "eval" | "manual-import" | "validation-import";
 export type AdminRunStatus = "queued" | "running" | "completed" | "failed";
+export type EvalProfileName =
+  | "fast-first-eval"
+  | "self-dogfood-stability"
+  | "high-confidence-review"
+  | "perplexity-cross-check";
+
+export interface EvalProfilePreset {
+  id: EvalProfileName;
+  label: string;
+  description: string;
+  defaults: {
+    provider: "openai" | "perplexity";
+    model: string;
+    locale: string | null;
+    samples: number;
+    timeoutMs: number;
+  };
+}
+
+export const EVAL_PROFILE_PRESETS: Record<EvalProfileName, EvalProfilePreset> = {
+  "fast-first-eval": {
+    id: "fast-first-eval",
+    label: "Fast first eval",
+    description: "Lowest-friction first benchmark pass for fixtures and external starter repositories.",
+    defaults: {
+      provider: "openai",
+      model: "gpt-5-mini",
+      locale: "en-US",
+      samples: 1,
+      timeoutMs: 60000
+    }
+  },
+  "self-dogfood-stability": {
+    id: "self-dogfood-stability",
+    label: "Self-dogfood stability",
+    description: "Adds one extra sample so maintainers can see instability earlier on repo self-audits.",
+    defaults: {
+      provider: "openai",
+      model: "gpt-5-mini",
+      locale: "en-US",
+      samples: 2,
+      timeoutMs: 60000
+    }
+  },
+  "high-confidence-review": {
+    id: "high-confidence-review",
+    label: "High-confidence review",
+    description: "Use a heavier model for smaller, messaging-sensitive adjudication passes.",
+    defaults: {
+      provider: "openai",
+      model: "gpt-5",
+      locale: "en-US",
+      samples: 1,
+      timeoutMs: 60000
+    }
+  },
+  "perplexity-cross-check": {
+    id: "perplexity-cross-check",
+    label: "Perplexity cross-check",
+    description: "Use after an OpenAI baseline when you want a search-shaped second opinion with fresh citations.",
+    defaults: {
+      provider: "perplexity",
+      model: "sonar",
+      locale: "en-US",
+      samples: 1,
+      timeoutMs: 60000
+    }
+  }
+};
 
 export interface RunRecord {
   id: string;
@@ -197,6 +266,16 @@ export interface ConfigPresetSummary {
   brandPath: string;
   competitorsPath: string;
   promptsPath: string;
+  runtimePath?: string;
+  runtimeDefaults?: {
+    provider: "openai" | "perplexity";
+    model: string;
+    locale: string | null;
+    samples: number;
+    timeoutMs: number;
+    baseUrl: string;
+  } | null;
+  recommendedProfile?: EvalProfileName | null;
   siteDisplayName?: string;
   domain: string;
 }
@@ -222,8 +301,12 @@ export interface CreateAuditRunInput {
 export interface CreateEvalRunInput {
   site: string;
   presetId: string;
-  provider: "openai" | "perplexity";
+  profile?: EvalProfileName;
+  provider?: "openai" | "perplexity";
   model?: string;
   samples?: number;
   locale?: string;
+  runtimePath?: string;
+  timeoutMs?: number;
+  baseUrl?: string;
 }

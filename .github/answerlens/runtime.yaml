@@ -1,0 +1,16 @@
+# Default self-dogfood eval profile for the repository itself.
+# Keep repo-native defaults here; use profile aliases such as
+# high-confidence-review or perplexity-cross-check only as temporary overrides.
+runtime:
+  eval:
+    provider: openai
+    model: gpt-5-mini
+    locale: en-US
+    samples: 2
+    timeout_ms: 60000
+
+  providers:
+    openai:
+      base_url: https://api.openai.com/v1
+    perplexity:
+      base_url: https://api.perplexity.ai

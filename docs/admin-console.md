@@ -12,6 +12,7 @@ This is not a new public front door and it is not a dashboard-first rewrite. It 
 - inspect completed runs from `runs/*`
 - review artifacts in the same order we use elsewhere: `share-summary.md`, `scorecard.md`, `recommendations.md`
 - browse repo presets without editing YAML in the browser
+- see the default eval provider/model/runtime path before launching an eval run
 
 ## What it is not
 
@@ -115,10 +116,13 @@ The goal is not to approve a new dashboard pattern. The goal is to verify that a
 2. Pick a preset source
 3. Set a site input
 4. Choose `audit` or `eval`
-5. Wait for the queued job to finish
-6. Land in the run detail page for artifact review
+5. For `eval`, confirm the preset's `runtime.yaml` defaults and only override them directly when you want a temporary change
+6. If you want a recommended bundle of temporary overrides, choose a `profile` alias such as `fast-first-eval`, `self-dogfood-stability`, or `high-confidence-review`
+7. Wait for the queued job to finish
+8. Land in the run detail page for artifact review
 
 The console writes the same file-backed outputs into `runs/*`. It does not invent a second artifact format.
+For `eval`, the launcher reads `runtime.yaml` next to `brand.yaml`, keeps secrets in environment variables, and uses explicit form inputs only as temporary overrides. See [model-runtime.md](model-runtime.md) for the full precedence rules.
 
 ## Package boundaries
 
@@ -128,6 +132,8 @@ The console writes the same file-backed outputs into `runs/*`. It does not inven
   Browser-safe run, artifact, preset, and job shapes
 - `packages/admin-runtime`
   File-system-backed preset discovery, run listing, artifact reading, and queued run orchestration
+- `packages/runtime-config`
+  Shared `runtime.yaml` loader and eval default resolution
 
 The admin BFF reuses core AnswerLens logic through `packages/core`, `packages/providers`, and `packages/report`. It does not shell out to a second CLI path for normal `audit` and `eval` launches.
 

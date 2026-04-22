@@ -54,8 +54,6 @@ test("runCli eval writes audit, eval, and raw payload outputs", async () => {
       "./examples/acme/prompts.yaml",
       "--out",
       outDir,
-      "--provider",
-      "openai",
       "--samples",
       "2",
       "--locale",
@@ -95,6 +93,258 @@ test("runCli eval writes audit, eval, and raw payload outputs", async () => {
   assert.equal(evalSummaryJson.summary.stablePromptRate, 100);
   assert.equal(evalSummaryJson.summary.unstablePromptCount, 0);
   assert.ok(logs.some((entry) => entry.includes("AnswerLens eval complete.")));
+  assert.ok(logs.some((entry) => entry.includes("Provider: openai")));
+  assert.ok(logs.some((entry) => entry.includes("Model: gpt-5-mini")));
+});
+
+test("runCli eval flags override runtime defaults", async () => {
+  process.env.ANSWERLENS_IMPORT_ONLY = "1";
+  const { runCli } = await import("./index.ts");
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-cli-runtime-"));
+  const runtimePath = path.join(tempDir, "runtime.yaml");
+  await writeFile(
+    runtimePath,
+    `runtime:
+  eval:
+    provider: openai
+    model: gpt-5-mini
+    locale: en-US
+    samples: 1
+    timeout_ms: 60000
+  providers:
+    openai:
+      base_url: https://api.openai.com/v1
+    perplexity:
+      base_url: https://api.perplexity.ai
+`,
+    "utf8"
+  );
+
+  const calls: Array<{
+    provider: string;
+    model?: string;
+    locale?: string;
+    timeoutMs?: number;
+    baseUrl?: string;
+    sampleIndex?: number;
+    runCount?: number;
+  }> = [];
+
+  await runCli(
+    [
+      "eval",
+      "./examples/fixtures/missing-evidence",
+      "--brand",
+      "./examples/acme/brand.yaml",
+      "--competitors",
+      "./examples/acme/competitors.yaml",
+      "--prompts",
+      "./examples/acme/prompts.yaml",
+      "--out",
+      tempDir,
+      "--runtime",
+      runtimePath,
+      "--provider",
+      "perplexity",
+      "--model",
+      "sonar-pro",
+      "--samples",
+      "2",
+      "--locale",
+      "en-US",
+      "--timeout-ms",
+      "30000",
+      "--base-url",
+      "https://perplexity.example"
+    ],
+    {
+      runProvider: async (provider, request, options) => {
+        calls.push({
+          provider,
+          model: options?.model,
+          locale: options?.locale,
+          timeoutMs: options?.timeoutMs,
+          baseUrl: options?.baseUrl,
+          sampleIndex: options?.sampleIndex,
+          runCount: options?.runCount
+        });
+        return fakeResponse(request.promptId, options?.sampleIndex ?? 0);
+      },
+      logger: {
+        log() {},
+        error() {}
+      }
+    }
+  );
+
+  assert.ok(calls.length > 0);
+  assert.equal(calls[0]?.provider, "perplexity");
+  assert.equal(calls[0]?.model, "sonar-pro");
+  assert.equal(calls[0]?.locale, "en-US");
+  assert.equal(calls[0]?.timeoutMs, 30000);
+  assert.equal(calls[0]?.baseUrl, "https://perplexity.example");
+  assert.equal(calls[0]?.runCount, 2);
+});
+
+test("runCli eval profile alias supplies recommended defaults", async () => {
+  process.env.ANSWERLENS_IMPORT_ONLY = "1";
+  const { runCli } = await import("./index.ts");
+  const outDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-cli-profile-"));
+  const calls: Array<{
+    provider: string;
+    model?: string;
+    locale?: string;
+    timeoutMs?: number;
+    runCount?: number;
+  }> = [];
+
+  await runCli(
+    [
+      "eval",
+      "./examples/fixtures/missing-evidence",
+      "--brand",
+      "./examples/acme/brand.yaml",
+      "--competitors",
+      "./examples/acme/competitors.yaml",
+      "--prompts",
+      "./examples/acme/prompts.yaml",
+      "--out",
+      outDir,
+      "--profile",
+      "high-confidence-review"
+    ],
+    {
+      runProvider: async (provider, request, options) => {
+        calls.push({
+          provider,
+          model: options?.model,
+          locale: options?.locale,
+          timeoutMs: options?.timeoutMs,
+          runCount: options?.runCount
+        });
+        return fakeResponse(request.promptId, options?.sampleIndex ?? 0);
+      },
+      logger: {
+        log() {},
+        error() {}
+      }
+    }
+  );
+
+  assert.ok(calls.length > 0);
+  assert.equal(calls[0]?.provider, "openai");
+  assert.equal(calls[0]?.model, "gpt-5");
+  assert.equal(calls[0]?.locale, "en-US");
+  assert.equal(calls[0]?.timeoutMs, 60000);
+  assert.equal(calls[0]?.runCount, 1);
+});
+
+test("runCli eval perplexity profile alias switches provider defaults", async () => {
+  process.env.ANSWERLENS_IMPORT_ONLY = "1";
+  const { runCli } = await import("./index.ts");
+  const outDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-cli-perplexity-profile-"));
+  const calls: Array<{
+    provider: string;
+    model?: string;
+    locale?: string;
+    timeoutMs?: number;
+    runCount?: number;
+  }> = [];
+
+  await runCli(
+    [
+      "eval",
+      "./examples/fixtures/missing-evidence",
+      "--brand",
+      "./examples/acme/brand.yaml",
+      "--competitors",
+      "./examples/acme/competitors.yaml",
+      "--prompts",
+      "./examples/acme/prompts.yaml",
+      "--out",
+      outDir,
+      "--profile",
+      "perplexity-cross-check"
+    ],
+    {
+      runProvider: async (provider, request, options) => {
+        calls.push({
+          provider,
+          model: options?.model,
+          locale: options?.locale,
+          timeoutMs: options?.timeoutMs,
+          runCount: options?.runCount
+        });
+        return fakeResponse(request.promptId, options?.sampleIndex ?? 0);
+      },
+      logger: {
+        log() {},
+        error() {}
+      }
+    }
+  );
+
+  assert.ok(calls.length > 0);
+  assert.equal(calls[0]?.provider, "perplexity");
+  assert.equal(calls[0]?.model, "sonar");
+  assert.equal(calls[0]?.locale, "en-US");
+  assert.equal(calls[0]?.timeoutMs, 60000);
+  assert.equal(calls[0]?.runCount, 1);
+});
+
+test("runCli eval explicit provider override does not keep a mismatched profile model", async () => {
+  process.env.ANSWERLENS_IMPORT_ONLY = "1";
+  const { runCli } = await import("./index.ts");
+  const outDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-cli-profile-provider-override-"));
+  const calls: Array<{
+    provider: string;
+    model?: string;
+    locale?: string;
+    timeoutMs?: number;
+    runCount?: number;
+  }> = [];
+
+  await runCli(
+    [
+      "eval",
+      "./examples/fixtures/missing-evidence",
+      "--brand",
+      "./examples/acme/brand.yaml",
+      "--competitors",
+      "./examples/acme/competitors.yaml",
+      "--prompts",
+      "./examples/acme/prompts.yaml",
+      "--out",
+      outDir,
+      "--profile",
+      "perplexity-cross-check",
+      "--provider",
+      "openai"
+    ],
+    {
+      runProvider: async (provider, request, options) => {
+        calls.push({
+          provider,
+          model: options?.model,
+          locale: options?.locale,
+          timeoutMs: options?.timeoutMs,
+          runCount: options?.runCount
+        });
+        return fakeResponse(request.promptId, options?.sampleIndex ?? 0);
+      },
+      logger: {
+        log() {},
+        error() {}
+      }
+    }
+  );
+
+  assert.ok(calls.length > 0);
+  assert.equal(calls[0]?.provider, "openai");
+  assert.equal(calls[0]?.model, "gpt-5-mini");
+  assert.equal(calls[0]?.locale, "en-US");
+  assert.equal(calls[0]?.timeoutMs, 60000);
+  assert.equal(calls[0]?.runCount, 1);
 });
 
 test("runCli manual-import accepts normalized provider responses", async () => {
@@ -392,8 +642,9 @@ test("consumer repo starter bundle stays self-consistent", async () => {
     outDir
   ]);
 
-  const [workflow, shareSummary, scorecard, recommendations, runManifest] = await Promise.all([
+  const [workflow, runtimeConfig, shareSummary, scorecard, recommendations, runManifest] = await Promise.all([
     readFile("./examples/consumer-repo/.github/workflows/answerlens.yml", "utf8"),
+    readFile("./examples/consumer-repo/.github/answerlens/runtime.yaml", "utf8"),
     readFile(path.join(outDir, "share-summary.md"), "utf8"),
     readFile(path.join(outDir, "scorecard.md"), "utf8"),
     readFile(path.join(outDir, "recommendations.md"), "utf8"),
@@ -402,9 +653,12 @@ test("consumer repo starter bundle stays self-consistent", async () => {
 
   assert.match(workflow, /actions\/checkout@v5/);
   assert.match(workflow, /actions\/upload-artifact@v6/);
+  assert.match(workflow, /runtime\.yaml/);
   assert.match(workflow, /\.github\/answerlens\/brand\.yaml/);
   assert.match(workflow, /\.github\/answerlens\/competitors\.yaml/);
   assert.match(workflow, /\.github\/answerlens\/prompts\.yaml/);
+  assert.match(runtimeConfig, /provider: openai/);
+  assert.match(runtimeConfig, /model: gpt-5-mini/);
   assert.match(workflow, /YSCJRH\/ai-visibility-auditor@v0\.3\.0/);
   assert.match(workflow, /Artifact review order/);
   assert.match(workflow, /scorecard-path/);

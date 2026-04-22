@@ -167,6 +167,7 @@ The public Action contract is:
 - Canonical distribution plan: [docs/distribution-plan.md](docs/distribution-plan.md)
 - GitHub-native growth practice: [docs/github-growth-plan.md](docs/github-growth-plan.md)
 - Self-dogfooding for discoverability: [docs/self-dogfooding.md](docs/self-dogfooding.md)
+- Model runtime defaults and override rules: [docs/model-runtime.md](docs/model-runtime.md)
 - Manual setup checklist for Pages, npm, and repo settings: [docs/manual-steps.md](docs/manual-steps.md)
 - 5-minute real-site quickstart: [docs/quickstart.md](docs/quickstart.md)
 - GitHub Action usage and output contract: [docs/github-action.md](docs/github-action.md)
@@ -210,6 +211,7 @@ apps/admin         Internal control console for runs, presets, and artifact revi
 packages/core      Crawl, extract, audit, scoring, recommendations, config loading
 packages/contracts Browser-safe contracts for the admin console
 packages/admin-runtime File-backed runtime helpers for the admin BFF
+packages/runtime-config Shared runtime.yaml loader and eval default resolution
 packages/providers Live provider adapters and normalization contracts
 packages/report    Markdown, JSON, and HTML report rendering
 examples/          Demo configs and local fixtures
@@ -235,13 +237,17 @@ OPENAI_API_KEY=... corepack pnpm eval -- https://example.com \
   --brand ./.github/answerlens/brand.yaml \
   --competitors ./.github/answerlens/competitors.yaml \
   --prompts ./.github/answerlens/prompts.yaml \
-  --provider openai \
-  --samples 2 \
-  --locale en-US \
   --out ./runs/example-eval
 ```
 
-Perplexity runs use the same command shape with `--provider perplexity` and `PERPLEXITY_API_KEY`.
+That command auto-loads `./.github/answerlens/runtime.yaml` from the same directory as `brand.yaml`.
+
+Use flags such as `--profile`, `--provider`, `--model`, `--samples`, `--locale`, `--timeout-ms`, and `--base-url` only when you want a temporary override.
+
+For the first live benchmark pass, start with `--profile fast-first-eval`. Use `--profile high-confidence-review` only when you are re-checking a smaller, messaging-sensitive prompt set.
+Use `--profile perplexity-cross-check` only after you already have one readable OpenAI baseline and want a search-shaped second opinion.
+
+Perplexity runs use the same command shape with `PERPLEXITY_API_KEY`. The full precedence rules and scenario matrix live in [docs/model-runtime.md](docs/model-runtime.md).
 
 ## Manual import
 

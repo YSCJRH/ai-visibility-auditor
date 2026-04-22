@@ -24,7 +24,7 @@
     "pack:cli": "corepack pnpm --dir apps/cli pack --pack-destination ../../dist/packages",
     "pack:cli:dry-run": "corepack pnpm --dir apps/cli pack --dry-run",
     "build:site": "node --experimental-strip-types scripts/distribution/build-site.ts",
-    "test": "node --experimental-strip-types --experimental-test-isolation=none --test packages/core/src/audit.test.ts packages/core/src/eval.test.ts packages/core/src/validation.test.ts packages/providers/src/openai.test.ts packages/report/src/index.test.ts packages/admin-runtime/src/index.test.ts apps/cli/src/index.test.ts scripts/distribution/build-site.test.ts scripts/distribution/build-social-preview.test.ts",
+    "test": "node --experimental-strip-types --experimental-test-isolation=none --test packages/core/src/audit.test.ts packages/core/src/eval.test.ts packages/core/src/validation.test.ts packages/providers/src/openai.test.ts packages/runtime-config/src/index.test.ts packages/report/src/index.test.ts packages/admin-runtime/src/index.test.ts apps/cli/src/index.test.ts scripts/distribution/build-site.test.ts scripts/distribution/build-social-preview.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.base.json && corepack pnpm --dir apps/admin typecheck"
   },
   "dependencies": {

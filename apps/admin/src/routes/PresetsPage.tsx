@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { ConfigPresetSummary } from "@answerlens/contracts";
+import { EVAL_PROFILE_PRESETS, type ConfigPresetSummary } from "@answerlens/contracts";
 import { MetricTile } from "../components/MetricTile";
 import { SectionHeader } from "../components/SectionHeader";
 import { listConfigPresets } from "../lib/api";
@@ -80,6 +80,12 @@ export function PresetsPage() {
                   <span className={uiStyles.metaLabel}>{t("admin.presets.nextMove")}</span>
                   <span className={uiStyles.metaValue}>{presetNextMove(preset, t)}</span>
                 </div>
+                {preset.recommendedProfile ? (
+                  <div className={uiStyles.metaRow}>
+                    <span className={uiStyles.metaLabel}>{t("admin.presets.recommendedProfile")}</span>
+                    <span className={uiStyles.metaValue}>{EVAL_PROFILE_PRESETS[preset.recommendedProfile].label}</span>
+                  </div>
+                ) : null}
                 <div className={uiStyles.metaRow}>
                   <span className={uiStyles.metaLabel}>{t("admin.presets.defaultSite")}</span>
                   <span className={uiStyles.metaValue}>{preset.defaultSiteInput}</span>
@@ -102,6 +108,34 @@ export function PresetsPage() {
                     {preset.promptsPath}
                   </span>
                 </div>
+                {preset.runtimePath ? (
+                  <div className={uiStyles.metaRow}>
+                    <span className={uiStyles.metaLabel}>{t("admin.presets.runtime")}</span>
+                    <span className={uiStyles.metaValue}>{preset.runtimePath}</span>
+                  </div>
+                ) : null}
+                {preset.runtimeDefaults ? (
+                  <div className={uiStyles.metaRow}>
+                    <span className={uiStyles.metaLabel}>{t("admin.presets.runtimeDefaults")}</span>
+                    <span className={uiStyles.metaValue}>
+                      {preset.runtimeDefaults.provider}
+                      <br />
+                      {preset.runtimeDefaults.model}
+                      <br />
+                      {(preset.runtimeDefaults.locale ?? t("common.pending"))} · {preset.runtimeDefaults.samples}
+                    </span>
+                  </div>
+                ) : null}
+                {preset.runtimeDefaults ? (
+                  <div className={uiStyles.metaRow}>
+                    <span className={uiStyles.metaLabel}>{t("admin.presets.runtimeNetwork")}</span>
+                    <span className={uiStyles.metaValue}>
+                      {preset.runtimeDefaults.timeoutMs}ms
+                      <br />
+                      {preset.runtimeDefaults.baseUrl}
+                    </span>
+                  </div>
+                ) : null}
               </div>
             </div>
           </article>

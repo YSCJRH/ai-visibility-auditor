@@ -17,6 +17,7 @@ import {
   writeAuditOutputs,
   writeEvalOutputs
 } from "../../report/src/index.ts";
+import { defaultRuntimePathForBrand, recommendEvalProfile, resolveEvalRuntime } from "../../runtime-config/src/index.ts";
 import type {
   AdminRunDetail,
   AdminRunListItem,
@@ -45,6 +46,7 @@ type PresetFiles = {
   brandPath: string;
   competitorsPath: string;
   promptsPath: string;
+  runtimePath: string;
 };
 
 type RuntimeState = {
@@ -64,7 +66,8 @@ const PRESETS: PresetFiles[] = [
     defaultSiteInput: "https://yscjrh.github.io/ai-visibility-auditor/",
     brandPath: ".github/answerlens/brand.yaml",
     competitorsPath: ".github/answerlens/competitors.yaml",
-    promptsPath: ".github/answerlens/prompts.yaml"
+    promptsPath: ".github/answerlens/prompts.yaml",
+    runtimePath: ".github/answerlens/runtime.yaml"
   },
   {
     id: "example-acme",
@@ -73,7 +76,8 @@ const PRESETS: PresetFiles[] = [
     defaultSiteInput: "./examples/fixtures/static-good",
     brandPath: "examples/acme/brand.yaml",
     competitorsPath: "examples/acme/competitors.yaml",
-    promptsPath: "examples/acme/prompts.yaml"
+    promptsPath: "examples/acme/prompts.yaml",
+    runtimePath: "examples/acme/runtime.yaml"
   },
   {
     id: "example-consumer-repo",
@@ -82,7 +86,8 @@ const PRESETS: PresetFiles[] = [
     defaultSiteInput: "./examples/fixtures/static-good",
     brandPath: "examples/consumer-repo/.github/answerlens/brand.yaml",
     competitorsPath: "examples/consumer-repo/.github/answerlens/competitors.yaml",
-    promptsPath: "examples/consumer-repo/.github/answerlens/prompts.yaml"
+    promptsPath: "examples/consumer-repo/.github/answerlens/prompts.yaml",
+    runtimePath: "examples/consumer-repo/.github/answerlens/runtime.yaml"
   }
 ];
 
@@ -126,6 +131,13 @@ function runsRoot(options?: RuntimeOptions): string {
 
 function resolveFromRepo(relativePath: string, options?: RuntimeOptions): string {
   return path.resolve(repoRoot(options), relativePath);
+}
+
+function resolveMaybeRepoPath(value: string | undefined, options?: RuntimeOptions): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+  return path.isAbsolute(value) ? path.resolve(value) : resolveFromRepo(value, options);
 }
 
 async function readJson<T>(filePath: string): Promise<T> {
@@ -196,7 +208,8 @@ function loadPresetFiles(presetId: string, options?: RuntimeOptions): PresetFile
     ...preset,
     brandPath: resolveFromRepo(preset.brandPath, options),
     competitorsPath: resolveFromRepo(preset.competitorsPath, options),
-    promptsPath: resolveFromRepo(preset.promptsPath, options)
+    promptsPath: resolveFromRepo(preset.promptsPath, options),
+    runtimePath: resolveFromRepo(preset.runtimePath, options)
   };
 }
 
@@ -245,11 +258,16 @@ async function runAuditIntoDirectory(
 async function runEvalIntoDirectory(
   outDir: string,
   input: CreateEvalRunInput,
+  resolvedRuntime: Awaited<ReturnType<typeof resolveEvalRuntime>>,
   options?: RuntimeOptions
 ): Promise<{ runId: string; outDir: string }> {
   const { brand, competitors, prompts } = await loadPresetInputs(input.presetId, options);
-  const samples = input.samples ?? 1;
-  const locale = input.locale ?? null;
+  const provider = resolvedRuntime.provider.value;
+  const model = resolvedRuntime.model.value;
+  const samples = resolvedRuntime.samples.value;
+  const locale = resolvedRuntime.locale.value;
+  const timeoutMs = resolvedRuntime.timeoutMs.value;
+  const baseUrl = resolvedRuntime.baseUrl.value;
   const audit = await runAudit({
     siteInput: input.site,
     brand,
@@ -262,7 +280,7 @@ async function runEvalIntoDirectory(
     for (let sampleIndex = 0; sampleIndex < samples; sampleIndex += 1) {
       responses.push(
         await runEvalProvider(
-          input.provider as ProviderName,
+          provider as ProviderName,
           {
             promptId: promptCase.id,
             prompt: promptCase.template,
@@ -275,7 +293,9 @@ async function runEvalIntoDirectory(
             holdout: promptCase.holdout ?? false
           },
           {
-            model: input.model,
+            model,
+            baseUrl,
+            timeoutMs,
             locale: promptCase.locale ?? locale ?? undefined,
             sampleIndex,
             runCount: samples,
@@ -307,7 +327,10 @@ export async function listConfigPresets(options?: RuntimeOptions): Promise<Confi
   return Promise.all(
     PRESETS.map(async (preset) => {
       const files = loadPresetFiles(preset.id, options);
-      const brand = await loadBrandConfig(files.brandPath);
+      const [brand, runtimeDefaults] = await Promise.all([
+        loadBrandConfig(files.brandPath),
+        resolveEvalRuntime({ brandPath: files.brandPath, runtimePath: files.runtimePath })
+      ]);
       return {
         id: preset.id,
         label: preset.label,
@@ -316,6 +339,22 @@ export async function listConfigPresets(options?: RuntimeOptions): Promise<Confi
         brandPath: path.relative(repoRoot(options), files.brandPath),
         competitorsPath: path.relative(repoRoot(options), files.competitorsPath),
         promptsPath: path.relative(repoRoot(options), files.promptsPath),
+        runtimePath: path.relative(repoRoot(options), files.runtimePath),
+        runtimeDefaults: {
+          provider: runtimeDefaults.provider.value,
+          model: runtimeDefaults.model.value,
+          locale: runtimeDefaults.locale.value,
+          samples: runtimeDefaults.samples.value,
+          timeoutMs: runtimeDefaults.timeoutMs.value,
+          baseUrl: runtimeDefaults.baseUrl.value
+        },
+        recommendedProfile: recommendEvalProfile({
+          provider: runtimeDefaults.provider.value,
+          model: runtimeDefaults.model.value,
+          locale: runtimeDefaults.locale.value,
+          samples: runtimeDefaults.samples.value,
+          timeoutMs: runtimeDefaults.timeoutMs.value
+        }),
         siteDisplayName: brand.brand.site_display_name,
         domain: brand.brand.domain
       } satisfies ConfigPresetSummary;
@@ -472,6 +511,18 @@ export async function createAuditRun(input: CreateAuditRunInput, options?: Runti
 }
 
 export async function createEvalRun(input: CreateEvalRunInput, options?: RuntimeOptions): Promise<RunJobRecord> {
+  const preset = loadPresetFiles(input.presetId, options);
+  const resolvedRuntime = await resolveEvalRuntime({
+    brandPath: preset.brandPath,
+    runtimePath: resolveMaybeRepoPath(input.runtimePath, options) ?? preset.runtimePath,
+    profile: input.profile,
+    provider: input.provider,
+    model: input.model,
+    locale: input.locale,
+    samples: input.samples,
+    timeoutMs: input.timeoutMs,
+    baseUrl: input.baseUrl
+  });
   const id = crypto.randomUUID();
   const outDir = path.join(runsRoot(options), runDirectoryId("eval", input.site));
   const now = new Date().toISOString();
@@ -481,7 +532,7 @@ export async function createEvalRun(input: CreateEvalRunInput, options?: Runtime
     status: "queued",
     site: input.site,
     presetId: input.presetId,
-    provider: input.provider,
+    provider: resolvedRuntime.provider.value,
     startedAt: now,
     updatedAt: now
   };
@@ -490,7 +541,7 @@ export async function createEvalRun(input: CreateEvalRunInput, options?: Runtime
   void (async () => {
     try {
       updateJob(id, { status: "running" });
-      const result = await runEvalIntoDirectory(outDir, input, options);
+      const result = await runEvalIntoDirectory(outDir, input, resolvedRuntime, options);
       updateJob(id, { status: "completed", runId: result.runId });
     } catch (error) {
       updateJob(id, {

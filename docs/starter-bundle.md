@@ -12,6 +12,7 @@ Use it after the live demo report, the 60-second fixture demo, and one useful re
     brand.yaml
     competitors.yaml
     prompts.yaml
+    runtime.yaml
   workflows/
     answerlens.yml
 ```
@@ -21,7 +22,11 @@ Use it after the live demo report, the 60-second fixture demo, and one useful re
 - `brand.yaml`: product name, domain, proof-page hints, and optional `site_display_name`
 - `competitors.yaml`: declared comparison set for the category you actually sell into
 - `prompts.yaml`: buyer, comparison, and citation questions for your real audience
+- `runtime.yaml`: non-secret eval defaults such as provider, model, locale, samples, timeout, and optional base URL
 - `answerlens.yml`: the GitHub Action path that runs the same artifact contract in CI
+
+Keep API keys in environment variables or GitHub secrets. Do not put them into `runtime.yaml`.
+For the first live benchmark pass, the recommended temporary shortcut is `fast-first-eval`.
 
 ## Review artifacts in this order
 
@@ -42,3 +47,5 @@ Then use `pr-snippet.md` for GitHub copy and `run.json` for machine-readable met
 1. Run one real-site audit with [quickstart.md](quickstart.md) if you have not done that yet.
 2. Copy the starter files from [`examples/consumer-repo`](../examples/consumer-repo).
 3. Move into [github-action.md](github-action.md) when the local run already feels reviewable.
+
+If you want the full model precedence rules in one place, use [model-runtime.md](model-runtime.md).

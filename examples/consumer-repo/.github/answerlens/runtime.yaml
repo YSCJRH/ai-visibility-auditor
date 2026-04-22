@@ -1,0 +1,16 @@
+# Default external-starter eval baseline.
+# Keep copyable repo defaults here; use profile aliases such as
+# fast-first-eval, high-confidence-review, or perplexity-cross-check as temporary overrides.
+runtime:
+  eval:
+    provider: openai
+    model: gpt-5-mini
+    locale: en-US
+    samples: 1
+    timeout_ms: 60000
+
+  providers:
+    openai:
+      base_url: https://api.openai.com/v1
+    perplexity:
+      base_url: https://api.perplexity.ai

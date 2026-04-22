@@ -21,18 +21,29 @@ inputs:
     description: "Output directory for AnswerLens artifacts."
     required: false
     default: "runs/answerlens"
+  runtime:
+    description: "Optional path to runtime.yaml for eval defaults. Defaults to a sibling runtime.yaml next to brand.yaml."
+    required: false
+  profile:
+    description: "Optional eval profile alias: fast-first-eval, self-dogfood-stability, high-confidence-review, or perplexity-cross-check."
+    required: false
   provider:
-    description: "Provider name for eval runs."
+    description: "Optional eval provider override."
     required: false
   model:
     description: "Optional provider model override."
     required: false
   samples:
-    description: "Repeated samples for eval runs."
+    description: "Optional repeated-sample override for eval runs."
     required: false
-    default: "1"
   locale:
     description: "Optional locale override."
+    required: false
+  timeout-ms:
+    description: "Optional eval provider timeout override in milliseconds."
+    required: false
+  base-url:
+    description: "Optional eval provider base URL override."
     required: false
   manual-input:
     description: "Path to normalized manual-import JSON."
@@ -124,10 +135,6 @@ runs:
           throw "Unsupported command '$command'. Use audit, eval, manual-import, search-console-import, or bing-indexnow-helper."
         }
 
-        if ($command -eq 'eval' -and [string]::IsNullOrWhiteSpace('${{ inputs.provider }}')) {
-          throw 'Input "provider" is required for eval runs.'
-        }
-
         if ($command -eq 'manual-import' -and [string]::IsNullOrWhiteSpace('${{ inputs.manual-input }}')) {
           throw 'Input "manual-input" is required for manual-import runs.'
         }
@@ -158,7 +165,17 @@ runs:
         )
 
         if ($command -eq 'eval') {
-          $args += @('--provider', '${{ inputs.provider }}')
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.runtime }}')) {
+            $args += @('--runtime', (Resolve-AnswerLensInput '${{ inputs.runtime }}'))
+          }
+
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.profile }}')) {
+            $args += @('--profile', '${{ inputs.profile }}')
+          }
+
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.provider }}')) {
+            $args += @('--provider', '${{ inputs.provider }}')
+          }
 
           if (-not [string]::IsNullOrWhiteSpace('${{ inputs.model }}')) {
             $args += @('--model', '${{ inputs.model }}')
@@ -166,6 +183,14 @@ runs:
 
           if (-not [string]::IsNullOrWhiteSpace('${{ inputs.samples }}')) {
             $args += @('--samples', '${{ inputs.samples }}')
+          }
+
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.timeout-ms }}')) {
+            $args += @('--timeout-ms', '${{ inputs.timeout-ms }}')
+          }
+
+          if (-not [string]::IsNullOrWhiteSpace('${{ inputs.base-url }}')) {
+            $args += @('--base-url', '${{ inputs.base-url }}')
           }
         }
 

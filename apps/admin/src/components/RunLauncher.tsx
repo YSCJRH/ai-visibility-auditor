@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import type { CreateAuditRunInput, CreateEvalRunInput, RunJobRecord } from "@answerlens/contracts";
+import { EVAL_PROFILE_PRESETS, type CreateAuditRunInput, type CreateEvalRunInput, type EvalProfileName, type RunJobRecord } from "@answerlens/contracts";
 import { createAuditRun, createEvalRun, getRunJob, listConfigPresets } from "../lib/api";
 import { formatStatus } from "../lib/format";
 import { useLocale } from "../lib/locale";
@@ -31,16 +31,20 @@ function presetNextMove(presetId: string, t: (key: string) => string): string {
 }
 
 export function RunLauncher() {
-  const { locale, t } = useLocale();
+  const { locale: uiLocale, t } = useLocale();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<LaunchMode>("audit");
   const [presetId, setPresetId] = useState("");
   const [site, setSite] = useState("");
-  const [provider, setProvider] = useState<"openai" | "perplexity">("openai");
+  const [provider, setProvider] = useState<"" | "openai" | "perplexity">("");
+  const [profile, setProfile] = useState<"" | EvalProfileName>("");
   const [model, setModel] = useState("");
   const [samples, setSamples] = useState(1);
+  const [localeOverride, setLocaleOverride] = useState("");
+  const [timeoutMs, setTimeoutMs] = useState(60000);
+  const [baseUrl, setBaseUrl] = useState("");
   const [job, setJob] = useState<RunJobRecord | null>(null);
 
   const presetsQuery = useQuery({
@@ -65,6 +69,33 @@ export function RunLauncher() {
     }
   }, [selectedPreset, presets, site]);
 
+  useEffect(() => {
+    if (!selectedPreset) {
+      return;
+    }
+
+    setProvider(selectedPreset.runtimeDefaults?.provider ?? "");
+    setProfile(selectedPreset.recommendedProfile ?? "");
+    setModel(selectedPreset.runtimeDefaults?.model ?? "");
+    setSamples(selectedPreset.runtimeDefaults?.samples ?? 1);
+    setLocaleOverride(selectedPreset.runtimeDefaults?.locale ?? "");
+    setTimeoutMs(selectedPreset.runtimeDefaults?.timeoutMs ?? 60000);
+    setBaseUrl(selectedPreset.runtimeDefaults?.baseUrl ?? "");
+  }, [selectedPreset?.id]);
+
+  useEffect(() => {
+    if (!profile) {
+      return;
+    }
+
+    const next = EVAL_PROFILE_PRESETS[profile].defaults;
+    setProvider(next.provider);
+    setModel(next.model);
+    setSamples(next.samples);
+    setLocaleOverride(next.locale ?? "");
+    setTimeoutMs(next.timeoutMs);
+  }, [profile]);
+
   const createRunMutation = useMutation({
     mutationFn: async () => {
       if (!selectedPreset) {
@@ -79,10 +110,24 @@ export function RunLauncher() {
       const payload: CreateEvalRunInput = {
         presetId: selectedPreset.id,
         site,
-        provider,
-        model: model.trim().length > 0 ? model.trim() : undefined,
-        samples,
-        locale
+        runtimePath: selectedPreset.runtimePath,
+        profile: profile || undefined,
+        provider:
+          provider !== "" && provider !== selectedPreset.runtimeDefaults?.provider ? provider : undefined,
+        model:
+          model.trim().length > 0 && model.trim() !== selectedPreset.runtimeDefaults?.model
+            ? model.trim()
+            : undefined,
+        samples: samples !== selectedPreset.runtimeDefaults?.samples ? samples : undefined,
+        locale:
+          localeOverride.trim().length > 0 && localeOverride.trim() !== (selectedPreset.runtimeDefaults?.locale ?? "")
+            ? localeOverride.trim()
+            : undefined,
+        timeoutMs: timeoutMs !== selectedPreset.runtimeDefaults?.timeoutMs ? timeoutMs : undefined,
+        baseUrl:
+          baseUrl.trim().length > 0 && baseUrl.trim() !== selectedPreset.runtimeDefaults?.baseUrl
+            ? baseUrl.trim()
+            : undefined
       };
       return createEvalRun(payload);
     },
@@ -197,12 +242,29 @@ export function RunLauncher() {
                 {mode === "eval" ? (
                   <>
                     <label className={styles.field}>
+                      <span className={styles.label}>{t("admin.launcher.profile")}</span>
+                      <select
+                        className={styles.select}
+                        value={profile}
+                        onChange={(event) => setProfile(event.target.value as "" | EvalProfileName)}
+                      >
+                        <option value="">{t("admin.launcher.profile.default")}</option>
+                        {Object.values(EVAL_PROFILE_PRESETS).map((entry) => (
+                          <option key={entry.id} value={entry.id}>
+                            {entry.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className={styles.field}>
                       <span className={styles.label}>{t("admin.launcher.provider")}</span>
                       <select
                         className={styles.select}
                         value={provider}
-                        onChange={(event) => setProvider(event.target.value as "openai" | "perplexity")}
+                        onChange={(event) => setProvider(event.target.value as "" | "openai" | "perplexity")}
                       >
+                        <option value="">{t("common.pending")}</option>
                         <option value="openai">OpenAI</option>
                         <option value="perplexity">Perplexity</option>
                       </select>
@@ -229,6 +291,38 @@ export function RunLauncher() {
                         placeholder={t("admin.launcher.model.placeholder")}
                       />
                     </label>
+
+                    <label className={styles.field}>
+                      <span className={styles.label}>{t("admin.launcher.locale")}</span>
+                      <input
+                        className={styles.input}
+                        value={localeOverride}
+                        onChange={(event) => setLocaleOverride(event.target.value)}
+                        placeholder="zh-CN"
+                      />
+                    </label>
+
+                    <label className={styles.field}>
+                      <span className={styles.label}>{t("admin.launcher.timeout")}</span>
+                      <input
+                        className={styles.input}
+                        type="number"
+                        min={1000}
+                        step={1000}
+                        value={timeoutMs}
+                        onChange={(event) => setTimeoutMs(Number(event.target.value) || 60000)}
+                      />
+                    </label>
+
+                    <label className={`${styles.field} ${styles.fieldWide}`}>
+                      <span className={styles.label}>{t("admin.launcher.baseUrl")}</span>
+                      <input
+                        className={styles.input}
+                        value={baseUrl}
+                        onChange={(event) => setBaseUrl(event.target.value)}
+                        placeholder={t("admin.launcher.baseUrl.placeholder")}
+                      />
+                    </label>
                   </>
                 ) : null}
               </div>
@@ -242,6 +336,38 @@ export function RunLauncher() {
                   <p className={styles.hint}>
                     {t("admin.launcher.presetGuide")}: <strong>{presetUse(selectedPreset.id, t)}</strong>
                   </p>
+                  {selectedPreset.recommendedProfile ? (
+                    <p className={styles.hint}>
+                      {t("admin.launcher.recommendedProfile")}:{" "}
+                      <strong>{EVAL_PROFILE_PRESETS[selectedPreset.recommendedProfile].label}</strong>
+                    </p>
+                  ) : null}
+                  {profile ? (
+                    <p className={styles.hint}>
+                      {t("admin.launcher.profile")}:{" "}
+                      <strong>{EVAL_PROFILE_PRESETS[profile].label}</strong>.{" "}
+                      {EVAL_PROFILE_PRESETS[profile].description}
+                    </p>
+                  ) : null}
+                  {selectedPreset.runtimeDefaults ? (
+                    <p className={styles.hint}>
+                      {t("admin.launcher.runtime")}: <strong>{selectedPreset.runtimePath}</strong>.{" "}
+                      {t("admin.launcher.runtimeDefaults")}:{" "}
+                      <strong>
+                        {selectedPreset.runtimeDefaults.provider} · {selectedPreset.runtimeDefaults.model} ·{" "}
+                        {selectedPreset.runtimeDefaults.locale ?? t("common.pending")} ·{" "}
+                        {selectedPreset.runtimeDefaults.samples}
+                      </strong>
+                    </p>
+                  ) : null}
+                  {selectedPreset.runtimeDefaults ? (
+                    <p className={styles.hint}>
+                      {t("admin.launcher.runtimeNetwork")}:{" "}
+                      <strong>
+                        {selectedPreset.runtimeDefaults.timeoutMs}ms · {selectedPreset.runtimeDefaults.baseUrl}
+                      </strong>
+                    </p>
+                  ) : null}
                   <p className={styles.hint}>
                     {t("admin.launcher.nextMove")}: <strong>{presetNextMove(selectedPreset.id, t)}</strong>
                   </p>
@@ -250,7 +376,7 @@ export function RunLauncher() {
 
               <footer className={styles.footer}>
                 <div className={styles.status}>
-                  {job ? <StatusBadge label={formatStatus(job.status, locale)} tone={job.status === "failed" ? "error" : "info"} /> : null}
+                  {job ? <StatusBadge label={formatStatus(job.status, uiLocale)} tone={job.status === "failed" ? "error" : "info"} /> : null}
                   {job?.error ? <span className={styles.hint}>{job.error}</span> : null}
                   {presetsQuery.isLoading ? <span className={styles.hint}>{t("admin.launcher.loadingPresets")}</span> : null}
                 </div>
