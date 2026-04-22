@@ -35,7 +35,7 @@ corepack pnpm admin:dev
 1. 选择 preset
 2. 输入站点
 3. 选择 `audit` 或 `eval`
-4. 如果是 `eval`，先确认 preset 的 `runtime.yaml` 默认值
+4. 如果是 `eval`，先确认 preset 的 `runtime.yaml` 默认值；只有临时覆盖时才改 provider / model / locale / timeout / base URL
 5. 只有在你想临时覆盖时，才改 provider / model / locale
 6. 等待队列完成并进入 run detail
 

@@ -116,7 +116,7 @@ The goal is not to approve a new dashboard pattern. The goal is to verify that a
 2. Pick a preset source
 3. Set a site input
 4. Choose `audit` or `eval`
-5. For `eval`, confirm the preset's `runtime.yaml` defaults and only override provider/model/locale when you want a temporary change
+5. For `eval`, confirm the preset's `runtime.yaml` defaults and only override provider/model/locale/timeout/base URL when you want a temporary change
 6. Wait for the queued job to finish
 7. Land in the run detail page for artifact review
 

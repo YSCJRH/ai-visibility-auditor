@@ -120,6 +120,16 @@ export function PresetsPage() {
                     </span>
                   </div>
                 ) : null}
+                {preset.runtimeDefaults ? (
+                  <div className={uiStyles.metaRow}>
+                    <span className={uiStyles.metaLabel}>{t("admin.presets.runtimeNetwork")}</span>
+                    <span className={uiStyles.metaValue}>
+                      {preset.runtimeDefaults.timeoutMs}ms
+                      <br />
+                      {preset.runtimeDefaults.baseUrl}
+                    </span>
+                  </div>
+                ) : null}
               </div>
             </div>
           </article>

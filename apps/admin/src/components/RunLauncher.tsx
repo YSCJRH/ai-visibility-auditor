@@ -42,6 +42,8 @@ export function RunLauncher() {
   const [model, setModel] = useState("");
   const [samples, setSamples] = useState(1);
   const [localeOverride, setLocaleOverride] = useState("");
+  const [timeoutMs, setTimeoutMs] = useState(60000);
+  const [baseUrl, setBaseUrl] = useState("");
   const [job, setJob] = useState<RunJobRecord | null>(null);
 
   const presetsQuery = useQuery({
@@ -75,6 +77,8 @@ export function RunLauncher() {
     setModel(selectedPreset.runtimeDefaults?.model ?? "");
     setSamples(selectedPreset.runtimeDefaults?.samples ?? 1);
     setLocaleOverride(selectedPreset.runtimeDefaults?.locale ?? "");
+    setTimeoutMs(selectedPreset.runtimeDefaults?.timeoutMs ?? 60000);
+    setBaseUrl(selectedPreset.runtimeDefaults?.baseUrl ?? "");
   }, [selectedPreset?.id]);
 
   const createRunMutation = useMutation({
@@ -102,6 +106,11 @@ export function RunLauncher() {
         locale:
           localeOverride.trim().length > 0 && localeOverride.trim() !== (selectedPreset.runtimeDefaults?.locale ?? "")
             ? localeOverride.trim()
+            : undefined,
+        timeoutMs: timeoutMs !== selectedPreset.runtimeDefaults?.timeoutMs ? timeoutMs : undefined,
+        baseUrl:
+          baseUrl.trim().length > 0 && baseUrl.trim() !== selectedPreset.runtimeDefaults?.baseUrl
+            ? baseUrl.trim()
             : undefined
       };
       return createEvalRun(payload);
@@ -260,6 +269,28 @@ export function RunLauncher() {
                         placeholder="zh-CN"
                       />
                     </label>
+
+                    <label className={styles.field}>
+                      <span className={styles.label}>{t("admin.launcher.timeout")}</span>
+                      <input
+                        className={styles.input}
+                        type="number"
+                        min={1000}
+                        step={1000}
+                        value={timeoutMs}
+                        onChange={(event) => setTimeoutMs(Number(event.target.value) || 60000)}
+                      />
+                    </label>
+
+                    <label className={`${styles.field} ${styles.fieldWide}`}>
+                      <span className={styles.label}>{t("admin.launcher.baseUrl")}</span>
+                      <input
+                        className={styles.input}
+                        value={baseUrl}
+                        onChange={(event) => setBaseUrl(event.target.value)}
+                        placeholder={t("admin.launcher.baseUrl.placeholder")}
+                      />
+                    </label>
                   </>
                 ) : null}
               </div>
@@ -281,6 +312,14 @@ export function RunLauncher() {
                         {selectedPreset.runtimeDefaults.provider} · {selectedPreset.runtimeDefaults.model} ·{" "}
                         {selectedPreset.runtimeDefaults.locale ?? t("common.pending")} ·{" "}
                         {selectedPreset.runtimeDefaults.samples}
+                      </strong>
+                    </p>
+                  ) : null}
+                  {selectedPreset.runtimeDefaults ? (
+                    <p className={styles.hint}>
+                      {t("admin.launcher.runtimeNetwork")}:{" "}
+                      <strong>
+                        {selectedPreset.runtimeDefaults.timeoutMs}ms · {selectedPreset.runtimeDefaults.baseUrl}
                       </strong>
                     </p>
                   ) : null}
