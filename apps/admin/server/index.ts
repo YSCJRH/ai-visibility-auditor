@@ -410,6 +410,8 @@ function renderReviewShell(title: string, body: string, locale: Locale): string 
         .brand-copy, .sidebar-card, .topbar-copy { display: none; }
         .topbar { flex-direction: column; padding: 0.9rem; }
         .topbar-title { font-size: 1.02rem; }
+        .title { font-size: clamp(1.7rem, 9vw, 2.2rem); line-height: 1.06; }
+        .card-title { font-size: 1.02rem; }
         table, thead, tbody, tr, td { display: block; width: 100%; }
         thead { display: none; }
         tr { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,.05); }
