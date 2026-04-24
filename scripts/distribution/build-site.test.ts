@@ -85,12 +85,17 @@ test("build-site writes indexable pages and metadata", async () => {
     "en/releases/index.html",
     "examples/index.html",
     "en/examples/index.html",
+    "playbooks/index.html",
+    "en/playbooks/index.html",
     "use-case/product-marketing/index.html",
     "en/use-case/product-marketing/index.html",
     "use-case/developer-advocacy/index.html",
     "en/use-case/developer-advocacy/index.html",
     "use-case/open-source-maintainers/index.html",
     "en/use-case/open-source-maintainers/index.html",
+    "use-case/open-source-maintainer/index.html",
+    "en/use-case/open-source-maintainer/index.html",
+    "zh/use-case/open-source-maintainer/index.html",
     "starter/example-run/share-summary.md",
     "zh/starter/example-run/share-summary.md",
     "examples/static-good/index.html",
@@ -128,10 +133,15 @@ test("build-site writes indexable pages and metadata", async () => {
     developerAdvocacy,
     openSourceRedirect,
     openSource,
+    openSourceAliasRedirect,
+    openSourceAliasEnRedirect,
+    openSourceAliasZhRedirect,
     releasesRedirect,
     releases,
     examplesRedirect,
     examples,
+    playbooksRedirect,
+    playbooks,
     demoReport,
     zhDemoReport,
     feed,
@@ -160,10 +170,15 @@ test("build-site writes indexable pages and metadata", async () => {
     load("en/use-case/developer-advocacy/index.html"),
     load("use-case/open-source-maintainers/index.html"),
     load("en/use-case/open-source-maintainers/index.html"),
+    load("use-case/open-source-maintainer/index.html"),
+    load("en/use-case/open-source-maintainer/index.html"),
+    load("zh/use-case/open-source-maintainer/index.html"),
     load("releases/index.html"),
     load("en/releases/index.html"),
     load("examples/index.html"),
     load("en/examples/index.html"),
+    load("playbooks/index.html"),
+    load("en/playbooks/index.html"),
     load("examples/static-good/index.html"),
     load("zh/examples/static-good/index.html"),
     load("feed.xml"),
@@ -176,19 +191,22 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /<link rel="canonical" href="https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/en\/"/);
   assert.match(home, /hreflang="zh-CN"/);
   assert.match(home, /assets\/social-preview\.png/);
-  assert.match(home, /AnswerLens turns AI discoverability work into reviewable artifacts\./);
+  assert.match(home, /<h1>AnswerLens<\/h1>/);
+  assert.match(home, /productHero/);
+  assert.match(home, /Move from demo to CI without changing the artifact contract\./);
   assert.match(home, /Demo score/);
   assert.match(home, /First artifact/);
-  assert.match(home, /Primary entry/);
-  assert.match(home, /Bridge step/);
+  assert.match(home, /First-run path/);
+  assert.match(home, /Artifact contract/);
+  assert.match(home, /ai-visibility-auditor\/en\/starter\/">Starter<\/a>/);
   assert.match(home, /What the demo says right now/);
   assert.match(home, /AnswerLens static-good fixture demo/);
   assert.match(home, /examples\/static-good\/share-summary\.md/);
   assert.match(home, /Built by YSCJRH from repo-native docs, releases, and artifacts\./);
-  assert.match(home, /Run one real-site audit before CI\./);
+  assert.match(home, /Every useful run resolves to three review artifacts\./);
   assert.match(home, /Run the 60-second fixture demo/);
-  assert.match(home, /5-minute quickstart/);
-  assert.match(home, /Add the GitHub Action/);
+  assert.match(home, /Open quickstart/);
+  assert.match(home, /Open Action docs/);
   assert.match(home, /SoftwareApplication/);
   assert.match(home, /Organization/);
   assert.match(zhHome, /zh\/examples\/static-good\/index\.html/);
@@ -205,37 +223,69 @@ test("build-site writes indexable pages and metadata", async () => {
     productMarketingRedirect,
     developerAdvocacyRedirect,
     openSourceRedirect,
+    openSourceAliasRedirect,
     releasesRedirect,
-    examplesRedirect
+    examplesRedirect,
+    playbooksRedirect
   ]) {
     assert.match(redirectPage, /window\.location\.replace/);
   }
+  assert.match(openSourceAliasRedirect, /use-case\/open-source-maintainers\//);
+  assert.match(openSourceAliasEnRedirect, /en\/use-case\/open-source-maintainers\//);
+  assert.match(openSourceAliasZhRedirect, /zh\/use-case\/open-source-maintainers\//);
 
   assert.match(docs, /Activation plan/);
+  assert.match(docs, /Use the docs to understand the score, then move back into the run\./);
+  assert.match(docs, /Learning path/);
+  assert.match(docs, /Understand the result before you tune the workflow\./);
   assert.match(docs, /Proof page map/);
   assert.match(docs, /Starter bundle<\/a>: external-repo layout and artifact review order/);
+  assert.match(docs, /Schema-text consistency/);
+  assert.match(docs, /Evidence density/);
+  assert.match(starter, /Copy the AnswerLens workflow into another GitHub repository\./);
+  assert.match(starter, /Move from local proof to CI adoption without inventing a new workflow\./);
+  assert.match(starter, /Copyable repository shape/);
   assert.match(starter, /Starter example run/);
   assert.match(starter, /Example Product public site/);
   assert.match(starter, /runtime\.yaml/);
   assert.match(starter, /non-secret eval defaults/i);
+  assert.match(starter, /YSCJRH\/ai-visibility-auditor@v0\.3\.2/);
   assert.match(starter, /starter\/example-run\/share-summary\.md/);
   assert.match(pricing, /Pricing for AnswerLens is open-source, BYOK, and artifact-first\./);
+  assert.match(pricing, /View starter/);
   assert.match(pricing, /\$0 provider cost/);
   assert.match(security, /Security for AnswerLens starts with no hosted control plane\./);
+  assert.match(security, /Read manual steps/);
   assert.match(security, /no consumer AI UI scraping/);
   assert.match(faq, /AnswerLens FAQ for new visitors and evaluators\./);
+  assert.match(faq, /Compare options/);
   assert.match(faq, /FAQPage/);
   assert.match(compare, /Profound/);
   assert.match(compare, /Peec AI/);
   assert.match(compare, /Otterly/);
+  assert.match(compare, /Review pricing/);
   assert.match(integrations, /GitHub-native and artifact-backed/);
+  assert.match(integrations, /Open Action docs/);
   assert.match(productMarketing, /AnswerLens for product marketing teams\./);
+  assert.match(productMarketing, /Open playbooks/);
   assert.match(developerAdvocacy, /AnswerLens for developer advocacy teams\./);
+  assert.match(developerAdvocacy, /View examples/);
   assert.match(openSource, /AnswerLens for open-source maintainers\./);
+  assert.match(openSource, /Open releases/);
   assert.match(releases, /v0\.3\.0/);
   assert.match(releases, /Use the latest release/);
+  assert.match(releases, /Open latest release/);
   assert.match(examples, /AnswerLens static-good fixture demo/);
+  assert.match(examples, /The demo page is the fastest way to inspect a finished AnswerLens run\./);
+  assert.match(examples, /Demo artifact contract/);
+  assert.match(examples, /Open the live artifact set in the same order a reviewer would\./);
   assert.match(examples, /What to do after the demo/);
+  assert.match(examples, /Run the 60-second fixture demo/);
+  assert.match(playbooks, /Turn audit findings into a small, reviewable fix loop\./);
+  assert.match(playbooks, /Fix loop/);
+  assert.match(playbooks, /Keep each improvement tied to a run artifact\./);
+  assert.match(playbooks, /Current recommendations/);
+  assert.match(playbooks, /Schema-text consistency/);
   assert.match(demoReport, /AnswerLens static-good fixture demo/);
   assert.match(zhDemoReport, /AnswerLens/);
   assert.match(feed, /AnswerLens releases/);

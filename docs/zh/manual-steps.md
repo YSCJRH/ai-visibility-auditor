@@ -26,6 +26,8 @@
    - Trusted publishing 路径：为当前仓库配置 npm trusted publishing，并设置仓库变量 `ANSWERLENS_ENABLE_NPM_TRUSTED_PUBLISH=true`。
 4. 任一路径配置完成后，语义化版本 release workflow 就可以自动发布 `@answerlens/cli`。
 
+如果 `npm view @answerlens/cli` 返回 `404`，就把 npm 视为尚未激活；在配置好其中一种发布路径并能在 registry 看到包之前，继续使用 GitHub release assets 或本地 checkout。
+
 ## GitHub Pages
 
 1. 启用 **Source: GitHub Actions**。
@@ -39,7 +41,7 @@
 ## GitHub Actions runtime
 
 1. 自托管 runner 需要保持在兼容 Node 24-based JavaScript actions 的版本上。
-2. 根 `AnswerLens` Action 会通过 Corepack provision pnpm，所以外部仓库在 `uses: YSCJRH/ai-visibility-auditor@vX` 时，不需要再单独加 `pnpm/action-setup`。
+2. 根 `AnswerLens` Action 会通过 Corepack provision pnpm，所以外部仓库使用经过 review 的 release tag，例如 `YSCJRH/ai-visibility-auditor@v0.3.2` 时，不需要再单独加 `pnpm/action-setup`。
 3. 对 `eval` 来说，把默认 provider / model / locale / timeout 放进 `runtime.yaml`，并让它和 `brand.yaml` 位于同一目录。
 4. `OPENAI_API_KEY` 和 `PERPLEXITY_API_KEY` 继续放在 repository 或 organization secrets 里，不要写进 `runtime.yaml`。
 5. 如果你在仓库外维护复制版 workflow，尽量保持和这里相同的 major 版本：
@@ -75,3 +77,5 @@
 - README、quickstart、release notes 和 Pages 都讲同一条 first-run funnel
 - docs 和 copied workflow 里提到的 action major versions 要与仓库默认值一致
 - `eval` 的默认模型配置应来自 `runtime.yaml`，secret 只来自环境变量
+- npm install 文案不应在 registry 能看到包之前暗示 npm 已经可用
+- active umbrella issue body 应描述当前 post-release activation phase，而不是在新的 stable release 出现后仍锚定旧 release

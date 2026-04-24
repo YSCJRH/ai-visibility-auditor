@@ -23,9 +23,10 @@ Use it after the live demo report, the 60-second fixture demo, and one useful re
 - `competitors.yaml`: declared comparison set for the category you actually sell into
 - `prompts.yaml`: buyer, comparison, and citation questions for your real audience
 - `runtime.yaml`: non-secret eval defaults such as provider, model, locale, samples, timeout, and optional base URL
-- `answerlens.yml`: the GitHub Action path that runs the same artifact contract in CI
+- `answerlens.yml`: the GitHub Action path that runs the same artifact contract in CI, pinned to the current stable Action release
 
 Keep API keys in environment variables or GitHub secrets. Do not put them into `runtime.yaml`.
+The current starter workflow uses `YSCJRH/ai-visibility-auditor@v0.3.2`; after a newer release, update that pin only after reviewing the release notes.
 For the first live benchmark pass, the recommended temporary shortcut is `fast-first-eval`.
 
 ## Review artifacts in this order

@@ -29,6 +29,7 @@ After copying it:
 6. Set `site:` in the workflow to the public URL you want to audit.
 
 The starter bundle is intentionally minimal. It exists to make the public GitHub Action path copyable, forkable, and easy to reference from README and release docs.
+The checked-in workflow pins the current stable Action release, `YSCJRH/ai-visibility-auditor@v0.3.2`. After a newer release, update that pin only after reviewing the release notes.
 Keep API keys in GitHub secrets or local environment variables. Do not put them into `runtime.yaml`.
 For the first live benchmark pass, the recommended temporary shortcut is `profile: fast-first-eval`.
 If you already have one readable OpenAI baseline and want a provider-level second opinion, use `profile: perplexity-cross-check` as a temporary override.
