@@ -51,6 +51,7 @@ For the current activation phase, keep coordination lightweight:
 - use `kind:*`, `area:*`, and `priority:*` labels for triage
 - split roadmap work into small issues instead of building a separate GitHub Project
 - keep `#33` open while activation and adoption hardening remains the active workstream
+- refresh the `#33` body when the latest release moves so it describes the current post-release activation phase instead of anchoring to an older release
 - keep the active activation PR linked from the current umbrella issue until the repo has more parallel contributors
 - treat [docs/roadmap.md](roadmap.md) as the canonical public roadmap
 - treat [docs/activation-plan.md](activation-plan.md) as the canonical activation brief
@@ -92,4 +93,5 @@ The repository now includes [`.github/CODEOWNERS`](../.github/CODEOWNERS). Keep 
 - enable automated release notes
 - publish release notes that link back to [docs/roadmap.md](roadmap.md)
 - keep npm publishing wording aligned with the actual trusted publishing / `NPM_TOKEN` decision tree
+- after each semver release, verify `releases/latest`, the release snapshot, README/roadmap status, and the active umbrella issue body all agree
 - add artifact attestations after releases become routine
