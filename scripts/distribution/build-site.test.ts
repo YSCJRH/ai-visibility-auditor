@@ -129,8 +129,10 @@ test("build-site writes indexable pages and metadata", async () => {
     starter,
     pricingRedirect,
     pricing,
+    zhPricing,
     securityRedirect,
     security,
+    zhSecurity,
     faqRedirect,
     faq,
     zhFaq,
@@ -173,8 +175,10 @@ test("build-site writes indexable pages and metadata", async () => {
     load("en/starter/index.html"),
     load("pricing/index.html"),
     load("en/pricing/index.html"),
+    load("zh/pricing/index.html"),
     load("security/index.html"),
     load("en/security/index.html"),
+    load("zh/security/index.html"),
     load("faq/index.html"),
     load("en/faq/index.html"),
     load("zh/faq/index.html"),
@@ -306,9 +310,17 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(pricing, /AnswerLens is open source\. You bring the provider keys you choose\./);
   assert.match(pricing, /View starter/);
   assert.match(pricing, /\$0 provider cost/);
+  assert.doesNotMatch(
+    zhPricing,
+    /The open-source repository|The CLI workflow for a basic|The reusable GitHub Action and release downloads|Local sample-site demos|The Action uploads the same report files|Area/
+  );
   assert.match(security, /Security for AnswerLens starts with no hosted control plane\./);
   assert.match(security, /Read manual steps/);
   assert.match(security, /no consumer AI UI scraping/);
+  assert.doesNotMatch(
+    zhSecurity,
+    /AnswerLens lets teams audit public product sites|Security for AnswerLens starts|Provider API keys stay|The core `audit` workflow can run without provider keys|Public sharing should use summary files|Use pull requests, Action logs|Teams should still review reports|Read manual steps/
+  );
   assert.match(faq, /AnswerLens FAQ for new visitors and evaluators\./);
   assert.match(faq, /Compare options/);
   assert.match(faq, /FAQPage/);
