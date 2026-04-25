@@ -78,6 +78,7 @@ jobs:
             }));
             fs.writeFileSync("dist/releases.json", `${JSON.stringify(compiled, null, 2)}\n`);
       - run: pnpm build:site -- --releases dist/releases.json
+      - run: pnpm seo:check --releases dist/releases.json
       - name: Create release bundles
         run: |
           tar -czf dist/answerlens-demo-audit.tar.gz runs/static-good
