@@ -30,6 +30,7 @@ jobs:
       - run: pnpm demo:consumer-repo
       - run: pnpm build:admin
       - run: pnpm build:site
+      - run: pnpm seo:check
       - run: pnpm pack:cli:dry-run
       - uses: actions/upload-artifact@v6
         with:

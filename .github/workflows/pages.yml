@@ -64,6 +64,7 @@ jobs:
           corepack prepare pnpm@10.33.0 --activate
           pnpm --version
       - run: pnpm build:site -- --releases dist/releases.json
+      - run: pnpm seo:check --releases dist/releases.json
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist/site

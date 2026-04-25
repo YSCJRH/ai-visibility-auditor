@@ -83,6 +83,7 @@ test("build-site writes indexable pages and metadata", async () => {
     "en/integrations/index.html",
     "releases/index.html",
     "en/releases/index.html",
+    "zh/releases/index.html",
     "examples/index.html",
     "en/examples/index.html",
     "playbooks/index.html",
@@ -138,6 +139,7 @@ test("build-site writes indexable pages and metadata", async () => {
     openSourceAliasZhRedirect,
     releasesRedirect,
     releases,
+    zhReleases,
     examplesRedirect,
     examples,
     playbooksRedirect,
@@ -175,6 +177,7 @@ test("build-site writes indexable pages and metadata", async () => {
     load("zh/use-case/open-source-maintainer/index.html"),
     load("releases/index.html"),
     load("en/releases/index.html"),
+    load("zh/releases/index.html"),
     load("examples/index.html"),
     load("en/examples/index.html"),
     load("playbooks/index.html"),
@@ -211,8 +214,17 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /Open Action docs/);
   assert.match(home, /SoftwareApplication/);
   assert.match(home, /Organization/);
+  assert.match(home, /WebSite/);
+  assert.match(home, /softwareVersion/);
+  assert.match(home, /og:image:alt/);
+  assert.match(home, /What it checks/);
+  assert.match(home, /What it outputs/);
+  assert.match(home, /Who should use it/);
   assert.match(zhHome, /zh\/examples\/static-good\/index\.html/);
   assert.match(zhHome, /locale-switcher/);
+  assert.match(zhHome, /它检查什么/);
+  assert.match(zhHome, /它输出什么/);
+  assert.match(zhHome, /谁应该使用/);
 
   for (const redirectPage of [
     docsRedirect,
@@ -280,6 +292,10 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(releases, /v0\.3\.0/);
   assert.match(releases, /Use the latest release/);
   assert.match(releases, /Open latest release/);
+  assert.match(zhReleases, /打开 GitHub Release/);
+  assert.match(zhReleases, /AnswerLens v0\.3\.2 延续/);
+  assert.doesNotMatch(zhReleases, /What ships/);
+  assert.doesNotMatch(zhReleases, /Known limits/);
   assert.match(examples, /AnswerLens static-good fixture demo/);
   assert.match(examples, /The demo report shows what your team will receive\./);
   assert.match(examples, /Demo report package/);
@@ -297,6 +313,7 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(zhDemoReport, /AnswerLens/);
   assert.match(feed, /AnswerLens releases/);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/en\/examples\//);
+  assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/<\/loc>/);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/zh\/examples\//);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/en\/pricing\//);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/zh\/pricing\//);

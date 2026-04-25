@@ -2,6 +2,15 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { LOCALE_STORAGE_KEY, type Locale, localeToSlug, t } from "../../packages/i18n/src/index.ts";
+import {
+  buildSeoPage,
+  generateSitemap,
+  localizedReleaseSummary,
+  renderJsonLd,
+  renderSeoHead,
+  type SeoPage,
+  type SeoPageKind
+} from "./site-seo.ts";
 
 type ShareSummary = {
   project: string;
@@ -52,6 +61,7 @@ type PageSpec = {
   description: LocalizedText;
   body: LocalizedText;
   jsonLd: unknown;
+  seoKind?: SeoPageKind;
 };
 
 const REPO_URL = "https://github.com/YSCJRH/ai-visibility-auditor";
@@ -706,6 +716,23 @@ function renderLanguageSelector(siteUrl: string, route: string, locale: Locale):
   return `<div class="locale-switcher"><span>${escapeHtml(t(locale, "lang.label"))}:</span> <a href="${escapeHtml(new URL(localizePath(route, locale), siteUrl).href)}">${escapeHtml(current === "en" ? t(locale, "lang.english") : t(locale, "lang.chinese"))}</a> / <a href="${escapeHtml(new URL(localizePath(route, otherLocale(locale)), siteUrl).href)}">${escapeHtml(alternate === "en" ? t(locale, "lang.english") : t(locale, "lang.chinese"))}</a></div>`;
 }
 
+function buildPageSeo(siteUrl: string, page: PageSpec, updatedAt: string, locale: Locale): SeoPage {
+  return buildSeoPage({
+    siteUrl,
+    route: page.route,
+    locale,
+    title: resolveLocalizedText(page.title, locale),
+    description: resolveLocalizedText(page.description, locale),
+    lastModified: updatedAt,
+    kind: page.seoKind,
+    ogImage: new URL("assets/social-preview.png", siteUrl).href,
+    ogImageAlt:
+      locale === "zh-CN"
+        ? "AnswerLens AI 可发现性审计报告截图，展示 scorecard、share summary 和 recommendations。"
+        : "AnswerLens AI visibility audit report screenshot showing scorecard, share summary, and recommendations."
+  });
+}
+
 function renderStartBar(siteUrl: string, locale: Locale): string {
   const demoHref = new URL(localizePath("examples/", locale), siteUrl).href;
   const quickstartHref = repoBlob(locale === "zh-CN" ? "docs/zh/quickstart.md" : "docs/quickstart.md");
@@ -718,15 +745,10 @@ function renderStartBar(siteUrl: string, locale: Locale): string {
   return `<aside class="startBar"><p>${escapeHtml(copy)}</p><div class="startActions"><a href="${escapeHtml(demoHref)}">${escapeHtml(demoLabel)}</a><a href="${escapeHtml(quickstartHref)}">${escapeHtml(quickstartLabel)}</a></div></aside>`;
 }
 
-function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale: Locale): string {
-  const localizedRoute = localizePath(page.route, locale);
-  const canonical = new URL(localizedRoute, siteUrl).href;
-  const xDefaultHref = new URL(page.route, siteUrl).href;
-  const ogImage = new URL("assets/social-preview.png", siteUrl).href;
-  const pageTitle = resolveLocalizedText(page.title, locale);
-  const pageDescription = resolveLocalizedText(page.description, locale);
+function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale: Locale, latestReleaseVersion: string): string {
   const pageBody = resolveLocalizedText(page.body, locale);
-  const documentTitle = pageTitle.includes("AnswerLens") ? pageTitle : `${pageTitle} | AnswerLens`;
+  const seoPage = buildPageSeo(siteUrl, page, updatedAt, locale);
+  const ogImage = seoPage.ogImage;
   const navLink = (route: string, label: string): string => {
     const currentAttr = page.route === route ? ' aria-current="page"' : "";
     return `<a href="${escapeHtml(new URL(localizePath(route, locale), siteUrl).href)}"${currentAttr}>${escapeHtml(label)}</a>`;
@@ -737,22 +759,7 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${escapeHtml(documentTitle)}</title>
-    <meta name="description" content="${escapeHtml(pageDescription)}" />
-    <link rel="canonical" href="${escapeHtml(canonical)}" />
-    <link rel="alternate" hreflang="en" href="${escapeHtml(new URL(localizePath(page.route, "en"), siteUrl).href)}" />
-    <link rel="alternate" hreflang="zh-CN" href="${escapeHtml(new URL(localizePath(page.route, "zh-CN"), siteUrl).href)}" />
-    <link rel="alternate" hreflang="x-default" href="${escapeHtml(xDefaultHref)}" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="${escapeHtml(documentTitle)}" />
-    <meta property="og:description" content="${escapeHtml(pageDescription)}" />
-    <meta property="og:url" content="${escapeHtml(canonical)}" />
-    <meta property="og:image" content="${escapeHtml(ogImage)}" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${escapeHtml(documentTitle)}" />
-    <meta name="twitter:description" content="${escapeHtml(pageDescription)}" />
-    <meta name="twitter:image" content="${escapeHtml(ogImage)}" />
-    <meta name="last-modified" content="${escapeHtml(updatedAt)}" />
+    ${renderSeoHead(seoPage)}
     <style>
       :root{color-scheme:light;--bg:#f6f8fb;--bg-accent:#eef7f4;--surface:#ffffff;--surface-strong:#ffffff;--surface-soft:#eef4f1;--line:#d8dee8;--line-strong:#0f766e;--ink:#111827;--muted:#5d6678;--accent:#0f766e;--accent-strong:#134e4a;--accent-warm:#b45309;--shadow:0 18px 46px rgba(16,24,40,.08)}
       *{box-sizing:border-box}
@@ -847,7 +854,7 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale
       @media (max-width:720px){.brand-copy{display:none}.nav{gap:6px}.nav a{min-height:34px;padding:0 10px;font-size:.92rem}.startBar{align-items:flex-start;flex-direction:column}.startActions{justify-content:flex-start}.panel table{display:block;overflow-x:auto;white-space:nowrap}}
       @media (max-width:640px){.shell{width:calc(100% - 20px);padding:10px 0 56px}.topbar{gap:10px;padding:12px 14px}.brand-copy{display:none}.nav{flex-wrap:nowrap;gap:4px;width:100%;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}.locale-zh .nav{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;overflow:visible}.nav a{flex:0 0 auto;min-height:31px;padding:0 9px;font-size:.86rem}.locale-zh .nav a{justify-content:center;min-width:0;padding:0 2px;font-size:.8rem}.locale-switcher{margin-top:10px;padding:7px 10px}.startBar{margin-top:10px;padding:10px 12px}.startActions{display:grid;grid-template-columns:1fr;width:100%}.locale-zh .startActions{grid-template-columns:repeat(2,minmax(0,1fr))}.startActions a{width:100%;min-height:32px;white-space:nowrap}.locale-zh .startActions a{padding:0 8px;font-size:.94rem}.content{gap:18px;margin-top:18px}.hero{gap:12px;min-height:auto;padding:18px 16px}.productHero{min-height:430px;background-image:linear-gradient(90deg,rgba(7,18,28,.98) 0%,rgba(7,18,28,.94) 100%),url("${escapeHtml(new URL("assets/social-preview.png", siteUrl).href)}");background-position:66% center}.hero .eyebrow{order:1}.hero h1{order:2;max-width:unset;font-size:1.86rem;line-height:1.1;text-wrap:balance}.hero p:not(.eyebrow){order:3}.heroActions{order:4;display:grid;grid-template-columns:1fr;width:100%;margin-top:0;gap:8px}.productHero h1{font-size:2.7rem;line-height:1.04}.locale-zh .hero h1{font-size:1.58rem;line-height:1.16}.locale-zh .productHero h1{font-size:2.24rem;line-height:1.12}.hero p{font-size:.95rem;line-height:1.5}.locale-zh .hero p{font-size:.9rem;line-height:1.48}.sectionHeader h2{font-size:1.36rem;line-height:1.24}.panel,.metric,.journeyStep{padding:20px}.grid,.ctaGrid,.stepGrid{grid-template-columns:1fr}.ctaLink{width:100%}.heroActions .ctaLink{min-height:42px;margin-top:0}.metric-value{font-size:2.35rem}}
     </style>
-    <script type="application/ld+json">${JSON.stringify(page.jsonLd)}</script>
+    ${renderJsonLd(seoPage, { pageJsonLd: page.jsonLd, latestReleaseVersion })}
   </head>
   <body class="${locale === "zh-CN" ? "locale-zh" : "locale-en"}">
     <div class="shell">
@@ -1033,6 +1040,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   ]);
 
   const updatedAt = formatDate(releases[0]?.published_at, shareSummary.run.generatedAt);
+  const latestReleaseVersion = releases[0]?.tag_name ?? "v0.3.2";
 
   await mkdir(path.join(outDir, "docs"), { recursive: true });
   await mkdir(path.join(outDir, "releases"), { recursive: true });
@@ -1184,17 +1192,24 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       )
       .join("");
 
-  const releaseCards = releases.length
-    ? releases
-        .map((release) =>
-          renderPanel(
-            release.name ?? release.tag_name,
-            formatReadableDate(release.published_at, updatedAt),
-            `<p>${escapeHtml(excerpt(release.body, 320) || "Release metadata is available on GitHub.")}</p><p><a href="${escapeHtml(release.html_url)}">Open GitHub release</a></p>`
+  const renderReleaseCards = (locale: Locale): string =>
+    releases.length
+      ? releases
+          .map((release) =>
+            renderPanel(
+              release.name ?? release.tag_name,
+              formatReadableDate(release.published_at, updatedAt, locale),
+              `<p>${escapeHtml(localizedReleaseSummary(release, locale))}</p><p><a href="${escapeHtml(release.html_url)}">${escapeHtml(locale === "zh-CN" ? "打开 GitHub Release" : "Open GitHub release")}</a></p>`
+            )
           )
-        )
-        .join("")
-    : renderPanel("No releases yet", "Releases", "<p>Release metadata has not been compiled yet.</p>");
+          .join("")
+      : renderPanel(
+          locale === "zh-CN" ? "暂无 release" : "No releases yet",
+          locale === "zh-CN" ? "发布" : "Releases",
+          locale === "zh-CN"
+            ? "<p>还没有编译到可展示的 release 元数据。</p>"
+            : "<p>Release metadata has not been compiled yet.</p>"
+        );
 
   const artifactLinks = shareSummary.artifacts
     .map((artifact) => `<li><a href="../examples/static-good/${escapeHtml(artifact)}">${escapeHtml(artifact)}</a></li>`)
@@ -1335,6 +1350,14 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       },
       body: {
         en: `<section class="hero productHero"><p class="eyebrow">${escapeHtml(TAGLINE)}</p><h1>AnswerLens</h1><p>Check whether AI assistants can understand your product pages. Run AnswerLens from the CLI, then review a share summary, scorecard, and fix list in GitHub.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open live demo</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run quickstart</a></div></section>
+        <section class="section">
+          <div class="sectionHeader"><p class="eyebrow">Product shape</p><h2>What AnswerLens checks, outputs, and fits.</h2><p>AnswerLens is a CLI-first and artifact-first open-source workflow. It is not a hosted dashboard, does not scrape consumer AI interfaces, and does not promise answer-surface rankings.</p></div>
+          <div class="grid">
+            ${renderPanel("What it checks", "Public product pages", "<p>AnswerLens checks the structure, evidence, schema, and internal links on public product pages so teams can see whether the site is clear enough for AI systems to read and cite.</p>")}
+            ${renderPanel("What it outputs", "Reviewable artifacts", "<p>Each run writes <code>share-summary.md</code>, <code>scorecard.md</code>, <code>recommendations.md</code>, and JSON results so product, docs, and engineering teams can review the same evidence in PRs or issues.</p>")}
+            ${renderPanel("Who should use it", "Teams with public surfaces", "<p>Use it when you maintain product websites, docs, open-source README files, release pages, and self-serve trial paths that need to stay understandable and citable.</p>")}
+          </div>
+        </section>
         <section class="section journey">
           <div class="sectionHeader"><p class="eyebrow">Start here</p><h2>See the report once, then try it on your own site.</h2><p>Open the demo report, reproduce it locally with the sample site, run a quick audit on one public site, then add the same check to GitHub Actions when the result is useful.</p></div>
           <ol class="stepGrid">
@@ -1373,6 +1396,14 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           ])}</ul>`)}
         </section>`,
         "zh-CN": `<section class="hero productHero"><p class="eyebrow">面向 AI 可发现性的 CI。</p><h1>AnswerLens</h1><p>检查 AI 助手能不能读懂你的产品网站。你从命令行运行 AnswerLens，再在 GitHub 里查看摘要、评分卡和修复清单。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">打开在线演示</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">运行 quickstart</a></div></section>
+        <section class="section">
+          <div class="sectionHeader"><p class="eyebrow">产品形态</p><h2>它检查什么、输出什么，以及适合谁使用。</h2><p>AnswerLens 是 CLI-first 和 artifact-first 的开源工作流，不是托管 dashboard，也不抓取消费级 AI 界面，更不承诺答案页排名。</p></div>
+          <div class="grid">
+            ${renderPanel("它检查什么", "公开产品页面", "<p>AnswerLens 检查公开产品页面的结构、证据、schema 与内部链接，判断它们是否足够清楚，能被 AI 系统稳定读取和引用。</p>")}
+            ${renderPanel("它输出什么", "可审阅产物", "<p>每次运行都会生成 <code>share-summary.md</code>、<code>scorecard.md</code>、<code>recommendations.md</code> 和 JSON 结果，让产品、文档和工程团队可以在 PR 或 issue 中审阅。</p>")}
+            ${renderPanel("谁应该使用", "维护公开入口的团队", "<p>适合维护产品官网、文档、开源 README、release 页面和自助试用路径的团队。</p>")}
+          </div>
+        </section>
         <section class="section journey">
           <div class="sectionHeader"><p class="eyebrow">从这里开始</p><h2>先看一次报告，再跑到你自己的站点上。</h2><p>先打开在线演示报告，再用示例站点在本地复现一次。确认结果有用后，在一个公开产品站点上跑 quickstart；最后再接入 GitHub Action。</p></div>
           <ol class="stepGrid">
@@ -1498,13 +1529,26 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     {
       route: "releases/",
       filePath: path.join(outDir, "releases", "index.html"),
-      title: "Release notes and downloadable distribution assets",
-      description: "Release index, version notes, and downloadable assets compiled from GitHub metadata.",
-      body: `<section class="hero"><p class="eyebrow">Versioned distribution</p><h1>Download the latest AnswerLens release.</h1><p>This page keeps the current version, release notes, demo bundles, and compiled site bundle in one place.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(releases[0]?.html_url ?? `${REPO_URL}/releases`)}">Open latest release</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open live demo</a></div></section>
+      title: {
+        en: "Release notes and downloadable distribution assets",
+        "zh-CN": "AnswerLens 发布说明与 Release Assets"
+      },
+      description: {
+        en: "Release index, version notes, and downloadable assets compiled from GitHub metadata.",
+        "zh-CN": "从 GitHub 元数据生成的 AnswerLens 发布索引、版本说明和可下载 assets。"
+      },
+      body: {
+        en: `<section class="hero"><p class="eyebrow">Versioned distribution</p><h1>Download the latest AnswerLens release.</h1><p>This page keeps the current version, release notes, demo bundles, and compiled site bundle in one place.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(releases[0]?.html_url ?? `${REPO_URL}/releases`)}">Open latest release</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open live demo</a></div></section>
         <section class="section grid">
           ${renderPanel("Use the latest release", "Start here", `<p>If you already know you need a versioned download, start here. If you are evaluating AnswerLens for the first time, open the demo report first.</p><ol><li><a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open the live demo report</a></li><li><a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">Run the sample-site demo locally</a></li><li><a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a></li><li><a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Add the GitHub Action</a></li><li>${releases[0]?.html_url ? `<a href="${escapeHtml(releases[0].html_url)}">Download the latest release assets</a>` : "Download the latest release assets"}</li></ol><p>Review reports in the same order each time: <code>share-summary.md</code>, <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`)}
         </section>
-        <section class="section grid">${releaseCards}</section>`,
+        <section class="section grid">${renderReleaseCards("en")}</section>`,
+        "zh-CN": `<section class="hero"><p class="eyebrow">版本化分发</p><h1>下载最新的 AnswerLens release。</h1><p>这个页面把当前版本、发布说明、demo bundle 和编译后的站点 bundle 放在同一个入口里，方便你按固定顺序评估和下载。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(releases[0]?.html_url ?? `${REPO_URL}/releases`)}">打开最新 release</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">打开在线演示</a></div></section>
+        <section class="section grid">
+          ${renderPanel("使用最新 release", "从这里开始", `<p>如果你已经确定需要一个固定版本的下载包，可以从这里开始。如果你是第一次评估 AnswerLens，建议先打开 demo report。</p><ol><li><a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">打开在线演示报告</a></li><li><a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">在本地运行 fixture 演示</a></li><li><a href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">在真实公开站点上跑 5 分钟 quickstart</a></li><li><a href="${escapeHtml(repoBlob("docs/zh/github-action.md"))}">添加 GitHub Action</a></li><li>${releases[0]?.html_url ? `<a href="${escapeHtml(releases[0].html_url)}">下载最新 release assets</a>` : "下载最新 release assets"}</li></ol><p>每次都按同一顺序审阅报告：<code>share-summary.md</code>、<code>scorecard.md</code>，然后是 <code>recommendations.md</code>。</p>`)}
+        </section>
+        <section class="section grid">${renderReleaseCards("zh-CN")}</section>`
+      },
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
@@ -2061,8 +2105,8 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     await writeFile(page.filePath ?? path.join(outDir, page.route, "index.html"), renderLocaleRedirectPage(siteUrl, page.route), "utf8");
     await mkdir(path.dirname(localeIndexPath(outDir, page.route, "en")), { recursive: true });
     await mkdir(path.dirname(localeIndexPath(outDir, page.route, "zh-CN")), { recursive: true });
-    await writeFile(localeIndexPath(outDir, page.route, "en"), renderLayout(siteUrl, page, updatedAt, "en"), "utf8");
-    await writeFile(localeIndexPath(outDir, page.route, "zh-CN"), renderLayout(siteUrl, page, updatedAt, "zh-CN"), "utf8");
+    await writeFile(localeIndexPath(outDir, page.route, "en"), renderLayout(siteUrl, page, updatedAt, "en", latestReleaseVersion), "utf8");
+    await writeFile(localeIndexPath(outDir, page.route, "zh-CN"), renderLayout(siteUrl, page, updatedAt, "zh-CN", latestReleaseVersion), "utf8");
   }
 
   for (const alias of routeAliases) {
@@ -2077,15 +2121,13 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
     }
   }
 
-  const sitemap = pages
-    .flatMap((page) => [
-      `<url><loc>${escapeHtml(new URL(localizePath(page.route, "en"), siteUrl).href)}</loc><lastmod>${escapeHtml(updatedAt)}</lastmod></url>`,
-      `<url><loc>${escapeHtml(new URL(localizePath(page.route, "zh-CN"), siteUrl).href)}</loc><lastmod>${escapeHtml(updatedAt)}</lastmod></url>`
-    ])
-    .join("");
+  const seoPages = pages.flatMap((page) => [
+    buildPageSeo(siteUrl, page, updatedAt, "en"),
+    buildPageSeo(siteUrl, page, updatedAt, "zh-CN")
+  ]);
   await writeFile(
     path.join(outDir, "sitemap.xml"),
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemap}</urlset>\n`,
+    generateSitemap({ siteUrl, pages: seoPages, lastModified: updatedAt }),
     "utf8"
   );
 
