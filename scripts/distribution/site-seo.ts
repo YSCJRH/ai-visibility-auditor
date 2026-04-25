@@ -169,7 +169,7 @@ export function localizedReleaseSummary(release: ReleaseLike, locale: SeoLocale)
   }
 
   if (locale === "zh-CN") {
-    return `${release.tag_name} 的详细说明保留在 GitHub Release 中。建议先按在线演示、fixture、真实站点 quickstart、GitHub Action 的顺序试用 AnswerLens，再下载对应版本的 release assets。`;
+    return `${release.tag_name} 的详细说明保留在 GitHub 发布页中。建议先按在线演示、fixture、真实站点 quickstart、GitHub Action 的顺序试用 AnswerLens，再下载对应版本的发布资源。`;
   }
 
   return release.body?.replace(/\s+/g, " ").trim() || `${release.tag_name} release metadata is available on GitHub.`;
@@ -212,7 +212,7 @@ function homeJsonLd(page: SeoPage, latestReleaseVersion: string): unknown[] {
       operatingSystem: "Cross-platform",
       description:
         page.locale === "zh-CN"
-          ? "AnswerLens 是一个面向产品网站的 CLI-first AI 可发现性审计器，会输出团队可审阅的 GitHub-native 产物。"
+          ? "AnswerLens 是一个面向产品网站的 CLI-first AI 可发现性审计器，会输出团队可审阅的 GitHub 工作流产物。"
           : `${DEFAULT_DESCRIPTION} ${DEFAULT_TAGLINE}`,
       url: page.canonical,
       codeRepository: REPO_URL,

@@ -238,7 +238,7 @@ function translateSiteHtml(html: string): string {
     ["Start with GitHub Actions for PR checks. Add provider-based evals, Search Console imports, or Bing helpers only when they help validate what the basic audit already found.", "先用 GitHub Actions 做 PR 检查。只有当它们能验证基础审计发现的问题时，再添加模型评估、Search Console 导入或 Bing 辅助工具。"],
     ["After the report, fix one page issue.", "看完报告后，按建议修页面。"],
     ["Use the demo recommendation as the first pass: confirm the issue, change one page, then run AnswerLens again before sharing.", "先从演示报告里的当前建议开始：确认问题，改一处页面，再跑一次检查确认有效。"],
-    ["Download the latest AnswerLens release.", "下载最新 AnswerLens release。"],
+    ["Download the latest AnswerLens release.", "下载最新 AnswerLens 发布版本。"],
     ["This page keeps the current version, release notes, demo bundles, and compiled site bundle in one place.", "这一页集中展示当前版本、发布说明、demo bundle 和编译后的站点 bundle。"],
     ["Use these answers before you run quickstart, add GitHub Actions, or compare AnswerLens with hosted dashboard tools.", "在运行 quickstart、添加 GitHub Actions，或把 AnswerLens 和托管看板工具做对比之前，可以先看这些回答。"],
     ["see the open-source package and provider-cost model.", "查看开源打包方式和 provider 成本模型。"],
@@ -268,7 +268,7 @@ function translateSiteHtml(html: string): string {
     ["Run sample locally", "本地运行示例"],
     ["Open fix list", "打开修复清单"],
     ["AnswerLens makes AI discoverability reviewable in GitHub.", "AnswerLens 让 AI 可发现性在 GitHub 里变得可审阅。"],
-    ["AI visibility audit reports and demo entry points", "AI 可见性审计报告与演示入口"],
+    ["AI visibility audit reports and demo entry points", "AI 可发现性审计报告与演示入口"],
     ["Docs index, concepts, and activation references", "文档索引、概念与激活参考"],
     ["Release notes and downloadable distribution assets", "发布说明与可下载分发资产"],
     ["Demo reports and sample-site outputs", "演示报告与示例站点输出"],
@@ -298,7 +298,7 @@ function translateSiteHtml(html: string): string {
     ["Use-case coverage", "用例覆盖"],
     ["Product page map", "产品页面地图"],
     ["Report files", "报告文件"],
-    ["Use the latest release", "使用最新发布"],
+    ["Use the latest release", "使用最新发布版本"],
     ["Latest demo run", "最新演示运行"],
     ["What to do after the demo", "看完演示后做什么"],
     ["Starter example result", "starter 示例结果"],
@@ -1199,15 +1199,15 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             renderPanel(
               release.name ?? release.tag_name,
               formatReadableDate(release.published_at, updatedAt, locale),
-              `<p>${escapeHtml(localizedReleaseSummary(release, locale))}</p><p><a href="${escapeHtml(release.html_url)}">${escapeHtml(locale === "zh-CN" ? "打开 GitHub Release" : "Open GitHub release")}</a></p>`
+              `<p>${escapeHtml(localizedReleaseSummary(release, locale))}</p><p><a href="${escapeHtml(release.html_url)}">${escapeHtml(locale === "zh-CN" ? "打开 GitHub 发布页" : "Open GitHub release")}</a></p>`
             )
           )
           .join("")
       : renderPanel(
-          locale === "zh-CN" ? "暂无 release" : "No releases yet",
+          locale === "zh-CN" ? "暂无发布版本" : "No releases yet",
           locale === "zh-CN" ? "发布" : "Releases",
           locale === "zh-CN"
-            ? "<p>还没有编译到可展示的 release 元数据。</p>"
+            ? "<p>还没有编译到可展示的发布元数据。</p>"
             : "<p>Release metadata has not been compiled yet.</p>"
         );
 
@@ -1342,7 +1342,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       filePath: path.join(outDir, "index.html"),
       title: {
         en: "AI visibility audit reports and demo entry points",
-        "zh-CN": "AI 可见性审计报告与演示入口"
+        "zh-CN": "AnswerLens：AI 可发现性审计器与 GitHub 原生报告工作流"
       },
       description: {
         en: `${DESCRIPTION} ${TAGLINE}`,
@@ -1531,11 +1531,11 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       filePath: path.join(outDir, "releases", "index.html"),
       title: {
         en: "Release notes and downloadable distribution assets",
-        "zh-CN": "AnswerLens 发布说明与 Release Assets"
+        "zh-CN": "AnswerLens 发布说明与下载资源"
       },
       description: {
         en: "Release index, version notes, and downloadable assets compiled from GitHub metadata.",
-        "zh-CN": "从 GitHub 元数据生成的 AnswerLens 发布索引、版本说明和可下载 assets。"
+        "zh-CN": "从 GitHub 元数据生成的 AnswerLens 发布索引、版本说明和可下载资源。"
       },
       body: {
         en: `<section class="hero"><p class="eyebrow">Versioned distribution</p><h1>Download the latest AnswerLens release.</h1><p>This page keeps the current version, release notes, demo bundles, and compiled site bundle in one place.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(releases[0]?.html_url ?? `${REPO_URL}/releases`)}">Open latest release</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open live demo</a></div></section>
@@ -1543,9 +1543,9 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           ${renderPanel("Use the latest release", "Start here", `<p>If you already know you need a versioned download, start here. If you are evaluating AnswerLens for the first time, open the demo report first.</p><ol><li><a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open the live demo report</a></li><li><a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">Run the sample-site demo locally</a></li><li><a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run a 5-minute real-site audit</a></li><li><a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Add the GitHub Action</a></li><li>${releases[0]?.html_url ? `<a href="${escapeHtml(releases[0].html_url)}">Download the latest release assets</a>` : "Download the latest release assets"}</li></ol><p>Review reports in the same order each time: <code>share-summary.md</code>, <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`)}
         </section>
         <section class="section grid">${renderReleaseCards("en")}</section>`,
-        "zh-CN": `<section class="hero"><p class="eyebrow">版本化分发</p><h1>下载最新的 AnswerLens release。</h1><p>这个页面把当前版本、发布说明、demo bundle 和编译后的站点 bundle 放在同一个入口里，方便你按固定顺序评估和下载。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(releases[0]?.html_url ?? `${REPO_URL}/releases`)}">打开最新 release</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">打开在线演示</a></div></section>
+        "zh-CN": `<section class="hero"><p class="eyebrow">版本化分发</p><h1>下载最新的 AnswerLens 发布版本。</h1><p>这个页面把当前版本、发布说明、demo bundle 和编译后的站点 bundle 放在同一个入口里，方便你按固定顺序评估和下载。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(releases[0]?.html_url ?? `${REPO_URL}/releases`)}">打开最新发布</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">打开在线演示</a></div></section>
         <section class="section grid">
-          ${renderPanel("使用最新 release", "从这里开始", `<p>如果你已经确定需要一个固定版本的下载包，可以从这里开始。如果你是第一次评估 AnswerLens，建议先打开 demo report。</p><ol><li><a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">打开在线演示报告</a></li><li><a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">在本地运行 fixture 演示</a></li><li><a href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">在真实公开站点上跑 5 分钟 quickstart</a></li><li><a href="${escapeHtml(repoBlob("docs/zh/github-action.md"))}">添加 GitHub Action</a></li><li>${releases[0]?.html_url ? `<a href="${escapeHtml(releases[0].html_url)}">下载最新 release assets</a>` : "下载最新 release assets"}</li></ol><p>每次都按同一顺序审阅报告：<code>share-summary.md</code>、<code>scorecard.md</code>，然后是 <code>recommendations.md</code>。</p>`)}
+          ${renderPanel("使用最新发布版本", "从这里开始", `<p>如果你已经确定需要一个固定版本的下载包，可以从这里开始。如果你是第一次评估 AnswerLens，建议先打开在线演示报告。</p><ol><li><a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">打开在线演示报告</a></li><li><a href="${escapeHtml(REPO_URL)}#run-the-60-second-fixture-demo">在本地运行 fixture 演示</a></li><li><a href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">在真实公开站点上跑 5 分钟 quickstart</a></li><li><a href="${escapeHtml(repoBlob("docs/zh/github-action.md"))}">添加 GitHub Action</a></li><li>${releases[0]?.html_url ? `<a href="${escapeHtml(releases[0].html_url)}">下载最新发布资源</a>` : "下载最新发布资源"}</li></ol><p>每次都按同一顺序审阅报告：<code>share-summary.md</code>、<code>scorecard.md</code>，然后是 <code>recommendations.md</code>。</p>`)}
         </section>
         <section class="section grid">${renderReleaseCards("zh-CN")}</section>`
       },
