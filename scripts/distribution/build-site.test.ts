@@ -292,7 +292,7 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(releases, /v0\.3\.0/);
   assert.match(releases, /Use the latest release/);
   assert.match(releases, /Open latest release/);
-  assert.match(zhReleases, /打开 GitHub Release/);
+  assert.match(zhReleases, /打开 GitHub 发布页/);
   assert.match(zhReleases, /AnswerLens v0\.3\.2 延续/);
   assert.doesNotMatch(zhReleases, /What ships/);
   assert.doesNotMatch(zhReleases, /Known limits/);
