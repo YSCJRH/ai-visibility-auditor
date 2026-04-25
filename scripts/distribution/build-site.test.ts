@@ -97,6 +97,15 @@ test("build-site writes indexable pages and metadata", async () => {
     "use-case/open-source-maintainer/index.html",
     "en/use-case/open-source-maintainer/index.html",
     "zh/use-case/open-source-maintainer/index.html",
+    "use-cases/product-marketing/index.html",
+    "en/use-cases/product-marketing/index.html",
+    "zh/use-cases/product-marketing/index.html",
+    "use-cases/developer-advocacy/index.html",
+    "en/use-cases/developer-advocacy/index.html",
+    "zh/use-cases/developer-advocacy/index.html",
+    "use-cases/open-source-maintainers/index.html",
+    "en/use-cases/open-source-maintainers/index.html",
+    "zh/use-cases/open-source-maintainers/index.html",
     "starter/example-run/share-summary.md",
     "zh/starter/example-run/share-summary.md",
     "examples/static-good/index.html",
@@ -124,10 +133,12 @@ test("build-site writes indexable pages and metadata", async () => {
     security,
     faqRedirect,
     faq,
+    zhFaq,
     compareRedirect,
     compare,
     integrationsRedirect,
     integrations,
+    zhIntegrations,
     productMarketingRedirect,
     productMarketing,
     developerAdvocacyRedirect,
@@ -137,6 +148,10 @@ test("build-site writes indexable pages and metadata", async () => {
     openSourceAliasRedirect,
     openSourceAliasEnRedirect,
     openSourceAliasZhRedirect,
+    productMarketingPluralRedirect,
+    developerAdvocacyPluralRedirect,
+    openSourcePluralRedirect,
+    openSourcePluralZhRedirect,
     releasesRedirect,
     releases,
     zhReleases,
@@ -162,10 +177,12 @@ test("build-site writes indexable pages and metadata", async () => {
     load("en/security/index.html"),
     load("faq/index.html"),
     load("en/faq/index.html"),
+    load("zh/faq/index.html"),
     load("compare/index.html"),
     load("en/compare/index.html"),
     load("integrations/index.html"),
     load("en/integrations/index.html"),
+    load("zh/integrations/index.html"),
     load("use-case/product-marketing/index.html"),
     load("en/use-case/product-marketing/index.html"),
     load("use-case/developer-advocacy/index.html"),
@@ -175,6 +192,10 @@ test("build-site writes indexable pages and metadata", async () => {
     load("use-case/open-source-maintainer/index.html"),
     load("en/use-case/open-source-maintainer/index.html"),
     load("zh/use-case/open-source-maintainer/index.html"),
+    load("use-cases/product-marketing/index.html"),
+    load("use-cases/developer-advocacy/index.html"),
+    load("use-cases/open-source-maintainers/index.html"),
+    load("zh/use-cases/open-source-maintainers/index.html"),
     load("releases/index.html"),
     load("en/releases/index.html"),
     load("zh/releases/index.html"),
@@ -238,6 +259,10 @@ test("build-site writes indexable pages and metadata", async () => {
     developerAdvocacyRedirect,
     openSourceRedirect,
     openSourceAliasRedirect,
+    productMarketingPluralRedirect,
+    developerAdvocacyPluralRedirect,
+    openSourcePluralRedirect,
+    openSourcePluralZhRedirect,
     releasesRedirect,
     examplesRedirect,
     playbooksRedirect
@@ -247,9 +272,19 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(openSourceAliasRedirect, /use-case\/open-source-maintainers\//);
   assert.match(openSourceAliasEnRedirect, /en\/use-case\/open-source-maintainers\//);
   assert.match(openSourceAliasZhRedirect, /zh\/use-case\/open-source-maintainers\//);
+  assert.match(productMarketingPluralRedirect, /use-case\/product-marketing\//);
+  assert.match(developerAdvocacyPluralRedirect, /use-case\/developer-advocacy\//);
+  assert.match(openSourcePluralRedirect, /use-case\/open-source-maintainers\//);
+  assert.match(openSourcePluralZhRedirect, /zh\/use-case\/open-source-maintainers\//);
   assert.match(playbooks, /aria-current="page">Fixes<\/a>/);
   assert.match(playbooks, /First visit/);
   assert.match(playbooks, /Run the 5-minute check on your site/);
+  assert.match(zhFaq, /先看在线演示报告，再在本地跑示例站点演示/);
+  assert.match(zhFaq, /查看对比/);
+  assert.doesNotMatch(zhFaq, /Start with the 在线演示报告|对比 options|Compare options/);
+  assert.match(zhIntegrations, /发布资源与 Pages 站点/);
+  assert.match(zhIntegrations, /把演示输出和文档整理成可复用的公开页面与下载资源/);
+  assert.doesNotMatch(zhIntegrations, /Release assets and Pages|Turns demo outputs|<th>Integration<\/th>|What it does/);
 
   assert.match(docs, /Activation plan/);
   assert.match(docs, /Find the doc that explains your score and decide the next fix\./);

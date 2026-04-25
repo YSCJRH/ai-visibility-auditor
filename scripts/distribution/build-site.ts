@@ -240,8 +240,9 @@ function translateSiteHtml(html: string): string {
     ["Use the demo recommendation as the first pass: confirm the issue, change one page, then run AnswerLens again before sharing.", "先从演示报告里的当前建议开始：确认问题，改一处页面，再跑一次检查确认有效。"],
     ["Download the latest AnswerLens release.", "下载最新 AnswerLens 发布版本。"],
     ["This page keeps the current version, release notes, demo bundles, and compiled site bundle in one place.", "这一页集中展示当前版本、发布说明、demo bundle 和编译后的站点 bundle。"],
-    ["Use these answers before you run quickstart, add GitHub Actions, or compare AnswerLens with hosted dashboard tools.", "在运行 quickstart、添加 GitHub Actions，或把 AnswerLens 和托管看板工具做对比之前，可以先看这些回答。"],
-    ["see the open-source package and provider-cost model.", "查看开源打包方式和 provider 成本模型。"],
+    ["Use these answers before you run quickstart, add GitHub Actions, or compare AnswerLens with hosted dashboard tools.", "在做 5 分钟检查、添加 GitHub Actions，或把 AnswerLens 和托管看板工具做对比之前，可以先看这些回答。"],
+    ["Compare options", "查看对比"],
+    ["see the open-source package and provider-cost model.", "查看开源打包方式和模型服务成本。"],
     ["review the GitHub Actions setup path.", "查看 GitHub Actions 设置路径。"],
     ["Report package", "报告文件"],
     ["Product pages", "产品页面"],
@@ -277,7 +278,7 @@ function translateSiteHtml(html: string): string {
     ["Security, trust, and review guardrails", "安全、信任与审阅边界"],
     ["First-run FAQ and guardrails", "首次试用 FAQ 与边界说明"],
     ["AnswerLens compared with Profound, Peec AI, and Otterly", "AnswerLens 与 Profound、Peec AI、Otterly 的对比"],
-    ["GitHub, provider, and validation integrations", "GitHub、provider 与验证集成"],
+    ["GitHub, provider, and validation integrations", "GitHub、模型服务与验证集成"],
     ["Use case for product marketing teams", "面向产品营销团队的使用场景"],
     ["Use case for developer advocacy teams", "面向开发者关系团队的使用场景"],
     ["Use case for open-source maintainers", "面向开源维护者的使用场景"],
@@ -402,7 +403,7 @@ function translateSiteHtml(html: string): string {
     ["release assets", "release 下载"],
     ["Pricing", "定价"],
     ["Security", "安全"],
-    ["answer first-run workflow questions.", "回答第一次试用和 workflow 设置问题。"],
+    ["answer first-run workflow questions.", "回答第一次试用和工作流设置问题。"],
     ["explain how the GitHub workflow differs from hosted dashboard products.", "说明 GitHub 工作流和托管看板产品的差异。"],
     ["explain where Action and eval usage create variable cost.", "说明 Action 和评估使用会在哪里产生费用。"],
     ["explain secret handling and review expectations.", "说明密钥处理和审阅预期。"],
@@ -514,17 +515,18 @@ function translateSiteHtml(html: string): string {
     ["AnswerLens audits whether a product site is easy for AI systems to read, cite, compare, and recommend. It writes a share summary, scorecard, and recommendations your team can review.", "AnswerLens 审计的是：一个产品网站是否足够容易被 AI 系统读取、引用、比较与推荐，并输出团队可以审阅的摘要、评分卡和修复建议。"],
     ["Does AnswerLens scrape consumer AI apps?", "AnswerLens 会抓取消费级 AI 应用吗？"],
     ["No. AnswerLens keeps the non-goal explicit: no consumer AI UI scraping and no ranking guarantees on answer surfaces.", "不会。AnswerLens 明确把这件事列为非目标：不抓取消费级 AI UI，也不承诺答案面的排名结果。"],
-    ["Do I need provider API keys to try it?", "试用时需要 provider API key 吗？"],
-    ["Not for a basic audit run. Provider keys are only needed when you want eval-mode benchmarking on top of the core site audit.", "基础的 audit run 不需要。只有当你想在核心站点审计之上再做 eval benchmarking 时，才需要 provider key。"],
+    ["Do I need provider API keys to try it?", "试用时需要模型服务 key 吗？"],
+    ["Not for a basic audit run. Provider keys are only needed when you want eval-mode benchmarking on top of the core site audit.", "基础审计不需要。只有当你想在核心站点检查之外增加模型评估时，才需要模型服务 key。"],
     ["How do I start in under five minutes?", "怎样在 5 分钟内开始？"],
     ["Start with the live demo report, run the sample-site demo locally, then use the 5-minute real-site quickstart before adding the GitHub Action.", "先看在线演示报告，再在本地跑示例站点演示，然后用 5 分钟 quickstart 审计真实站点，最后再添加 GitHub Action。"],
+    ["Start with the 在线演示报告, run the sample-site demo locally, then use the 5-minute real-site quickstart before adding the GitHub Action.", "先看在线演示报告，再在本地跑示例站点演示，然后用 5 分钟 quickstart 审计真实站点，最后再添加 GitHub Action。"],
     ["How does pricing work today?", "当前的定价模式是怎样的？"],
-    ["The project is open source, the CLI and Pages docs are public, and optional eval costs stay in your own provider account.", "项目本身是开源的，CLI 和 Pages 文档公开可见；可选 eval 的费用会留在你自己的 provider 账户里。"],
+    ["The project is open source, the CLI and Pages docs are public, and optional eval costs stay in your own provider account.", "项目本身是开源的，CLI 和 Pages 文档公开可见；可选模型评估的费用会留在你自己的模型服务账户里。"],
     ["see the open-source and BYOK packaging model.", "查看开源与 BYOK 的打包模型。"],
     ["review trust, secrets, and guardrails.", "查看信任、密钥与边界说明。"],
     ["understand how AnswerLens differs from Profound, Peec AI, and Otterly.", "理解 AnswerLens 与 Profound、Peec AI、Otterly 的区别。"],
     ["review the GitHub-native workflow path.", "查看 GitHub-native 工作流路径。"],
-    ["go deeper on activation, scoring, and Action usage.", "进一步了解 activation、scoring 与 Action 使用方式。"],
+    ["go deeper on activation, scoring, and Action usage.", "进一步了解激活计划、评分与 Action 使用方式。"],
     ["Fixture outputs are treated as public example artifacts.", "fixture 输出会被当作公开示例 artifacts。"],
     ["The static-good fixture is the stable source for share summaries, scorecards, recommendations, and HTML report outputs.", "static-good fixture 是 share summaries、scorecards、recommendations 与 HTML report outputs 的稳定来源。"],
     ["if you want the same artifact set locally.", "如果你想在本地拿到同一组 artifacts。"],
@@ -599,7 +601,7 @@ function translateSiteHtml(html: string): string {
     ["What teams can ship next", "团队下一步最值得做什么"],
     ["Frequently asked questions about what AnswerLens is, how it works, and what it does not claim.", "关于 AnswerLens 是什么、如何工作，以及它不承诺什么的常见问题。"],
     ["Open-source pricing, packaging, BYOK evaluation, and release-asset distribution for AnswerLens.", "AnswerLens 的开源定价、打包方式、BYOK 评估与 release-asset 分发说明。"],
-    ["GitHub Action, provider adapters, Search Console import, and helper integrations for AnswerLens.", "AnswerLens 的 GitHub Action、provider adapters、Search Console 导入与辅助集成说明。"],
+    ["GitHub Action, provider adapters, Search Console import, and helper integrations for AnswerLens.", "AnswerLens 的 GitHub Action、模型服务适配、Search Console 导入与辅助验证说明。"],
     ["Release index, version notes, and distribution surfaces compiled from GitHub metadata.", "基于 GitHub metadata 编译出的 release index、版本说明与分发页面。"],
     ["Release notes should work like a second front door, not a changelog graveyard.", "Release notes 应该像第二个公开入口，而不是一座 changelog 坟场。"],
     ["This page is compiled from release metadata so the public version line stays machine-readable, easy to index, and useful for first-run visitors.", "这一页由 release metadata 编译而成，目的是让公开版本线保持 machine-readable、易于索引，并且对首次访客有用。"],
@@ -660,6 +662,10 @@ function translateSiteHtml(html: string): string {
     ["The Action keeps the same artifact contract used by local runs.", "这个 Action 复用了与本地运行相同的 artifact 契约。"],
     ["$0 to download", "下载成本为 $0"],
     ["Demo bundles, the compiled site, and docs stay publicly accessible.", "demo bundle、编译后站点和文档保持公开可访问。"],
+    ["Integration", "集成方式"],
+    ["OpenAI and Perplexity eval", "OpenAI 与 Perplexity 评估"],
+    ["Release assets and Pages", "发布资源与 Pages 站点"],
+    ["Turns demo outputs and docs into reusable public pages and downloads.", "把演示输出和文档整理成可复用的公开页面与下载资源。"],
     ["Concern", "关注点"],
     ["AnswerLens approach", "AnswerLens 方式"],
     ["Secrets", "密钥"],
@@ -2096,6 +2102,18 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   const routeAliases = [
     {
       from: "use-case/open-source-maintainer/",
+      to: "use-case/open-source-maintainers/"
+    },
+    {
+      from: "use-cases/product-marketing/",
+      to: "use-case/product-marketing/"
+    },
+    {
+      from: "use-cases/developer-advocacy/",
+      to: "use-case/developer-advocacy/"
+    },
+    {
+      from: "use-cases/open-source-maintainers/",
       to: "use-case/open-source-maintainers/"
     }
   ];
