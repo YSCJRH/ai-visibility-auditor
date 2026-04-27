@@ -69,8 +69,10 @@ test("build-site writes indexable pages and metadata", async () => {
     "zh/index.html",
     "docs/index.html",
     "en/docs/index.html",
+    "zh/docs/index.html",
     "starter/index.html",
     "en/starter/index.html",
+    "zh/starter/index.html",
     "pricing/index.html",
     "en/pricing/index.html",
     "security/index.html",
@@ -79,8 +81,10 @@ test("build-site writes indexable pages and metadata", async () => {
     "en/faq/index.html",
     "compare/index.html",
     "en/compare/index.html",
+    "zh/compare/index.html",
     "integrations/index.html",
     "en/integrations/index.html",
+    "zh/integrations/index.html",
     "releases/index.html",
     "en/releases/index.html",
     "zh/releases/index.html",
@@ -92,6 +96,7 @@ test("build-site writes indexable pages and metadata", async () => {
     "en/use-case/product-marketing/index.html",
     "use-case/developer-advocacy/index.html",
     "en/use-case/developer-advocacy/index.html",
+    "zh/use-case/developer-advocacy/index.html",
     "use-case/open-source-maintainers/index.html",
     "en/use-case/open-source-maintainers/index.html",
     "use-case/open-source-maintainer/index.html",
@@ -125,8 +130,10 @@ test("build-site writes indexable pages and metadata", async () => {
     zhHome,
     docsRedirect,
     docs,
+    zhDocs,
     starterRedirect,
     starter,
+    zhStarter,
     pricingRedirect,
     pricing,
     zhPricing,
@@ -138,6 +145,7 @@ test("build-site writes indexable pages and metadata", async () => {
     zhFaq,
     compareRedirect,
     compare,
+    zhCompare,
     integrationsRedirect,
     integrations,
     zhIntegrations,
@@ -145,6 +153,7 @@ test("build-site writes indexable pages and metadata", async () => {
     productMarketing,
     developerAdvocacyRedirect,
     developerAdvocacy,
+    zhDeveloperAdvocacy,
     openSourceRedirect,
     openSource,
     openSourceAliasRedirect,
@@ -171,8 +180,10 @@ test("build-site writes indexable pages and metadata", async () => {
     load("zh/index.html"),
     load("docs/index.html"),
     load("en/docs/index.html"),
+    load("zh/docs/index.html"),
     load("starter/index.html"),
     load("en/starter/index.html"),
+    load("zh/starter/index.html"),
     load("pricing/index.html"),
     load("en/pricing/index.html"),
     load("zh/pricing/index.html"),
@@ -184,6 +195,7 @@ test("build-site writes indexable pages and metadata", async () => {
     load("zh/faq/index.html"),
     load("compare/index.html"),
     load("en/compare/index.html"),
+    load("zh/compare/index.html"),
     load("integrations/index.html"),
     load("en/integrations/index.html"),
     load("zh/integrations/index.html"),
@@ -191,6 +203,7 @@ test("build-site writes indexable pages and metadata", async () => {
     load("en/use-case/product-marketing/index.html"),
     load("use-case/developer-advocacy/index.html"),
     load("en/use-case/developer-advocacy/index.html"),
+    load("zh/use-case/developer-advocacy/index.html"),
     load("use-case/open-source-maintainers/index.html"),
     load("en/use-case/open-source-maintainers/index.html"),
     load("use-case/open-source-maintainer/index.html"),
@@ -289,6 +302,19 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(zhIntegrations, /发布资源与 Pages 站点/);
   assert.match(zhIntegrations, /把演示输出和文档整理成可复用的公开页面与下载资源/);
   assert.doesNotMatch(zhIntegrations, /Release assets and Pages|Turns demo outputs|<th>Integration<\/th>|What it does/);
+  assert.match(zhDocs, /文档索引、概念说明与上手路径/);
+  assert.match(zhDocs, /接入文件<\/a>：外部仓库布局和报告审阅顺序/);
+  assert.doesNotMatch(zhDocs, /activation references|canonical Markdown|Starter bundle/);
+  assert.match(zhStarter, /接入文件是给外部仓库复用的公开起点/);
+  assert.match(zhStarter, /接入文件提供第一次 CI 运行需要的内容/);
+  assert.match(zhStarter, /看接入文件如何进入 GitHub Actions 工作流/);
+  assert.doesNotMatch(zhStarter, /starter bundle|raw repo files|adoption readiness|live demo artifact set|activation references|canonical Markdown|GitHub-native workflow/);
+  assert.match(zhCompare, /仓库内审阅 vs 看板式监测/);
+  assert.match(zhCompare, /模型服务用量留在自己的账户/);
+  assert.match(zhCompare, /对比页、FAQ 和证明页/);
+  assert.doesNotMatch(zhCompare, /dashboard-first|Repo-native|provider 使用量|proof page|首页、pricing/);
+  assert.match(zhDeveloperAdvocacy, /保持上手路径和实现说明可见/);
+  assert.doesNotMatch(zhDeveloperAdvocacy, /activation references|and examples/);
 
   assert.match(docs, /Activation plan/);
   assert.match(docs, /Find the doc that explains your score and decide the next fix\./);
