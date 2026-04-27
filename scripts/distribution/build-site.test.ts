@@ -90,6 +90,7 @@ test("build-site writes indexable pages and metadata", async () => {
     "zh/releases/index.html",
     "examples/index.html",
     "en/examples/index.html",
+    "zh/examples/index.html",
     "playbooks/index.html",
     "en/playbooks/index.html",
     "use-case/product-marketing/index.html",
@@ -168,6 +169,7 @@ test("build-site writes indexable pages and metadata", async () => {
     zhReleases,
     examplesRedirect,
     examples,
+    zhExamples,
     playbooksRedirect,
     playbooks,
     demoReport,
@@ -218,6 +220,7 @@ test("build-site writes indexable pages and metadata", async () => {
     load("zh/releases/index.html"),
     load("examples/index.html"),
     load("en/examples/index.html"),
+    load("zh/examples/index.html"),
     load("playbooks/index.html"),
     load("en/playbooks/index.html"),
     load("examples/static-good/index.html"),
@@ -381,11 +384,17 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.doesNotMatch(zhReleases, /What ships/);
   assert.doesNotMatch(zhReleases, /Known limits/);
   assert.match(examples, /AnswerLens static-good fixture demo/);
-  assert.match(examples, /The demo report shows what your team will receive\./);
-  assert.match(examples, /Demo report package/);
-  assert.match(examples, /Open the report files in the order reviewers use\./);
-  assert.match(examples, /What to do after the demo/);
-  assert.match(examples, /Run the sample-site demo/);
+  assert.match(examples, /See the report before you run anything\./);
+  assert.match(examples, /What to look at/);
+  assert.match(examples, /Start with the summary, then check the scorecard and fixes\./);
+  assert.match(examples, /After the demo/);
+  assert.match(examples, /Recreate the sample locally/);
+  assert.match(zhExamples, /先看报告，再决定要不要运行。/);
+  assert.match(zhExamples, /先看什么/);
+  assert.match(zhExamples, /先读摘要，再查评分卡和修复建议。/);
+  assert.match(zhExamples, /看完演示后/);
+  assert.match(zhExamples, /本地复现示例/);
+  assert.doesNotMatch(zhExamples, /漏斗|The demo report shows|Demo report package/);
   assert.match(playbooks, /Turn one recommendation into a page change\./);
   assert.match(playbooks, /Page fixes/);
   assert.match(playbooks, /View current fixes/);
