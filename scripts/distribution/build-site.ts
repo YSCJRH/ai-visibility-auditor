@@ -227,8 +227,8 @@ function translateSiteHtml(html: string): string {
     ["Open the demo report, reproduce it locally with the sample site, run a quick audit on one public site, then add the same check to GitHub Actions when the result is useful.", "先打开在线演示报告，再用示例站点在本地复现一次。确认结果有用后，在一个公开产品站点上跑 quickstart；最后再接入 GitHub Action。"],
     ["You get a report set your team can actually review.", "你会得到一组团队真的能审阅的报告。"],
     ["The useful output is simple: a short summary, a scorecard, and a fix list you can discuss in product, docs, or PR review.", "结果不需要重新整理：一份摘要、一份评分卡、一份修复清单，产品、文档和 PR 审阅都能直接使用。"],
-    ["Use the docs with a report in front of you.", "把文档放在报告旁边读。"],
-    ["Start from the summary or scorecard, then open the document that explains the failed check. The goal is simple: understand the issue, fix one page, and run the audit again.", "先从摘要或评分卡开始，再打开能解释失败检查的文档。目标很简单：读懂问题，修一个页面，然后重新跑一次审计。"],
+    ["Have a report open? Pick the next doc by task.", "报告已经打开？按下一步任务读文档。"],
+    ["Start with share-summary.md or scorecard.md. Then choose the document that explains the issue, helps you edit one page, or moves the same report into CI.", "先看 share-summary.md 或 scorecard.md，再按你要做的事选择文档：解释问题、改一个页面，或把同一组报告接入 CI。"],
     ["See the report before you run anything.", "先看报告，再决定要不要运行。"],
     ["The static-good demo shows the finished AnswerLens output: what changed, what is trustworthy, and which file to open first. Use it to decide whether the workflow is worth trying on one public site.", "static-good 演示展示的是 AnswerLens 完成后的输出：哪里有问题、哪些证据可信、第一份文件该打开什么。先用它判断这套工作流是否值得跑到一个公开站点上。"],
     ["Turn one useful local audit into a GitHub Action.", "把一轮有用的本地审计变成 GitHub Action。"],
@@ -298,7 +298,7 @@ function translateSiteHtml(html: string): string {
     ["Open fix list", "打开修复清单"],
     ["AnswerLens turns public-site clarity into GitHub-ready reports.", "AnswerLens 把公开站点的清晰度变成可在 GitHub 审阅的报告。"],
     ["AnswerLens public-site audit reports for GitHub teams", "面向 GitHub 团队的 AnswerLens 公开站点审计报告"],
-    ["Docs for reading AnswerLens reports", "读懂 AnswerLens 报告的文档"],
+    ["Docs for acting on an AnswerLens report", "拿到 AnswerLens 报告后该读什么"],
     ["Release notes and downloadable distribution assets", "发布说明与可下载分发资产"],
     ["Demo report for evaluating AnswerLens", "用于评估 AnswerLens 的演示报告"],
     ["Copy AnswerLens into a GitHub repository", "把 AnswerLens 接入 GitHub 仓库"],
@@ -333,6 +333,8 @@ function translateSiteHtml(html: string): string {
     ["Public proof pages", "公开证明页面"],
     ["Use-case coverage", "用例覆盖"],
     ["Choose the next product page", "选择下一页产品说明"],
+    ["Choose by what you need to do", "按下一步选择"],
+    ["Use docs to answer the question in front of you.", "用文档回答眼前这个问题。"],
     ["Report files", "报告文件"],
     ["Use the latest release", "使用最新发布版本"],
     ["Latest demo run", "最新演示运行"],
@@ -513,7 +515,7 @@ function translateSiteHtml(html: string): string {
     ["Current public comparison", "当前公开对比"],
     ["What people ask first", "大家首先会问什么"],
     ["What it does", "它能做什么"],
-    ["Use AnswerLens docs to understand a report, fix one page issue, run your own site, and move the same report set into GitHub Actions.", "用 AnswerLens 文档读懂报告、修一个页面问题、审计自己的站点，并把同一组报告接入 GitHub Actions。"],
+    ["Choose the next AnswerLens doc by task: understand a scorecard, fix one page, run your site, or add GitHub Actions.", "按任务选择下一篇 AnswerLens 文档：读懂评分卡、修一个页面、审计自己的站点，或接入 GitHub Actions。"],
     ["Turn one useful local AnswerLens audit into a GitHub Actions workflow with copyable config files and a pinned Action.", "把一轮有用的本地 AnswerLens 审计，变成可复制配置文件和固定版本 Action 组成的 GitHub Actions 工作流。"],
     ["How AnswerLens differs from dashboard-first AI visibility tools such as Profound, Peec AI, and Otterly.", "说明 AnswerLens 与 Profound、Peec AI、Otterly 等看板式 AI 可见性工具的区别。"],
     ["Open a finished AnswerLens report, see the evidence your team would review, then run the same sample locally before trying your site.", "先打开一份完成的 AnswerLens 报告，看清团队会审阅哪些证据，再本地复现示例并尝试自己的站点。"],
@@ -1511,22 +1513,22 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       route: "docs/",
       filePath: path.join(outDir, "docs", "index.html"),
       title: {
-        en: "Docs for reading AnswerLens reports",
-        "zh-CN": "读懂 AnswerLens 报告的文档"
+        en: "Docs for acting on an AnswerLens report",
+        "zh-CN": "拿到 AnswerLens 报告后该读什么"
       },
       description: {
-        en: "Use AnswerLens docs to understand a report, fix one page issue, run your own site, and move the same report set into GitHub Actions.",
-        "zh-CN": "用 AnswerLens 文档读懂报告、修一个页面问题、审计自己的站点，并把同一组报告接入 GitHub Actions。"
+        en: "Choose the next AnswerLens doc by task: understand a scorecard, fix one page, run your site, or add GitHub Actions.",
+        "zh-CN": "按任务选择下一篇 AnswerLens 文档：读懂评分卡、修一个页面、审计自己的站点，或接入 GitHub Actions。"
       },
       body: {
-        en: `<section class="hero"><p class="eyebrow">Product docs</p><h1>Use the docs with a report in front of you.</h1><p>Start from the summary or scorecard, then open the document that explains the failed check. The goal is simple: understand the issue, fix one page, and run the audit again.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run quickstart</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("playbooks/", siteUrl).href)}">Open fixes</a></div></section>
+        en: `<section class="hero"><p class="eyebrow">Product docs</p><h1>Have a report open? Pick the next doc by task.</h1><p>Start with share-summary.md or scorecard.md. Then choose the document that explains the issue, helps you edit one page, or moves the same report into CI.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run your site</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("playbooks/", siteUrl).href)}">Fix one page</a></div></section>
         <section class="section journey">
-          <div class="sectionHeader"><p class="eyebrow">Choose by task</p><h2>Use docs to move from result to action.</h2><p>Each path starts from the same report order: summary, scorecard, recommendations. Pick the document that helps you take the next concrete step.</p></div>
+          <div class="sectionHeader"><p class="eyebrow">Choose by what you need to do</p><h2>Use docs to answer the question in front of you.</h2><p>Every path starts from the same report files: summary, scorecard, recommendations. Pick one action, read the matching doc, then come back to the report.</p></div>
           <ol class="stepGrid">
-            ${renderJourneyStep("1", "Read the report", "Use scoring notes to understand what the summary and scorecard are telling you.", repoBlob("docs/scoring.md"), "Open scoring")}
-            ${renderJourneyStep("2", "Explain the failure", "Use concept docs when schema, evidence, or page-structure problems need context.", repoBlob("docs/concepts/schema-text-consistency.md"), "Open concepts")}
-            ${renderJourneyStep("3", "Try your site", "Use quickstart after the demo so the docs turn into one real audit.", repoBlob("docs/quickstart.md"), "Open quickstart")}
-            ${renderJourneyStep("4", "Move into CI", "Use the Action only after the local report already feels reviewable.", repoBlob("docs/github-action.md"), "Open Action docs")}
+            ${renderJourneyStep("1", "Understand the score", "Use scoring notes to understand what the summary and scorecard are telling you.", repoBlob("docs/scoring.md"), "Open scoring")}
+            ${renderJourneyStep("2", "Explain a failed check", "Use concept docs when schema, evidence, or page-structure problems need context.", repoBlob("docs/concepts/schema-text-consistency.md"), "Open concepts")}
+            ${renderJourneyStep("3", "Run your own site", "Use quickstart after the demo so the docs turn into one real audit.", repoBlob("docs/quickstart.md"), "Open quickstart")}
+            ${renderJourneyStep("4", "Add the Action", "Use the Action only after the local report already feels reviewable.", repoBlob("docs/github-action.md"), "Open Action docs")}
           </ol>
         </section>
         <section class="section grid">${renderDocsCards("en")}</section>
@@ -1541,18 +1543,18 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">Developer advocacy teams</a>: docs, examples, and self-serve proof.`,
           `<a href="${escapeHtml(proofPageUrls.openSource)}">Open-source maintainers</a>: README, Pages, releases, and report-first distribution.`
         ])}</ul>`)}${renderPanel("Report files", "Review order", `<p>After you read the docs, go back to the report files in the same order used everywhere else:</p><div class="artifactRail"><div class="artifactItem"><strong><a href="${escapeHtml(new URL("examples/static-good/share-summary.md", siteUrl).href)}">share-summary.md</a></strong><p>Start with the human-readable audit summary.</p></div><div class="artifactItem"><strong><a href="${escapeHtml(new URL("examples/static-good/scorecard.md", siteUrl).href)}">scorecard.md</a></strong><p>Inspect coverage, checks, and scoring.</p></div><div class="artifactItem"><strong><a href="${escapeHtml(new URL("examples/static-good/recommendations.md", siteUrl).href)}">recommendations.md</a></strong><p>Turn issues into fixes.</p></div></div><p>Then continue to the <a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">real-site quickstart</a> or the <a href="${escapeHtml(repoBlob("docs/github-action.md"))}">GitHub Action path</a>.</p>`)}</section>`,
-        "zh-CN": `<section class="hero"><p class="eyebrow">产品文档</p><h1>把文档放在报告旁边读。</h1><p>先从摘要或评分卡开始，再打开能解释失败检查的文档。目标很简单：读懂问题，修一个页面，然后重新跑一次审计。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">运行 quickstart</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("playbooks/", siteUrl).href)}">打开修复页</a></div></section>
+        "zh-CN": `<section class="hero"><p class="eyebrow">产品文档</p><h1>报告已经打开？按下一步任务读文档。</h1><p>先看 share-summary.md 或 scorecard.md，再按你要做的事选择文档：解释问题、改一个页面，或把同一组报告接入 CI。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">审计你的站点</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("playbooks/", siteUrl).href)}">修一个页面</a></div></section>
         <section class="section journey">
-          <div class="sectionHeader"><p class="eyebrow">按任务选择</p><h2>用文档把结果变成动作。</h2><p>每条路径都从同一个报告顺序开始：摘要、评分卡、修复建议。然后选择能帮你完成下一步的文档。</p></div>
+          <div class="sectionHeader"><p class="eyebrow">按下一步选择</p><h2>用文档回答眼前这个问题。</h2><p>每条路径都从同一组报告文件开始：摘要、评分卡、修复建议。先选一个动作，读对应文档，再回到报告继续审阅。</p></div>
           <ol class="stepGrid">
-            ${renderJourneyStep("1", "读报告", "用评分说明理解摘要和评分卡到底在提醒什么。", repoBlob("docs/scoring.md"), "打开评分说明")}
-            ${renderJourneyStep("2", "解释失败原因", "当结构化数据、证据或页面结构问题需要上下文时，继续看概念文档。", repoBlob("docs/concepts/schema-text-consistency.md"), "打开概念文档")}
-            ${renderJourneyStep("3", "试自己的站点", "看完演示后用 quickstart，把文档转成一次真实审计。", repoBlob("docs/zh/quickstart.md"), "打开 quickstart")}
-            ${renderJourneyStep("4", "搬进 CI", "本地报告已经能审阅之后，再进入 Action 路径。", repoBlob("docs/zh/github-action.md"), "打开 Action 文档")}
+            ${renderJourneyStep("1", "读懂分数", "用评分说明理解摘要和评分卡到底在提醒什么。", repoBlob("docs/scoring.md"), "打开评分说明")}
+            ${renderJourneyStep("2", "解释失败项", "当结构化数据、证据或页面结构问题需要上下文时，继续看概念文档。", repoBlob("docs/concepts/schema-text-consistency.md"), "打开概念文档")}
+            ${renderJourneyStep("3", "跑自己的站点", "看完演示后用 quickstart，把文档转成一次真实审计。", repoBlob("docs/zh/quickstart.md"), "打开 quickstart")}
+            ${renderJourneyStep("4", "接入 Action", "本地报告已经能审阅之后，再进入 Action 路径。", repoBlob("docs/zh/github-action.md"), "打开 Action 文档")}
           </ol>
         </section>
         <section class="section grid">${renderDocsCards("zh-CN")}</section>
-        <section class="section grid">${renderPanel("选择下一页产品说明", "接下来读哪里", `<p>当报告引出购买、信任、设置或定位问题时，就继续看这些页面。</p><ul>${renderList([
+        <section class="section grid">${renderPanel("报告提出了产品问题？", "继续读哪里", `<p>如果报告暴露的是价格、信任、定位或接入问题，就打开对应页面继续看。</p><ul>${renderList([
           `<a href="${escapeHtml(proofPageUrls.pricing)}">定价</a>：开源打包、自带 API key 的成本和接入方式。`,
           `<a href="${escapeHtml(proofPageUrls.security)}">安全</a>：secrets、审阅流和信任边界。`,
           `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>：用可引用的语言回答首次试用问题。`,
