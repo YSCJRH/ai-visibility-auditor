@@ -316,12 +316,12 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(zhIntegrations, /把演示输出和文档整理成可复用的公开页面与下载资源/);
   assert.doesNotMatch(zhIntegrations, /Release assets and Pages|Turns demo outputs|<th>Integration<\/th>|What it does/);
   assert.match(zhDocs, /拿到 AnswerLens 报告后该读什么/);
-  assert.match(zhDocs, /报告已经打开？按下一步任务读文档。/);
+  assert.match(zhDocs, /报告已打开？<br>下一步读哪篇？/);
   assert.match(zhDocs, /用文档回答眼前这个问题。/);
   assert.match(zhDocs, /读懂分数/);
   assert.match(zhDocs, /报告提出了产品问题？/);
   assert.match(zhDocs, /接入文件<\/a>：外部仓库布局和报告审阅顺序/);
-  assert.doesNotMatch(zhDocs, /activation references|canonical Markdown|Starter bundle|把文档放在报告旁边读|用文档把结果变成动作/);
+  assert.doesNotMatch(zhDocs, /activation references|canonical Markdown|Starter bundle|把文档放在报告旁边读|用文档把结果变成动作|报告已经打开？按下一步任务读文档。/);
   assert.match(zhStarter, /把一轮有用的本地审计变成 GitHub Action/);
   assert.match(zhStarter, /本地报告已经看懂之后，再复制这些文件/);
   assert.match(zhStarter, /需要复制的文件/);

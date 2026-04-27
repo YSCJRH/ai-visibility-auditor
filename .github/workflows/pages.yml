@@ -65,7 +65,7 @@ jobs:
           pnpm --version
       - run: pnpm build:site -- --releases dist/releases.json
       - run: pnpm seo:check --releases dist/releases.json
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist/site
 
@@ -81,4 +81,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
