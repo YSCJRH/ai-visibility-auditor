@@ -11,38 +11,29 @@
 
 > CI for AI discoverability.
 
-AnswerLens is a CLI-first, GitHub-native AI visibility auditor for product websites. It helps product teams understand why AI systems miss, flatten, or misread their site, then writes reproducible artifacts they can review in GitHub.
+AnswerLens is a CLI-first, GitHub-native AI visibility auditor for product websites. It audits public product pages and writes report files your team can review in GitHub.
 
-AnswerLens focuses on explainable structure, evidence, and validation workflows rather than consumer UI scraping.
+It shows whether AI systems can understand what you sell, find supporting proof, read pricing and comparison pages, and cite the right source material.
 
-Open-source. CLI-first. Report-driven. No consumer UI scraping. No ranking promises. No dashboard-first rewrite.
+Open-source. Command-line first. Report-driven. No consumer AI UI scraping. No ranking promises. No hosted dashboard required. No dashboard-first rewrite.
 
 ## Start here
 
-One path, four steps:
+Start with the report, not a setup guide:
 
 1. [Open the live demo report](https://yscjrh.github.io/ai-visibility-auditor/examples/static-good/index.html)
-   The fastest way to understand the output, artifact flow, and why the project is reviewable in GitHub.
+   The fastest way to see the summary, scorecard, and fix list together.
    If you are browsing a fork or copy without Pages enabled, use the [repo walkthrough fallback](docs/demo-report.md).
 2. [Run the 60-second fixture demo](#run-the-60-second-fixture-demo)
-   Reproduce the same artifact set locally so the workflow feels concrete.
+   Reproduce the same reports locally so the command feels concrete.
 3. [Run a 5-minute real-site audit](docs/quickstart.md)
-   Bridge from the demo into your own public site before you wire CI.
+   Try one public product site before you wire CI.
 4. [Add the GitHub Action](docs/github-action.md)
-   Move the same artifact-backed workflow into pull requests, artifact uploads, and `GITHUB_STEP_SUMMARY`.
+   Move the same report set into pull requests, artifact uploads, and `GITHUB_STEP_SUMMARY`.
 
-Primary entry: the live demo report.
+Across every step, keep the report order fixed: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
 
-Secondary entries:
-- the 60-second fixture demo
-- the GitHub Action docs, once one local run already feels reviewable
-
-Bridge step:
-- use the real-site quickstart between the fixture demo and CI adoption
-
-Across every step, keep the artifact order fixed: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
-
-If you already know you want CI, the Action docs remain public, but the clearest first run is still demo -> fixture -> real-site -> Action.
+If you already know you want CI, the Action docs remain public, but the easiest path is still demo -> sample site -> real site -> Action.
 
 ## What you get
 
@@ -55,7 +46,7 @@ If you already know you want CI, the Action docs remain public, but the clearest
 
 ## Why AnswerLens
 
-- CI for AI discoverability, built for Git workflows instead of dashboard lock-in
+- CI for AI discoverability, built for Git workflows instead of hosted-dashboard lock-in
 - Explainable audit rules that focus on why AI systems miss or misread a site
 - A report-first, repo-native workflow that turns runs into artifacts teams can review and ship against
 - A validation-oriented path that avoids scrape-and-rank claims and keeps evidence visible
@@ -65,6 +56,7 @@ If you already know you want CI, the Action docs remain public, but the clearest
 - Not a "rank #1 in ChatGPT" hack
 - Not a consumer AI UI scraper
 - Not a generic AI content generator
+- Not a dashboard-first rewrite of the CLI workflow
 - Not a replacement for Search Console or analytics
 - Not a guarantee of placement on any answer surface
 

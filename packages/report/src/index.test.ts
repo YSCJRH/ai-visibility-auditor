@@ -236,7 +236,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(readme, /search-console-summary\.json/);
   assert.match(readme, /bing-indexnow-helper/);
   assert.match(readme, /indexnow-summary\.json/);
-  assert.match(readme, /AnswerLens focuses on explainable structure, evidence, and validation workflows rather than consumer UI scraping\./);
+  assert.match(readme, /It shows whether AI systems can understand what you sell, find supporting proof, read pricing and comparison pages, and cite the right source material\./);
   assert.match(readme, /## Why AnswerLens/);
   assert.match(readme, /Full public roadmap: \[docs\/roadmap\.md\]/);
   assert.match(readme, /!\[AnswerLens cover\]\(assets\/readme-cover\.svg\)/);
