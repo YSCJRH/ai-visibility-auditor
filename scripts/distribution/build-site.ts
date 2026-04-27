@@ -225,7 +225,7 @@ function translateSiteHtml(html: string): string {
     ["Playbooks", "操作手册"],
     ["Check whether AI assistants can understand your product pages. Run AnswerLens from the CLI, then review a share summary, scorecard, and fix list in GitHub.", "检查 AI 助手能不能读懂你的产品网站。你从命令行运行 AnswerLens，再在 GitHub 里查看摘要、评分卡和修复清单。"],
     ["Open the demo report, reproduce it locally with the sample site, run a quick audit on one public site, then add the same check to GitHub Actions when the result is useful.", "先打开在线演示报告，再用示例站点在本地复现一次。确认结果有用后，在一个公开产品站点上跑 quickstart；最后再接入 GitHub Action。"],
-    ["Each audit gives your team three files to review.", "每次审计都会留下三份可审阅文件。"],
+    ["You get a report set your team can actually review.", "你会得到一组团队真的能审阅的报告。"],
     ["The useful output is simple: a short summary, a scorecard, and a fix list you can discuss in product, docs, or PR review.", "结果不需要重新整理：一份摘要、一份评分卡、一份修复清单，产品、文档和 PR 审阅都能直接使用。"],
     ["Use the docs with a report in front of you.", "把文档放在报告旁边读。"],
     ["Start from the summary or scorecard, then open the document that explains the failed check. The goal is simple: understand the issue, fix one page, and run the audit again.", "先从摘要或评分卡开始，再打开能解释失败检查的文档。目标很简单：读懂问题，修一个页面，然后重新跑一次审计。"],
@@ -295,8 +295,8 @@ function translateSiteHtml(html: string): string {
     ["Run sample", "运行示例"],
     ["Run sample locally", "本地运行示例"],
     ["Open fix list", "打开修复清单"],
-    ["AnswerLens makes AI discoverability reviewable in GitHub.", "AnswerLens 让 AI 可发现性在 GitHub 里变得可审阅。"],
-    ["AI visibility audit reports and demo entry points", "AI 可发现性审计报告与演示入口"],
+    ["AnswerLens turns public-site clarity into GitHub-ready reports.", "AnswerLens 把公开站点的清晰度变成可在 GitHub 审阅的报告。"],
+    ["AnswerLens public-site audit reports for GitHub teams", "面向 GitHub 团队的 AnswerLens 公开站点审计报告"],
     ["Docs for reading AnswerLens reports", "读懂 AnswerLens 报告的文档"],
     ["Release notes and downloadable distribution assets", "发布说明与可下载分发资产"],
     ["Demo reports and sample-site outputs", "演示报告与示例站点输出"],
@@ -321,6 +321,13 @@ function translateSiteHtml(html: string): string {
     ["Use case", "使用场景"],
     ["Fixes and playbooks", "修复与手册"],
     ["Recommended first-run path", "推荐首次试用路径"],
+    ["Does AnswerLens fit your site?", "AnswerLens 是否适合你的站点？"],
+    ["Check the public story", "检查公开叙事"],
+    ["Review the evidence", "审阅证据"],
+    ["Best fit", "适合谁"],
+    ["Try it in this order", "按这个顺序试用"],
+    ["See the output before setup", "先看输出，再设置"],
+    ["Run one real page", "跑一个真实页面"],
     ["Public proof block", "公开证明区块"],
     ["Public proof pages", "公开证明页面"],
     ["Use-case coverage", "用例覆盖"],
@@ -1378,30 +1385,30 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       route: "",
       filePath: path.join(outDir, "index.html"),
       title: {
-        en: "AI visibility audit reports and demo entry points",
+        en: "AnswerLens public-site audit reports for GitHub teams",
         "zh-CN": "AnswerLens：AI 可发现性审计器与 GitHub 原生报告工作流"
       },
       description: {
-        en: `${DESCRIPTION} ${TAGLINE}`,
-        "zh-CN": "AnswerLens 审计公开产品页面，并生成可在 GitHub 中审阅的报告文件。面向 AI 可发现性的 CI。"
+        en: "AnswerLens checks whether public product pages are clear, evidenced, and easy to review, then writes GitHub-ready report files.",
+        "zh-CN": "AnswerLens 检查公开产品页面是否清楚、有证据、便于审阅，并生成可进入 GitHub 工作流的报告。"
       },
       body: {
-        en: `<section class="hero productHero"><p class="eyebrow">${escapeHtml(TAGLINE)}</p><h1>AnswerLens</h1><p>Audit public product pages and get report files your team can review in GitHub. Start with the demo, then run one 5-minute check on your own site before adding CI.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open live demo</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run quickstart</a></div></section>
+        en: `<section class="hero productHero"><p class="eyebrow">${escapeHtml(TAGLINE)}</p><h1>AnswerLens</h1><p>Use AnswerLens when your website is the source material for AI answers. It checks whether public product pages are clear, evidenced, and easy to review, then writes GitHub-ready report files.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open demo report</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run your site</a></div></section>
         <section class="section">
-          <div class="sectionHeader"><p class="eyebrow">Product shape</p><h2>What AnswerLens checks, writes, and protects.</h2><p>AnswerLens is a command-line-first, report-first open-source workflow: no consumer AI UI scraping, no ranking promises, no hosted dashboard required, and no dashboard-first rewrite.</p></div>
+          <div class="sectionHeader"><p class="eyebrow">Product fit</p><h2>Does AnswerLens fit your site?</h2><p>It is built for teams that want public pages and GitHub review to stay in sync. It is not a hosted monitoring dashboard, a ranking tool, or a consumer AI scraper.</p></div>
           <div class="grid">
-            ${renderPanel("What it checks", "Public product pages", "<p>AnswerLens checks whether your pages clearly explain what you sell, where the proof lives, how pricing and comparisons are framed, and whether schema and links support the story.</p>")}
-            ${renderPanel("What it writes", "Reviewable report files", "<p>Each run writes <code>share-summary.md</code>, <code>scorecard.md</code>, <code>recommendations.md</code>, and JSON results so product, docs, and engineering teams can review the same evidence in PRs or issues.</p>")}
-            ${renderPanel("Who should use it", "Teams with public surfaces", "<p>Use it when you maintain product websites, docs, open-source README files, release pages, and self-serve trial paths that need to stay understandable and citable.</p>")}
+            ${renderPanel("Check the public story", "What it checks", "<p>Can someone understand your category, proof, pricing, comparisons, and setup path from the public page alone? AnswerLens checks those signals, plus schema and internal links.</p>")}
+            ${renderPanel("Review the evidence", "What it outputs", "<p>The product surface is the report set: <code>share-summary.md</code>, <code>scorecard.md</code>, <code>recommendations.md</code>, and JSON results your team can review in PRs or issues.</p>")}
+            ${renderPanel("Best fit", "Who should use it", "<p>Use it when product marketing, docs, developer advocacy, or open-source maintainers share responsibility for pages that need to stay understandable and citable.</p>")}
           </div>
         </section>
         <section class="section journey">
-          <div class="sectionHeader"><p class="eyebrow">Start here</p><h2>Start with the report, then try your own site.</h2><p>The path is intentionally sequential: demo report, local sample-site run, one real-site audit, then GitHub Actions.</p></div>
+          <div class="sectionHeader"><p class="eyebrow">Try it in this order</p><h2>See the output before setup, then run one real page.</h2><p>Start with a finished report, recreate it locally, run one public product site, and add GitHub Actions only after the report is worth reviewing again.</p></div>
           <ol class="stepGrid">
-            ${renderJourneyStep("1", "Open the live demo", "Inspect a finished audit before installing anything. The demo shows the HTML report, share summary, scorecard, and recommendations together.", new URL("examples/static-good/index.html", siteUrl).href, "Open demo")}
-            ${renderJourneyStep("2", "Run the sample-site demo", "Recreate the demo locally in about a minute so you know the command and reports before using your own URL.", `${REPO_URL}#run-the-60-second-fixture-demo`, "Run sample")}
-            ${renderJourneyStep("3", "Check your site", "Run the quickstart against one public product site before adding CI.", repoBlob("docs/quickstart.md"), "Open quickstart")}
-            ${renderJourneyStep("4", "Add GitHub Actions", "Put the same report set into pull requests with the pinned starter workflow.", repoBlob("docs/github-action.md"), "Open Action docs")}
+            ${renderJourneyStep("1", "Open the demo report", "Inspect the finished HTML report, summary, scorecard, and recommendations before installing anything.", new URL("examples/static-good/index.html", siteUrl).href, "Open demo")}
+            ${renderJourneyStep("2", "Run the sample site", "Recreate the same output locally so the command and report files are familiar before you use your own URL.", `${REPO_URL}#run-the-60-second-fixture-demo`, "Run sample")}
+            ${renderJourneyStep("3", "Audit one public site", "Run the quickstart against one product page set and read the summary before changing copy or wiring CI.", repoBlob("docs/quickstart.md"), "Open quickstart")}
+            ${renderJourneyStep("4", "Add the Action", "Move the same report set into pull requests with the pinned starter workflow.", repoBlob("docs/github-action.md"), "Open Action docs")}
           </ol>
         </section>
         <section class="section grid">
@@ -1411,7 +1418,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           ${renderMetric("Latest release", releases[0]?.tag_name ?? "pending", "Current published version line.")}
         </section>
         <section class="section">
-          <article class="panel callout"><p class="eyebrow">Report package</p><h2>Each audit gives your team three files to review.</h2><p>The useful output is simple: a short summary, a scorecard, and a fix list you can discuss in product, docs, or PR review.</p><div class="artifactRail"><div class="artifactItem"><strong>share-summary.md</strong><p>Share the audit in a PR, issue, or team note.</p></div><div class="artifactItem"><strong>scorecard.md</strong><p>Inspect the score, page coverage, and failed checks.</p></div><div class="artifactItem"><strong>recommendations.md</strong><p>Turn gaps into copy, proof, and structure fixes.</p></div></div><p>When you need a versioned download, open <a href="${escapeHtml(new URL("releases/", siteUrl).href)}">the latest release</a>.</p></article>
+          <article class="panel callout"><p class="eyebrow">Report package</p><h2>You get a report set your team can actually review.</h2><p>The useful output is simple: a short summary, a scorecard, and a fix list you can discuss in product, docs, or PR review.</p><div class="artifactRail"><div class="artifactItem"><strong>share-summary.md</strong><p>Share the audit in a PR, issue, or team note.</p></div><div class="artifactItem"><strong>scorecard.md</strong><p>Inspect the score, page coverage, and failed checks.</p></div><div class="artifactItem"><strong>recommendations.md</strong><p>Turn gaps into copy, proof, and structure fixes.</p></div></div><p>When you need a versioned download, open <a href="${escapeHtml(new URL("releases/", siteUrl).href)}">the latest release</a>.</p></article>
         </section>
         <section class="section grid">
           ${renderPanel("What the demo says right now", "Current signal", `${renderSiteIdentity(shareSummary.site)}${firstIssue ? `<p><strong>Top issue:</strong> ${escapeHtml(firstIssue.title)} (${escapeHtml(firstIssue.severity)}) - ${escapeHtml(firstIssue.fixHint)}</p>` : "<p><strong>Top issue:</strong> none</p>"}${firstFix ? `<p><strong>Top fix:</strong> ${escapeHtml(firstFix.title)} - ${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p><strong>Top fix:</strong> none</p>"}<p>Open reports in order: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p><ul>${publicArtifactLinks}</ul>`)}
@@ -1432,22 +1439,22 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             `<a href="${escapeHtml(proofPageUrls.openSource)}">Open-source maintainers</a>: use README, releases, Pages, and reports as the public distribution stack.`
           ])}</ul>`)}
         </section>`,
-        "zh-CN": `<section class="hero productHero"><p class="eyebrow">面向 AI 可发现性的 CI。</p><h1>AnswerLens</h1><p>审计公开产品页面，并得到可在 GitHub 里审阅的报告文件。先看演示，再用 5 分钟跑自己的站点，确认有用后再接入 CI。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">打开在线演示</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">运行 quickstart</a></div></section>
+        "zh-CN": `<section class="hero productHero"><p class="eyebrow">面向 AI 可发现性的 CI。</p><h1>AnswerLens</h1><p>当你的网站会成为 AI 回答的素材时，用 AnswerLens 检查公开产品页面是否清楚、有证据、便于审阅，并生成可进入 GitHub 工作流的报告。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">打开演示报告</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">审计你的站点</a></div></section>
         <section class="section">
-          <div class="sectionHeader"><p class="eyebrow">产品形态</p><h2>它检查什么、写出什么，以及保护哪些边界。</h2><p>AnswerLens 是命令行优先、报告优先的开源工作流：不抓取消费级 AI 应用界面，不承诺排名，不要求托管看板，也不改成看板优先产品。</p></div>
+          <div class="sectionHeader"><p class="eyebrow">产品适配</p><h2>AnswerLens 是否适合你的站点？</h2><p>它适合希望公开页面和 GitHub 审阅保持同步的团队。它不是托管监测看板，不是排名工具，也不会抓取消费级 AI 应用界面。</p></div>
           <div class="grid">
-            ${renderPanel("它检查什么", "公开产品页面", "<p>AnswerLens 检查页面是否讲清楚你卖什么、证据在哪里、定价和对比如何表达，以及 schema 与内部链接是否支撑这些信息。</p>")}
-            ${renderPanel("它写出什么", "可审阅报告文件", "<p>每次运行都会生成 <code>share-summary.md</code>、<code>scorecard.md</code>、<code>recommendations.md</code> 和 JSON 结果，让产品、文档和工程团队可以在 PR 或 issue 中审阅。</p>")}
-            ${renderPanel("谁应该使用", "维护公开入口的团队", "<p>适合维护产品官网、文档、开源 README、release 页面和自助试用路径的团队。</p>")}
+            ${renderPanel("检查公开叙事", "它检查什么", "<p>别人只看公开页面，能不能理解你的品类、证据、定价、对比和上手路径？AnswerLens 会检查这些信号，也会看 schema 和内部链接。</p>")}
+            ${renderPanel("审阅证据", "它输出什么", "<p>产品表面是一组报告：<code>share-summary.md</code>、<code>scorecard.md</code>、<code>recommendations.md</code> 和 JSON 结果，可以放进 PR 或 issue 审阅。</p>")}
+            ${renderPanel("适合谁", "谁应该使用", "<p>适合由产品营销、文档、开发者关系或开源维护者共同负责的公开页面；这些页面需要保持可理解、可引用、可修复。</p>")}
           </div>
         </section>
         <section class="section journey">
-          <div class="sectionHeader"><p class="eyebrow">从这里开始</p><h2>先看报告，再试自己的站点。</h2><p>路径保持顺序：在线演示报告、本地示例站点、一次真实站点审计，然后才是 GitHub Action。</p></div>
+          <div class="sectionHeader"><p class="eyebrow">按这个顺序试用</p><h2>先看输出，再设置；然后跑一个真实页面。</h2><p>先看一份完成的报告，在本地复现一次，再审计一个公开产品站点；只有当报告值得反复审阅时，再接入 GitHub Action。</p></div>
           <ol class="stepGrid">
-            ${renderJourneyStep("1", "打开在线演示", "先看一份完成的审计结果，不需要安装任何东西。演示页会同时展示 HTML 报告、摘要、评分卡和修复建议。", new URL("examples/static-good/index.html", siteUrl).href, "打开演示")}
-            ${renderJourneyStep("2", "运行示例站点演示", "用大约一分钟在本地复现演示结果，先熟悉命令和报告，再换成自己的网址。", `${REPO_URL}#run-the-60-second-fixture-demo`, "运行示例")}
-            ${renderJourneyStep("3", "检查你的站点", "在一个公开产品站点上跑 quickstart，再考虑接入 CI。", repoBlob("docs/zh/quickstart.md"), "打开 quickstart")}
-            ${renderJourneyStep("4", "接入 GitHub Action", "用固定版本的 starter workflow，把同一组报告放进 PR 审阅。", repoBlob("docs/zh/github-action.md"), "打开 Action 文档")}
+            ${renderJourneyStep("1", "打开演示报告", "先看完成后的 HTML 报告、摘要、评分卡和修复建议，不需要安装任何东西。", new URL("examples/static-good/index.html", siteUrl).href, "打开演示")}
+            ${renderJourneyStep("2", "运行示例站点", "在本地复现同一组输出，先熟悉命令和报告文件，再换成自己的网址。", `${REPO_URL}#run-the-60-second-fixture-demo`, "运行示例")}
+            ${renderJourneyStep("3", "审计一个公开站点", "用 quickstart 跑一组公开产品页面，先读摘要，再决定是否改文案或接 CI。", repoBlob("docs/zh/quickstart.md"), "打开 quickstart")}
+            ${renderJourneyStep("4", "添加 Action", "用固定版本的 starter workflow，把同一组报告放进 PR 审阅。", repoBlob("docs/zh/github-action.md"), "打开 Action 文档")}
           </ol>
         </section>
         <section class="section grid">
@@ -1457,7 +1464,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           ${renderMetric("最新版本", releases[0]?.tag_name ?? "待生成", "当前公开发布的版本线。")}
         </section>
         <section class="section">
-          <article class="panel callout"><p class="eyebrow">报告文件</p><h2>每次审计都会留下三份可审阅文件。</h2><p>结果不需要重新整理：一份摘要、一份评分卡、一份修复清单，产品、文档和 PR 审阅都能直接使用。</p><div class="artifactRail"><div class="artifactItem"><strong>share-summary.md</strong><p>把这轮审计放进 PR、issue 或团队记录。</p></div><div class="artifactItem"><strong>scorecard.md</strong><p>查看分数、页面覆盖和失败检查。</p></div><div class="artifactItem"><strong>recommendations.md</strong><p>把缺口转成文案、证明和结构修复。</p></div></div><p>需要固定版本下载时，再打开 <a href="${escapeHtml(new URL("releases/", siteUrl).href)}">最新发布</a>。</p></article>
+          <article class="panel callout"><p class="eyebrow">报告文件</p><h2>你会得到一组团队真的能审阅的报告。</h2><p>结果不需要重新整理：一份摘要、一份评分卡、一份修复清单，产品、文档和 PR 审阅都能直接使用。</p><div class="artifactRail"><div class="artifactItem"><strong>share-summary.md</strong><p>把这轮审计放进 PR、issue 或团队记录。</p></div><div class="artifactItem"><strong>scorecard.md</strong><p>查看分数、页面覆盖和失败检查。</p></div><div class="artifactItem"><strong>recommendations.md</strong><p>把缺口转成文案、证明和结构修复。</p></div></div><p>需要固定版本下载时，再打开 <a href="${escapeHtml(new URL("releases/", siteUrl).href)}">最新发布</a>。</p></article>
         </section>
         <section class="section grid">
           ${renderPanel("这轮演示现在说明了什么", "当前信号", `${renderSiteIdentity(shareSummary.site)}${firstIssue ? `<p><strong>核心问题：</strong> ${escapeHtml(firstIssue.title)} (${escapeHtml(firstIssue.severity)}) - ${escapeHtml(firstIssue.fixHint)}</p>` : "<p><strong>核心问题：</strong> 无</p>"}${firstFix ? `<p><strong>优先修复：</strong> ${escapeHtml(firstFix.title)} - ${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p><strong>优先修复：</strong> 无</p>"}<p>报告打开顺序保持固定：<code>share-summary.md</code>，然后 <code>scorecard.md</code>，最后 <code>recommendations.md</code>。</p><ul>${publicArtifactLinks}</ul>`)}
