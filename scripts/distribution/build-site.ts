@@ -263,8 +263,8 @@ function translateSiteHtml(html: string): string {
     ["Teams should still review reports before posting them to public issues, PRs, or release notes.", "把报告发到公开 issue、PR 或发布说明之前，团队仍应先审阅一遍。"],
     ["Connect AnswerLens where your team already reviews work.", "把 AnswerLens 接到团队已经在审阅工作的地方。"],
     ["Start with GitHub Actions for PR checks. Add provider-based evals, Search Console imports, or Bing helpers only when they help validate what the basic audit already found.", "先用 GitHub Actions 做 PR 检查。只有当它们能验证基础审计发现的问题时，再添加模型评估、Search Console 导入或 Bing 辅助工具。"],
-    ["Turn one recommendation into a page change.", "把一条建议变成一次页面改动。"],
-    ["Use the demo recommendation as the first pass: confirm the issue, change one page, then run AnswerLens again before sharing.", "先从演示报告里的当前建议开始：确认问题，改一处页面，再跑一次检查确认有效。"],
+    ["Use one recommendation to improve one page.", "用一条建议改好一个页面。"],
+    ["Playbooks are for the moment after you have a report open. Pick one recommendation, confirm the evidence, change the page, then rerun the audit so the next reviewer sees a fresh result.", "这一页是给已经打开报告的人使用的。先选一条建议，核对证据，再改页面，最后重新运行审计，让下一位审阅者看到新的结果。"],
     ["Download the latest AnswerLens release.", "下载最新 AnswerLens 发布版本。"],
     ["This page keeps the current version, release notes, demo bundles, and compiled site bundle in one place.", "这一页集中展示当前版本、发布说明、demo bundle 和编译后的站点 bundle。"],
     ["Use these answers before you run quickstart, add GitHub Actions, or compare AnswerLens with hosted dashboard tools.", "在做 5 分钟检查、添加 GitHub Actions，或把 AnswerLens 和托管看板工具做对比之前，可以先看这些回答。"],
@@ -291,7 +291,7 @@ function translateSiteHtml(html: string): string {
     ["External setup", "外部设置"],
     ["GitHub-first teams", "GitHub-first 团队"],
     ["GitHub distribution", "GitHub 分发"],
-    ["Latest fix list", "最新修复清单"],
+    ["Current generated recommendation", "当前生成的建议"],
     ["Demo result", "演示结果"],
     ["Run sample", "运行示例"],
     ["Run sample locally", "本地运行示例"],
@@ -310,7 +310,7 @@ function translateSiteHtml(html: string): string {
     ["Use case for product marketing teams", "面向产品营销团队的使用场景"],
     ["Use case for developer advocacy teams", "面向开发者关系团队的使用场景"],
     ["Use case for open-source maintainers", "面向开源维护者的使用场景"],
-    ["Page fixes from current audit reports", "基于当前审计报告的页面修复建议"],
+    ["Fix one product page from an AnswerLens report", "根据 AnswerLens 报告修好一个产品页面"],
     ["Product docs", "产品文档"],
     ["Versioned distribution", "版本化分发"],
     ["Example report", "示例报告"],
@@ -320,7 +320,7 @@ function translateSiteHtml(html: string): string {
     ["Compare", "对比"],
     ["Integrations", "集成"],
     ["Use case", "使用场景"],
-    ["Fixes and playbooks", "修复与手册"],
+    ["Fixes and playbooks", "页面修复"],
     ["Recommended first-run path", "推荐首次试用路径"],
     ["Does AnswerLens fit your site?", "AnswerLens 是否适合你的站点？"],
     ["Check the public story", "检查公开叙事"],
@@ -357,7 +357,7 @@ function translateSiteHtml(html: string): string {
     ["Where teams start", "团队从哪里开始"],
     ["Where teams focus", "团队关注点"],
     ["Why maintainers use it", "维护者为什么使用它"],
-    ["Latest fix list", "最新修复清单"],
+    ["Current generated recommendation", "当前生成的建议"],
     ["Recommended reading", "推荐阅读"],
     ["Open live demo", "打开在线演示"],
     ["View starter", "查看接入文件"],
@@ -2062,64 +2062,64 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       route: "playbooks/",
       filePath: path.join(outDir, "playbooks", "index.html"),
       title: {
-        en: "Page fixes from current audit reports",
-        "zh-CN": "基于当前审计报告的页面修复建议"
+        en: "Fix one product page from an AnswerLens report",
+        "zh-CN": "根据 AnswerLens 报告修好一个产品页面"
       },
       description: {
-        en: "Use AnswerLens recommendations to make one clear page improvement, then run the audit again.",
-        "zh-CN": "用 AnswerLens 修复建议完成一个清晰页面改进，然后重新运行审计。"
+        en: "Choose one recommendation, update the page evidence or structure, then rerun AnswerLens before sharing the result.",
+        "zh-CN": "从一条建议开始，更新页面证据或结构，再重新运行 AnswerLens 后分享结果。"
       },
       body: {
-        en: `<section class="hero"><p class="eyebrow">Page fixes</p><h1>Turn one recommendation into a page change.</h1><p>Use the demo recommendation as the first pass: confirm the issue, change one page, then run AnswerLens again before sharing.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(new URL("examples/static-good/recommendations.md", siteUrl).href)}">View current fixes</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open demo report</a></div></section>
+        en: `<section class="hero"><p class="eyebrow">Page fix</p><h1>Use one recommendation to improve one page.</h1><p>Playbooks are for the moment after you have a report open. Pick one recommendation, confirm the evidence, change the page, then rerun the audit so the next reviewer sees a fresh result.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(new URL("examples/static-good/recommendations.md", siteUrl).href)}">Open fix list</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open demo report</a></div></section>
         <section class="section grid">
-          ${renderPanel("Have a report?", "Start here", `<p>If this is your first AnswerLens page, start with the demo report. If you already have a report, read the summary and scorecard before applying a recommendation.</p><ul>${renderList([
+          ${renderPanel("Know what you are fixing", "Start here", `<p>Use this page after you have opened a demo or real-site report. Read the summary first, use the scorecard to confirm the issue, then choose one recommendation.</p><ul>${renderList([
             `<a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open the demo report</a>`,
             `<a href="${escapeHtml(new URL("examples/static-good/share-summary.md", siteUrl).href)}">Read the plain-language summary</a>`,
             `<a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run the 5-minute check on your site</a>`
           ])}</ul>`)}
-          ${renderPanel("Current top issue", "From the demo", `${firstIssue ? `<p><strong>${escapeHtml(firstIssue.title)}</strong></p><p>${escapeHtml(firstIssue.fixHint)}</p>` : "<p>No current demo issue.</p>"}`)}
-          ${renderPanel("Recommended fix", "Next change", `${firstFix ? `<p><strong>${escapeHtml(firstFix.title)}</strong></p><p>${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p>No current recommendation.</p>"}`)}
+          ${renderPanel("What the report found", "From the demo", `${firstIssue ? `<p><strong>${escapeHtml(firstIssue.title)}</strong></p><p>${escapeHtml(firstIssue.fixHint)}</p>` : "<p>No current demo issue.</p>"}`)}
+          ${renderPanel("First page change", "Recommended action", `${firstFix ? `<p><strong>${escapeHtml(firstFix.title)}</strong></p><p>${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p>No current recommendation.</p>"}`)}
         </section>
         <section class="section journey">
-          <div class="sectionHeader"><p class="eyebrow">Fix loop</p><h2>Change one page, then rerun the report.</h2><p>Start with the summary, confirm the issue in the scorecard, apply the recommendation, then run the audit again before you share it.</p></div>
+          <div class="sectionHeader"><p class="eyebrow">One-page fix path</p><h2>Confirm the issue, make the edit, rerun AnswerLens.</h2><p>Keep the work small enough to review: one issue, one page, one fresh report before the result moves into a pull request or team note.</p></div>
           <ol class="stepGrid">
             ${renderJourneyStep("1", "Start with the summary", "Use the short summary to explain the audit and decide whether the issue is worth acting on.", new URL("examples/static-good/share-summary.md", siteUrl).href, "Open summary")}
-            ${renderJourneyStep("2", "Confirm in the scorecard", "Inspect the affected checks, pages, and evidence before changing copy.", new URL("examples/static-good/scorecard.md", siteUrl).href, "Open scorecard")}
-            ${renderJourneyStep("3", "Apply the recommendation", "Use the fix list to update page copy, proof, and structure.", new URL("examples/static-good/recommendations.md", siteUrl).href, "Open fixes")}
-            ${renderJourneyStep("4", "Run it again", "Run the sample or a real-site audit again before moving the result into review.", repoBlob("docs/quickstart.md"), "Start 5-minute check")}
+            ${renderJourneyStep("2", "Check the scorecard evidence", "Inspect the affected checks, pages, and evidence before changing copy.", new URL("examples/static-good/scorecard.md", siteUrl).href, "Open scorecard")}
+            ${renderJourneyStep("3", "Change one page", "Use the recommendation to update page copy, proof, or structure.", new URL("examples/static-good/recommendations.md", siteUrl).href, "Open fix list")}
+            ${renderJourneyStep("4", "Rerun before sharing", "Run the sample or a real-site audit again before moving the result into review.", repoBlob("docs/quickstart.md"), "Start 5-minute check")}
           </ol>
         </section>
         <section class="section grid">
-          ${renderPanel("Latest fix list", "Demo result", `${firstFix ? `<p><strong>${escapeHtml(firstFix.title)}</strong></p><p>${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p>No current recommendation.</p>"}<p>Open the <a href="${escapeHtml(new URL("examples/static-good/recommendations.md", siteUrl).href)}">full generated fix list</a>.</p>`)}
-          ${renderPanel("Recommended reading", "Concept support", `<ul>${renderList([
+          ${renderPanel("Current generated recommendation", "Demo report", `${firstFix ? `<p><strong>${escapeHtml(firstFix.title)}</strong></p><p>${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p>No current recommendation.</p>"}<p>Open the <a href="${escapeHtml(new URL("examples/static-good/recommendations.md", siteUrl).href)}">full generated fix list</a>.</p>`)}
+          ${renderPanel("Read this when the fix needs context", "Concept support", `<ul>${renderList([
             `<a href="${escapeHtml(repoBlob("docs/concepts/schema-text-consistency.md"))}">Keep structured data aligned</a>: match visible page copy with machine-readable data.`,
             `<a href="${escapeHtml(repoBlob("docs/concepts/evidence-density.md"))}">Add citeable evidence</a>: make proof easier to quote and compare.`,
             `<a href="${escapeHtml(repoBlob("docs/scoring.md"))}">Read the scorecard</a>: understand how issues affect the report.`,
             `<a href="${escapeHtml(repoBlob("docs/github-action.md"))}">Set up GitHub Actions</a>: put the same check into code review.`
           ])}</ul>`)}
         </section>`,
-        "zh-CN": `<section class="hero"><p class="eyebrow">页面修复</p><h1>把一条建议变成一次页面改动。</h1><p>先从演示报告里的当前建议开始：确认问题，改一处页面，再跑一次检查确认有效。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(new URL("examples/static-good/recommendations.md", siteUrl).href)}">查看当前建议</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">查看演示报告</a></div></section>
+        "zh-CN": `<section class="hero"><p class="eyebrow">页面修复</p><h1>用一条建议改好一个页面。</h1><p>这一页是给已经打开报告的人使用的。先选一条建议，核对证据，再改页面，最后重新运行审计，让下一位审阅者看到新的结果。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(new URL("examples/static-good/recommendations.md", siteUrl).href)}">打开修复清单</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">打开演示报告</a></div></section>
         <section class="section grid">
-          ${renderPanel("已经有报告？", "先从这里开始", `<p>如果这是你第一次打开 AnswerLens，先看在线演示报告。如果你已经有一份报告，先读摘要和评分卡，再按建议修页面。</p><ul>${renderList([
+          ${renderPanel("先弄清要修什么", "从这里开始", `<p>请在打开演示或真实站点报告之后使用这一页。先读摘要，再用评分卡确认问题，最后只选择一条建议处理。</p><ul>${renderList([
             `<a href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">打开在线演示报告</a>`,
             `<a href="${escapeHtml(new URL("examples/static-good/share-summary.md", siteUrl).href)}">阅读摘要报告</a>`,
             `<a href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">在你的站点上做 5 分钟检查</a>`
           ])}</ul>`)}
-          ${renderPanel("当前核心问题", "来自演示", `${firstIssue ? `<p><strong>${escapeHtml(firstIssue.title)}</strong></p><p>${escapeHtml(firstIssue.fixHint)}</p>` : "<p>当前演示没有问题。</p>"}`)}
-          ${renderPanel("推荐修复", "下一步改动", `${firstFix ? `<p><strong>${escapeHtml(firstFix.title)}</strong></p><p>${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p>当前没有修复建议。</p>"}`)}
+          ${renderPanel("报告发现了什么", "演示报告", `${firstIssue ? `<p><strong>${escapeHtml(firstIssue.title)}</strong></p><p>${escapeHtml(firstIssue.fixHint)}</p>` : "<p>当前演示没有问题。</p>"}`)}
+          ${renderPanel("第一处页面改动", "建议动作", `${firstFix ? `<p><strong>${escapeHtml(firstFix.title)}</strong></p><p>${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p>当前没有修复建议。</p>"}`)}
         </section>
         <section class="section journey">
-          <div class="sectionHeader"><p class="eyebrow">修复循环</p><h2>改一个页面，然后重新生成报告。</h2><p>先看摘要，再用评分卡确认问题；按建议修页面，然后在分享前重新跑一次审计。</p></div>
+          <div class="sectionHeader"><p class="eyebrow">一次只修一个页面</p><h2>确认问题，改页面，再重新运行 AnswerLens。</h2><p>这样改动足够小，团队容易审阅，也能看到下一轮报告是否变清楚。</p></div>
           <ol class="stepGrid">
             ${renderJourneyStep("1", "先看摘要", "用简短摘要说明这轮审计，并判断问题是否值得处理。", new URL("examples/static-good/share-summary.md", siteUrl).href, "打开摘要")}
-            ${renderJourneyStep("2", "用评分卡确认", "改文案前，先检查受影响的检查项、页面和证据。", new URL("examples/static-good/scorecard.md", siteUrl).href, "打开评分卡")}
-            ${renderJourneyStep("3", "按建议修页面", "用修复清单更新页面文案、证明和结构。", new URL("examples/static-good/recommendations.md", siteUrl).href, "打开修复清单")}
-            ${renderJourneyStep("4", "分享前重新检查", "把结果交给团队评审之前，先重新跑示例或真实站点审计。", repoBlob("docs/zh/quickstart.md"), "开始 5 分钟检查")}
+            ${renderJourneyStep("2", "核对评分卡证据", "改文案前，先检查受影响的检查项、页面和证据。", new URL("examples/static-good/scorecard.md", siteUrl).href, "打开评分卡")}
+            ${renderJourneyStep("3", "只改一个页面", "用修复建议更新页面文案、证明或结构。", new URL("examples/static-good/recommendations.md", siteUrl).href, "打开修复清单")}
+            ${renderJourneyStep("4", "分享前重新运行", "把结果交给团队评审之前，先重新跑示例或真实站点审计。", repoBlob("docs/zh/quickstart.md"), "开始 5 分钟检查")}
           </ol>
         </section>
         <section class="section grid">
-          ${renderPanel("最新修复建议", "演示结果", `${firstFix ? `<p><strong>${escapeHtml(firstFix.title)}</strong></p><p>${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p>当前没有修复建议。</p>"}<p>查看<a href="${escapeHtml(new URL("examples/static-good/recommendations.md", siteUrl).href)}">完整生成修复清单</a>。</p>`)}
-          ${renderPanel("推荐阅读", "概念支撑", `<ul>${renderList([
+          ${renderPanel("当前生成的建议", "演示报告", `${firstFix ? `<p><strong>${escapeHtml(firstFix.title)}</strong></p><p>${escapeHtml(firstFix.expectedOutcome)}</p>` : "<p>当前没有修复建议。</p>"}<p>查看<a href="${escapeHtml(new URL("examples/static-good/recommendations.md", siteUrl).href)}">完整生成修复清单</a>。</p>`)}
+          ${renderPanel("需要背景时再读", "概念支撑", `<ul>${renderList([
             `<a href="${escapeHtml(repoBlob("docs/concepts/schema-text-consistency.md"))}">对齐结构化数据</a>：让机器可读数据和页面文案说同一件事。`,
             `<a href="${escapeHtml(repoBlob("docs/concepts/evidence-density.md"))}">补充可引用证据</a>：让证明更容易被引用和比较。`,
             `<a href="${escapeHtml(repoBlob("docs/scoring.md"))}">读懂评分卡</a>：理解问题如何影响报告结果。`,

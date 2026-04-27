@@ -93,6 +93,7 @@ test("build-site writes indexable pages and metadata", async () => {
     "zh/examples/index.html",
     "playbooks/index.html",
     "en/playbooks/index.html",
+    "zh/playbooks/index.html",
     "use-case/product-marketing/index.html",
     "en/use-case/product-marketing/index.html",
     "use-case/developer-advocacy/index.html",
@@ -172,6 +173,7 @@ test("build-site writes indexable pages and metadata", async () => {
     zhExamples,
     playbooksRedirect,
     playbooks,
+    zhPlaybooks,
     demoReport,
     zhDemoReport,
     feed,
@@ -223,6 +225,7 @@ test("build-site writes indexable pages and metadata", async () => {
     load("zh/examples/index.html"),
     load("playbooks/index.html"),
     load("en/playbooks/index.html"),
+    load("zh/playbooks/index.html"),
     load("examples/static-good/index.html"),
     load("zh/examples/static-good/index.html"),
     load("feed.xml"),
@@ -304,7 +307,7 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(openSourcePluralRedirect, /use-case\/open-source-maintainers\//);
   assert.match(openSourcePluralZhRedirect, /zh\/use-case\/open-source-maintainers\//);
   assert.match(playbooks, /aria-current="page">Fixes<\/a>/);
-  assert.match(playbooks, /Have a report\?/);
+  assert.match(playbooks, /Know what you are fixing/);
   assert.match(playbooks, /Run the 5-minute check on your site/);
   assert.match(zhFaq, /先看在线演示报告，再在本地跑示例站点演示/);
   assert.match(zhFaq, /查看对比/);
@@ -395,13 +398,19 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(zhExamples, /看完演示后/);
   assert.match(zhExamples, /本地复现示例/);
   assert.doesNotMatch(zhExamples, /漏斗|The demo report shows|Demo report package/);
-  assert.match(playbooks, /Turn one recommendation into a page change\./);
-  assert.match(playbooks, /Page fixes/);
-  assert.match(playbooks, /View current fixes/);
-  assert.match(playbooks, /Fix loop/);
-  assert.match(playbooks, /Change one page, then rerun the report\./);
-  assert.match(playbooks, /Latest fix list/);
+  assert.match(playbooks, /Use one recommendation to improve one page\./);
+  assert.match(playbooks, /Page fix/);
+  assert.match(playbooks, /Open fix list/);
+  assert.match(playbooks, /One-page fix path/);
+  assert.match(playbooks, /Confirm the issue, make the edit, rerun AnswerLens\./);
+  assert.match(playbooks, /Current generated recommendation/);
   assert.match(playbooks, /Keep structured data aligned/);
+  assert.match(zhPlaybooks, /用一条建议改好一个页面。/);
+  assert.match(zhPlaybooks, /先弄清要修什么/);
+  assert.match(zhPlaybooks, /一次只修一个页面/);
+  assert.match(zhPlaybooks, /确认问题，改页面，再重新运行 AnswerLens。/);
+  assert.match(zhPlaybooks, /当前生成的建议/);
+  assert.doesNotMatch(zhPlaybooks, /修复循环|把一条建议变成一次页面改动|Page fixes|Fix loop|漏斗/);
   assert.match(demoReport, /AnswerLens static-good fixture demo/);
   assert.match(zhDemoReport, /AnswerLens/);
   assert.match(feed, /AnswerLens releases/);
