@@ -234,7 +234,9 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /assets\/social-preview\.png/);
   assert.match(home, /<h1>AnswerLens<\/h1>/);
   assert.match(home, /productHero/);
-  assert.match(home, /See the report once, then try it on your own site\./);
+  assert.match(home, /Audit public product pages and get report files your team can review in GitHub\./);
+  assert.match(home, /Start with the report, then try your own site\./);
+  assert.match(home, /no consumer AI UI scraping, no ranking promises, no hosted dashboard required, and no dashboard-first rewrite/);
   assert.match(home, /Demo score/);
   assert.match(home, /First report/);
   assert.match(home, /Start here/);
@@ -256,13 +258,18 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /softwareVersion/);
   assert.match(home, /og:image:alt/);
   assert.match(home, /What it checks/);
-  assert.match(home, /What it outputs/);
+  assert.match(home, /What it writes/);
   assert.match(home, /Who should use it/);
   assert.match(zhHome, /zh\/examples\/static-good\/index\.html/);
   assert.match(zhHome, /locale-switcher/);
   assert.match(zhHome, /它检查什么/);
-  assert.match(zhHome, /它输出什么/);
+  assert.match(zhHome, /它写出什么/);
   assert.match(zhHome, /谁应该使用/);
+  assert.match(zhHome, /审计公开产品页面，并得到可在 GitHub 里审阅的报告文件/);
+  assert.match(zhHome, /先看报告，再试自己的站点/);
+  assert.match(zhHome, /命令行优先、报告优先/);
+  assert.match(zhHome, /不改成看板优先产品/);
+  assert.doesNotMatch(zhHome, /CLI-first|artifact-first|dashboard|答案页排名|漏斗/);
 
   for (const redirectPage of [
     docsRedirect,

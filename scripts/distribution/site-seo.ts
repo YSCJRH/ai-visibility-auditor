@@ -212,7 +212,7 @@ function homeJsonLd(page: SeoPage, latestReleaseVersion: string): unknown[] {
       operatingSystem: "Cross-platform",
       description:
         page.locale === "zh-CN"
-          ? "AnswerLens 是一个面向产品网站的 CLI-first AI 可发现性审计器，会输出团队可审阅的 GitHub 工作流产物。"
+          ? "AnswerLens 会审计公开产品页面，并生成团队可在 GitHub 中审阅的报告文件。"
           : `${DEFAULT_DESCRIPTION} ${DEFAULT_TAGLINE}`,
       url: page.canonical,
       codeRepository: REPO_URL,

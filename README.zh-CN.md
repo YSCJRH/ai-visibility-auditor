@@ -11,42 +11,32 @@
 
 > 面向 AI 可发现性的 CI。
 
-AnswerLens 是一个 CLI-first、GitHub-native 的 AI 可见性审计器，面向产品网站。它帮助团队理解为什么 AI 系统会错过、压扁或误读站点内容，然后产出可复现、可在 GitHub 中审阅的 artifacts。
+AnswerLens 是一个面向产品网站的命令行优先 AI 可见性审计器。它会审计公开产品页面，并生成团队可以在 GitHub 里审阅的报告文件。
 
-它关注的是可解释的结构、证据和验证工作流，而不是消费级 UI 抓取。
+它帮助你判断 AI 系统能否看懂你卖什么、找到支撑证据、读懂定价和对比页面，并引用正确来源。
 
-开源。CLI-first。报告驱动。无消费级 UI 抓取。不承诺排名。不做 dashboard-first 重写。
+开源。命令行优先。报告驱动。不抓取消费级 AI 界面。不承诺排名。不要求托管看板。不改成看板优先产品。
 
 ## 从这里开始
 
-一条路径，四个步骤：
+先看报告，不要先读安装说明：
 
 1. [打开在线演示报告](https://yscjrh.github.io/ai-visibility-auditor/zh/examples/static-good/index.html)
-   最快理解输出、artifact 流，以及为什么这套工作流适合在 GitHub 中审阅。
-2. [运行 60 秒 fixture 演示](README.md#run-the-60-second-fixture-demo)
-   在本地复现同一组 artifacts，让这条路径从“看懂”变成“亲手跑通”。
+   先看到摘要、评分卡和修复清单放在一起是什么样。
+2. [运行 60 秒示例站点演示](README.md#run-the-60-second-fixture-demo)
+   在本地复现同一组报告，让命令路径变得具体。
 3. [运行 5 分钟真实站点审计](docs/zh/quickstart.md)
-   先把同一套配置跑到自己的公开站点上，再去接 CI。
+   先用一个公开产品站点试跑，再去接 CI。
 4. [添加 GitHub Action](docs/zh/github-action.md)
-   把同一套 artifact-first 工作流搬进 PR、artifact 上传和 `GITHUB_STEP_SUMMARY`。
+   把同一组报告放进 PR、产物上传和 `GITHUB_STEP_SUMMARY`。
 
-主入口：
-- 在线演示报告
+每一步都保持同样的报告顺序：`share-summary.md`，然后 `scorecard.md`，最后 `recommendations.md`。
 
-辅助入口：
-- 60 秒 fixture 演示
-- GitHub Action 文档，但前提是一轮本地运行已经足够可审阅
-
-桥接步骤：
-- 在 fixture 演示和 CI 接入之间，先跑一轮真实站点 quickstart
-
-每一步都保持同样的 artifact 顺序：`share-summary.md`，然后 `scorecard.md`，最后 `recommendations.md`。
-
-如果你一开始就知道自己要接 CI，Action 文档当然仍然公开可用；但最清晰的首次路径仍然是 demo -> fixture -> real-site -> Action。
+如果你一开始就知道自己要接 CI，Action 文档当然仍然公开可用；但最容易完成的首次路径仍然是：演示报告 -> 示例站点 -> 真实站点 -> Action。
 
 ## 你会得到什么
 
-- `audit`：对实时站点或本地 fixture 做 AI readiness 审计
+- `audit`：对公开站点或本地示例站点做 AI 可见性审计
 - `eval`：通过 OpenAI / Perplexity 适配器做 prompt-pack 基准评估
 - `manual-import`：为外部或人工收集的答案样本做归一化评分
 - `search-console-import`：把 Search Console 页面级导出与关键页面证据对照验证
@@ -55,9 +45,9 @@ AnswerLens 是一个 CLI-first、GitHub-native 的 AI 可见性审计器，面�
 
 ## 为什么是 AnswerLens
 
-- 面向 AI 可发现性的 CI，服务于 Git 工作流而不是 dashboard 锁定
+- 面向 AI 可发现性的 CI，服务于 Git 工作流而不是托管看板锁定
 - 规则可解释，聚焦 AI 为什么会错过或误读站点
-- report-first、repo-native，把运行结果变成团队能审阅和推进的 artifacts
+- 报告优先、仓库内审阅，把运行结果变成团队能推进的报告文件
 - 以验证为导向，避免 scrape-and-rank 叙事，并让证据保持可见
 
 ## 它不是什么
@@ -65,6 +55,7 @@ AnswerLens 是一个 CLI-first、GitHub-native 的 AI 可见性审计器，面�
 - 不是“让你在 ChatGPT 排第一”的技巧包
 - 不是消费级 AI UI 抓取器
 - 不是泛化的 AI 内容生成器
+- 不是把命令行审计改成看板优先产品
 - 不是 Search Console 或 analytics 的替代品
 - 不是任何答案面的排名保证
 
