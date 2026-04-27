@@ -218,6 +218,7 @@ function otherLocale(locale: Locale): Locale {
 function translateSiteHtml(html: string): string {
   const replacements: Array<[string, string]> = [
     ["Home", "首页"],
+    ["Docs and examples", "文档与示例"],
     ["Docs", "文档"],
     ["Releases", "发布"],
     ["Examples", "示例"],
@@ -296,7 +297,7 @@ function translateSiteHtml(html: string): string {
     ["Open fix list", "打开修复清单"],
     ["AnswerLens makes AI discoverability reviewable in GitHub.", "AnswerLens 让 AI 可发现性在 GitHub 里变得可审阅。"],
     ["AI visibility audit reports and demo entry points", "AI 可发现性审计报告与演示入口"],
-    ["Docs index, concepts, and activation references", "文档索引、概念与激活参考"],
+    ["Docs index, concepts, and activation references", "文档索引、概念说明与上手路径"],
     ["Release notes and downloadable distribution assets", "发布说明与可下载分发资产"],
     ["Demo reports and sample-site outputs", "演示报告与示例站点输出"],
     ["Starter files for external GitHub repositories", "面向外部 GitHub 仓库的 starter 文件"],
@@ -384,7 +385,7 @@ function translateSiteHtml(html: string): string {
     ["Repeat the check", "重复检查"],
     ["Improve public pages, run the audit again, and track whether the next round of feedback is easier to act on.", "改进公开页面后再跑一次审计，看看下一轮反馈是否更容易执行。"],
     ["AnswerLens integrations stay GitHub-native and artifact-backed.", "AnswerLens 的集成保持围绕 GitHub 和报告文件。"],
-    ["The integration surface is intentionally narrow: keep the core audit contract stable, add eval providers when you need them, and layer validation imports on top without turning the project into a dashboard-first SaaS.", "集成面刻意保持收敛：先稳定核心审计，再按需要加入模型评估和验证导入，不把项目扩成看板优先的 SaaS。"],
+    ["The integration surface is intentionally narrow: keep the core audit contract stable, add eval providers when you need them, and layer validation imports on top without turning the project into a dashboard-first SaaS.", "集成面刻意保持收敛：先稳定核心审计，再按需要加入模型评估和验证导入，不把项目扩成看板式 SaaS。"],
     ["How teams usually start", "团队通常如何开始"],
     ["Open the live demo report.", "先看在线演示报告。"],
     ["Run the sample-site demo locally.", "在本地跑一次示例站点演示。"],
@@ -408,7 +409,7 @@ function translateSiteHtml(html: string): string {
     ["artifact 组合", "报告文件"],
     ["artifacts", "报告文件"],
     ["GitHub-native", "GitHub 原生"],
-    ["dashboard-first", "看板优先"],
+    ["dashboard-first", "看板式"],
     ["打开 quickstart", "开始 5 分钟检查"],
     ["Teams usually look at the demo, run one local audit, and then add GitHub Actions. The package is intentionally simple:", "团队通常先看演示，再跑一次本地审计，然后添加 GitHub Actions。打包方式刻意保持简单："],
     ["The root GitHub Action for pull requests and manual workflow runs.", "根目录 GitHub Action 用于 pull request 和手动 workflow 运行。"],
@@ -425,6 +426,11 @@ function translateSiteHtml(html: string): string {
     ["把 接入文件", "把接入文件"],
     ["先看 在线演示报告", "先看在线演示报告"],
     ["看 接入文件 如何嵌进 GitHub 原生 工作流", "看接入文件如何进入 GitHub Actions 工作流"],
+    ["The 接入文件 is the public adoption asset for external repositories.", "接入文件是给外部仓库复用的公开起点。"],
+    ["这样能把 接入文件 保持在“证明 adoption readiness”的位置，而不是变成另一套独立产品面。", "这样接入文件只承担“可复制上手”的作用，不会变成另一套产品页面。"],
+    ["查看 activation references、scoring notes 与 canonical Markdown。", "查看上手路径、评分说明和规范文档。"],
+    ["当你想先解释 AnswerLens GitHub Action 路径，而不是直接把人扔进 raw repo files 时，就该用这一页。它把 external layout、artifact order 和 next step 放在了同一个页面里。", "当你需要说明 AnswerLens 的 GitHub Action 接入路径时，先用这一页讲清 .github/answerlens/ 目录、报告顺序和下一步，再把读者带到示例文件。"],
+    ["当你需要先给出一份可引用的 <code>.github/answerlens/</code> 布局说明，而不是直接把 raw example files 扔给别人时，请使用 接入文件 overview。", "当你需要先说明 <code>.github/answerlens/</code> 目录该怎么放，再把示例文件交给别人时，请使用接入文件总览。"],
     ["activation 参考、评分说明和规范 Markdown", "评分说明和产品文档"],
     ["release assets", "release 下载"],
     ["Pricing", "定价"],
@@ -456,7 +462,7 @@ function translateSiteHtml(html: string): string {
     ["把 release 下载 当作第二个公开入口", "把 release 下载作为第二个公开入口"],
     ["继续看 评分说明和产品文档", "继续看评分说明和产品文档"],
     ["What to keep aligned", "需要保持一致的内容"],
-    ["keep activation references and implementation notes visible.", "保持激活参考和实现说明可见。"],
+    ["keep activation references and implementation notes visible.", "保持上手路径和实现说明可见。"],
     ["explain GitHub Actions, providers, and validation helpers together.", "把 GitHub Actions、模型服务和验证辅助工具放在一起说明。"],
     ["answer first-run setup questions before CI adoption.", "在接入 CI 前回答第一次设置问题。"],
     ["explain why a GitHub workflow differs from hosted dashboard tools.", "说明 GitHub 工作流为什么不同于托管看板工具。"],
@@ -551,17 +557,17 @@ function translateSiteHtml(html: string): string {
     ["see the open-source and BYOK packaging model.", "查看开源与 BYOK 的打包模型。"],
     ["review trust, secrets, and guardrails.", "查看信任、密钥与边界说明。"],
     ["understand how AnswerLens differs from Profound, Peec AI, and Otterly.", "理解 AnswerLens 与 Profound、Peec AI、Otterly 的区别。"],
-    ["review the GitHub-native workflow path.", "查看 GitHub-native 工作流路径。"],
+    ["review the GitHub-native workflow path.", "查看 GitHub 工作流路径。"],
     ["go deeper on activation, scoring, and Action usage.", "进一步了解激活计划、评分与 Action 使用方式。"],
     ["Fixture outputs are treated as public example artifacts.", "fixture 输出会被当作公开示例 artifacts。"],
     ["The static-good fixture is the stable source for share summaries, scorecards, recommendations, and HTML report outputs.", "static-good fixture 是 share summaries、scorecards、recommendations 与 HTML report outputs 的稳定来源。"],
     ["if you want the same artifact set locally.", "如果你想在本地拿到同一组 artifacts。"],
     ["against your own public site.", "面向你自己的公开站点。"],
-    ["Open the starter bundle overview", "打开 starter bundle 总览"],
+    ["Open the starter bundle overview", "打开接入文件总览"],
     ["only after one useful local real-site run.", "前提是你已经有一轮真正有用的本地真实站点运行。"],
     ["Keep the review order stable:", "保持固定的审阅顺序："],
-    ["The starter bundle is the public adoption asset for external repositories.", "starter bundle 是面向外部仓库的公开 adoption 资产。"],
-    ["Use this page when you want to explain the AnswerLens GitHub Action path before sending someone into raw repo files. It keeps the external layout, artifact order, and next step visible in one place.", "当你想先解释 AnswerLens GitHub Action 路径，而不是直接把人扔进 raw repo files 时，就该用这一页。它把 external layout、artifact order 和 next step 放在了同一个页面里。"],
+    ["The starter bundle is the public adoption asset for external repositories.", "接入文件是给外部仓库复用的公开起点。"],
+    ["Use this page when you want to explain the AnswerLens GitHub Action path before sending someone into raw repo files. It keeps the external layout, artifact order, and next step visible in one place.", "当你需要说明 AnswerLens 的 GitHub Action 接入路径时，先用这一页讲清 <code>.github/answerlens/</code> 目录、报告顺序和下一步，再把读者带到示例文件。"],
     ["External repo shape", "外部仓库结构"],
     ["Copy this layout", "复制这套布局"],
     ["This is the same layout used by ", "这就是下列示例所使用的同一套布局："],
@@ -572,16 +578,16 @@ function translateSiteHtml(html: string): string {
     ["Artifact review order", "artifact 审阅顺序"],
     ["Then use <code>pr-snippet.md</code> for GitHub copy and <code>run.json</code> for machine-readable metadata.", "然后再用 <code>pr-snippet.md</code> 写 GitHub 文案，用 <code>run.json</code> 提供机器可读元数据。"],
     ["Example site:", "示例站点："],
-    ["This public example uses the consumer-repo starter bundle against the stable fixture so external adopters can inspect the resulting artifacts before wiring their own site.", "这个公开示例会把 consumer-repo starter bundle 跑在稳定 fixture 上，让外部 adopter 在接自己站点之前，先看到最终 artifacts 长什么样。"],
+    ["This public example uses the consumer-repo starter bundle against the stable fixture so external adopters can inspect the resulting artifacts before wiring their own site.", "这个公开示例会把 consumer-repo 接入文件跑在稳定示例站点上，让外部采用者在接自己站点之前，先看到最终产物长什么样。"],
     ["if you have not done that yet.", "如果你还没做过这一步。"],
     ["Copy the starter files into the repository you want to audit.", "把 starter 文件复制到你准备审计的仓库里。"],
     ["Move into the GitHub Action path", "进入 GitHub Action 路径"],
     ["when the local run already feels reviewable.", "前提是本地运行已经足够可审阅。"],
-    ["That keeps the starter bundle positioned as proof of adoption readiness, not as a separate product surface.", "这样能把 starter bundle 保持在“证明 adoption readiness”的位置，而不是变成另一套独立产品面。"],
-    ["see the live demo artifact set first.", "先看 live demo artifact set。"],
-    ["activation references, scoring notes, and canonical Markdown.", "查看 activation references、scoring notes 与 canonical Markdown。"],
-    ["see how the starter bundle fits into the GitHub-native workflow.", "看 starter bundle 如何嵌入 GitHub-native 工作流。"],
-    ["use release assets as the second public front door.", "把 release assets 当作第二个公开入口。"],
+    ["That keeps the starter bundle positioned as proof of adoption readiness, not as a separate product surface.", "这样接入文件只承担“可复制上手”的作用，不会变成另一套产品页面。"],
+    ["see the live demo artifact set first.", "先看在线演示报告。"],
+    ["activation references, scoring notes, and canonical Markdown.", "查看上手路径、评分说明和规范文档。"],
+    ["see how the starter bundle fits into the GitHub-native workflow.", "看接入文件如何进入 GitHub Actions 工作流。"],
+    ["use release assets as the second public front door.", "把发布资源当作第二个公开入口。"],
     ["Pricing for AnswerLens is open-source, BYOK, and artifact-first.", "AnswerLens 的定价与打包方式是开源、BYOK、artifact-first。"],
     ["AnswerLens is not a hosted dashboard with seat-based licensing. The code, Pages docs, example reports, and release assets are public. The only variable costs appear when you choose to run eval-mode benchmarking with your own provider account or consume your own GitHub runner minutes.", "AnswerLens 不是一个按 seat 计费的托管 dashboard。代码、Pages 文档、示例报告和 release assets 都是公开的。变量成本只会在你决定用自己的 provider 账户运行 eval benchmarking，或者消耗自己的 GitHub runner minutes 时出现。"],
     ["Open surfaces", "公开面"],
@@ -599,7 +605,7 @@ function translateSiteHtml(html: string): string {
     ["Pages as the public proof surface for docs, examples, playbooks, pricing, and trust.", "Pages 是 docs、examples、playbooks、pricing 与 trust 的公开 proof surface。"],
     ["That model keeps pricing legible: open source for the product surface, BYOK for optional eval usage, and no hosted AnswerLens control plane fee today.", "这种模型让定价叙事保持清晰：产品面本身开源，eval 使用走 BYOK，当前也没有托管版 AnswerLens 控制平面费用。"],
     ["Security for AnswerLens starts with no hosted control plane.", "AnswerLens 的安全叙事起点，是没有托管控制平面。"],
-    ["AnswerLens is designed so that teams can audit public product sites and review results inside GitHub-native workflows without sending their repo history or provider keys to a separate AnswerLens SaaS. It keeps the guardrails explicit: no consumer AI UI scraping, no ranking guarantees, and no dashboard-first rewrite.", "AnswerLens 的设计目标，是让团队能在 GitHub-native 工作流中审计公开产品站点并审阅结果，而不必把仓库历史或 provider key 发给单独的 AnswerLens SaaS。它也把边界写得很明确：不抓取消费级 AI UI、不承诺排名、不做 dashboard-first 重写。"],
+    ["AnswerLens is designed so that teams can audit public product sites and review results inside GitHub-native workflows without sending their repo history or provider keys to a separate AnswerLens SaaS. It keeps the guardrails explicit: no consumer AI UI scraping, no ranking guarantees, and no dashboard-first rewrite.", "AnswerLens 的设计目标，是让团队在 GitHub 工作流中审计公开产品站点并审阅结果，而不必把仓库历史或模型服务 key 发给单独的 AnswerLens SaaS。它也把边界写得很明确：不抓取消费级 AI UI、不承诺排名、不改成看板式产品。"],
     ["What stays under your control", "哪些内容仍由你掌控"],
     ["Provider API keys stay in your own shell, CI environment, or GitHub Actions secrets.", "Provider API key 会保留在你自己的 shell、CI 环境或 GitHub Actions secrets 中。"],
     ["The core `audit` workflow can run without provider keys at all.", "核心 `audit` 工作流可以完全不依赖 provider key。"],
@@ -614,15 +620,15 @@ function translateSiteHtml(html: string): string {
     ["Teams should still review artifacts before posting them to public issues, PRs, or release notes.", "团队在把 artifacts 发到公开 issue、PR 或 release notes 前，仍然应该先自行审阅。"],
     ["That keeps the trust story direct: use your own deployment path, your own secrets handling, and your own repository review process.", "这能让信任叙事保持直接：使用你自己的部署路径、密钥处理方式和仓库审阅流程。"],
     ["AnswerLens integrations stay GitHub-native and artifact-backed.", "AnswerLens 的集成面保持 GitHub-native 和 artifact-backed。"],
-    ["The integration surface is intentionally narrow: keep the core audit contract stable, add eval providers when you need them, and layer validation imports on top without turning the project into a dashboard-first SaaS.", "集成面是刻意收敛的：保持核心 audit 契约稳定，在确有需要时再加 eval providers，并把验证导入叠加在其上，而不是把项目扩成 dashboard-first SaaS。"],
+    ["The integration surface is intentionally narrow: keep the core audit contract stable, add eval providers when you need them, and layer validation imports on top without turning the project into a dashboard-first SaaS.", "集成面是刻意收敛的：保持核心审计契约稳定，在确有需要时再加模型评估，并把验证导入叠加在其上，而不是把项目扩成看板式 SaaS。"],
     ["Runs the same artifact contract in pull requests, workflow_dispatch runs, and artifact uploads.", "在 pull requests、workflow_dispatch runs 和 artifact uploads 中运行同一套 artifact 契约。"],
     ["Run one real-site audit locally.", "先在本地跑一轮真实站点审计。"],
     ["Move the same artifact contract into the GitHub Action.", "再把同一套 artifact 契约搬进 GitHub Action。"],
     ["That sequencing keeps integrations understandable and reviewable instead of turning each surface into a separate product.", "这种顺序能让集成面保持可理解、可审阅，而不是把每个 surface 都变成独立产品。"],
     ["The external-repo path is public and copyable, not hidden in internal fixtures.", "external-repo 路径是公开且可复制的，不会藏在内部 fixtures 里。"],
-    ["Use the starter bundle overview when you need a citable explanation of the <code>.github/answerlens/</code> layout before handing someone the raw example files.", "当你需要先给出一份可引用的 <code>.github/answerlens/</code> 布局说明，而不是直接把 raw example files 扔给别人时，请使用 starter bundle overview。"],
-    ["That keeps the Action path legible for forks, releases, and external setup guides.", "这样能让 Action 路径在 forks、releases 与外部 setup guide 中都保持清晰。"],
-    ["AnswerLens is a CLI-first AI visibility auditor for product websites. It turns audits into share summaries, PR-ready snippets, static reports, release assets, and indexable pages without falling back to dashboard-only workflows.", "AnswerLens 是一个面向产品网站的 CLI-first AI visibility auditor。它会把审计结果转成 share summaries、PR-ready snippets、静态报告、release assets 和可索引页面，而不是退回到只靠 dashboard 的工作方式。"],
+    ["Use the starter bundle overview when you need a citable explanation of the <code>.github/answerlens/</code> layout before handing someone the raw example files.", "当你需要先说明 <code>.github/answerlens/</code> 目录该怎么放，再把示例文件交给别人时，请使用接入文件总览。"],
+    ["That keeps the Action path legible for forks, releases, and external setup guides.", "这样 fork、发布页和外部设置指南里的 Action 路径都会更清楚。"],
+    ["AnswerLens is a CLI-first AI visibility auditor for product websites. It turns audits into share summaries, PR-ready snippets, static reports, release assets, and indexable pages without falling back to dashboard-only workflows.", "AnswerLens 是一个面向产品网站的 CLI-first AI 可见性审计器。它会把审计结果转成分享摘要、PR 可复用片段、静态报告、发布资源和可索引页面，而不是退回到只靠看板的工作方式。"],
     ["Why AI may still miss the site", "为什么 AI 仍然可能错过这个站点"],
     ["What teams can ship next", "团队下一步最值得做什么"],
     ["Frequently asked questions about what AnswerLens is, how it works, and what it does not claim.", "关于 AnswerLens 是什么、如何工作，以及它不承诺什么的常见问题。"],
@@ -660,7 +666,7 @@ function translateSiteHtml(html: string): string {
     ["Top fixes", "优先修复"],
     ["Next step", "下一步"],
     ["Operational detail", "操作细节"],
-    ["Repo-native vs dashboard-first", "Repo-native 与 dashboard-first"],
+    ["Repo-native vs dashboard-first", "仓库内审阅 vs 看板式监测"],
     ["Copyable sources", "可复制来源"],
     ["Latest run excerpt", "最新运行摘录"],
     ["Example files", "示例文件"],
@@ -703,9 +709,9 @@ function translateSiteHtml(html: string): string {
     ["Public sharing", "公开分享"],
     ["Share <code>share-summary.md</code> or <code>pr-snippet.md</code> and keep raw payloads private.", "公开分享时优先使用 <code>share-summary.md</code> 或 <code>pr-snippet.md</code>，原始 payload 保持私有。"],
     ["Dimension", "维度"],
-    ["Dashboard-first AI visibility tools", "dashboard-first AI 可见性工具"],
+    ["Dashboard-first AI visibility tools", "看板式 AI 可见性工具"],
     ["Primary output", "核心产出"],
-    ["Repo-native reports, scorecards, and fix lists", "Repo-native 报告、scorecard 和修复清单"],
+    ["Repo-native reports, scorecards, and fix lists", "仓库内报告、评分卡和修复清单"],
     ["Managed monitoring views and dashboards", "托管式监测视图和 dashboard"],
     ["Operating model", "运行模式"],
     ["Usually hosted and dashboard-centered", "通常为托管式、以 dashboard 为中心"],
@@ -729,7 +735,7 @@ function translateSiteHtml(html: string): string {
     ["示例 AnswerLens report artifacts generated from the static-good fixture.", "由 static-good fixture 生成的 AnswerLens 示例报告产物。"],
     ["fixture 输出会被当作公开示例 artifacts。", "fixture 输出会被当作公开示例产物。"],
     ["static-good fixture 是 share summaries、scorecards、recommendations 与 HTML report outputs 的稳定来源。", "static-good fixture 是 share summary、scorecard、recommendations 和 HTML 报告输出的稳定来源。"],
-    ["这个公开示例会把 consumer-repo starter bundle 跑在稳定 fixture 上，让外部 adopter 在接自己站点之前，先看到最终 artifacts 长什么样。", "这个公开示例会把 consumer-repo starter bundle 跑在稳定 fixture 上，让外部采用者在接自己站点之前，先看到最终产物长什么样。"],
+    ["这个公开示例会把 consumer-repo starter bundle 跑在稳定 fixture 上，让外部 adopter 在接自己站点之前，先看到最终 artifacts 长什么样。", "这个公开示例会把 consumer-repo 接入文件跑在稳定示例站点上，让外部采用者在接自己站点之前，先看到最终产物长什么样。"],
     ["before you hand this path to another repository.", "再把这条路径交给另一个仓库。"],
     ["保持固定的审阅顺序： <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.", "保持固定的审阅顺序：先看 <code>share-summary.md</code>，再看 <code>scorecard.md</code>，最后看 <code>recommendations.md</code>。"],
     ["示例 files", "示例文件"],
@@ -1318,12 +1324,12 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   const compareTableZh = `
     <table>
       <thead>
-        <tr><th>维度</th><th>AnswerLens</th><th>dashboard-first AI 可见性工具</th></tr>
+        <tr><th>维度</th><th>AnswerLens</th><th>看板式 AI 可见性工具</th></tr>
       </thead>
       <tbody>
-        <tr><td>主要输出</td><td>仓库内可审阅的报告、scorecard 和修复清单</td><td>托管式监测视图和看板</td></tr>
+        <tr><td>主要输出</td><td>仓库内可审阅的报告、评分卡和修复清单</td><td>托管式监测视图和看板</td></tr>
         <tr><td>工作方式</td><td>CLI、本地仓库和 GitHub Actions</td><td>通常是托管式、以看板为中心</td></tr>
-        <tr><td>协作位置</td><td>PR、release、Pages 与报告文件</td><td>厂商 UI 加导出摘要</td></tr>
+        <tr><td>协作位置</td><td>PR、发布说明、Pages 与报告文件</td><td>厂商 UI 加导出摘要</td></tr>
         <tr><td>边界</td><td>不抓取消费级 AI UI，也不承诺答案面排名</td><td>取决于厂商与监测方式</td></tr>
       </tbody>
     </table>`;
@@ -1460,7 +1466,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             `<a href="${escapeHtml(proofPageUrls.pricing)}">定价与打包</a>：看开源、BYOK 和 release 资产的成本边界。`,
             `<a href="${escapeHtml(proofPageUrls.security)}">安全与信任</a>：把 secrets、审阅流和非目标放到同一页。`,
             `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">文档索引</a>：继续看快速开始、评分说明和 GitHub Action 用法。`,
-            `<a href="${escapeHtml(proofPageUrls.starter)}">starter bundle</a>：在接 CI 之前先看外部 <code>.github/answerlens/</code> 布局。`,
+            `<a href="${escapeHtml(proofPageUrls.starter)}">接入文件</a>：在接 CI 之前先看外部 <code>.github/answerlens/</code> 布局。`,
             `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>：用可引用的语言回答首次试用问题。`,
             `<a href="${escapeHtml(proofPageUrls.compare)}">对比页</a>：看 AnswerLens 和托管看板类工具的差异。`,
             `<a href="${escapeHtml(proofPageUrls.integrations)}">集成页</a>：把 GitHub Action 和验证辅助工具放到一起看。`
@@ -1468,7 +1474,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         </section>
         <section class="section grid">
           ${renderPanel("哪些团队通常会继续往下看", "团队适配", `<p>这些使用场景会展示团队最常用的第一批任务。</p><ul>${renderList([
-            `<a href="${escapeHtml(proofPageUrls.productMarketing)}">产品营销团队</a>：把首页、pricing 和对比内容缺口变成可审阅的修复项。`,
+            `<a href="${escapeHtml(proofPageUrls.productMarketing)}">产品营销团队</a>：把首页、定价页和对比内容缺口变成可审阅的修复项。`,
             `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">开发者关系团队</a>：强化文档、示例和自助试用路径。`,
             `<a href="${escapeHtml(proofPageUrls.openSource)}">开源维护者</a>：把 README、release、Pages 和报告当作公开分发栈。`
           ])}</ul>`)}
@@ -1498,7 +1504,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       filePath: path.join(outDir, "docs", "index.html"),
       title: {
         en: "Docs index, concepts, and activation references",
-        "zh-CN": "文档索引、概念与激活参考"
+        "zh-CN": "文档索引、概念说明与上手路径"
       },
       description: {
         en: "Canonical docs, concepts, scoring notes, activation guidance, and distribution references for AnswerLens.",
@@ -1544,7 +1550,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>：用可引用的语言回答首次试用问题。`,
           `<a href="${escapeHtml(proofPageUrls.compare)}">对比</a>：AnswerLens 与托管看板类工具的差异。`,
           `<a href="${escapeHtml(proofPageUrls.integrations)}">集成</a>：GitHub Action、模型评估和验证辅助工具。`,
-          `<a href="${escapeHtml(proofPageUrls.starter)}">Starter bundle</a>：外部仓库布局和报告审阅顺序。`,
+          `<a href="${escapeHtml(proofPageUrls.starter)}">接入文件</a>：外部仓库布局和报告审阅顺序。`,
           `<a href="${escapeHtml(proofPageUrls.productMarketing)}">产品营销团队</a>：强化首页、定价页和对比页。`,
           `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">开发者关系团队</a>：强化文档、示例和自助试用。`,
           `<a href="${escapeHtml(proofPageUrls.openSource)}">开源维护者</a>：把 README、Pages、releases 和报告变成公开入口。`
@@ -1663,7 +1669,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           <ol class="stepGrid">
             ${renderJourneyStep("1", "运行示例站点演示", "在本地复现同一组报告，确认 CLI 可以跑通。", `${REPO_URL}#run-the-60-second-fixture-demo`, "运行示例")}
             ${renderJourneyStep("2", "审计真实站点", "先用 5 分钟 quickstart 跑自己的公开产品站点，再接 CI。", repoBlob("docs/zh/quickstart.md"), "打开 quickstart")}
-            ${renderJourneyStep("3", "复制 starter bundle", "把这条路径交给另一个仓库之前，先看 starter 总览。", proofPageUrls.starter, "打开 starter")}
+            ${renderJourneyStep("3", "复制接入文件", "把这条路径交给另一个仓库之前，先看接入文件总览。", proofPageUrls.starter, "打开接入文件")}
             ${renderJourneyStep("4", "添加 Action", "当本地运行已经足够可审阅时，再把同一组报告放进 pull request。", repoBlob("docs/zh/github-action.md"), "打开 Action 文档")}
           </ol>
         </section>`
@@ -1732,14 +1738,14 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             `<a href="${escapeHtml(new URL("releases/", siteUrl).href)}">Releases</a>: use release assets as the second public front door.`
           ])}</ul>`)}
         </section>`,
-        "zh-CN": `<section class="hero"><p class="eyebrow">starter 文件</p><h1>把 AnswerLens 接入另一个 GitHub 仓库。</h1><p>把配置文件和 workflow 复制到你要审计的仓库里。这一页会说明该复制什么、secret 放在哪里，以及第一次结果该怎么看。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(repoBlob("examples/consumer-repo/.github/workflows/answerlens.yml"))}">打开 workflow</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("starter/example-run/index.html", siteUrl).href)}">查看示例结果</a></div></section>
+        "zh-CN": `<section class="hero"><p class="eyebrow">接入文件</p><h1>把 AnswerLens 接入另一个 GitHub 仓库。</h1><p>接入文件是给外部仓库复用的公开起点。这一页会说明该复制什么、密钥放在哪里，以及第一次结果该怎么看。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(repoBlob("examples/consumer-repo/.github/workflows/answerlens.yml"))}">打开 workflow</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("starter/example-run/index.html", siteUrl).href)}">查看示例结果</a></div></section>
         <section class="section journey">
-          <div class="sectionHeader"><p class="eyebrow">CI 设置</p><h2>先跑一次本地审计，再添加 workflow。</h2><p>starter 文件提供第一次 CI 运行需要的内容：站点设置、竞品、提示词、runtime 默认值，以及固定版本的 Action。</p></div>
+          <div class="sectionHeader"><p class="eyebrow">CI 设置</p><h2>先跑一次本地审计，再添加工作流。</h2><p>接入文件提供第一次 CI 运行需要的内容：站点设置、竞品、提示词、runtime 默认值，以及固定版本的 Action。</p></div>
           <ol class="stepGrid">
             ${renderJourneyStep("1", "先跑真实站点审计", "先有一轮有用的本地审计，让报告内容变得可理解。", repoBlob("docs/zh/quickstart.md"), "打开 quickstart")}
-            ${renderJourneyStep("2", "复制 starter 文件", "把 .github/answerlens 文件和 workflow 移到你要审计的仓库里。", repoBlob("examples/consumer-repo/.github"), "打开来源")}
-            ${renderJourneyStep("3", "设置 runtime 默认值", "把非 secret 的 eval 默认值放进 runtime.yaml，把 provider key 留在 secrets。", repoBlob("examples/consumer-repo/.github/answerlens/runtime.yaml"), "打开 runtime")}
-            ${renderJourneyStep("4", "使用固定版本的 Action", "在 pull request 或 workflow_dispatch 里运行经过 review 的稳定 release tag。", repoBlob("examples/consumer-repo/.github/workflows/answerlens.yml"), "打开 workflow")}
+            ${renderJourneyStep("2", "复制接入文件", "把 .github/answerlens 文件和工作流移到你要审计的仓库里。", repoBlob("examples/consumer-repo/.github"), "打开来源")}
+            ${renderJourneyStep("3", "设置 runtime 默认值", "把非密钥的评估默认值放进 runtime.yaml，把模型服务 key 留在 secrets。", repoBlob("examples/consumer-repo/.github/answerlens/runtime.yaml"), "打开 runtime")}
+            ${renderJourneyStep("4", "使用固定版本的 Action", "在 pull request 或 workflow_dispatch 里运行经过审阅的稳定 release tag。", repoBlob("examples/consumer-repo/.github/workflows/answerlens.yml"), "打开工作流")}
           </ol>
         </section>
         <section class="section grid">
@@ -1767,9 +1773,9 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           ${renderPanel("把它接进真实仓库时怎么走", "设置你的仓库", `<p>文件复制完成后，第一轮保持小而清晰：</p><ol><li>替换示例产品、域名、竞品和 prompts。</li><li>把非 secret 的 eval 默认值放进 <code>runtime.yaml</code>，API keys 留在 secrets。</li><li>如果想先用最低摩擦的 eval，可以从 <code>profile: fast-first-eval</code> 开始。</li><li>如果已经有一轮可读的 OpenAI baseline，并想临时加一个 search-shaped 第二意见，可以使用 <code>profile: perplexity-cross-check</code>。</li><li>本地结果已经足够可审阅之后，<a href="${escapeHtml(repoBlob("docs/zh/github-action.md"))}">再进入 GitHub Action</a>。</li></ol>`)}
           ${renderPanel("这页应该和哪些公开页一起看", "相关证明页面", `<ul>${renderList([
             `<a href="${escapeHtml(new URL("examples/", siteUrl).href)}">示例页</a>：先看 live demo 的 artifact 组合。`,
-            `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">文档页</a>：继续看 activation 参考、评分说明和规范 Markdown。`,
-            `<a href="${escapeHtml(proofPageUrls.integrations)}">集成页</a>：看 starter bundle 如何嵌进 GitHub-native 工作流。`,
-            `<a href="${escapeHtml(new URL("releases/", siteUrl).href)}">发布页</a>：把 release assets 当作第二个公开入口。`
+            `<a href="${escapeHtml(new URL("docs/", siteUrl).href)}">文档页</a>：继续看上手路径、评分说明和规范文档。`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">集成页</a>：看接入文件如何进入 GitHub Actions 工作流。`,
+            `<a href="${escapeHtml(new URL("releases/", siteUrl).href)}">发布页</a>：把发布资源当作第二个公开入口。`
           ])}</ul>`)}
         </section>`
       },
@@ -1883,7 +1889,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       },
       description: {
         en: "How AnswerLens differs from dashboard-first AI visibility tools such as Profound, Peec AI, and Otterly.",
-        "zh-CN": "说明 AnswerLens 与 Profound、Peec AI、Otterly 等 dashboard-first AI 可见性工具的区别。"
+        "zh-CN": "说明 AnswerLens 与 Profound、Peec AI、Otterly 等看板式 AI 可见性工具的区别。"
       },
       body: {
         en: `<section class="hero"><p class="eyebrow">Compare</p><h1>AnswerLens compared with Profound, Peec AI, and Otterly for GitHub-first teams.</h1><p>AnswerLens fits teams that want local audits, GitHub review, and clear fix lists instead of a hosted monitoring dashboard. Profound, Peec AI, and Otterly may fit teams that want managed monitoring or broader hosted visibility products.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open live demo</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(proofPageUrls.pricing)}">Review pricing</a></div></section>
@@ -1918,21 +1924,21 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             "Peec AI：更像产品化的 AI 搜索监测 SaaS，重心在持续追踪与外部界面。",
             "Otterly：偏向持续监控型工具，适合长期跟踪而非仓库内审阅。"
           ])}</ul>`)}
-          ${renderPanel("工作流最核心的区别", "Repo-native 与 dashboard-first", compareTableZh)}
+          ${renderPanel("工作流最核心的区别", "仓库内审阅 vs 看板式监测", compareTableZh)}
         </section>
         <section class="section grid">
           ${renderPanel("什么时候更适合选 AnswerLens", "决策标准", `<ul>${renderList([
-            "你需要的是能进入 pull request、issue、release notes 和 Pages 的报告、scorecard 与修复清单。",
-            "你希望 provider 使用量留在自己的账户里，而不是被包在托管厂商表面之后。",
+            "你需要的是能进入 pull request、issue、发布说明和 Pages 的报告、评分卡与修复清单。",
+            "你希望模型服务用量留在自己的账户里，而不是被包在托管厂商表面之后。",
             "你更在意把源材料写清楚、补齐证据和对比能力，而不是追求一个平台上的“排名承诺”。",
-            "你想让 compare / FAQ / proof page 这类内容缺口，以报告文件的形式暴露出来，而不是只出现在监控看板里。"
+            "你想让对比页、FAQ 和证明页这类内容缺口，以报告文件的形式暴露出来，而不是只出现在监控看板里。"
           ])}</ul>`)}
           ${renderPanel("相关公开页应该一起看", "互链", `<ul>${renderList([
             `<a href="${escapeHtml(proofPageUrls.pricing)}">定价页</a>：对比打包方式和成本姿态。`,
             `<a href="${escapeHtml(proofPageUrls.security)}">安全页</a>：对比信任模型和审阅方式。`,
             `<a href="${escapeHtml(proofPageUrls.faq)}">FAQ</a>：对比首次试用问题与边界说明。`,
-            `<a href="${escapeHtml(proofPageUrls.integrations)}">集成页</a>：对比 GitHub-native 工作流入口。`,
-            `<a href="${escapeHtml(proofPageUrls.productMarketing)}">产品营销团队</a>：看首页、pricing、proof page 这类场景是否更贴合。`,
+            `<a href="${escapeHtml(proofPageUrls.integrations)}">集成页</a>：对比 GitHub 工作流入口。`,
+            `<a href="${escapeHtml(proofPageUrls.productMarketing)}">产品营销团队</a>：看首页、定价页和证明页这类场景是否更贴合。`,
             `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">开发者关系团队</a>：看文档、示例和自助试用路径的适配度。`
           ])}</ul>`)}
         </section>`
