@@ -166,10 +166,11 @@ The practical rule is:
 For `eval`, AnswerLens resolves values in this order:
 
 1. explicit inputs from CLI flags, GitHub Action inputs, or the admin launcher
-2. `runtime.yaml`
-3. provider-specific environment fallbacks
-4. adapter defaults
-5. API keys from environment variables only
+2. profile alias
+3. `runtime.yaml`
+4. provider-specific environment fallbacks
+5. adapter defaults
+6. API keys from environment variables only
 
 Provider-specific environment fallbacks remain:
 

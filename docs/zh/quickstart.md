@@ -2,11 +2,11 @@
 
 [English](../quickstart.md) | [简体中文](quickstart.md)
 
-这是 fixture demo 和 GitHub Action 之间的桥接步骤。
+这是 fixture demo 和 GitHub Action 之间的桥接步骤。这里的 sample report 指在线示例报告，baseline 指第一次可复现的基线结果，provider 指你选择的模型服务商。
 
 适用场景：
 
-- 你已经看过 sample report
+- 你已经看过在线 sample report，并知道先读 `share-summary.md`
 - 你想先对自己的公开站点跑一轮真实 AnswerLens
 - 你还没准备好立刻接入 CI
 
@@ -44,7 +44,7 @@ corepack pnpm install
 - 如果你希望公开报告显示友好的站点名，而不是原始 URL 或本地路径，设置 `site_display_name`
 - 在 `competitors.yaml` 里改成真实竞争对手
 - 在 `prompts.yaml` 里改成贴合你买家、比较和引用问题的提示词
-- 如果你计划运行 `eval`，就在 `runtime.yaml` 里设置默认 provider、model、locale 和 timeout
+- 如果你计划运行 `eval`，就在 `runtime.yaml` 里设置默认 provider（模型服务商）、model、locale 和 timeout
 
 不要把 API key 写进 `runtime.yaml`。它们应继续放在环境变量里。完整优先级见 [model-runtime.md](model-runtime.md)。
 
@@ -70,7 +70,7 @@ OPENAI_API_KEY=... corepack pnpm eval -- https://www.example.com \
 
 如果你想直接套用推荐的一档临时配置，而不是自己逐项覆盖：
 
-- `--profile fast-first-eval` 适合第一次 benchmark pass
+- `--profile fast-first-eval` 适合第一次 benchmark pass，也就是先得到一轮低摩擦 baseline
 - `--profile high-confidence-review` 适合少量高价值 prompt 的复核
 - `--profile perplexity-cross-check` 适合在已经有一轮 OpenAI baseline 之后，再做一次偏搜索风格的第二意见检查
 

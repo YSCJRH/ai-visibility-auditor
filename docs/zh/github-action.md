@@ -2,7 +2,7 @@
 
 [English](../github-action.md) | [简体中文](github-action.md)
 
-AnswerLens 提供一个可复用的根 Action，让团队把 AI 可发现性检查放进 GitHub-native 工作流，而不是在每个仓库里重复拼 shell glue。
+AnswerLens 提供一个可复用的根 Action，让团队把 AI 可发现性检查放进 GitHub-native 工作流，而不是在每个仓库里重复拼 shell glue。这里的 workflow pin 指把 `uses:` 固定到经过 review 的 release tag；provider 指 `eval` 使用的模型服务商。
 
 请在完成下面这条路径之后再来看这页：
 
@@ -30,9 +30,9 @@ AnswerLens 提供一个可复用的根 Action，让团队把 AI 可发现性检�
 ```
 
 把 [../../examples/consumer-repo/.github](../../examples/consumer-repo/.github) 当作可复制的 baseline。
-当前仓库中的 starter workflow pin 到稳定 Action release：`YSCJRH/ai-visibility-auditor@v0.3.2`；有新 release 后，先读 release notes，再更新这个 pin。
+当前仓库中的 starter workflow pin 到稳定 Action release：`YSCJRH/ai-visibility-auditor@v0.3.2`。也就是外部仓库先固定到这个经过 review 的版本；有新 release 后，先读 release notes，再更新这个 pin。
 
-如果你计划运行 `eval`，就把默认 provider / model / locale / timeout 放进 `runtime.yaml`，不要把这些默认值散落在 workflow 里。
+如果你计划运行 `eval`，就把默认 provider（模型服务商）/ model / locale / timeout 放进 `runtime.yaml`，不要把这些默认值散落在 workflow 里。
 
 ## 最小工作流
 

@@ -1021,6 +1021,16 @@ function renderFixedRedirectPage(targetUrl: string): string {
 }
 
 function localizeAbsoluteSiteLinks(html: string, siteUrl: string, locale: Locale): string {
+  const headClose = html.indexOf("</head>");
+  if (headClose === -1) {
+    return localizeAbsoluteSiteLinksInFragment(html, siteUrl, locale);
+  }
+
+  const headEnd = headClose + "</head>".length;
+  return `${html.slice(0, headEnd)}${localizeAbsoluteSiteLinksInFragment(html.slice(headEnd), siteUrl, locale)}`;
+}
+
+function localizeAbsoluteSiteLinksInFragment(html: string, siteUrl: string, locale: Locale): string {
   const slug = localeToSlug(locale);
   const escapedBase = siteUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return html.replace(
@@ -1622,7 +1632,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           ${renderMetric("Demo score", String(shareSummary.metrics.overallScore ?? "pending"), "The current sample-site score.")}
           ${renderMetric("Key pages", String(shareSummary.metrics.keyPageCount ?? "pending"), "Critical pages found in the demo site.")}
           ${renderMetric("Run kind", runManifest.kind, "The demo uses the core audit path.")}
-          ${renderMetric("Report version", shareSummary.run.artifactVersion, "The report format in use.")}
+          ${renderMetric("Report schema", shareSummary.run.artifactVersion, "Report artifact contract, not the package release.")}
         </section>
         <section class="section">
           <article class="panel callout"><p class="eyebrow">What to look at</p><h2>Start with the summary, then check the scorecard and fixes.</h2><p>The demo is here to answer three visitor questions: what do I get, can I trust the evidence, and what would I do next?</p><div class="artifactRail"><div class="artifactItem"><strong><a href="${escapeHtml(new URL("examples/static-good/share-summary.md", siteUrl).href)}">share-summary.md</a></strong><p>Start here for the plain-language audit story.</p></div><div class="artifactItem"><strong><a href="${escapeHtml(new URL("examples/static-good/scorecard.md", siteUrl).href)}">scorecard.md</a></strong><p>Use this to verify coverage, checks, and score drivers.</p></div><div class="artifactItem"><strong><a href="${escapeHtml(new URL("examples/static-good/recommendations.md", siteUrl).href)}">recommendations.md</a></strong><p>Use this to turn gaps into page changes.</p></div></div></article>
@@ -1632,7 +1642,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             `Site: ${escapeHtml(siteLabel(runManifest.site))}`,
             `Mode: ${escapeHtml(runManifest.kind)}`,
             `Generated: ${escapeHtml(formatReadableDate(runManifest.generatedAt, shareSummary.run.generatedAt))}`,
-            `Artifact version: ${escapeHtml(shareSummary.run.artifactVersion)}`,
+            `Artifact schema version: ${escapeHtml(shareSummary.run.artifactVersion)}`,
             `Rule version: ${escapeHtml(shareSummary.run.ruleVersion)}`
           ])}</ul>${fixtureHostNote(runManifest.site.baseUrl) ? `<p>${fixtureHostNote(runManifest.site.baseUrl)}</p>` : ""}`)}
           ${renderPanel("All generated files", "Reports", `<ul>${artifactLinks}</ul>`)}
@@ -1655,7 +1665,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           ${renderMetric("演示分数", String(shareSummary.metrics.overallScore ?? "待生成"), "当前示例站点得分。")}
           ${renderMetric("关键页面数", String(shareSummary.metrics.keyPageCount ?? "待生成"), "这次演示识别出的关键页面数量。")}
           ${renderMetric("运行类型", runManifest.kind === "audit" ? "audit" : runManifest.kind, "演示使用核心审计能力。")}
-          ${renderMetric("报告版本", shareSummary.run.artifactVersion, "这次报告使用的输出格式。")}
+          ${renderMetric("报告格式", shareSummary.run.artifactVersion, "报告产物契约版本，不是软件发布版本。")}
         </section>
         <section class="section">
           <article class="panel callout"><p class="eyebrow">先看什么</p><h2>先读摘要，再查评分卡和修复建议。</h2><p>演示页要回答三个访客问题：我会得到什么、证据能不能相信、下一步该做什么？</p><div class="artifactRail"><div class="artifactItem"><strong><a href="${escapeHtml(new URL("examples/static-good/share-summary.md", siteUrl).href)}">share-summary.md</a></strong><p>先看这里，理解这轮审计在说什么。</p></div><div class="artifactItem"><strong><a href="${escapeHtml(new URL("examples/static-good/scorecard.md", siteUrl).href)}">scorecard.md</a></strong><p>用它核对覆盖范围、检查项和分数来源。</p></div><div class="artifactItem"><strong><a href="${escapeHtml(new URL("examples/static-good/recommendations.md", siteUrl).href)}">recommendations.md</a></strong><p>用它把缺口变成页面改动。</p></div></div></article>
@@ -1665,7 +1675,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             `站点：${escapeHtml(siteLabel(runManifest.site))}`,
             `模式：${escapeHtml(runManifest.kind === "audit" ? "审计" : runManifest.kind)}`,
             `生成时间：${escapeHtml(formatReadableDate(runManifest.generatedAt, shareSummary.run.generatedAt, "zh-CN"))}`,
-            `报告版本：${escapeHtml(shareSummary.run.artifactVersion)}`,
+            `报告格式版本：${escapeHtml(shareSummary.run.artifactVersion)}`,
             `规则版本：${escapeHtml(shareSummary.run.ruleVersion)}`
           ])}</ul>${runManifest.site.baseUrl === "https://fixture.local" ? "<p><code>https://fixture.local</code> 是公开演示 fixture 中使用的稳定主机名，不是 AnswerLens 的官网地址。</p>" : ""}`)}
           ${renderPanel("这次演示会生成哪些文件", "报告文件", `<ul>${artifactLinks}</ul>`)}

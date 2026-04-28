@@ -47,9 +47,11 @@ Read [references/checklist.md](references/checklist.md) first.
 
 ## Validate before closing
 
+- `corepack pnpm public:check`
 - `corepack pnpm demo:fixture`
 - `corepack pnpm test`
 - `corepack pnpm typecheck`
 - `corepack pnpm build:site`
+- `corepack pnpm seo:check`
 
 Add `corepack pnpm pack:cli:dry-run` when package or release-facing install copy changed.

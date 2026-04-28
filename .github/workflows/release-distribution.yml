@@ -53,6 +53,7 @@ jobs:
           node -e "const fs=require('node:fs'); const pkg=JSON.parse(fs.readFileSync('apps/cli/package.json','utf8')); const tag=(process.env.RELEASE_TAG||'').replace(/^v/, ''); if (pkg.version !== tag) { console.error(`apps/cli/package.json version ${pkg.version} does not match tag ${tag}`); process.exit(1); }"
       - run: pnpm typecheck
       - run: pnpm test
+      - run: pnpm public:check
       - run: pnpm demo:fixture
       - run: pnpm demo:consumer-repo
       - run: pnpm build:cli

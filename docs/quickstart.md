@@ -11,8 +11,8 @@ If you have not opened the live demo report or run the fixture demo yet, do that
 - a public site URL
 - Node `>=22.0.0`
 - a local checkout of this repository
-- no provider API keys for a basic `audit` run
-- provider API keys only if you want to run `eval`
+- Basic `audit` does not require provider API keys.
+- You only need provider API keys when you choose to run `eval`.
 
 ## Step 1: install the local workspace
 

@@ -37,3 +37,6 @@ Check the path in this order:
 - docs mention `pr-snippet.md` before the user has seen `share-summary.md`
 - copied workflow versions fall behind the hardened repo defaults
 - adoption copy starts promising product capability that the CLI does not actually ship
+- public surfaces lose the explicit `audit` no-key / optional `eval` BYOK boundary
+- artifact review order changes away from `share-summary.md`, then `scorecard.md`, then `recommendations.md`
+- public copy starts promoting `npm install @answerlens/cli` before the registry package is visible

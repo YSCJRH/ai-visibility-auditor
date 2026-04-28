@@ -24,6 +24,8 @@ export type LocaleTextFinding = {
   snippet: string;
 };
 
+type JsonLdObject = Record<string, unknown>;
+
 type ReleaseLike = {
   tag_name: string;
   name?: string;
@@ -142,7 +144,7 @@ export function renderJsonLd(page: SeoPage, args: { pageJsonLd?: unknown; latest
   const nodes =
     page.kind === "home"
       ? homeJsonLd(page, args.latestReleaseVersion)
-      : [...normalizeJsonLd(args.pageJsonLd), breadcrumbJsonLd(page)];
+      : [...normalizeJsonLd(args.pageJsonLd).map((node) => alignJsonLdWithPage(node, page)), breadcrumbJsonLd(page)];
   return `<script type="application/ld+json">${safeJson(nodes)}</script>`;
 }
 
@@ -250,7 +252,7 @@ function breadcrumbJsonLd(page: SeoPage): unknown {
         "@type": "ListItem",
         position: 1,
         name: "AnswerLens",
-        item: page.alternates[page.locale]
+        item: localeHomeUrl(page)
       },
       {
         "@type": "ListItem",
@@ -262,12 +264,40 @@ function breadcrumbJsonLd(page: SeoPage): unknown {
   };
 }
 
-function normalizeJsonLd(value: unknown): unknown[] {
+function alignJsonLdWithPage(node: JsonLdObject, page: SeoPage): JsonLdObject {
+  const pageTypes = new Set(["WebPage", "CollectionPage", "Dataset", "FAQPage"]);
+  const type = node["@type"];
+  if (typeof type === "string" && pageTypes.has(type)) {
+    const aligned: JsonLdObject = { ...node, url: page.canonical };
+    if (typeof node.name === "string") {
+      aligned.name = page.title;
+    }
+    if (typeof node.description === "string") {
+      aligned.description = page.description;
+    }
+    return aligned;
+  }
+
+  return node;
+}
+
+function localeHomeUrl(page: SeoPage): string {
+  const localizedRoute = localizeSeoPath(page.route, page.locale);
+  if (!page.canonical.endsWith(localizedRoute)) {
+    return page.alternates[page.locale];
+  }
+
+  const siteRoot = page.canonical.slice(0, page.canonical.length - localizedRoute.length);
+  return `${siteRoot}${localizeSeoPath("", page.locale)}`;
+}
+
+function normalizeJsonLd(value: unknown): JsonLdObject[] {
   if (!value) {
     return [];
   }
 
-  return Array.isArray(value) ? value : [value];
+  const nodes = Array.isArray(value) ? value : [value];
+  return nodes.filter((node): node is JsonLdObject => Boolean(node) && typeof node === "object" && !Array.isArray(node));
 }
 
 function escapeHtml(value: string): string {

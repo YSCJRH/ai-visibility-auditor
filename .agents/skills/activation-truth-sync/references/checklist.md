@@ -37,3 +37,5 @@
 - manual steps imply a repo edit for something that still requires GitHub settings
 - install copy implies npm is available while the registry still returns `404`
 - action docs lag behind starter bundle paths or workflow major versions
+- public copy introduces ranking guarantees, fake proof, consumer AI UI scraping, host-level robots claims, or premature npm install copy that `corepack pnpm public:check` should block
+- generated Pages metadata drifts across canonical, hreflang, sitemap, Open Graph URL, JSON-LD URL, BreadcrumbList, or FAQPage contracts that `corepack pnpm seo:check` should block

@@ -111,8 +111,31 @@ runtime:
 什么时候再覆盖：
 
 - 当你只跑少量高价值 prompt，而且想要更高置信度时，临时切到 `gpt-5`
+- 当你已经有一轮可读的 OpenAI baseline，而且想比较引用行为或搜索风格 framing 时，才临时切到 Perplexity
 - 只有当 prompt pack 和目标受众本身就是中文或其他语言时，再改 locale
 - 只有在你明确要检查稳定性时，再把 `samples` 提到 `2` 或 `3`
+
+### 什么时候值得切到 Perplexity
+
+不要因为“实时网页检索”听起来更强，就把整个仓库默认值改成 Perplexity。
+
+只有同时满足下面三点时，再把它当作临时覆盖：
+
+- 同一组 prompt pack 已经有一轮可读的 OpenAI baseline
+- 你想比较引用行为或搜索风格的回答 framing，而不是替换主 benchmark 线
+- 你愿意把它当作第二意见，而不是 canonical first pass
+
+Perplexity 更适合临时用于：
+
+- 竞争对手或对比 prompt，因为新网页检索可能改变回答框架
+- citation-sensitive spot check，用来比较另一家 provider 的来源选择
+- 做消息决策前偶尔跑一次跨 provider 验证
+
+它通常不适合做这些场景的第一默认值：
+
+- fixture demo
+- external starter first run
+- 主要需要便宜、可重复 baseline 的大 prompt pack
 
 ### 当前 preset 对应关系
 

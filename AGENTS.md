@@ -26,8 +26,9 @@ Repository slug: ai-visibility-auditor.
 - Every meaningful change should improve at least one funnel step: discover, understand, trust, try, activate, share, or revisit.
 
 ## Verification
-- Docs and workflow changes: `corepack pnpm test`, `corepack pnpm typecheck`, `corepack pnpm build:site`, `corepack pnpm pack:cli:dry-run`
+- Docs and workflow changes: `corepack pnpm public:check`, `corepack pnpm test`, `corepack pnpm typecheck`, `corepack pnpm build:site`, `corepack pnpm seo:check`, `corepack pnpm pack:cli:dry-run`
 - Demo or onboarding changes: `corepack pnpm demo:fixture`
+- Public claim, SEO metadata, Pages, release, README, or Action adoption changes must include `corepack pnpm public:check`; Pages-generating changes must include `corepack pnpm seo:check` after `corepack pnpm build:site`
 
 ## Done means
 - Product wording stays consistent across public docs.

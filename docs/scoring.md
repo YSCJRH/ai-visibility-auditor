@@ -78,6 +78,8 @@ These fields do not imply an official platform ranking and do not change the hea
 - `before-after-diff.md` compares the current eval run to the previous run in the same output directory
 - `citation-gap-matrix.json` and `citation-gap-matrix.md` show prompts where accurate mentions lack owned or trusted citations
 
+`run.json` and `share-summary.json` expose `artifactVersion` as the report artifact/schema contract version. It is not the package or GitHub release version, so `artifactVersion: 0.3.0` may still be correct for a later software release when the report shape remains compatible.
+
 ## Penalties and stability
 
 - `error`: high-confidence blocker, large penalty
