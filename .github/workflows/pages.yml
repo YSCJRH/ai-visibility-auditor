@@ -63,6 +63,8 @@ jobs:
           corepack enable
           corepack prepare pnpm@10.33.0 --activate
           pnpm --version
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm public:check
       - run: pnpm build:site -- --releases dist/releases.json
       - run: pnpm seo:check --releases dist/releases.json
       - uses: actions/upload-pages-artifact@v5

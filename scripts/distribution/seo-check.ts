@@ -56,13 +56,14 @@ function parseArgs(argv: string[]): CliOptions {
   };
 }
 
-async function runSeoCheck(options: CliOptions): Promise<Finding[]> {
+export async function runSeoCheck(options: CliOptions): Promise<Finding[]> {
   const findings: Finding[] = [];
   const latestRelease = await readLatestRelease(options.releasesPath);
   const sitemapPath = path.join(options.siteDir, "sitemap.xml");
   const sitemap = await readFile(sitemapPath, "utf8");
   const sitemapUrls = parseSitemapUrls(sitemap);
   const sitemapSet = new Set(sitemapUrls);
+  checkDuplicateSitemapUrls(sitemapUrls, findings);
   const htmlFiles = await listHtmlFiles(options.siteDir);
   const pageByCanonical = new Map<string, { file: string; html: string; $: cheerio.CheerioAPI; locale?: SeoLocale }>();
 
@@ -80,7 +81,11 @@ async function runSeoCheck(options: CliOptions): Promise<Finding[]> {
       continue;
     }
 
-    pageByCanonical.set(canonical, { file, html, $, locale });
+    if (pageByCanonical.has(canonical)) {
+      findings.push(finding("canonical-duplicate", file, `Canonical URL is used by more than one generated page: ${canonical}.`));
+    } else {
+      pageByCanonical.set(canonical, { file, html, $, locale });
+    }
     if (!sitemapSet.has(canonical)) {
       findings.push(finding("sitemap-missing-canonical", file, `Sitemap is missing canonical URL ${canonical}.`));
     }
@@ -102,7 +107,7 @@ async function runSeoCheck(options: CliOptions): Promise<Finding[]> {
 
   for (const [canonical, page] of pageByCanonical.entries()) {
     checkHead(page.file, page.$, canonical, latestRelease, findings);
-    checkHreflang(page.file, page.$, canonical, pageByCanonical, findings);
+    checkHreflang(page.file, page.$, canonical, options.siteUrl, pageByCanonical, findings);
     checkJsonLd(page.file, page.$, canonical, latestRelease, findings);
     await checkInternalLinks(options.siteDir, options.siteUrl, canonical, page.file, page.$, findings);
     if (page.locale === "zh-CN") {
@@ -160,6 +165,11 @@ function checkHead(file: string, $: cheerio.CheerioAPI, canonical: string, lates
     }
   }
 
+  const ogUrl = $("meta[property='og:url']").attr("content")?.trim();
+  if (ogUrl && ogUrl !== canonical) {
+    findings.push(finding("og-url-canonical", file, `Open Graph URL ${ogUrl} must match canonical URL ${canonical}.`));
+  }
+
   if (canonical.endsWith("/en/") || canonical.endsWith("/zh/")) {
     const softwareApp = collectJsonLd($).find((node) => node?.["@type"] === "SoftwareApplication");
     if (!softwareApp) {
@@ -173,6 +183,9 @@ function checkHead(file: string, $: cheerio.CheerioAPI, canonical: string, lates
         )
       );
     }
+    if (softwareApp?.url !== canonical) {
+      findings.push(finding("jsonld-home-url", file, `SoftwareApplication url ${softwareApp?.url ?? "(missing)"} must match canonical URL ${canonical}.`));
+    }
   }
 }
 
@@ -180,6 +193,7 @@ function checkHreflang(
   file: string,
   $: cheerio.CheerioAPI,
   canonical: string,
+  siteUrl: string,
   pageByCanonical: Map<string, { file: string; $: cheerio.CheerioAPI; locale?: SeoLocale }>,
   findings: Finding[]
 ): void {
@@ -206,6 +220,17 @@ function checkHreflang(
   const selfLang = canonical.includes("/zh/") ? "zh-CN" : "en";
   if (alternates.get(selfLang) !== canonical) {
     findings.push(finding("hreflang-self", file, `hreflang ${selfLang} must self-reference ${canonical}.`));
+  }
+
+  const expectedXDefault = expectedNeutralXDefault(siteUrl, canonical);
+  if (expectedXDefault && alternates.get("x-default") !== expectedXDefault) {
+    findings.push(
+      finding(
+        "hreflang-x-default-neutral",
+        file,
+        `hreflang x-default must point to the neutral redirect URL ${expectedXDefault}, found ${alternates.get("x-default") ?? "(missing)"}.`
+      )
+    );
   }
 
   for (const hreflang of ["en", "zh-CN"] as const) {
@@ -242,6 +267,72 @@ function checkJsonLd(file: string, $: cheerio.CheerioAPI, canonical: string, _la
 
   if (!canonical.endsWith("/en/") && !canonical.endsWith("/zh/") && !nodes.some((node) => node?.["@type"] === "BreadcrumbList")) {
     findings.push(finding("jsonld-breadcrumb", file, "Nested page is missing BreadcrumbList JSON-LD."));
+  }
+
+  checkPageJsonLdUrls(file, nodes, canonical, findings);
+  checkBreadcrumbJsonLd(file, nodes, canonical, findings);
+  checkFaqJsonLd(file, $, nodes, canonical, findings);
+}
+
+function checkPageJsonLdUrls(file: string, nodes: Array<Record<string, any>>, canonical: string, findings: Finding[]): void {
+  const pageTypes = new Set(["WebPage", "CollectionPage", "Dataset", "FAQPage"]);
+  for (const node of nodes) {
+    const type = node?.["@type"];
+    if (typeof type !== "string" || !pageTypes.has(type)) {
+      continue;
+    }
+    if (node.url !== canonical) {
+      findings.push(finding("jsonld-url-canonical", file, `${type} JSON-LD url ${node.url ?? "(missing)"} must match canonical URL ${canonical}.`));
+    }
+  }
+}
+
+function checkBreadcrumbJsonLd(file: string, nodes: Array<Record<string, any>>, canonical: string, findings: Finding[]): void {
+  const breadcrumb = nodes.find((node) => node?.["@type"] === "BreadcrumbList");
+  if (!breadcrumb) {
+    return;
+  }
+
+  const elements = Array.isArray(breadcrumb.itemListElement) ? breadcrumb.itemListElement : [];
+  const first = elements[0];
+  const last = elements[elements.length - 1];
+  const expectedHome = expectedLocaleHome(canonical);
+  const firstItem = jsonLdListItemUrl(first);
+  const lastItem = jsonLdListItemUrl(last);
+
+  if (expectedHome && firstItem !== expectedHome) {
+    findings.push(finding("jsonld-breadcrumb-home", file, `Breadcrumb home item ${firstItem ?? "(missing)"} must point to locale home ${expectedHome}.`));
+  }
+
+  if (lastItem !== canonical) {
+    findings.push(finding("jsonld-breadcrumb-canonical", file, `Breadcrumb current item ${lastItem ?? "(missing)"} must match canonical URL ${canonical}.`));
+  }
+}
+
+function checkFaqJsonLd(
+  file: string,
+  $: cheerio.CheerioAPI,
+  nodes: Array<Record<string, any>>,
+  canonical: string,
+  findings: Finding[]
+): void {
+  const faq = nodes.find((node) => node?.["@type"] === "FAQPage");
+  if (!faq) {
+    return;
+  }
+
+  const canonicalUrl = safeUrl(canonical);
+  if (!canonicalUrl?.pathname.includes("/faq/")) {
+    findings.push(finding("jsonld-faq-page-only", file, "FAQPage JSON-LD is only allowed on visible FAQ pages."));
+  }
+
+  const visibleText = visiblePageText($);
+  const questions = Array.isArray(faq.mainEntity) ? faq.mainEntity : [];
+  for (const question of questions) {
+    const name = typeof question?.name === "string" ? question.name.trim() : "";
+    if (name && !visibleText.includes(name)) {
+      findings.push(finding("jsonld-faq-visible", file, `FAQPage question is not visible on the page: ${name}.`));
+    }
   }
 }
 
@@ -323,6 +414,17 @@ function collectJsonLd($: cheerio.CheerioAPI): Array<Record<string, any>> {
   return nodes;
 }
 
+function checkDuplicateSitemapUrls(urls: string[], findings: Finding[]): void {
+  const seen = new Set<string>();
+  for (const url of urls) {
+    if (seen.has(url)) {
+      findings.push(finding("sitemap-duplicate-url", "sitemap.xml", `Sitemap contains duplicate URL: ${url}.`));
+      continue;
+    }
+    seen.add(url);
+  }
+}
+
 function parseSitemapUrls(xml: string): string[] {
   const parsed = XML_PARSER.parse(xml);
   const raw = parsed?.urlset?.url;
@@ -387,6 +489,73 @@ function localeForFile(siteDir: string, file: string): SeoLocale | undefined {
   return undefined;
 }
 
+function expectedNeutralXDefault(siteUrl: string, canonical: string): string | null {
+  const route = unlocalizedRouteForCanonical(siteUrl, canonical);
+  return route === null ? null : new URL(route, siteUrl).href;
+}
+
+function expectedLocaleHome(canonical: string): string | null {
+  const url = safeUrl(canonical);
+  if (!url) {
+    return null;
+  }
+  const match = url.pathname.match(/^(.*\/)(en|zh)(?:\/|$)/);
+  if (!match) {
+    return null;
+  }
+  return `${url.origin}${match[1]}${match[2]}/`;
+}
+
+function unlocalizedRouteForCanonical(siteUrl: string, canonical: string): string | null {
+  const base = safeUrl(siteUrl);
+  const url = safeUrl(canonical);
+  if (!base || !url) {
+    return null;
+  }
+  if (url.origin !== base.origin || !url.pathname.startsWith(base.pathname)) {
+    return null;
+  }
+
+  const relative = url.pathname.slice(base.pathname.length);
+  if (relative === "en/" || relative === "zh/") {
+    return "";
+  }
+
+  if (relative.startsWith("en/")) {
+    return relative.slice("en/".length);
+  }
+
+  if (relative.startsWith("zh/")) {
+    return relative.slice("zh/".length);
+  }
+
+  return null;
+}
+
+function jsonLdListItemUrl(value: any): string | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+
+  const item = value.item;
+  if (typeof item === "string") {
+    return item;
+  }
+  if (item && typeof item === "object" && typeof item["@id"] === "string") {
+    return item["@id"];
+  }
+  if (item && typeof item === "object" && typeof item.url === "string") {
+    return item.url;
+  }
+  return undefined;
+}
+
+function visiblePageText($: cheerio.CheerioAPI): string {
+  const clone = $.root().clone();
+  clone.find("script,style,pre,code").remove();
+  return clone.text().replace(/\s+/g, " ").trim();
+}
+
 function isRedirectPage($: cheerio.CheerioAPI): boolean {
   return $("meta[http-equiv='refresh']").length > 0 && $("h1").length === 0;
 }
@@ -402,6 +571,14 @@ function isAbsoluteHttpUrl(value: string): boolean {
     return url.protocol === "https:" || url.protocol === "http:";
   } catch {
     return false;
+  }
+}
+
+function safeUrl(value: string): URL | null {
+  try {
+    return new URL(value);
+  } catch {
+    return null;
   }
 }
 

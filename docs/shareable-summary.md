@@ -75,6 +75,8 @@ The JSON shape is intentionally small:
 
 Consumers should treat unknown keys as forward-compatible additions.
 
+`artifactVersion` is the report artifact/schema contract version. It is allowed to differ from the current package or GitHub release tag; for example, `artifactVersion: 0.3.0` can be emitted by the `v0.3.2` software release when the report shape has not changed.
+
 For `manual-import` runs with reviewed rank data, `metrics` may also include:
 
 - `competitivePositionScore`

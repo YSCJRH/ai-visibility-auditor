@@ -237,6 +237,13 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(homeRedirect, /ai-visibility-auditor\/zh\//);
   assert.match(home, /<link rel="canonical" href="https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/en\/"/);
   assert.match(home, /hreflang="zh-CN"/);
+  assert.match(home, /hreflang="x-default" href="https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/"/);
+  assert.match(docs, /hreflang="x-default" href="https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/docs\/"/);
+  assert.match(zhDocs, /hreflang="x-default" href="https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/docs\/"/);
+  assert.match(docs, /"@type":"CollectionPage","name":"Docs for acting on an AnswerLens report","description":"Choose the next AnswerLens doc by task: understand a scorecard, fix one page, run your site, or add GitHub Actions.","url":"https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/en\/docs\/"/);
+  assert.match(docs, /"@type":"BreadcrumbList","itemListElement":\[{"@type":"ListItem","position":1,"name":"AnswerLens","item":"https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/en\/"},{"@type":"ListItem","position":2,"name":"Docs for acting on an AnswerLens report","item":"https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/en\/docs\/"}\]/);
+  assert.match(zhDocs, /"@type":"CollectionPage","name":"拿到 AnswerLens 报告后该读什么","description":"按任务选择下一篇 AnswerLens 文档：读懂评分卡、修一个页面、审计自己的站点，或接入 GitHub Actions。","url":"https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/zh\/docs\/"/);
+  assert.match(zhDocs, /"@type":"BreadcrumbList","itemListElement":\[{"@type":"ListItem","position":1,"name":"AnswerLens","item":"https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/zh\/"},{"@type":"ListItem","position":2,"name":"拿到 AnswerLens 报告后该读什么","item":"https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/zh\/docs\/"}\]/);
   assert.match(home, /assets\/social-preview\.png/);
   assert.match(home, /<h1>AnswerLens<\/h1>/);
   assert.match(home, /productHero/);

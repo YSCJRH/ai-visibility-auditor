@@ -50,9 +50,11 @@ Read [references/checklist.md](references/checklist.md) first.
 
 ## Validate before closing
 
+- `corepack pnpm public:check`
 - `corepack pnpm test`
 - `corepack pnpm typecheck`
 - `corepack pnpm build:site`
+- `corepack pnpm seo:check`
 - `corepack pnpm pack:cli:dry-run`
 
 Add `corepack pnpm demo:fixture` when onboarding or demo surfaces changed.

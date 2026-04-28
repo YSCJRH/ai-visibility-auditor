@@ -27,6 +27,24 @@ Recommended rules:
 - require linear history if the team prefers squash merges
 - recommend signed commits
 
+## Public governance checks
+
+Run `pnpm public:check` before merging changes that touch README, docs, Pages source, release snapshots, Action docs, starter workflows, or public workflow files.
+
+The check is intentionally stricter than normal copy review. It should fail when a public surface crosses these boundaries:
+
+- Do not promise rankings, placement, traffic, visibility lift, or percentage outcomes.
+- Do not present consumer AI UI scraping as a supported AnswerLens capability.
+- Do not add rating, review, testimonial, customer-proof, download-count, or star-count claims without verified visible proof.
+- Do not promote `npm install @answerlens/cli` while the registry package is still not visible.
+- Do not describe the project-site `robots.txt` as host-level control for `yscjrh.github.io`.
+- Keep `runtime.yaml` examples free of API keys, tokens, and secret-like values.
+- Keep report review order as `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
+- Keep copied workflow major versions aligned with the repository defaults.
+- Keep the first-run key boundary explicit: basic `audit` has no provider-key requirement, while optional `eval` is BYOK.
+
+When the check fails, fix the public surface or the copied example first. Only change the rule when the product boundary itself has changed and the README, roadmap, Pages source, Action docs, and release copy can be updated together.
+
 ## Labels
 
 Sync the labels from [`.github/labels.yml`](../.github/labels.yml).
