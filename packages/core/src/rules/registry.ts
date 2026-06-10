@@ -94,7 +94,7 @@ export function isKeyPage(page: PageRecord): boolean {
 }
 
 export function pageText(page: PageRecord): string {
-  return `${page.title} ${page.h1} ${page.textSnippet}`.trim();
+  return `${page.title} ${page.metaDescription} ${page.h1} ${page.headings.join(" ")} ${page.textSnippet}`.trim();
 }
 
 export function signalExamples(page: PageRecord, type: string): string[] {

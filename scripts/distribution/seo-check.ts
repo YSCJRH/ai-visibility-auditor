@@ -448,7 +448,7 @@ async function listHtmlFiles(root: string): Promise<string[]> {
 
 async function readLatestRelease(releasesPath: string): Promise<string> {
   const releases = JSON.parse(await readFile(releasesPath, "utf8")) as ReleaseEntry[];
-  return releases[0]?.tag_name ?? "v0.3.3";
+  return releases[0]?.tag_name ?? "v0.3.4";
 }
 
 async function writeReports(reportDir: string, findings: Finding[]): Promise<void> {

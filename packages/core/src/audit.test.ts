@@ -144,6 +144,85 @@ test("weak link context fixture reports discoverability gaps", async () => {
   assert.ok(result.recommendations.some((recommendation) => recommendation.id === "close-comparison-gaps"));
 });
 
+test("compare coverage reads page metadata beyond the body snippet", async () => {
+  const configs = await loadFixtureConfigs();
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+
+    if (url.endsWith("/robots.txt")) {
+      return new Response("User-agent: *\nAllow: /\nSitemap: https://example.test/sitemap.xml\n", {
+        status: 200,
+        headers: { "content-type": "text/plain" }
+      });
+    }
+
+    if (url.endsWith("/sitemap.xml")) {
+      return new Response(
+        '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://example.test/</loc></url><url><loc>https://example.test/compare</loc></url></urlset>',
+        {
+          status: 200,
+          headers: { "content-type": "application/xml" }
+        }
+      );
+    }
+
+    if (url === "https://example.test/") {
+      return new Response(
+        '<!doctype html><html><head><title>Example Product</title><meta name="description" content="Example Product is an AI visibility auditor for product websites." /></head><body><main><h1>Example Product</h1><p>Example Product is an AI visibility auditor for product websites for developer teams and product marketing teams.</p><a href="/compare">Compare alternatives</a></main></body></html>',
+        {
+          status: 200,
+          headers: { "content-type": "text/html" }
+        }
+      );
+    }
+
+    if (url === "https://example.test/compare") {
+      const filler = "This page explains public source material, pull request artifacts, and repeatable review workflows. ".repeat(8);
+      return new Response(
+        `<!doctype html><html><head><title>Example Product versus DeepRank alternatives</title><meta name="description" content="How Example Product differs from DeepRank for GitHub-first teams." /></head><body><main><h1>Alternatives for GitHub-first teams</h1><p>${filler}</p></main></body></html>`,
+        {
+          status: 200,
+          headers: { "content-type": "text/html" }
+        }
+      );
+    }
+
+    return new Response("Not found", {
+      status: 404,
+      headers: { "content-type": "text/plain" }
+    });
+  }) as typeof fetch;
+
+  try {
+    const result = await runAudit({
+      siteInput: "https://example.test/",
+      maxPages: 5,
+      ...configs,
+      brand: {
+        brand: {
+          ...configs.brand.brand,
+          name: "Example Product",
+          domain: "example.test",
+          category: "AI visibility auditor for product websites",
+          one_liner: "Example Product helps developer teams audit AI discoverability on product sites."
+        }
+      },
+      competitors: {
+        competitors: [{ name: "DeepRank", domain: "deeprank.example", category: "AI visibility suite" }]
+      }
+    });
+
+    const comparePage = result.pages.find((page) => page.url === "https://example.test/compare");
+    assert.ok(comparePage);
+    assert.equal(comparePage.textSnippet.toLowerCase().includes("deeprank"), false);
+    assert.equal(result.issues.some((issue) => issue.title === "Compare pages do not mention declared competitors"), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("trailing slash proof pages still collect incoming link context", async () => {
   const configs = await loadFixtureConfigs();
   const result = await runAudit({
@@ -233,6 +312,88 @@ test("remote crawl retries without custom user-agent when the branded request fa
   }
 });
 
+test("remote crawl follows same-site HTML redirect shims", async () => {
+  const configs = await loadFixtureConfigs();
+  const originalFetch = globalThis.fetch;
+  const requests: string[] = [];
+
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+    requests.push(url);
+
+    if (url.endsWith("/robots.txt")) {
+      return new Response("User-agent: *\nAllow: /\nSitemap: https://example.test/app/sitemap.xml\n", {
+        status: 200,
+        headers: { "content-type": "text/plain" }
+      });
+    }
+
+    if (url.endsWith("/sitemap.xml")) {
+      return new Response(
+        '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://example.test/app/</loc></url><url><loc>https://example.test/app/en/</loc></url></urlset>',
+        {
+          status: 200,
+          headers: { "content-type": "application/xml" }
+        }
+      );
+    }
+
+    if (url === "https://example.test/app") {
+      return new Response(
+        '<!doctype html><html><head><title>Example locale redirect</title><meta http-equiv="refresh" content="0; url=https://example.test/app/en/" /><link rel="canonical" href="https://example.test/app/en/" /></head><body><p><a href="https://example.test/app/en/">Continue</a></p></body></html>',
+        {
+          status: 200,
+          headers: { "content-type": "text/html" }
+        }
+      );
+    }
+
+    if (url === "https://example.test/app/en") {
+      return new Response(
+        '<!doctype html><html><head><title>Example Product | Home</title><meta name="description" content="Example Product is an AI visibility auditor for product websites." /></head><body><main><h1>Example Product</h1><p>Example Product is an AI visibility auditor for product websites for developer teams and product marketing teams.</p></main></body></html>',
+        {
+          status: 200,
+          headers: { "content-type": "text/html" }
+        }
+      );
+    }
+
+    return new Response("Not found", {
+      status: 404,
+      headers: { "content-type": "text/plain" }
+    });
+  }) as typeof fetch;
+
+  try {
+    const result = await runAudit({
+      siteInput: "https://example.test/app/",
+      maxPages: 5,
+      ...configs,
+      brand: {
+        brand: {
+          ...configs.brand.brand,
+          name: "Example Product",
+          domain: "example.test",
+          category: "AI visibility auditor for product websites",
+          one_liner: "Example Product helps developer teams audit AI discoverability on product sites."
+        }
+      }
+    });
+
+    assert.ok(requests.includes("https://example.test/app"));
+    assert.ok(requests.includes("https://example.test/app/en"));
+    assert.equal(result.pages.some((page) => page.url === "https://example.test/app"), false);
+    assert.equal(result.pages.filter((page) => page.url === "https://example.test/app/en").length, 1);
+    assert.equal(result.pages.find((page) => page.url === "https://example.test/app/en")?.pageType, "home");
+    assert.equal(
+      result.issues.some((issue) => issue.title === "Missing H1" && issue.pageUrl === "https://example.test/app"),
+      false
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("project-site base path is treated as the homepage", async () => {
   const { brand } = await loadFixtureConfigs();
   const page = normalizePage(
@@ -251,4 +412,51 @@ test("project-site base path is treated as the homepage", async () => {
   );
 
   assert.equal(page.pageType, "home");
+});
+
+test("localized project-site home paths are treated as the homepage", async () => {
+  const { brand } = await loadFixtureConfigs();
+  const page = normalizePage(
+    {
+      kind: "remote",
+      input: "https://yscjrh.github.io/ai-visibility-auditor/",
+      baseUrl: "https://yscjrh.github.io/ai-visibility-auditor"
+    },
+    {
+      url: "https://yscjrh.github.io/ai-visibility-auditor/en",
+      status: 200,
+      html: "<!doctype html><html><head><title>AnswerLens | Home</title></head><body><main><h1>AnswerLens</h1><p>AnswerLens is a CLI-first AI visibility auditor for product websites.</p></main></body></html>",
+      contentType: "text/html"
+    },
+    brand.brand
+  );
+
+  assert.equal(page.pageType, "home");
+});
+
+test("normalizePage counts CJK body text as extractable content", async () => {
+  const { brand } = await loadFixtureConfigs();
+  const cjkBody =
+    "AnswerLens 是面向产品网站的 AI 可发现性审计工具。".repeat(18) +
+    "它会生成 share-summary.md、scorecard.md 和 recommendations.md，让团队可以在 GitHub 里审阅公开源材料。定价、开源打包、接入工作流和文档说明都保持可引用。";
+  const page = normalizePage(
+    {
+      kind: "remote",
+      input: "https://example.test/",
+      baseUrl: "https://example.test"
+    },
+    {
+      url: "https://example.test/pricing",
+      status: 200,
+      html: `<!doctype html><html><head><title>AnswerLens pricing</title></head><body><main><h1>AnswerLens pricing</h1><h2>开源打包</h2><p>${cjkBody}</p></main></body></html>`,
+      contentType: "text/html"
+    },
+    brand.brand
+  );
+
+  assert.ok(page.wordCount >= 150);
+  assert.ok(page.evidenceSignals.some((signal) => signal.type === "body-depth"));
+  assert.ok(page.evidenceSignals.some((signal) => signal.type === "pricing-proof"));
+  assert.ok(page.evidenceSignals.some((signal) => signal.type === "workflow-proof"));
+  assert.ok(page.evidenceSignals.some((signal) => signal.type === "docs-proof"));
 });

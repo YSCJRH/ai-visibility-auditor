@@ -2,16 +2,18 @@
 
 This document records the AnswerLens SEO / adoption hardening pass that turns public metadata, security boundaries, and governance wording into checked contracts.
 
+Status note: this is a historical phase record from the `v0.3.2` hardening pass. Current release truth lives in [roadmap.md](roadmap.md), [distribution-plan.md](distribution-plan.md), and the latest GitHub release notes.
+
 ## Current State
 
 - Repository state at intake: `main...origin/main`, clean tracked worktree.
-- Current package and CLI version: `0.3.2`.
-- Current live GitHub release: `v0.3.2`, published `2026-04-21T12:31:25Z`.
+- Package and CLI version at intake: `0.3.2`.
+- Live GitHub release at intake: `v0.3.2`, published `2026-04-21T12:31:25Z`.
 - Current report artifact/schema version: `artifactVersion: 0.3.0`; this is the report output contract, not the package release tag.
 - Current npm state: `npm view @answerlens/cli` returns 404, so npm install copy must not be promoted as the primary install path.
 - Next release posture: keep npm publishing skipped; use GitHub release assets and Pages until trusted publishing or `NPM_TOKEN` is configured and the registry package is visible.
 - Current public funnel: live demo -> local fixture demo -> 5-minute real-site audit -> GitHub Action -> release assets.
-- Remote governance state: issue #33 now describes post-`v0.3.2` activation, adoption, SEO contract, and public-governance hardening.
+- Remote governance state at intake: issue #33 described post-`v0.3.2` activation, adoption, SEO contract, and public-governance hardening.
 
 ## Subagent Summary
 

@@ -12,7 +12,7 @@ Read [references/checklist.md](references/checklist.md) first.
 1. Read `AGENTS.md` before touching any public wording.
 2. Treat remote GitHub state as authoritative for:
    - latest released version
-   - active umbrella issue
+   - active or recently completed coordination issue
    - milestone and PR status
 3. Treat local repo files as authoritative for:
    - canonical product description
@@ -39,7 +39,7 @@ Read [references/checklist.md](references/checklist.md) first.
 - Keep the tagline as `CI for AI discoverability`.
 - Keep the non-goals intact: no consumer AI UI scraping, no ranking guarantees, no dashboard-first rewrite.
 - Keep manual repository settings explicit instead of implying they are repo-editable.
-- Re-check the current latest release and current umbrella issue before editing temporally unstable copy.
+- Re-check the current latest release and any active or recently completed coordination issue before editing temporally unstable copy.
 
 ## When you edit
 

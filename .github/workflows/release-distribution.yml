@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag-name:
-        description: "Optional semver tag to simulate or publish, for example v0.3.3."
+        description: "Optional semver tag to simulate or publish, for example v0.3.4."
         required: false
         type: string
   push:
@@ -113,13 +113,13 @@ jobs:
 
           ## What ships
 
-          - Clearer first-run path: live demo report, fixture demo, real-site audit, then GitHub Action adoption
-          - Share-ready report layer that points readers from `share-summary.md` to `scorecard.md` and `recommendations.md`
-          - Trust and safety docs for public-source auditing, BYOK eval, secret boundaries, raw payload handling, and non-ranking language
-          - First-run story and self-dogfooding log surfaces for authorized, artifact-backed adoption proof
-          - Repo-local Codex plugin workflows for activation reviews, adopter-kit checks, and public-claim guardrails
-          - Stronger `public:check` coverage for unsafe claims, premature npm install copy, raw payload uploads, runtime secrets, plugin copy, and artifact-order drift
-          - Starter bundle and GitHub Action docs pinned to the reviewed `v0.3.3` Action release
+          - Crawler handling for same-site HTML redirect shims on GitHub Pages-style locale roots
+          - Localized project-site homepage detection for paths such as `/en/`, `/zh/`, and `/zh-cn/`
+          - CJK extractable-content counting and Chinese proof-page signal terms for public source-material audits
+          - Compare coverage that reads page title, meta description, and headings instead of only the first body snippet
+          - Pages hero copy that repeats the exact product category: CLI-first AI visibility auditor for product websites
+          - Self-dogfood log, roadmap, release snapshot, and GitHub bootstrap copy synced around the completed `#33` activation pass
+          - Starter bundle and GitHub Action docs pinned to the reviewed `v0.3.4` Action release
           - Publish-ready CLI bundle and tarball plus repo-native report artifacts
 
           ## Known limits
@@ -147,9 +147,10 @@ jobs:
           - First-run story: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/first-run-story.md
           - Codex plugin: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/codex-plugin.md
 
-          ## Current follow-through
+          ## Follow-through
 
-          - Current umbrella issue: https://github.com/YSCJRH/ai-visibility-auditor/issues/33
+          - Track public-source self-dogfooding loops in https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/self-dogfood-log.md
+          - Open focused issues only when a concrete repo-editable gap remains
           EOF
       - name: Create or update GitHub release
         if: ${{ env.RELEASE_TAG != '' }}

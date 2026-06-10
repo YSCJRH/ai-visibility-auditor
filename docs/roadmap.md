@@ -17,7 +17,7 @@ Non-goals that stay fixed across roadmap stages:
 
 ## Near-term priorities
 
-Recently completed on `main` and released through `v0.3.3`:
+Recently completed on `main` and released through `v0.3.4`:
 
 - `#9` Schema-text consistency and evidence density rules
 - `#10` Internal link context, anchor quality, and rule registry
@@ -26,6 +26,7 @@ Recently completed on `main` and released through `v0.3.3`:
 - `#13` Search Console validation import
 - `#14` Bing Webmaster / IndexNow helper
 - activation funnel, share-ready artifacts, trust/safety docs, starter bundle hardening, self-dogfood loop, public guardrails, and repo-local Codex plugin workflows
+- Pages redirect handling, localized homepage detection, CJK extraction signals, compare metadata coverage, and current stable Action pins
 
 Why `#9` and `#10` came first:
 
@@ -149,6 +150,23 @@ Current status:
 - activation, adoption, trust/safety, first-run, self-dogfood, starter, report-summary, public-check, and Codex plugin surfaces are implemented on `main`
 - `v0.3.3` was released on June 10, 2026
 
+### `v0.3.4`
+
+Primary focus: self-dogfood follow-through and stable adopter pins
+
+Planned outcome:
+
+- follow same-site HTML redirect shims on GitHub Pages-style locale roots
+- treat localized project-site home paths as homepage records
+- count CJK body text and Chinese proof-page terms in extraction and discoverability rules
+- read compare page title, meta description, and headings when checking declared competitors
+- keep starter bundle and GitHub Action docs pinned to the reviewed stable Action release
+
+Current status:
+
+- redirect, locale, CJK, compare metadata, Pages copy, and stable pin follow-through are implemented on `main`
+- `v0.3.4` was released on June 10, 2026
+
 ## GitHub alignment
 
 Current milestone mapping:
@@ -167,6 +185,7 @@ Release planning:
 - `v0.3.1` is released and adds the internal admin control surface and review fallback
 - `v0.3.2` is released and adds bilingual public Pages, docs mirrors, localized report surfaces, and admin/review language switching
 - `v0.3.3` is released and adds the GitHub-native activation loop, trust/safety surfaces, starter hardening, public guardrails, and repo-local Codex plugin workflows
+- `v0.3.4` is released and tightens the self-dogfooding crawler, CJK extraction, compare metadata coverage, Pages category copy, and current stable Action pins
 
 This document is the canonical public roadmap. README, release notes, and umbrella issues should link back here instead of restating divergent plans.
 
@@ -174,10 +193,12 @@ Canonical distribution follow-through lives in [docs/distribution-plan.md](distr
 
 ## Current operating focus
 
-With `v0.3.3` released on June 10, 2026, near-term work can move from one-time activation hardening into repeatable adoption proof, release truth-sync, and self-dogfooding follow-through while staying inside the existing product boundary.
+With `v0.3.4` released on June 10, 2026, near-term work can move from one-time activation hardening into repeatable adoption proof, release truth-sync, and self-dogfooding follow-through while staying inside the existing product boundary.
 
 - Canonical brief: [docs/activation-plan.md](activation-plan.md)
-- Current umbrella issue: [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33)
+- Completed activation umbrella: [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33)
+- Current evidence trail: [docs/self-dogfood-log.md](self-dogfood-log.md)
+- Future GitHub issues should be focused on concrete bugs, docs gaps, or adoption-path drift rather than keeping a broad activation umbrella open.
 - Detailed working notes: [../trans.md](../trans.md)
 
 ## Distribution spine

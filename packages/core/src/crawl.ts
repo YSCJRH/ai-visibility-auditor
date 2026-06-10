@@ -1,5 +1,6 @@
 ﻿import { readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
+import { load } from "cheerio";
 import { XMLParser } from "fast-xml-parser";
 import { AI_BOTS } from "./constants.ts";
 import type { CrawlOptions, CrawlResult, FetchedPage, RobotsSnapshot, SiteSource } from "./types.ts";
@@ -131,6 +132,45 @@ async function fetchRemoteText(source: SiteSource, target: string): Promise<Fetc
 
 async function fetchText(source: SiteSource, target: string): Promise<FetchedPage> {
   return source.kind === "local" ? fetchLocalText(source, target) : fetchRemoteText(source, target);
+}
+
+function sameSiteUrl(source: SiteSource, targetUrl: string): boolean {
+  try {
+    const sourceUrl = new URL(source.baseUrl);
+    const target = new URL(targetUrl);
+    if (target.origin !== sourceUrl.origin) {
+      return false;
+    }
+
+    const basePath = sourceUrl.pathname.endsWith("/") ? sourceUrl.pathname : `${sourceUrl.pathname}/`;
+    return sourceUrl.pathname === "/" || target.pathname === sourceUrl.pathname || target.pathname.startsWith(basePath);
+  } catch {
+    return false;
+  }
+}
+
+function htmlRedirectTarget(source: SiteSource, page: FetchedPage): string | null {
+  if (!page.contentType.includes("html") || page.status < 200 || page.status >= 300) {
+    return null;
+  }
+
+  const $ = load(page.html);
+  const refresh = $("meta[http-equiv]")
+    .toArray()
+    .find((element) => ($(element).attr("http-equiv") ?? "").trim().toLowerCase() === "refresh");
+  const content = refresh ? $(refresh).attr("content") ?? "" : "";
+  const urlMatch = content.match(/(?:^|;)\s*url\s*=\s*([^;]+)/i);
+  if (!urlMatch?.[1]) {
+    return null;
+  }
+
+  try {
+    const href = urlMatch[1].trim().replace(/^['"]|['"]$/g, "");
+    const target = normalizeComparableUrl(new URL(href, page.url).toString());
+    return target !== page.url && sameSiteUrl(source, target) ? target : null;
+  } catch {
+    return null;
+  }
 }
 
 function parseRobots(text: string): RobotsSnapshot {
@@ -295,15 +335,36 @@ export async function crawlSite(options: CrawlOptions): Promise<CrawlResult> {
   }
 
   const urls = discovered.length > 0 ? discovered : source.kind === "local" ? await discoverLocalHtmlUrls(source) : [source.baseUrl];
-  const crawlTargets = prioritizeUrls(unique(urls))
+  const crawlTargets = prioritizeUrls(unique(urls.map((url) => buildUrl(source, url))))
     .filter((url) => shouldInclude(url, options.includePatterns, options.excludePatterns))
     .slice(0, options.maxPages);
 
   const pages: FetchedPage[] = [];
+  const fetchedPageUrls = new Set<string>();
   for (const target of crawlTargets) {
+    if (fetchedPageUrls.has(target)) {
+      continue;
+    }
+
     const page = await fetchText(source, target);
     if (page.contentType.includes("html") || page.contentType.includes("text/plain") || page.status === 0) {
+      const redirectTarget = htmlRedirectTarget(source, page);
+      if (redirectTarget && shouldInclude(redirectTarget, options.includePatterns, options.excludePatterns)) {
+        const redirectedPage = await fetchText(source, redirectTarget);
+        if (
+          !fetchedPageUrls.has(redirectedPage.url) &&
+          (redirectedPage.contentType.includes("html") ||
+            redirectedPage.contentType.includes("text/plain") ||
+            redirectedPage.status === 0)
+        ) {
+          pages.push(redirectedPage);
+          fetchedPageUrls.add(redirectedPage.url);
+        }
+        continue;
+      }
+
       pages.push(page);
+      fetchedPageUrls.add(page.url);
     }
   }
 

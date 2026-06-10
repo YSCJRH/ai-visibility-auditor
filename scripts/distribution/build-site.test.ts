@@ -247,7 +247,7 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /assets\/social-preview\.png/);
   assert.match(home, /<h1>AnswerLens<\/h1>/);
   assert.match(home, /productHero/);
-  assert.match(home, /Use AnswerLens when your website is the source material for AI answers\./);
+  assert.match(home, /AnswerLens is a CLI-first AI visibility auditor for product websites\./);
   assert.match(home, /Does AnswerLens fit your site\?/);
   assert.match(home, /not a hosted monitoring dashboard, a ranking tool, or a consumer AI scraper/);
   assert.match(home, /Demo score/);
@@ -357,7 +357,7 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(starter, /Example Product public site/);
   assert.match(starter, /runtime\.yaml/);
   assert.match(starter, /non-secret eval defaults/i);
-  assert.match(starter, /YSCJRH\/ai-visibility-auditor@v0\.3\.3/);
+  assert.match(starter, /YSCJRH\/ai-visibility-auditor@v0\.3\.4/);
   assert.match(starter, /starter\/example-run\/share-summary\.md/);
   assert.match(pricing, /AnswerLens is open source\. You bring the provider keys you choose\./);
   assert.match(pricing, /View starter/);

@@ -59,9 +59,9 @@ Open the artifacts in the same order used everywhere else:
 2. `scorecard.md`
 3. `recommendations.md`
 
-Keep the loop tracked under umbrella issue [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33).
+Keep the public evidence trail in [self-dogfood-log.md](self-dogfood-log.md). The `v0.3.3` activation umbrella [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33) records the first hardening pass, and `v0.3.4` records the redirect, locale, and CJK follow-up; after that, open a focused issue only when a specific repo-editable gap needs follow-up.
 
-Keep the public evidence trail in [self-dogfood-log.md](self-dogfood-log.md). Do not treat a self-dogfood score as traffic, ranking, answer-placement, or external adoption proof.
+Do not treat a self-dogfood score as traffic, ranking, answer-placement, or external adoption proof.
 
 ## Signal types that are in scope
 
