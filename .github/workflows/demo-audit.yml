@@ -40,9 +40,11 @@ jobs:
             cat "${{ steps.answerlens.outputs.pr-snippet-path }}"
             echo ''
             echo '### Artifact tree'
-            find "${{ steps.answerlens.outputs.out-dir }}" -maxdepth 2 -type f | sort
+            find "${{ steps.answerlens.outputs.out-dir }}" -path '*/raw/*' -prune -o -type f -print | sort
           } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v6
         with:
           name: answerlens-demo-audit
-          path: ${{ steps.answerlens.outputs.out-dir }}
+          path: |
+            ${{ steps.answerlens.outputs.out-dir }}
+            !${{ steps.answerlens.outputs.out-dir }}/raw/**

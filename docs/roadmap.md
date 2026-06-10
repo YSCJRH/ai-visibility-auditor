@@ -17,7 +17,7 @@ Non-goals that stay fixed across roadmap stages:
 
 ## Near-term priorities
 
-Recently completed on `main` and released through `v0.3.2`:
+Recently completed on `main` and released through `v0.3.3`:
 
 - `#9` Schema-text consistency and evidence density rules
 - `#10` Internal link context, anchor quality, and rule registry
@@ -25,6 +25,7 @@ Recently completed on `main` and released through `v0.3.2`:
 - `#12` Multi-sample aggregation stability summary
 - `#13` Search Console validation import
 - `#14` Bing Webmaster / IndexNow helper
+- activation funnel, share-ready artifacts, trust/safety docs, starter bundle hardening, self-dogfood loop, public guardrails, and repo-local Codex plugin workflows
 
 Why `#9` and `#10` came first:
 
@@ -131,6 +132,23 @@ Current status:
 - bilingual public Pages, docs mirrors, localized report outputs, and admin/review switching are implemented on `main`
 - `v0.3.2` was released on April 21, 2026
 
+### `v0.3.3`
+
+Primary focus: GitHub-native activation and adoption loop
+
+Planned outcome:
+
+- make the live demo, fixture demo, real-site audit, and GitHub Action adoption path easier to follow
+- make `share-summary.md`, `scorecard.md`, and `recommendations.md` work as a shareable evidence packet
+- document trust/safety boundaries, first-run story collection, and self-dogfooding loops without implying adoption proof
+- add repo-local Codex plugin workflows for maintainers reviewing activation, adopter-kit, and public-claim changes
+- strengthen public checks for unsafe claims, fake proof, premature npm install copy, raw payload exposure, runtime secrets, and artifact-order drift
+
+Current status:
+
+- activation, adoption, trust/safety, first-run, self-dogfood, starter, report-summary, public-check, and Codex plugin surfaces are implemented on `main`
+- `v0.3.3` was released on June 10, 2026
+
 ## GitHub alignment
 
 Current milestone mapping:
@@ -148,6 +166,7 @@ Release planning:
 - `v0.3.0` is released and ships the connector-focused import and helper layer
 - `v0.3.1` is released and adds the internal admin control surface and review fallback
 - `v0.3.2` is released and adds bilingual public Pages, docs mirrors, localized report surfaces, and admin/review language switching
+- `v0.3.3` is released and adds the GitHub-native activation loop, trust/safety surfaces, starter hardening, public guardrails, and repo-local Codex plugin workflows
 
 This document is the canonical public roadmap. README, release notes, and umbrella issues should link back here instead of restating divergent plans.
 
@@ -155,7 +174,7 @@ Canonical distribution follow-through lives in [docs/distribution-plan.md](distr
 
 ## Current operating focus
 
-With `v0.3.2` released on April 21, 2026, near-term work can move into semantic clarity and user-experience uplift across the bilingual public funnel and operator surfaces, while staying inside activation and adoption hardening rather than net-new connector delivery.
+With `v0.3.3` released on June 10, 2026, near-term work can move from one-time activation hardening into repeatable adoption proof, release truth-sync, and self-dogfooding follow-through while staying inside the existing product boundary.
 
 - Canonical brief: [docs/activation-plan.md](activation-plan.md)
 - Current umbrella issue: [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33)

@@ -40,6 +40,22 @@ test("public-surface-check rejects public overclaims, fake proof, premature npm 
   assert.ok(ruleIds.includes("workflow-action-major"));
 });
 
+test("public-surface-check rejects implicit npm install copy and raw payload artifact uploads", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(rootDir, "scripts/distribution/build-site.ts", "<code>@answerlens/cli</code> for CLI installs and dry-run packaging.");
+  await writeFixtureFile(
+    rootDir,
+    "examples/consumer-repo/.github/workflows/answerlens.yml",
+    `${artifactOrderText()}\nsteps:\n  - uses: actions/upload-artifact@v6\n    with:\n      path: \${{ steps.answerlens.outputs.out-dir }}\n`
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("public-npm-install-claim"));
+  assert.ok(ruleIds.includes("raw-payload-upload-exposure"));
+});
+
 test("public-surface-check rejects runtime secrets, artifact order drift, and missing audit/eval key boundary", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, ".github/answerlens/runtime.yaml", "runtime:\n  api_key: sk-testsecretvalue123\n");
@@ -59,14 +75,31 @@ async function createPublicSurfaceFixture(): Promise<string> {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-public-surface-"));
   await writeFixtureFile(rootDir, "README.md", "# AnswerLens\nNo ranking guarantees and no consumer AI UI scraping.\n");
   await writeFixtureFile(rootDir, "README.zh-CN.md", "# AnswerLens\n不承诺排名，不抓取消费级 AI UI。\n");
+  await writeFixtureFile(rootDir, ".agents/plugins/marketplace.json", "{\"name\":\"answerlens-codex\",\"plugins\":[]}\n");
+  await writeFixtureFile(
+    rootDir,
+    "plugins/answerlens-codex/skills/answerlens-activation/SKILL.md",
+    [
+      "# AnswerLens Activation",
+      "No ranking guarantees.",
+      "## What To Block",
+      "Block or rewrite public copy that claims or implies:",
+      "- guaranteed AI rankings",
+      "- guaranteed ChatGPT answer-surface placement",
+      "- consumer AI UI scraping as a product capability",
+      "It must not imply:",
+      "- must not imply unauthorized customer proof"
+    ].join("\n")
+  );
   await writeFixtureFile(rootDir, "action.yml", artifactOrderText());
+  await writeFixtureFile(rootDir, "docs/shareable-summary.md", artifactOrderText());
   await writeFixtureFile(rootDir, "docs/github-action.md", artifactOrderText());
   await writeFixtureFile(rootDir, "docs/zh/github-action.md", artifactOrderText());
   await writeFixtureFile(rootDir, "examples/consumer-repo/README.md", artifactOrderText());
   await writeFixtureFile(
     rootDir,
     "examples/consumer-repo/.github/workflows/answerlens.yml",
-    `${artifactOrderText()}\nsteps:\n  - uses: actions/checkout@v5\n  - uses: actions/upload-artifact@v6\n`
+    `${artifactOrderText()}\nsteps:\n  - uses: actions/checkout@v5\n  - uses: actions/upload-artifact@v6\n    with:\n      path: |\n        \${{ steps.answerlens.outputs.out-dir }}\n        !\${{ steps.answerlens.outputs.out-dir }}/raw/**\n`
   );
   await writeFixtureFile(
     rootDir,

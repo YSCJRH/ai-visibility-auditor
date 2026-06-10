@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag-name:
-        description: "Optional semver tag to simulate or publish, for example v0.3.2."
+        description: "Optional semver tag to simulate or publish, for example v0.3.3."
         required: false
         type: string
   push:
@@ -77,6 +77,18 @@ jobs:
               draft: release.draft,
               prerelease: release.prerelease
             }));
+            const releaseTag = process.env.RELEASE_TAG;
+            if (releaseTag && !compiled.some((release) => release.tag_name === releaseTag)) {
+              compiled.unshift({
+                tag_name: releaseTag,
+                name: releaseTag,
+                html_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/releases/tag/${releaseTag}`,
+                published_at: new Date().toISOString(),
+                body: "",
+                draft: false,
+                prerelease: false
+              });
+            }
             fs.writeFileSync("dist/releases.json", `${JSON.stringify(compiled, null, 2)}\n`);
       - run: pnpm build:site -- --releases dist/releases.json
       - run: pnpm seo:check --releases dist/releases.json
@@ -101,19 +113,24 @@ jobs:
 
           ## What ships
 
-          - Bilingual public Pages routing under `/en/` and `/zh/` with a visible language switcher
-          - `README.zh-CN.md` plus `docs/zh/` mirrors for the first-run path and admin guide
-          - Localized human-readable report outputs such as `share-summary.zh.md`, `scorecard.zh.md`, `recommendations.zh.md`, and `index.zh.html`
-          - Admin SPA and `/review/*` language switching with saved preference or query-based locale selection
-          - More natural Chinese `compare`, `starter`, and `examples` pages that keep the demo-to-CI funnel intact
+          - Clearer first-run path: live demo report, fixture demo, real-site audit, then GitHub Action adoption
+          - Share-ready report layer that points readers from `share-summary.md` to `scorecard.md` and `recommendations.md`
+          - Trust and safety docs for public-source auditing, BYOK eval, secret boundaries, raw payload handling, and non-ranking language
+          - First-run story and self-dogfooding log surfaces for authorized, artifact-backed adoption proof
+          - Repo-local Codex plugin workflows for activation reviews, adopter-kit checks, and public-claim guardrails
+          - Stronger `public:check` coverage for unsafe claims, premature npm install copy, raw payload uploads, runtime secrets, plugin copy, and artifact-order drift
+          - Starter bundle and GitHub Action docs pinned to the reviewed `v0.3.3` Action release
           - Publish-ready CLI bundle and tarball plus repo-native report artifacts
 
           ## Known limits
 
           - No consumer AI UI scraping
           - No ranking guarantees
-          - JSON contracts and machine-readable fields remain English-stable; localization only applies to human-readable surfaces
-          - The admin console is an internal operator surface, not a public SaaS or canonical product front door
+          - No promise of answer placement in ChatGPT, Perplexity, AI Overview, or any answer surface
+          - Readiness and VAVR are diagnostic signals, not platform rankings
+          - Optional `eval` is BYOK; secrets stay in environment variables or GitHub secrets, not `runtime.yaml`
+          - Public summaries and default GitHub artifacts should not expose raw provider payloads
+          - The Codex plugin is a maintainer workflow helper, not a new audit engine or public SaaS surface
           - GitHub Pages deployment still depends on repository settings
           - npm publish is skipped unless NPM_TOKEN or trusted publishing is configured
 
@@ -126,7 +143,9 @@ jobs:
           - Manual steps: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/manual-steps.md
           - Quickstart: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/quickstart.md
           - Activation plan: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/activation-plan.md
-          - Admin console guide: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/admin-console.md
+          - Trust and safety: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/trust-and-safety.md
+          - First-run story: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/first-run-story.md
+          - Codex plugin: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/codex-plugin.md
 
           ## Current follow-through
 

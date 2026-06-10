@@ -38,4 +38,7 @@
 - install copy implies npm is available while the registry still returns `404`
 - action docs lag behind starter bundle paths or workflow major versions
 - public copy introduces ranking guarantees, fake proof, consumer AI UI scraping, host-level robots claims, or premature npm install copy that `corepack pnpm public:check` should block
+- public summaries or default Action artifact uploads expose `raw/**` provider payloads
+- first-run story copy implies external adoption proof without visible authorization
+- trust/safety copy loses the `audit` no-key and optional `eval` BYOK boundary
 - generated Pages metadata drifts across canonical, hreflang, sitemap, Open Graph URL, JSON-LD URL, BreadcrumbList, or FAQPage contracts that `corepack pnpm seo:check` should block

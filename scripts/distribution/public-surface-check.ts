@@ -28,6 +28,8 @@ const TEXT_SURFACES = [
   "examples/consumer-repo/README.md",
   "examples/consumer-repo/.github/workflows/answerlens.yml",
   ".github/workflows",
+  ".agents/plugins/marketplace.json",
+  "plugins",
   "scripts/distribution/build-site.ts",
   "scripts/distribution/site-seo.ts",
   "scripts/distribution/releases-snapshot.json"
@@ -35,6 +37,7 @@ const TEXT_SURFACES = [
 
 const ARTIFACT_ORDER_SURFACES = [
   "action.yml",
+  "docs/shareable-summary.md",
   "docs/github-action.md",
   "docs/zh/github-action.md",
   "examples/consumer-repo/README.md",
@@ -56,6 +59,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
     const text = await readFile(path.join(rootDir, file), "utf8");
     checkPublicClaims(file, text, findings);
     checkActionMajors(file, text, findings);
+    checkRawPayloadUpload(file, text, findings);
   }
 
   await checkRuntimeConfigs(rootDir, findings);
@@ -129,12 +133,36 @@ function checkPublicClaims(file: string, text: string, findings: Finding[]): voi
       findings.push(finding("public-fake-proof", file, index, "Do not add rating, review, download, testimonial, customer-proof, or star-count claims without verified visible proof."));
     }
 
-    if (/(npm\s+(install|i)\s+@answerlens\/cli|pnpm\s+add\s+@answerlens\/cli|yarn\s+add\s+@answerlens\/cli)/i.test(normalized)) {
+    if (
+      /(npm\s+(install|i)\s+@answerlens\/cli|pnpm\s+add\s+@answerlens\/cli|yarn\s+add\s+@answerlens\/cli|@answerlens\/cli.{0,80}\b(cli\s+)?installs?\b|\b(cli\s+)?installs?\b.{0,80}@answerlens\/cli)/i.test(
+        normalized
+      )
+    ) {
       findings.push(finding("public-npm-install-claim", file, index, "Do not promote @answerlens/cli as an npm install path until the public registry package is visible."));
     }
 
     if (/yscjrh\.github\.io\/robots\.txt/i.test(normalized) || (/robots\.txt/i.test(normalized) && /(host-level|host-wide|whole host|controls the host|控制整个|控制 host)/i.test(normalized))) {
       findings.push(finding("public-robots-host-claim", file, index, "Project-site robots.txt must not be described as host-level robots control."));
+    }
+  });
+}
+
+function checkRawPayloadUpload(file: string, text: string, findings: Finding[]): void {
+  const lines = text.split(/\r?\n/);
+  lines.forEach((line, index) => {
+    if (!/(upload-artifact|actions\/upload-artifact)/i.test(line)) {
+      return;
+    }
+
+    const block = lines.slice(index, Math.min(lines.length, index + 18)).join("\n");
+    const mentionsFullRunUpload = /(steps\.answerlens\.outputs\.out-dir|runs\/answerlens|\bout-dir\b)/i.test(block);
+    const excludesRawPayloads = /!\s*.+\/raw\/\*\*|raw\/\*\*.+(excluded|private|restricted)|exclude.{0,80}raw/i.test(block);
+    if (mentionsFullRunUpload && !excludesRawPayloads) {
+      findings.push({
+        ruleId: "raw-payload-upload-exposure",
+        path: `${file}:${index + 1}`,
+        message: "Default public artifact uploads must exclude raw/** because eval and manual-import runs may contain raw provider payloads."
+      });
     }
   });
 }
@@ -228,7 +256,7 @@ async function checkAuditEvalKeyBoundary(rootDir: string, findings: Finding[]): 
 }
 
 function isNegativeBoundary(line: string): boolean {
-  return /\?$|\bdoes\b.{0,80}\bscrape\b|\b(no|not|does not|do not|without|avoid|avoids|avoiding|non-goal|non-goals|is not|must not|should not|cannot|can't|rather than|instead of|vs|versus|hard requirement|out of scope|should not change)\b|不承诺|不会|不要|不能|禁止|不是|避免|非目标|无消费级|不抓取/i.test(line);
+  return /\?$|\bdoes\b.{0,80}\bscrape\b|\b(block or rewrite|what to block|claims or implies|must not imply)\b|\b(no|not|does not|do not|without|avoid|avoids|avoiding|block|reject|forbid|non-goal|non-goals|is not|must not|should not|cannot|can't|rather than|instead of|vs|versus|hard requirement|out of scope|should not change)\b|不承诺|不会|不要|不能|禁止|不是|避免|非目标|无消费级|不抓取/i.test(line);
 }
 
 function finding(ruleId: string, file: string, zeroBasedLine: number, message: string): Finding {

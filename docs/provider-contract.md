@@ -55,5 +55,6 @@ Each citation should include:
 
 - Do not put provider-specific parsing in the scorer.
 - Do not hide raw responses.
+- Do not include raw responses in public summaries or default public artifact uploads.
 - Do not fail silently on unknown response shapes.
 - Do not require changes to `packages/core` when adding a new provider that already fits the contract.

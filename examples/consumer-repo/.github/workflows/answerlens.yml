@@ -13,7 +13,7 @@ jobs:
       # Keep eval defaults in .github/answerlens/runtime.yaml.
       # Only add provider/model overrides here when you want a temporary change.
       - id: answerlens
-        uses: YSCJRH/ai-visibility-auditor@v0.3.2
+        uses: YSCJRH/ai-visibility-auditor@v0.3.3
         with:
           command: audit
           site: https://www.example.com
@@ -41,4 +41,6 @@ jobs:
       - uses: actions/upload-artifact@v6
         with:
           name: answerlens-report
-          path: ${{ steps.answerlens.outputs.out-dir }}
+          path: |
+            ${{ steps.answerlens.outputs.out-dir }}
+            !${{ steps.answerlens.outputs.out-dir }}/raw/**

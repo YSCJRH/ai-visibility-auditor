@@ -41,6 +41,8 @@ Use this loop for public-surface work:
 
 The goal is not automation for its own sake. The goal is to keep producing better public source material over time.
 
+Record each visible loop in [self-dogfood-log.md](self-dogfood-log.md). The log should name the audited surface, artifact path, artifacts reviewed, source-material change made, and claims intentionally not made.
+
 ## Loop #1 operating path
 
 The first visible loop should run against the current GitHub Pages site:
@@ -58,6 +60,8 @@ Open the artifacts in the same order used everywhere else:
 3. `recommendations.md`
 
 Keep the loop tracked under umbrella issue [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33).
+
+Keep the public evidence trail in [self-dogfood-log.md](self-dogfood-log.md). Do not treat a self-dogfood score as traffic, ranking, answer-placement, or external adoption proof.
 
 ## Signal types that are in scope
 

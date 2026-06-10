@@ -30,7 +30,7 @@ AnswerLens 提供一个可复用的根 Action，让团队把 AI 可发现性检�
 ```
 
 把 [../../examples/consumer-repo/.github](../../examples/consumer-repo/.github) 当作可复制的 baseline。
-当前仓库中的 starter workflow pin 到稳定 Action release：`YSCJRH/ai-visibility-auditor@v0.3.2`。也就是外部仓库先固定到这个经过 review 的版本；有新 release 后，先读 release notes，再更新这个 pin。
+当前仓库中的 starter workflow pin 到稳定 Action release：`YSCJRH/ai-visibility-auditor@v0.3.3`。也就是外部仓库先固定到这个经过 review 的版本；有新 release 后，先读 release notes，再更新这个 pin。
 
 如果你计划运行 `eval`，就把默认 provider（模型服务商）/ model / locale / timeout 放进 `runtime.yaml`，不要把这些默认值散落在 workflow 里。
 
@@ -70,6 +70,8 @@ AnswerLens 提供一个可复用的根 Action，让团队把 AI 可发现性检�
 ## 安全边界
 
 把 `OPENAI_API_KEY`、`PERPLEXITY_API_KEY` 继续放在 GitHub secrets 里，不要写进 `runtime.yaml`。
+
+默认上传报告包时应排除 `raw/**`。`eval` 和 `manual-import` 可能会把 raw provider payloads 写到那里；如果团队确实需要调试这些 payload，请只通过显式的私有 workflow 或受限 artifact 路径上传。
 
 完整模型配置规则见 [model-runtime.md](model-runtime.md)。
 如果你只是想先用一档推荐的临时配置开始，可以优先用 `profile: fast-first-eval`，再决定是否改成单字段覆盖。

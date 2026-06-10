@@ -66,9 +66,9 @@ These fields do not imply an official platform ranking and do not change the hea
 
 ## Output contract
 
+- `share-summary.md` is the compact, shareable human summary for PRs, issues, releases, and job summaries
 - `scorecard.md` is the human-readable audit summary
 - `recommendations.md` turns audit findings into an actionable backlog
-- `share-summary.md` is the compact, shareable human summary for PRs, issues, releases, and job summaries
 - `share-summary.json` is the machine-readable share contract for Actions, badges, and downstream tooling
 - `pr-snippet.md` is a copy-ready GitHub Markdown block
 - `run.json` is the machine-readable run manifest

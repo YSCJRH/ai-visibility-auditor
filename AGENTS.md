@@ -24,6 +24,11 @@ Repository slug: ai-visibility-auditor.
 - Keep README, roadmap, distribution docs, Action docs, release copy, and manual steps in brand and status sync.
 - When an activation maintenance workflow repeats and the local flow is stable, codify it under `.agents/skills/` instead of re-explaining it in ad hoc prompts.
 - Every meaningful change should improve at least one funnel step: discover, understand, trust, try, activate, share, or revisit.
+- Public-facing report, README, Pages, Action, starter, or release changes must preserve the artifact reading order: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
+- Public summaries and default GitHub artifact uploads must not expose `raw/**` provider payloads. Keep raw payloads for local or private debugging paths.
+- Do not add npm install copy for `@answerlens/cli` unless the registry package is visibly published. Until then, describe local checkout, release assets, and manual npm activation steps.
+- First-run story or adoption-proof copy must stay authorized and artifact-backed; never imply current users, stars, forks, downloads, traffic, growth percentages, case studies, or external adoption without visible evidence.
+- Trust and safety copy must keep the BYOK boundary explicit: basic `audit` needs no provider key, optional `eval` uses the user's own provider account, and secrets stay out of configs, docs, and public summaries.
 
 ## Verification
 - Docs and workflow changes: `corepack pnpm public:check`, `corepack pnpm test`, `corepack pnpm typecheck`, `corepack pnpm build:site`, `corepack pnpm seo:check`, `corepack pnpm pack:cli:dry-run`

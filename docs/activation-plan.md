@@ -5,6 +5,7 @@ AnswerLens has enough product surface to be useful today. The next workstream is
 This document is the canonical repo entry for that workstream. The detailed working brief lives in [../trans.md](../trans.md).
 The GitHub-native growth practice for that workstream lives in [github-growth-plan.md](github-growth-plan.md).
 The self-dogfooding loop for that workstream lives in [self-dogfooding.md](self-dogfooding.md).
+The public trust boundary lives in [trust-and-safety.md](trust-and-safety.md), the first-run sharing template lives in [first-run-story.md](first-run-story.md), and the self-dogfooding evidence trail lives in [self-dogfood-log.md](self-dogfood-log.md).
 
 ## Current operating focus
 
@@ -23,6 +24,7 @@ Current umbrella issue: [#33](https://github.com/YSCJRH/ai-visibility-auditor/is
 - Real-site quickstart and first-run artifact order
 - Self-dogfooding rules for the README, Pages, release, and docs surfaces
 - GitHub-native packaging, community routing, and public proof surfaces
+- Trust/safety, first-run story, and self-dogfood log surfaces
 - Repo governance docs such as `AGENTS.md`
 - Public status alignment across roadmap, releases, milestones, and manual steps
 

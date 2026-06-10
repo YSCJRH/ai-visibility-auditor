@@ -1,0 +1,20 @@
+{
+  "name": "answerlens-codex",
+  "interface": {
+    "displayName": "AnswerLens Codex"
+  },
+  "plugins": [
+    {
+      "name": "answerlens-codex",
+      "source": {
+        "source": "local",
+        "path": "./plugins/answerlens-codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
