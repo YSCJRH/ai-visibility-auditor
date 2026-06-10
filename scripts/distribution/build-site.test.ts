@@ -266,6 +266,8 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /Open quickstart/);
   assert.match(home, /Open Action docs/);
   assert.match(home, /SoftwareApplication/);
+  assert.match(home, /"applicationCategory":"AI visibility auditor for product websites"/);
+  assert.doesNotMatch(home, /DeveloperApplication/);
   assert.match(home, /Organization/);
   assert.match(home, /WebSite/);
   assert.match(home, /softwareVersion/);
