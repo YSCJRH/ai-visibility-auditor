@@ -42,6 +42,21 @@ Audit whether a product site can be read, cited, compared, and recommended by AI
 
 - **Tighten structure and schema alignment on key pages**: Higher extraction quality and fewer ambiguous summaries.
 
+## Next review steps
+
+1. Open `scorecard.md` to verify coverage, checks, and score drivers.
+2. Open `recommendations.md` to turn the top gap into a page-level fix.
+3. Use `pr-snippet.md` when you want a copy-ready GitHub block.
+4. Use the AnswerLens starter bundle when this workflow is ready to move into another repository: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/starter-bundle.md
+
+## Shareable artifacts
+
+- [share-summary.md](share-summary.md)
+- [scorecard.md](scorecard.md)
+- [recommendations.md](recommendations.md)
+- [share-summary.json](share-summary.json)
+- [pr-snippet.md](pr-snippet.md)
+
 ## Guardrails
 
 AnswerLens does not scrape consumer AI UIs, auto-post content, or guarantee answer-surface rankings.
@@ -69,7 +84,7 @@ The JSON shape is intentionally small:
   },
   "topIssues": [],
   "topRecommendations": [],
-  "artifacts": ["scorecard.md", "recommendations.md", "run.json"]
+  "artifacts": ["share-summary.md", "scorecard.md", "recommendations.md", "share-summary.json", "pr-snippet.md", "run.json"]
 }
 ```
 
@@ -108,9 +123,11 @@ Use this when a team wants a copy-ready GitHub block:
 <details>
 <summary>Artifacts and guardrails</summary>
 
+- Share summary: `share-summary.md`
 - Scorecard: `scorecard.md`
 - Recommendations: `recommendations.md`
-- Share summary: `share-summary.md`
+- Machine-readable summary: `share-summary.json`
+- Copyable starter: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/starter-bundle.md
 
 AnswerLens does not scrape consumer AI UIs, auto-post content, or guarantee answer-surface rankings.
 

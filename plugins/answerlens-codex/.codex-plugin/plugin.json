@@ -1,0 +1,36 @@
+{
+  "name": "answerlens-codex",
+  "version": "0.1.0",
+  "description": "Codex workflows for keeping AnswerLens GitHub-native, copyable, and claim-safe.",
+  "author": {
+    "name": "AnswerLens maintainers",
+    "url": "https://github.com/YSCJRH/ai-visibility-auditor"
+  },
+  "homepage": "https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/codex-plugin.md",
+  "repository": "https://github.com/YSCJRH/ai-visibility-auditor",
+  "license": "Apache-2.0",
+  "keywords": [
+    "answerlens",
+    "codex",
+    "ai-discoverability",
+    "github-actions",
+    "open-source"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AnswerLens Codex",
+    "shortDescription": "Maintain AnswerLens adoption, trust, and public-claim guardrails.",
+    "longDescription": "AnswerLens Codex gives Codex focused workflows for improving the AnswerLens GitHub-native onboarding loop: live demo, fixture demo, real-site audit, starter bundle, first-run story, self-dogfooding, and public claim checks. It does not add consumer AI UI scraping or ranking guarantees.",
+    "developerName": "AnswerLens maintainers",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Review AnswerLens public claims before release.",
+      "Improve the AnswerLens starter adoption path.",
+      "Run an AnswerLens activation sanity pass."
+    ]
+  }
+}

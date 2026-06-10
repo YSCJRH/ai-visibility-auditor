@@ -40,3 +40,6 @@ Check the path in this order:
 - public surfaces lose the explicit `audit` no-key / optional `eval` BYOK boundary
 - artifact review order changes away from `share-summary.md`, then `scorecard.md`, then `recommendations.md`
 - public copy starts promoting `npm install @answerlens/cli` before the registry package is visible
+- Action or starter examples upload `raw/**` provider payloads by default
+- first-run story routing is missing from README, quickstart, or Discussions-oriented docs
+- starter bundle explains files but not where secrets belong or how to keep PR review public-safe

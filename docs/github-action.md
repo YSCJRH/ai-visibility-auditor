@@ -37,7 +37,7 @@ The public interface is:
 ```
 
 Use the starter files in [examples/consumer-repo/.github](../examples/consumer-repo/.github) as a copyable baseline, then replace the placeholder brand, competitors, prompts, and `site:` URL.
-The checked-in starter workflow pins the current stable Action release, `YSCJRH/ai-visibility-auditor@v0.3.2`; after a newer release, update that pin only after reviewing the release notes.
+The checked-in starter workflow pins the current stable Action release, `YSCJRH/ai-visibility-auditor@v0.3.3`; after a newer release, update that pin only after reviewing the release notes.
 
 If you want the generated Markdown and HTML artifacts to show a friendlier public label than the raw URL or local path, set `brand.site_display_name` in `brand.yaml`.
 If you plan to run `eval`, keep the default provider, model, locale, and timeout in `runtime.yaml` next to `brand.yaml`.
@@ -58,7 +58,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - id: answerlens
-        uses: YSCJRH/ai-visibility-auditor@v0.3.2
+        uses: YSCJRH/ai-visibility-auditor@v0.3.3
         with:
           command: audit
           site: https://www.example.com
@@ -86,7 +86,9 @@ jobs:
       - uses: actions/upload-artifact@v6
         with:
           name: answerlens-report
-          path: ${{ steps.answerlens.outputs.out-dir }}
+          path: |
+            ${{ steps.answerlens.outputs.out-dir }}
+            !${{ steps.answerlens.outputs.out-dir }}/raw/**
 ```
 
 ## Inputs
@@ -143,7 +145,7 @@ If you do not set `runtime`, AnswerLens tries `runtime.yaml` next to `brand.yaml
 
 The starter bundle is intentionally generic. Replace the example product, domain, competitor list, and prompt pack before using it on a real site.
 Treat it as the shareable adoption asset for forks, releases, and external setup guides.
-Keep the workflow pinned to a reviewed stable release tag, currently `v0.3.2`, instead of a branch or floating ref.
+Keep the workflow pinned to a reviewed stable release tag, currently `v0.3.3`, instead of a branch or floating ref.
 Keep secrets such as `OPENAI_API_KEY` and `PERPLEXITY_API_KEY` in repository or organization secrets, not in `runtime.yaml`.
 
 If you want the full model decision tree in one place, use [model-runtime.md](model-runtime.md).
@@ -159,7 +161,7 @@ If you want one last sanity check before CI, run the command path in [quickstart
 - `pr-snippet.md` for the copy-ready block that can move into PRs or issues
 - `run-json-path` as the pointer to the machine-readable manifest
 
-Keep the full `out-dir` uploaded as an artifact so reviewers can open the complete report bundle.
+Upload the report bundle for review, but keep `raw/**` excluded from the default artifact. `eval` and `manual-import` runs may write raw provider payloads there for debugging and auditability.
 
 Review artifacts in the same order used everywhere else:
 
@@ -176,11 +178,12 @@ This repository uses the same root Action via `uses: ./` in its fixture workflow
 - Do not post raw provider payloads to public PRs.
 - Do not call readiness scores rankings.
 - Do not imply AnswerLens guarantees answer-surface placement.
-- Prefer `share-summary.md` for public summaries and keep full JSON artifacts available for review.
+- Prefer `share-summary.md` for public summaries and keep non-raw JSON artifacts available for review.
+- If a team needs raw payloads for debugging, upload them only through an explicit private workflow or restricted artifact path.
 
 ## Runtime note
 
-- The root Action provisions pnpm with Corepack, so external repositories that call a reviewed release tag such as `YSCJRH/ai-visibility-auditor@v0.3.2` do not need to add `pnpm/action-setup` separately.
+- The root Action provisions pnpm with Corepack, so external repositories that call a reviewed release tag such as `YSCJRH/ai-visibility-auditor@v0.3.3` do not need to add `pnpm/action-setup` separately.
 - Repository workflows are hardened for the GitHub Actions Node 24 transition.
 - Self-hosted runners should stay on a runner version compatible with Node 24-based actions.
 - For copied workflows, prefer the same major versions documented in [docs/manual-steps.md](manual-steps.md): `actions/checkout@v5`, `actions/setup-node@v5`, `actions/github-script@v8`, and `actions/upload-artifact@v6`.

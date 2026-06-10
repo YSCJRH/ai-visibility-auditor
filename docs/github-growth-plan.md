@@ -105,6 +105,8 @@ The lowest-friction feedback ask should be:
 
 - tell us which artifact helped first
 
+Use [first-run-story.md](first-run-story.md) as the copyable template so feedback stays artifact-backed and does not drift into ranking, traffic, or fake adoption proof.
+
 ## Metrics ladder
 
 Track growth as a ladder, not as stars alone:

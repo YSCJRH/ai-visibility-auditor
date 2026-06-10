@@ -35,6 +35,8 @@ Across every step, keep the report order fixed: `share-summary.md`, then `scorec
 
 If you already know you want CI, the Action docs remain public, but the easiest path is still demo -> sample site -> real site -> Action.
 
+For safe sharing and first-run feedback, keep [trust and safety](docs/trust-and-safety.md) and the [first-run story template](docs/first-run-story.md) beside the report.
+
 ## What you get
 
 - `audit` for AI-readiness checks against a live site or local fixture
@@ -159,6 +161,9 @@ The public Action contract is:
 - Canonical distribution plan: [docs/distribution-plan.md](docs/distribution-plan.md)
 - GitHub-native growth practice: [docs/github-growth-plan.md](docs/github-growth-plan.md)
 - Self-dogfooding for discoverability: [docs/self-dogfooding.md](docs/self-dogfooding.md)
+- Self-dogfood log: [docs/self-dogfood-log.md](docs/self-dogfood-log.md)
+- Trust and safety: [docs/trust-and-safety.md](docs/trust-and-safety.md)
+- First-run story template: [docs/first-run-story.md](docs/first-run-story.md)
 - Model runtime defaults and override rules: [docs/model-runtime.md](docs/model-runtime.md)
 - Manual setup checklist for Pages, npm, and repo settings: [docs/manual-steps.md](docs/manual-steps.md)
 - 5-minute real-site quickstart: [docs/quickstart.md](docs/quickstart.md)
@@ -193,7 +198,7 @@ AnswerLens is designed to turn vague "AI SEO" work into concrete structure, evid
 - Share a screenshot, artifact, or first-run story: [GitHub Discussions](https://github.com/YSCJRH/ai-visibility-auditor/discussions) in `Show and tell`
 - Reproducible bug, docs gap, or concrete rule request: [GitHub Issues](https://github.com/YSCJRH/ai-visibility-auditor/issues)
 
-If you try AnswerLens on a real site, tell us which artifact helped first.
+If you try AnswerLens on a real site, use the [first-run story template](docs/first-run-story.md) and tell us which artifact helped first.
 
 ## Repository layout
 
@@ -387,6 +392,7 @@ See [docs/shareable-summary.md](docs/shareable-summary.md) and [docs/badges.md](
 - [AnswerLens vs consumer UI scraping](docs/compare/answerlens-vs-ui-scraping.md)
 - [Search Console validation import](docs/search-console.md)
 - [Bing / IndexNow helper](docs/bing-indexnow.md)
+- [Codex plugin for maintainers](docs/codex-plugin.md)
 
 ## Roadmap
 
@@ -395,6 +401,7 @@ See [docs/shareable-summary.md](docs/shareable-summary.md) and [docs/badges.md](
 - Released in `v0.2.3` on April 15, 2026: `#11` manual rank import and CPS plus `#12` repeated-sample stability summaries
 - Released in `v0.3.0` on April 15, 2026: `#13` Search Console validation import plus `#14` Bing Webmaster / IndexNow helper
 - Released in `v0.3.2` on April 21, 2026: bilingual public Pages and docs, localized report variants, and admin/review language switching
+- Released in `v0.3.3` on June 10, 2026: activation funnel, share-ready artifacts, trust/safety docs, starter bundle hardening, self-dogfood loop, public guardrails, and repo-local Codex plugin workflows
 - Current operating focus: [docs/activation-plan.md](docs/activation-plan.md)
 - Full public roadmap: [docs/roadmap.md](docs/roadmap.md)
 

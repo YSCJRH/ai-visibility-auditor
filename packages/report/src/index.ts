@@ -222,14 +222,14 @@ function topRecommendations(result: AuditResult): ShareSummary["topRecommendatio
 function auditArtifacts(): string[] {
   return [
     "share-summary.md",
+    "scorecard.md",
+    "recommendations.md",
     "share-summary.zh.md",
+    "scorecard.zh.md",
+    "recommendations.zh.md",
     "share-summary.json",
     "pr-snippet.md",
     "pr-snippet.zh.md",
-    "scorecard.md",
-    "scorecard.zh.md",
-    "recommendations.md",
-    "recommendations.zh.md",
     "issues.json",
     "site-audit.json",
     "index.html",
@@ -520,6 +520,12 @@ function renderShareSummaryMarkdown(summary: ShareSummary, locale: Locale = "en"
       : `- ${t(locale, "report.noIssues")}`;
 
   const artifacts = summary.artifacts.map((artifact) => `- [${artifact}](${artifact})`).join("\n");
+  const nextSteps = [
+    `1. ${t(locale, "report.next.scorecard")}`,
+    `2. ${t(locale, "report.next.recommendations")}`,
+    `3. ${t(locale, "report.next.prSnippet")}`,
+    `4. ${t(locale, "report.next.starter")}`
+  ].join("\n");
 
   return `# ${t(locale, "report.shareSummary.title")}
 
@@ -550,6 +556,10 @@ ${issues}
 ## ${t(locale, "report.fixes")}
 
 ${recommendations}
+
+## ${t(locale, "report.next.title")}
+
+${nextSteps}
 
 ## ${t(locale, "report.artifacts")}
 
@@ -595,10 +605,11 @@ ${topFixes}
 <details>
 <summary>${t(locale, "report.pr.artifacts")}</summary>
 
+- Share summary: \`share-summary.md\`
 - Scorecard: \`scorecard.md\`
 - Recommendations: \`recommendations.md\`
-- Share summary: \`share-summary.md\`
 - Machine-readable summary: \`share-summary.json\`
+- Copyable starter: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/starter-bundle.md
 
 ${t(locale, "brand.disclaimer")}
 
@@ -655,24 +666,7 @@ function buildAuditRunManifest(result: AuditResult): RunManifest {
       discoveredUrls: result.summary.discoveredUrls,
       keyPageCount: result.summary.keyPageCount
     },
-    artifacts: [
-      "site-audit.json",
-      "issues.json",
-      "recommendations.md",
-      "recommendations.zh.md",
-      "scorecard.md",
-      "scorecard.zh.md",
-      "index.html",
-      "index.zh.html",
-      "normalized-pages.json",
-      "competitor-diff.md",
-      "share-summary.md",
-      "share-summary.zh.md",
-      "share-summary.json",
-      "pr-snippet.md",
-      "pr-snippet.zh.md",
-      "run.json"
-    ]
+    artifacts: auditArtifacts()
   };
 }
 
@@ -702,36 +696,7 @@ function buildEvalRunManifest(result: EvalResult): RunManifest {
       competitivePositionScore: result.summary.competitivePositionScore,
       rankCoverageRate: result.summary.rankCoverageRate
     },
-    artifacts: [
-      "site-audit.json",
-      "issues.json",
-      "recommendations.md",
-      "recommendations.zh.md",
-      "scorecard.md",
-      "scorecard.zh.md",
-      "index.html",
-      "index.zh.html",
-      "normalized-pages.json",
-      "competitor-diff.md",
-      "eval-results.json",
-      "eval-summary.md",
-      "eval-summary.zh.md",
-      "eval-summary.json",
-      "before-after-diff.md",
-      "before-after-diff.zh.md",
-      "citation-gap-matrix.json",
-      "citation-gap-matrix.md",
-      "citation-gap-matrix.zh.md",
-      "share-summary.md",
-      "share-summary.zh.md",
-      "share-summary.json",
-      "pr-snippet.md",
-      "pr-snippet.zh.md",
-      "content-briefs/*.md",
-      "briefs/*.md",
-      "run.json",
-      "raw/<provider>/<promptId>.json"
-    ],
+    artifacts: [...evalArtifacts(), "content-briefs/*.md", "briefs/*.md", "raw/<provider>/<promptId>.json"],
     provider: result.provider
   };
 }
@@ -756,28 +721,7 @@ function buildValidationRunManifest(audit: AuditResult, result: SearchValidation
       totalImpressions: result.summary.totalImpressions,
       validationSource: result.source.type
     },
-    artifacts: [
-      "site-audit.json",
-      "issues.json",
-      "recommendations.md",
-      "recommendations.zh.md",
-      "scorecard.md",
-      "scorecard.zh.md",
-      "index.html",
-      "index.zh.html",
-      "normalized-pages.json",
-      "competitor-diff.md",
-      "search-console-summary.json",
-      "search-console-summary.md",
-      "search-console-summary.zh.md",
-      "search-console-pages.json",
-      "share-summary.md",
-      "share-summary.zh.md",
-      "share-summary.json",
-      "pr-snippet.md",
-      "pr-snippet.zh.md",
-      "run.json"
-    ]
+    artifacts: validationArtifacts()
   };
 }
 

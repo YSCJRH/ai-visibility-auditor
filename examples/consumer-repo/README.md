@@ -29,7 +29,7 @@ After copying it:
 6. Set `site:` in the workflow to the public URL you want to audit.
 
 The starter bundle is intentionally minimal. It exists to make the public GitHub Action path copyable, forkable, and easy to reference from README and release docs.
-The checked-in workflow pins the current stable Action release, `YSCJRH/ai-visibility-auditor@v0.3.2`. After a newer release, update that pin only after reviewing the release notes.
+The checked-in workflow pins the current stable Action release, `YSCJRH/ai-visibility-auditor@v0.3.3`. After a newer release, update that pin only after reviewing the release notes.
 Keep API keys in GitHub secrets or local environment variables. Do not put them into `runtime.yaml`.
 For the first live benchmark pass, the recommended temporary shortcut is `profile: fast-first-eval`.
 If you already have one readable OpenAI baseline and want a provider-level second opinion, use `profile: perplexity-cross-check` as a temporary override.
@@ -39,5 +39,7 @@ When the workflow runs, review the generated artifacts in this order:
 1. `share-summary.md`
 2. `scorecard.md`
 3. `recommendations.md`
+
+The starter workflow excludes `raw/**` from the uploaded artifact by default. If you later run `eval` or `manual-import`, raw provider payloads stay out of public artifacts unless you add a separate private debug upload.
 
 If you want one local run before CI, start with [../../docs/quickstart.md](../../docs/quickstart.md) and then move the same `.github/answerlens/` folder into the target repository workflow.

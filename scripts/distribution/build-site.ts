@@ -253,8 +253,8 @@ function translateSiteHtml(html: string): string {
     ["Bring your own provider bill", "使用你自己的模型服务账单"],
     ["OpenAI and Perplexity usage stays in your own account.", "OpenAI 和 Perplexity 的用量留在你自己的账户中。"],
     ["Your repository runner minutes", "你自己的 GitHub Actions 运行分钟数"],
-    ["The Action uploads the same report files used by local runs.", "Action 会上传与本地运行相同的报告文件。"],
-    ["<code>@answerlens/cli</code> for CLI installs and dry-run packaging.", "<code>@answerlens/cli</code> 用于命令行安装和打包预检。"],
+    ["The Action uploads review-safe report files and excludes raw payloads by default.", "Action 默认上传适合审阅的报告文件，并排除 raw payload。"],
+    ["Release tarballs or a local checkout for CLI runs until the npm package is visible.", "在 npm package 可见之前，使用 release tarball 或本地 checkout 跑 CLI。"],
     ["The root GitHub Action for pull requests and manual workflow runs.", "根目录 GitHub Action 用于 PR 检查和手动运行。"],
     ["Release assets for tarballs, demo bundles, and the compiled site bundle.", "发布下载包含 tarball、演示包和编译后的站点包。"],
     ["That keeps pricing simple: the product is open source, optional eval uses your own API keys, and there is no hosted AnswerLens control plane fee today.", "这样定价更容易理解：产品本身开源，可选模型评估使用你自己的模型服务 key，当前没有托管版 AnswerLens 控制平面费用。"],
@@ -1098,7 +1098,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   ]);
 
   const updatedAt = formatDate(releases[0]?.published_at, shareSummary.run.generatedAt);
-  const latestReleaseVersion = releases[0]?.tag_name ?? "v0.3.2";
+  const latestReleaseVersion = releases[0]?.tag_name ?? "v0.3.3";
 
   await mkdir(path.join(outDir, "docs"), { recursive: true });
   await mkdir(path.join(outDir, "releases"), { recursive: true });
@@ -1198,6 +1198,33 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         "zh-CN": "说明报告输出如何变成可直接复用的公开摘要。"
       },
       group: { en: "Share", "zh-CN": "分享" }
+    },
+    {
+      file: "docs/trust-and-safety.md",
+      title: { en: "Trust and safety", "zh-CN": "信任与安全" },
+      text: {
+        en: "Secrets, raw payloads, BYOK, scoring, and public sharing boundaries.",
+        "zh-CN": "说明 secrets、raw payload、BYOK、评分和公开分享边界。"
+      },
+      group: { en: "Trust", "zh-CN": "信任" }
+    },
+    {
+      file: "docs/first-run-story.md",
+      title: { en: "First-run story", "zh-CN": "首次运行故事" },
+      text: {
+        en: "Template for sharing a first run without turning it into a ranking claim.",
+        "zh-CN": "用于分享首次运行、但不变成排名声明的模板。"
+      },
+      group: { en: "Share", "zh-CN": "分享" }
+    },
+    {
+      file: "docs/self-dogfood-log.md",
+      title: { en: "Self-dogfood log", "zh-CN": "自我应用日志" },
+      text: {
+        en: "Public-source-material improvement loop for AnswerLens itself.",
+        "zh-CN": "AnswerLens 自身公开 source material 的改进循环记录。"
+      },
+      group: { en: "Operate", "zh-CN": "运营" }
     },
     {
       file: "docs/roadmap.md",
@@ -1313,7 +1340,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       <tbody>
         <tr><td>CLI audit</td><td>$0 provider cost</td><td>Basic <code>audit</code> runs do not require provider API keys.</td></tr>
         <tr><td>Eval runs</td><td>Bring your own provider bill</td><td>OpenAI and Perplexity usage stays in your own account.</td></tr>
-        <tr><td>GitHub Action</td><td>Your repository runner minutes</td><td>The Action uploads the same report files used by local runs.</td></tr>
+        <tr><td>GitHub Action</td><td>Your repository runner minutes</td><td>The Action uploads review-safe report files and excludes raw payloads by default.</td></tr>
         <tr><td>Release assets and Pages</td><td>$0 to download</td><td>Demo bundles, the compiled site, and docs stay publicly accessible.</td></tr>
       </tbody>
     </table>`;
@@ -1736,7 +1763,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             "<code>prompts.yaml</code>: buyer, comparison, and citation questions for your real audience.",
             "<code>runtime.yaml</code>: non-secret eval defaults for provider, model, locale, samples, timeout, and optional base URL.",
             "<code>answerlens.yml</code>: the GitHub Actions workflow that runs AnswerLens in CI and uploads the same report files, pinned to the current stable Action release."
-          ])}</ul><p>The current starter workflow uses <code>YSCJRH/ai-visibility-auditor@v0.3.2</code>; after a newer release, update that pin only after reviewing the release notes.</p><p>Keep API keys in GitHub secrets or local environment variables, not in <code>runtime.yaml</code>.</p>`)}
+          ])}</ul><p>The current starter workflow uses <code>YSCJRH/ai-visibility-auditor@v0.3.3</code>; after a newer release, update that pin only after reviewing the release notes.</p><p>Keep API keys in GitHub secrets or local environment variables, not in <code>runtime.yaml</code>.</p>`)}
         </section>
         <section class="section grid">
           ${renderPanel("Files to copy", "Copyable sources", `<ul>${renderList([
@@ -1776,7 +1803,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             "<code>prompts.yaml</code>：写给真实买家与评估场景的比较、引用和推荐问题。",
             "<code>runtime.yaml</code>：保存非 secret 的 eval 默认值，例如 provider、model、locale、samples 和 timeout。",
             "<code>answerlens.yml</code>：在 CI 里运行 AnswerLens、上传同一组报告文件，并 pin 到当前稳定 Action release 的 GitHub Actions workflow。"
-          ])}</ul><p>当前 starter workflow 使用 <code>YSCJRH/ai-visibility-auditor@v0.3.2</code>；有新 release 后，先读 release notes，再更新这个 pin。</p><p>API keys 继续放在 GitHub secrets 或本地环境变量里，不要写进 <code>runtime.yaml</code>。</p>`)}
+          ])}</ul><p>当前 starter workflow 使用 <code>YSCJRH/ai-visibility-auditor@v0.3.3</code>；有新 release 后，先读 release notes，再更新这个 pin。</p><p>API keys 继续放在 GitHub secrets 或本地环境变量里，不要写进 <code>runtime.yaml</code>。</p>`)}
         </section>
         <section class="section grid">
           ${renderPanel("需要复制的文件", "可复制来源", `<ul>${renderList([
@@ -1824,7 +1851,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         </section>
         <section class="section grid">
           ${renderPanel("Packaging choices", "How teams start", `<p>Teams usually look at the demo, run one local audit, and then add GitHub Actions. The package is intentionally simple:</p><ul>${renderList([
-            "<code>@answerlens/cli</code> for CLI installs and dry-run packaging.",
+            "Release tarballs or a local checkout for CLI runs until the npm package is visible.",
             "The root GitHub Action for pull requests and manual workflow runs.",
             "Release assets for tarballs, demo bundles, and the compiled site bundle.",
             "Pages for docs, examples, playbooks, pricing, and trust pages."

@@ -101,6 +101,14 @@ Then use:
 - Does `scorecard.md` make the readiness tradeoff legible enough to discuss with a teammate?
 - Do `recommendations.md` and `pr-snippet.md` feel reviewable, not just generic "AI SEO" advice?
 
+## Share the first run safely
+
+Use [trust-and-safety.md](trust-and-safety.md) before posting a result outside your team.
+
+If the run is safe to discuss publicly, use the [first-run story template](first-run-story.md). A useful first-run story says which artifact helped first, which source-material gap it exposed, and what you would fix next.
+
+Do not paste API keys, private analytics, or raw provider payloads into public PRs, issues, release notes, or Discussions.
+
 ## Next step: move the same path into CI
 
 Once the local run feels useful, continue to [docs/github-action.md](github-action.md) and keep the same `.github/answerlens/` folder shape plus the same artifact review order.

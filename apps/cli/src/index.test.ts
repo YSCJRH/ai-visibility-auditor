@@ -659,7 +659,7 @@ test("consumer repo starter bundle stays self-consistent", async () => {
   assert.match(workflow, /\.github\/answerlens\/prompts\.yaml/);
   assert.match(runtimeConfig, /provider: openai/);
   assert.match(runtimeConfig, /model: gpt-5-mini/);
-  assert.match(workflow, /YSCJRH\/ai-visibility-auditor@v0\.3\.2/);
+  assert.match(workflow, /YSCJRH\/ai-visibility-auditor@v0\.3\.3/);
   assert.match(workflow, /Artifact review order/);
   assert.match(workflow, /scorecard-path/);
   assert.match(workflow, /recommendations-path/);

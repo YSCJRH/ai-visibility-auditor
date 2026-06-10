@@ -1,6 +1,6 @@
 {
   "name": "answerlens-workspace",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": true,
   "description": "AnswerLens: CLI-first AI visibility auditor for product websites.",
   "type": "module",
