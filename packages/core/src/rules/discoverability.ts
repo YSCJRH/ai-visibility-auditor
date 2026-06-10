@@ -11,17 +11,17 @@ function normalizeText(value: string): string {
 function pageTypeKeywords(page: PageRecord): string[] {
   switch (page.pageType) {
     case "pricing":
-      return ["pricing", "plan", "cost", "quote"];
+      return ["pricing", "plan", "cost", "quote", "定价", "价格", "费用", "成本", "报价", "方案"];
     case "security":
-      return ["security", "compliance", "trust", "sso", "audit"];
+      return ["security", "compliance", "trust", "sso", "audit", "安全", "合规", "信任", "审计", "密钥"];
     case "docs":
-      return ["docs", "documentation", "api", "guide", "quickstart"];
+      return ["docs", "documentation", "api", "guide", "quickstart", "文档", "指南", "快速开始", "说明", "配置"];
     case "faq":
-      return ["faq", "question", "answer", "support"];
+      return ["faq", "question", "answer", "support", "问题", "问答", "回答", "支持"];
     case "compare":
-      return ["compare", "alternative", "versus", "vs", "evaluate"];
+      return ["compare", "alternative", "versus", "vs", "evaluate", "对比", "比较", "替代", "差异", "评估"];
     case "integrations":
-      return ["integration", "integrations", "connect", "slack", "segment", "warehouse", "api"];
+      return ["integration", "integrations", "connect", "slack", "segment", "warehouse", "api", "集成", "接入", "连接", "工作流"];
     case "use-case":
       return unique([
         ...keywordTokens(`${page.title} ${page.h1}`),
@@ -32,7 +32,14 @@ function pageTypeKeywords(page: PageRecord): string[] {
         "case",
         "solution",
         "rollout",
-        "onboarding"
+        "onboarding",
+        "使用场景",
+        "场景",
+        "团队",
+        "产品营销",
+        "开发者关系",
+        "开源维护者",
+        "接入"
       ]);
     default:
       return [];

@@ -3,7 +3,7 @@
 ## Remote truth to verify first
 
 - latest GitHub release tag and release body
-- current active umbrella issue state and body
+- current active or recently completed coordination issue state and body
 - open issue count and whether any legacy roadmap issue was reopened
 - milestone state only if the task touches roadmap history
 - npm registry visibility for `@answerlens/cli` when install or publish copy changes
@@ -31,8 +31,8 @@
 ## Common drift cases
 
 - README says one release state while roadmap or release notes say another
-- release notes point at a closed umbrella issue
-- active umbrella issue body anchors the phase to an older release after a newer stable release becomes latest
+- release notes describe a closed umbrella issue as the current follow-through path
+- active or recently completed coordination issue body anchors the phase to an older release after a newer stable release becomes latest
 - Pages entry points differ from README entry points
 - manual steps imply a repo edit for something that still requires GitHub settings
 - install copy implies npm is available while the registry still returns `404`

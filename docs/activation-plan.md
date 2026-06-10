@@ -1,6 +1,6 @@
 # Activation Plan
 
-AnswerLens has enough product surface to be useful today. The next workstream is not net-new capability expansion; it is activation and adoption hardening.
+AnswerLens has enough product surface to be useful today. The activation and adoption hardening workstream shipped through `v0.3.3`, with `v0.3.4` tightening the self-dogfood crawler, locale, and starter-pin follow-through; the ongoing work is to keep that path honest, repeatable, and easy to copy without expanding the product boundary.
 
 This document is the canonical repo entry for that workstream. The detailed working brief lives in [../trans.md](../trans.md).
 The GitHub-native growth practice for that workstream lives in [github-growth-plan.md](github-growth-plan.md).
@@ -14,7 +14,7 @@ The public trust boundary lives in [trust-and-safety.md](trust-and-safety.md), t
 3. `hardening`: codify repo rules, fix distribution drift, and verify that external adopters can copy the documented path
 4. `self-dogfooding`: use AnswerLens on its own Pages, demo, docs, and release-facing surfaces to improve clarity, proof, structure, and conversion over time
 
-Current umbrella issue: [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33)
+Completed umbrella issue: [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33) records the `v0.3.3` activation/adoption hardening pass. Future work should open focused issues only when there is a concrete repo-editable gap.
 
 ## What this workstream should change
 

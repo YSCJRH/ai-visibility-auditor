@@ -177,7 +177,7 @@ export const siteFinalRules = [
       return;
     }
 
-    const compareText = comparePages.map((page) => page.textSnippet.toLowerCase()).join(" ");
+    const compareText = comparePages.map((page) => pageText(page).toLowerCase()).join(" ");
     const mentionsCompetitor = input.competitors.competitors.some((competitor) =>
       compareText.includes(competitor.name.toLowerCase())
     );

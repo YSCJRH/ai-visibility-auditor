@@ -57,20 +57,19 @@ Historical milestones already used in this repository:
 - `v0.2-eval`
 - `v0.3-connectors`
 
-These can stay as the release-history spine. The current follow-through should use the activation umbrella issue instead of creating another milestone too early:
+These can stay as the release-history spine. The `v0.3.3` activation umbrella issue records the completed activation/adoption hardening pass:
 
 - `#33` activation and adoption hardening
 
 ## Issue batching
 
-For the current activation phase, keep coordination lightweight:
+For post-`v0.3.4` follow-through, keep coordination lightweight:
 
 - use milestones as the release spine
 - use `kind:*`, `area:*`, and `priority:*` labels for triage
 - split roadmap work into small issues instead of building a separate GitHub Project
-- keep `#33` open while activation and adoption hardening remains the active workstream
-- refresh the `#33` body when the latest release moves so it describes the current post-release activation phase instead of anchoring to an older release
-- keep the active activation PR linked from the current umbrella issue until the repo has more parallel contributors
+- treat `#33` as the completed `v0.3.3` activation/adoption hardening record
+- open focused issues only for concrete bugs, docs gaps, workflow drift, or adoption-path evidence that needs repo-editable follow-up
 - treat [docs/roadmap.md](roadmap.md) as the canonical public roadmap
 - treat [docs/activation-plan.md](activation-plan.md) as the canonical activation brief
 - treat [docs/shareable-summary.md](shareable-summary.md) as the canonical share-output contract
@@ -111,5 +110,5 @@ The repository now includes [`.github/CODEOWNERS`](../.github/CODEOWNERS). Keep 
 - enable automated release notes
 - publish release notes that link back to [docs/roadmap.md](roadmap.md)
 - keep npm publishing wording aligned with the actual trusted publishing / `NPM_TOKEN` decision tree
-- after each semver release, verify `releases/latest`, the release snapshot, README/roadmap status, and the active umbrella issue body all agree
+- after each semver release, verify `releases/latest`, the release snapshot, README/roadmap status, and any active or recently completed coordination issue all agree
 - add artifact attestations after releases become routine

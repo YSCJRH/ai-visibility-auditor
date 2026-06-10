@@ -228,7 +228,7 @@ function translateSiteHtml(html: string): string {
     ["You get a report set your team can actually review.", "你会得到一组团队真的能审阅的报告。"],
     ["The useful output is simple: a short summary, a scorecard, and a fix list you can discuss in product, docs, or PR review.", "结果不需要重新整理：一份摘要、一份评分卡、一份修复清单，产品、文档和 PR 审阅都能直接使用。"],
     ["Have a report open? Pick the next doc by task.", "报告已打开？<br>下一步读哪篇？"],
-    ["Start with share-summary.md or scorecard.md. Then choose the document that explains the issue, helps you edit one page, or moves the same report into CI.", "先看 share-summary.md 或 scorecard.md，再按你要做的事选择文档：解释问题、改一个页面，或把同一组报告接入 CI。"],
+    ["Start with share-summary.md, then scorecard.md. Then choose the document that explains the issue, helps you edit one page, or moves the same report into CI.", "先看 share-summary.md，再看 scorecard.md，然后按你要做的事选择文档：解释问题、改一个页面，或把同一组报告接入 CI。"],
     ["See the report before you run anything.", "先看报告，再决定要不要运行。"],
     ["The static-good demo shows the finished AnswerLens output: what changed, what is trustworthy, and which file to open first. Use it to decide whether the workflow is worth trying on one public site.", "static-good 演示展示的是 AnswerLens 完成后的输出：哪里有问题、哪些证据可信、第一份文件该打开什么。先用它判断这套工作流是否值得跑到一个公开站点上。"],
     ["Turn one useful local audit into a GitHub Action.", "把一轮有用的本地审计变成 GitHub Action。"],
@@ -1098,7 +1098,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   ]);
 
   const updatedAt = formatDate(releases[0]?.published_at, shareSummary.run.generatedAt);
-  const latestReleaseVersion = releases[0]?.tag_name ?? "v0.3.3";
+  const latestReleaseVersion = releases[0]?.tag_name ?? "v0.3.4";
 
   await mkdir(path.join(outDir, "docs"), { recursive: true });
   await mkdir(path.join(outDir, "releases"), { recursive: true });
@@ -1434,7 +1434,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         "zh-CN": "AnswerLens 检查公开产品页面是否清楚、有证据、便于审阅，并生成可进入 GitHub 工作流的报告。"
       },
       body: {
-        en: `<section class="hero productHero"><p class="eyebrow">${escapeHtml(TAGLINE)}</p><h1>AnswerLens</h1><p>Use AnswerLens when your website is the source material for AI answers. It checks whether public product pages are clear, evidenced, and easy to review, then writes GitHub-ready report files.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open demo report</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run your site</a></div></section>
+        en: `<section class="hero productHero"><p class="eyebrow">${escapeHtml(TAGLINE)}</p><h1>AnswerLens</h1><p>AnswerLens is a CLI-first AI visibility auditor for product websites. Use it when your website is the source material for AI answers. It checks whether public product pages are clear, evidenced, and easy to review, then writes GitHub-ready report files.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">Open demo report</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run your site</a></div></section>
         <section class="section">
           <div class="sectionHeader"><p class="eyebrow">Product fit</p><h2>Does AnswerLens fit your site?</h2><p>It is built for teams that want public pages and GitHub review to stay in sync. It is not a hosted monitoring dashboard, a ranking tool, or a consumer AI scraper.</p></div>
           <div class="grid">
@@ -1532,7 +1532,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
           name: "AnswerLens",
-          applicationCategory: "DeveloperApplication",
+          applicationCategory: "AI visibility auditor for product websites",
           description: `${DESCRIPTION} ${TAGLINE}`,
           operatingSystem: "Cross-platform",
           url: new URL("", siteUrl).href,
@@ -1558,7 +1558,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
         "zh-CN": "按任务选择下一篇 AnswerLens 文档：读懂评分卡、修一个页面、审计自己的站点，或接入 GitHub Actions。"
       },
       body: {
-        en: `<section class="hero"><p class="eyebrow">Product docs</p><h1>Have a report open? Pick the next doc by task.</h1><p>Start with share-summary.md or scorecard.md. Then choose the document that explains the issue, helps you edit one page, or moves the same report into CI.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run your site</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("playbooks/", siteUrl).href)}">Fix one page</a></div></section>
+        en: `<section class="hero"><p class="eyebrow">Product docs</p><h1>Have a report open? Pick the next doc by task.</h1><p>Start with share-summary.md, then scorecard.md. Then choose the document that explains the issue, helps you edit one page, or moves the same report into CI.</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(repoBlob("docs/quickstart.md"))}">Run your site</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("playbooks/", siteUrl).href)}">Fix one page</a></div></section>
         <section class="section journey">
           <div class="sectionHeader"><p class="eyebrow">Choose by what you need to do</p><h2>Use docs to answer the question in front of you.</h2><p>Every path starts from the same report files: summary, scorecard, recommendations. Pick one action, read the matching doc, then come back to the report.</p></div>
           <ol class="stepGrid">
@@ -1580,7 +1580,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           `<a href="${escapeHtml(proofPageUrls.developerAdvocacy)}">Developer advocacy teams</a>: docs, examples, and self-serve proof.`,
           `<a href="${escapeHtml(proofPageUrls.openSource)}">Open-source maintainers</a>: README, Pages, releases, and report-first distribution.`
         ])}</ul>`)}${renderPanel("Report files", "Review order", `<p>After you read the docs, go back to the report files in the same order used everywhere else:</p><div class="artifactRail"><div class="artifactItem"><strong><a href="${escapeHtml(new URL("examples/static-good/share-summary.md", siteUrl).href)}">share-summary.md</a></strong><p>Start with the human-readable audit summary.</p></div><div class="artifactItem"><strong><a href="${escapeHtml(new URL("examples/static-good/scorecard.md", siteUrl).href)}">scorecard.md</a></strong><p>Inspect coverage, checks, and scoring.</p></div><div class="artifactItem"><strong><a href="${escapeHtml(new URL("examples/static-good/recommendations.md", siteUrl).href)}">recommendations.md</a></strong><p>Turn issues into fixes.</p></div></div><p>Then continue to the <a href="${escapeHtml(repoBlob("docs/quickstart.md"))}">real-site quickstart</a> or the <a href="${escapeHtml(repoBlob("docs/github-action.md"))}">GitHub Action path</a>.</p>`)}</section>`,
-        "zh-CN": `<section class="hero"><p class="eyebrow">产品文档</p><h1>报告已打开？<br>下一步读哪篇？</h1><p>先看 share-summary.md 或 scorecard.md，再按你要做的事选择文档：解释问题、改一个页面，或把同一组报告接入 CI。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">审计你的站点</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("playbooks/", siteUrl).href)}">修一个页面</a></div></section>
+        "zh-CN": `<section class="hero"><p class="eyebrow">产品文档</p><h1>报告已打开？<br>下一步读哪篇？</h1><p>先看 share-summary.md，再看 scorecard.md，然后按你要做的事选择文档：解释问题、改一个页面，或把同一组报告接入 CI。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(repoBlob("docs/zh/quickstart.md"))}">审计你的站点</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("playbooks/", siteUrl).href)}">修一个页面</a></div></section>
         <section class="section journey">
           <div class="sectionHeader"><p class="eyebrow">按下一步选择</p><h2>用文档回答眼前这个问题。</h2><p>每条路径都从同一组报告文件开始：摘要、评分卡、修复建议。先选一个动作，读对应文档，再回到报告继续审阅。</p></div>
           <ol class="stepGrid">
@@ -1763,7 +1763,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             "<code>prompts.yaml</code>: buyer, comparison, and citation questions for your real audience.",
             "<code>runtime.yaml</code>: non-secret eval defaults for provider, model, locale, samples, timeout, and optional base URL.",
             "<code>answerlens.yml</code>: the GitHub Actions workflow that runs AnswerLens in CI and uploads the same report files, pinned to the current stable Action release."
-          ])}</ul><p>The current starter workflow uses <code>YSCJRH/ai-visibility-auditor@v0.3.3</code>; after a newer release, update that pin only after reviewing the release notes.</p><p>Keep API keys in GitHub secrets or local environment variables, not in <code>runtime.yaml</code>.</p>`)}
+          ])}</ul><p>The current starter workflow uses <code>YSCJRH/ai-visibility-auditor@v0.3.4</code>; after a newer release, update that pin only after reviewing the release notes.</p><p>Keep API keys in GitHub secrets or local environment variables, not in <code>runtime.yaml</code>.</p>`)}
         </section>
         <section class="section grid">
           ${renderPanel("Files to copy", "Copyable sources", `<ul>${renderList([
@@ -1803,7 +1803,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             "<code>prompts.yaml</code>：写给真实买家与评估场景的比较、引用和推荐问题。",
             "<code>runtime.yaml</code>：保存非 secret 的 eval 默认值，例如 provider、model、locale、samples 和 timeout。",
             "<code>answerlens.yml</code>：在 CI 里运行 AnswerLens、上传同一组报告文件，并 pin 到当前稳定 Action release 的 GitHub Actions workflow。"
-          ])}</ul><p>当前 starter workflow 使用 <code>YSCJRH/ai-visibility-auditor@v0.3.3</code>；有新 release 后，先读 release notes，再更新这个 pin。</p><p>API keys 继续放在 GitHub secrets 或本地环境变量里，不要写进 <code>runtime.yaml</code>。</p>`)}
+          ])}</ul><p>当前 starter workflow 使用 <code>YSCJRH/ai-visibility-auditor@v0.3.4</code>；有新 release 后，先读 release notes，再更新这个 pin。</p><p>API keys 继续放在 GitHub secrets 或本地环境变量里，不要写进 <code>runtime.yaml</code>。</p>`)}
         </section>
         <section class="section grid">
           ${renderPanel("需要复制的文件", "可复制来源", `<ul>${renderList([

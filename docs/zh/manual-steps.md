@@ -41,7 +41,7 @@
 ## GitHub Actions runtime
 
 1. 自托管 runner 需要保持在兼容 Node 24-based JavaScript actions 的版本上。
-2. 根 `AnswerLens` Action 会通过 Corepack provision pnpm，所以外部仓库使用经过 review 的 release tag，例如 `YSCJRH/ai-visibility-auditor@v0.3.3` 时，不需要再单独加 `pnpm/action-setup`。
+2. 根 `AnswerLens` Action 会通过 Corepack provision pnpm，所以外部仓库使用经过 review 的 release tag，例如 `YSCJRH/ai-visibility-auditor@v0.3.4` 时，不需要再单独加 `pnpm/action-setup`。
 3. 对 `eval` 来说，把默认 provider / model / locale / timeout 放进 `runtime.yaml`，并让它和 `brand.yaml` 位于同一目录。
 4. `OPENAI_API_KEY` 和 `PERPLEXITY_API_KEY` 继续放在 repository 或 organization secrets 里，不要写进 `runtime.yaml`。
 5. 如果你在仓库外维护复制版 workflow，尽量保持和这里相同的 major 版本：
@@ -80,4 +80,4 @@
 - docs 和 copied workflow 里提到的 action major versions 要与仓库默认值一致
 - `eval` 的默认模型配置应来自 `runtime.yaml`，secret 只来自环境变量
 - npm install 文案不应在 registry 能看到包之前暗示 npm 已经可用
-- active umbrella issue body 应描述当前 post-release activation phase，而不是在新的 stable release 出现后仍锚定旧 release
+- 如果存在 active 或刚完成的 coordination issue，它应描述当前 release truth，而不是在新的 stable release 出现后仍锚定旧 release

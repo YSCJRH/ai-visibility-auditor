@@ -25,9 +25,14 @@ function normalizePathname(pathname: string): string {
 function detectPageType(source: SiteSource, page: FetchedPage, title: string, h1: string): PageType {
   const pathname = normalizePathname(new URL(page.url).pathname);
   const sourcePathname = normalizePathname(new URL(source.baseUrl).pathname);
+  const localizedHomePathnames = ["en", "zh", "zh-cn"].map((locale) =>
+    normalizePathname(sourcePathname === "/" ? `/${locale}` : `${sourcePathname}/${locale}`)
+  );
   const haystack = `${title} ${h1} ${pathname}`.toLowerCase();
 
-  if (pathname === "/" || pathname === "" || pathname === sourcePathname) return "home";
+  if (pathname === "/" || pathname === "" || pathname === sourcePathname || localizedHomePathnames.includes(pathname)) {
+    return "home";
+  }
   if (pathLooksLike(pathname, "pricing", "plans") || haystack.includes("pricing")) return "pricing";
   if (pathLooksLike(pathname, "security", "trust") || haystack.includes("security")) return "security";
   if (pathLooksLike(pathname, "faq")) return "faq";
@@ -56,17 +61,31 @@ const TRUST_TERMS = [
   "audit log",
   "dpa",
   "hipaa",
-  "role-based"
+  "role-based",
+  "安全",
+  "信任",
+  "密钥",
+  "权限",
+  "审阅",
+  "加密",
+  "合规"
 ];
 
-const PRICING_TERMS = ["plan", "pricing", "price", "starter", "growth", "enterprise", "seat", "quote", "free", "$"];
-const COMPARISON_TERMS = ["compare", "alternative", "versus", "vs", "criteria", "trade-off", "decision"];
-const WORKFLOW_TERMS = ["setup", "quickstart", "implementation", "workflow", "deploy", "configure", "onboard", "rollout"];
-const OUTCOME_TERMS = ["reduce", "increase", "improve", "adoption", "activation", "time-to-value", "faster", "outcome"];
-const DOCS_TERMS = ["api", "sdk", "quickstart", "reference", "guide", "version", "updated", "implementation"];
+const PRICING_TERMS = ["plan", "pricing", "price", "starter", "growth", "enterprise", "seat", "quote", "free", "$", "定价", "价格", "成本", "开源", "免费", "打包"];
+const COMPARISON_TERMS = ["compare", "alternative", "versus", "vs", "criteria", "trade-off", "decision", "对比", "替代", "差异", "取舍", "决策", "看板"];
+const WORKFLOW_TERMS = ["setup", "quickstart", "implementation", "workflow", "deploy", "configure", "onboard", "rollout", "设置", "上手", "工作流", "部署", "配置", "接入", "运行", "审阅"];
+const OUTCOME_TERMS = ["reduce", "increase", "improve", "adoption", "activation", "time-to-value", "faster", "outcome", "减少", "增加", "改进", "改善", "更快", "结果", "目标", "采用"];
+const DOCS_TERMS = ["api", "sdk", "quickstart", "reference", "guide", "version", "updated", "implementation", "文档", "指南", "示例", "版本", "更新", "实现", "说明"];
 
 function normalizeWhitespace(value: string): string {
   return value.replace(/\s+/g, " ").trim();
+}
+
+function countExtractableWords(text: string): number {
+  const latinTokens = text.match(/[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*/g) ?? [];
+  const cjkChars = text.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu) ?? [];
+  const nonLatinWords = Math.ceil(cjkChars.length / 2);
+  return latinTokens.length + nonLatinWords;
 }
 
 function truncateText(value: string, maxLength = 180): string {
@@ -280,7 +299,7 @@ function createSchemaTextSignals(records: JsonLdRecord[], visibleText: string): 
 function createEvidenceSignals(text: string, pageType: PageType, lists: number, tables: number): EvidenceSignal[] {
   const signals: EvidenceSignal[] = [];
   const textLower = text.toLowerCase();
-  const words = text.split(/\s+/).filter(Boolean);
+  const wordCount = countExtractableWords(text);
   const numbers = regexExamples(
     text,
     /(?:\$\s?\d{1,4}(?:[.,]\d+)?|\b\d{1,4}(?:[.,]\d+)?%?(?:\s?(?:k|m|b|days?|weeks?|months?|users?|seats?))?\b)/gi
@@ -307,7 +326,7 @@ function createEvidenceSignals(text: string, pageType: PageType, lists: number, 
   pushSignal(signals, "docs-proof", docsTerms.length, docsTerms);
 
   if (["pricing", "security", "docs", "compare", "use-case"].includes(pageType)) {
-    pushSignal(signals, "body-depth", Math.floor(words.length / 80), [`${words.length} words`]);
+    pushSignal(signals, "body-depth", Math.floor(wordCount / 80), [`${wordCount} words`]);
   }
 
   return signals;
@@ -487,7 +506,7 @@ export function normalizePage(source: SiteSource, page: FetchedPage, _brand: Bra
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
-  const wordCount = text ? text.split(/\s+/).length : 0;
+  const wordCount = text ? countExtractableWords(text) : 0;
   const textLower = text.toLowerCase();
   const pageType = detectPageType(source, page, title, h1);
   const lists = $("ul, ol").length;

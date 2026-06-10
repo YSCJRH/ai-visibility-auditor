@@ -26,7 +26,7 @@ Use it after the live demo report, the 60-second fixture demo, and one useful re
 - `answerlens.yml`: the GitHub Action path that runs the same artifact contract in CI, pinned to the current stable Action release
 
 Keep API keys in environment variables or GitHub secrets. Do not put them into `runtime.yaml`.
-The current starter workflow uses `YSCJRH/ai-visibility-auditor@v0.3.3`; after a newer release, update that pin only after reviewing the release notes.
+The current starter workflow uses `YSCJRH/ai-visibility-auditor@v0.3.4`; after a newer release, update that pin only after reviewing the release notes.
 For the first live benchmark pass, the recommended temporary shortcut is `fast-first-eval`.
 
 ## Review artifacts in this order

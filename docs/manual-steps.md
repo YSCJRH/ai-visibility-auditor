@@ -35,7 +35,7 @@ If `npm view @answerlens/cli` returns `404`, treat npm as not yet activated; use
 ## GitHub Actions runtime
 
 1. Keep self-hosted runners on a version compatible with Node 24-based JavaScript actions.
-2. The root `AnswerLens` Action provisions pnpm with Corepack, so copied adopter workflows do not need a separate `pnpm/action-setup` step when they call the repository Action with a reviewed release tag such as `YSCJRH/ai-visibility-auditor@v0.3.3`.
+2. The root `AnswerLens` Action provisions pnpm with Corepack, so copied adopter workflows do not need a separate `pnpm/action-setup` step when they call the repository Action with a reviewed release tag such as `YSCJRH/ai-visibility-auditor@v0.3.4`.
 3. For `eval`, keep non-secret provider defaults in `runtime.yaml` next to `brand.yaml`; keep API keys in repository or organization secrets.
 4. If you maintain copied workflows outside this repository, prefer the same major action versions used here:
    `actions/checkout@v5`, `actions/setup-node@v5`, `actions/github-script@v8`, and `actions/upload-artifact@v6`.
@@ -92,7 +92,7 @@ Keep `.github/ISSUE_TEMPLATE/config.yml` aligned with that routing so first-time
 - release notes and Announcements should describe self-dogfooding improvements in the same language as the docs
 - npm publish copy should mention both trusted publishing and `NPM_TOKEN`
 - npm install copy should not imply the package is available before the registry returns a visible package
-- the active umbrella issue body should describe the current post-release activation phase, not an older release after a newer stable release becomes latest
+- any active or recently completed coordination issue should describe the current release truth, not an older release after a newer stable release becomes latest
 
 ## Current no-token path
 
