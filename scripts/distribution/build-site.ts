@@ -1426,11 +1426,11 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
       route: "",
       filePath: path.join(outDir, "index.html"),
       title: {
-        en: "AnswerLens public-site audit reports for GitHub teams",
+        en: "AnswerLens: CLI-first AI visibility auditor for product websites",
         "zh-CN": "AnswerLens：AI 可发现性审计器与 GitHub 原生报告工作流"
       },
       description: {
-        en: "AnswerLens checks whether public product pages are clear, evidenced, and easy to review, then writes GitHub-ready report files.",
+        en: "AnswerLens is a CLI-first AI visibility auditor for product websites that checks whether public pages are clear, evidenced, and easy to review.",
         "zh-CN": "AnswerLens 检查公开产品页面是否清楚、有证据、便于审阅，并生成可进入 GitHub 工作流的报告。"
       },
       body: {

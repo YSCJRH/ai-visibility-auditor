@@ -220,7 +220,7 @@ function homeJsonLd(page: SeoPage, latestReleaseVersion: string): unknown[] {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       name: "AnswerLens",
-      applicationCategory: "DeveloperApplication",
+      applicationCategory: "AI visibility auditor for product websites",
       operatingSystem: "Cross-platform",
       description:
         page.locale === "zh-CN"
