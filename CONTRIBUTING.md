@@ -8,6 +8,7 @@ Thanks for helping build AnswerLens.
 - Use Discussions for questions, roadmap feedback, and showcases once the GitHub remote is enabled.
 - Read [docs/rule-authoring.md](docs/rule-authoring.md) before proposing new audit rules.
 - Read [docs/provider-contract.md](docs/provider-contract.md) before adding or changing provider adapters.
+- Read [docs/release-bump-playbook.md](docs/release-bump-playbook.md) before preparing a semver release bump.
 - For docs, release, starter, Action, or public report changes, keep the public framing intact: no consumer AI UI scraping, no ranking or answer-placement guarantee, and no public npm install copy until `@answerlens/cli` is visible in the registry.
 
 ## Local setup
@@ -36,6 +37,7 @@ pnpm demo:fixture
 - Add or update tests when logic changes.
 - Attach a screenshot or report artifact when the UI or report output changes.
 - For public-facing changes, run `pnpm public:check` and preserve the artifact order: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
+- For release bump PRs, confirm package versions, release snapshot, starter pins, Pages fallback metadata, and npm status with [docs/release-bump-playbook.md](docs/release-bump-playbook.md).
 - Do not paste raw provider payloads into public PRs, issues, Discussions, or release notes.
 
 ## Project conventions
