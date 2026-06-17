@@ -38,6 +38,11 @@ const DEFAULT_DESCRIPTION = "AnswerLens is a CLI-first AI visibility auditor for
 const DEFAULT_TAGLINE = "CI for AI discoverability.";
 
 const RELEASE_SUMMARIES: Record<string, Record<SeoLocale, string>> = {
+  "v0.3.5": {
+    en: "AnswerLens v0.3.5 aligns release assets with the post-deploy Pages category polish, self-dogfood log, and current stable Action starter pins.",
+    "zh-CN":
+      "AnswerLens v0.3.5 对齐发布资产、部署后的 Pages category polish、自我应用日志和当前稳定 Action starter pin。"
+  },
   "v0.3.4": {
     en: "AnswerLens v0.3.4 tightens the self-dogfooding loop with Pages redirect handling, localized homepage detection, CJK extraction signals, compare metadata coverage, and updated stable Action pins.",
     "zh-CN":

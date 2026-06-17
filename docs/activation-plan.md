@@ -1,6 +1,6 @@
 # Activation Plan
 
-AnswerLens has enough product surface to be useful today. The activation and adoption hardening workstream shipped through `v0.3.3`, with `v0.3.4` tightening the self-dogfood crawler, locale, and starter-pin follow-through; the ongoing work is to keep that path honest, repeatable, and easy to copy without expanding the product boundary.
+AnswerLens has enough product surface to be useful today. The activation and adoption hardening workstream shipped through `v0.3.3`, with `v0.3.4` tightening the self-dogfood crawler, locale, and starter-pin follow-through and `v0.3.5` realigning release assets with the post-deploy Pages polish; the ongoing work is to keep that path honest, repeatable, and easy to copy without expanding the product boundary.
 
 This document is the canonical repo entry for that workstream. The detailed working brief lives in [../trans.md](../trans.md).
 The GitHub-native growth practice for that workstream lives in [github-growth-plan.md](github-growth-plan.md).

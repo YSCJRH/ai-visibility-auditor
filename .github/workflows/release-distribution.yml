@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag-name:
-        description: "Optional semver tag to simulate or publish, for example v0.3.4."
+        description: "Optional semver tag to simulate or publish, for example v0.3.5."
         required: false
         type: string
   push:
@@ -113,13 +113,11 @@ jobs:
 
           ## What ships
 
-          - Crawler handling for same-site HTML redirect shims on GitHub Pages-style locale roots
-          - Localized project-site homepage detection for paths such as `/en/`, `/zh/`, and `/zh-cn/`
-          - CJK extractable-content counting and Chinese proof-page signal terms for public source-material audits
-          - Compare coverage that reads page title, meta description, and headings instead of only the first body snippet
-          - Pages hero copy that repeats the exact product category: CLI-first AI visibility auditor for product websites
-          - Self-dogfood log, roadmap, release snapshot, and GitHub bootstrap copy synced around the completed `#33` activation pass
-          - Starter bundle and GitHub Action docs pinned to the reviewed `v0.3.4` Action release
+          - Release assets rebuilt from the current `main` state after the post-deploy Pages category polish
+          - Compiled site bundle aligned with the live Pages category schema and public product description
+          - Self-dogfood log, roadmap, release snapshot, and GitHub bootstrap copy synced after the postdeploy dogfood pass
+          - Starter bundle and GitHub Action docs pinned to the reviewed `v0.3.5` Action release
+          - The same fixture demo, consumer-repo demo, public-claim checks, typecheck, tests, and SEO checks as the release gate
           - Publish-ready CLI bundle and tarball plus repo-native report artifacts
 
           ## Known limits

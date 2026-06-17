@@ -359,7 +359,7 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(starter, /Example Product public site/);
   assert.match(starter, /runtime\.yaml/);
   assert.match(starter, /non-secret eval defaults/i);
-  assert.match(starter, /YSCJRH\/ai-visibility-auditor@v0\.3\.4/);
+  assert.match(starter, /YSCJRH\/ai-visibility-auditor@v0\.3\.5/);
   assert.match(starter, /starter\/example-run\/share-summary\.md/);
   assert.match(pricing, /AnswerLens is open source\. You bring the provider keys you choose\./);
   assert.match(pricing, /View starter/);
