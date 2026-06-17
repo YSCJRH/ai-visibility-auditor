@@ -59,6 +59,29 @@ test("public-surface-check rejects implicit npm install copy and raw payload art
   assert.ok(ruleIds.includes("raw-payload-upload-exposure"));
 });
 
+test("public-surface-check rejects default run artifact uploads without raw exclusion", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/ci.yml",
+    [
+      "steps:",
+      "  - uses: actions/checkout@v5",
+      "  - uses: actions/upload-artifact@v6",
+      "    with:",
+      "      name: answerlens-demo-runs",
+      "      path: |",
+      "        runs/static-good",
+      "        runs/consumer-repo"
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("raw-payload-upload-exposure"));
+});
+
 test("public-surface-check rejects local absolute paths in public contribution surfaces", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, "CONTRIBUTING.md", "Read [docs/rule-authoring.md](/D:/SEO/docs/rule-authoring.md).\n");

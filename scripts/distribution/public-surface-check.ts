@@ -231,7 +231,7 @@ function checkRawPayloadUpload(file: string, text: string, findings: Finding[]):
     }
 
     const block = lines.slice(index, Math.min(lines.length, index + 18)).join("\n");
-    const mentionsFullRunUpload = /(steps\.answerlens\.outputs\.out-dir|runs\/answerlens|\bout-dir\b)/i.test(block);
+    const mentionsFullRunUpload = /(steps\.answerlens\.outputs\.out-dir|\bruns\/[A-Za-z0-9_.-]+|\bout-dir\b)/i.test(block);
     const excludesRawPayloads = /!\s*.+\/raw\/\*\*|raw\/\*\*.+(excluded|private|restricted)|exclude.{0,80}raw/i.test(block);
     if (mentionsFullRunUpload && !excludesRawPayloads) {
       findings.push({
