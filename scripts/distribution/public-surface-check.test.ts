@@ -5,6 +5,9 @@ import os from "node:os";
 import path from "node:path";
 import { runPublicSurfaceCheck } from "./public-surface-check.ts";
 
+const STABLE_VERSION = "0.3.5";
+const STABLE_TAG = `v${STABLE_VERSION}`;
+
 test("public-surface-check passes a minimal compliant public surface", async () => {
   const rootDir = await createPublicSurfaceFixture();
 
@@ -96,8 +99,27 @@ test("public-surface-check rejects release workflows that cannot refresh Pages a
   assert.ok(ruleIds.includes("release-pages-refresh-dispatch"));
 });
 
+test("public-surface-check rejects stable version drift across release and adoption surfaces", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(rootDir, "apps/cli/package.json", JSON.stringify({ name: "@answerlens/cli", version: "0.3.6" }, null, 2));
+  await writeFixtureFile(
+    rootDir,
+    "examples/consumer-repo/.github/workflows/answerlens.yml",
+    `${artifactOrderText()}\nsteps:\n  - uses: YSCJRH/ai-visibility-auditor@v0.3.4\n`
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("stable-version-package-drift"));
+  assert.ok(ruleIds.includes("stable-version-release-snapshot"));
+  assert.ok(ruleIds.includes("stable-version-surface-pin"));
+});
+
 async function createPublicSurfaceFixture(): Promise<string> {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-public-surface-"));
+  await writeFixtureFile(rootDir, "package.json", JSON.stringify({ name: "answerlens-workspace", version: STABLE_VERSION }, null, 2));
+  await writeFixtureFile(rootDir, "apps/cli/package.json", JSON.stringify({ name: "@answerlens/cli", version: STABLE_VERSION }, null, 2));
   await writeFixtureFile(rootDir, "README.md", "# AnswerLens\nNo ranking guarantees and no consumer AI UI scraping.\n");
   await writeFixtureFile(rootDir, "README.zh-CN.md", "# AnswerLens\n不承诺排名，不抓取消费级 AI UI。\n");
   await writeFixtureFile(rootDir, ".agents/plugins/marketplace.json", "{\"name\":\"answerlens-codex\",\"plugins\":[]}\n");
@@ -118,13 +140,36 @@ async function createPublicSurfaceFixture(): Promise<string> {
   );
   await writeFixtureFile(rootDir, "action.yml", artifactOrderText());
   await writeFixtureFile(rootDir, "docs/shareable-summary.md", artifactOrderText());
-  await writeFixtureFile(rootDir, "docs/github-action.md", artifactOrderText());
-  await writeFixtureFile(rootDir, "docs/zh/github-action.md", artifactOrderText());
-  await writeFixtureFile(rootDir, "examples/consumer-repo/README.md", artifactOrderText());
+  await writeFixtureFile(
+    rootDir,
+    "docs/github-action.md",
+    `${artifactOrderText()}\nUse YSCJRH/ai-visibility-auditor@${STABLE_TAG}; currently \`${STABLE_TAG}\`.\n`
+  );
+  await writeFixtureFile(
+    rootDir,
+    "docs/zh/github-action.md",
+    `${artifactOrderText()}\n使用 YSCJRH/ai-visibility-auditor@${STABLE_TAG}。\n`
+  );
+  await writeFixtureFile(
+    rootDir,
+    "docs/starter-bundle.md",
+    `The current starter workflow uses YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`
+  );
+  await writeFixtureFile(
+    rootDir,
+    "docs/manual-steps.md",
+    `Use the reviewed release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`
+  );
+  await writeFixtureFile(
+    rootDir,
+    "docs/zh/manual-steps.md",
+    `使用经过 review 的 release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}。\n`
+  );
+  await writeFixtureFile(rootDir, "examples/consumer-repo/README.md", `${artifactOrderText()}\nPin YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`);
   await writeFixtureFile(
     rootDir,
     "examples/consumer-repo/.github/workflows/answerlens.yml",
-    `${artifactOrderText()}\nsteps:\n  - uses: actions/checkout@v5\n  - uses: actions/upload-artifact@v6\n    with:\n      path: |\n        \${{ steps.answerlens.outputs.out-dir }}\n        !\${{ steps.answerlens.outputs.out-dir }}/raw/**\n`
+    `${artifactOrderText()}\nsteps:\n  - uses: actions/checkout@v5\n  - uses: YSCJRH/ai-visibility-auditor@${STABLE_TAG}\n  - uses: actions/upload-artifact@v6\n    with:\n      path: |\n        \${{ steps.answerlens.outputs.out-dir }}\n        !\${{ steps.answerlens.outputs.out-dir }}/raw/**\n`
   );
   await writeFixtureFile(
     rootDir,
@@ -140,13 +185,31 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "  actions: write",
       "  contents: write",
       "  id-token: write",
+      "on:",
+      "  workflow_dispatch:",
+      "    inputs:",
+      "      tag-name:",
+      `        description: \"Optional semver tag to simulate or publish, for example ${STABLE_TAG}.\"`,
       "jobs:",
       "  release:",
       "    runs-on: ubuntu-latest",
       "    steps:",
+      `      - run: echo \"Starter bundle pinned to ${STABLE_TAG}\"`,
       "      - run: gh workflow run pages.yml --ref main"
     ].join("\n")
   );
+  await writeFixtureFile(
+    rootDir,
+    "scripts/distribution/releases-snapshot.json",
+    JSON.stringify([{ tag_name: STABLE_TAG, body: `Release notes for ${STABLE_TAG}.` }], null, 2)
+  );
+  await writeFixtureFile(
+    rootDir,
+    "scripts/distribution/build-site.ts",
+    `const fallback = releases[0]?.tag_name ?? "${STABLE_TAG}";\nconst pin = "YSCJRH/ai-visibility-auditor@${STABLE_TAG}";\n`
+  );
+  await writeFixtureFile(rootDir, "scripts/distribution/seo-check.ts", `const fallback = releases[0]?.tag_name ?? "${STABLE_TAG}";\n`);
+  await writeFixtureFile(rootDir, "scripts/distribution/site-seo.ts", `const releaseCopy = { "${STABLE_TAG}": "Stable release" };\n`);
   await writeFixtureFile(
     rootDir,
     "docs/quickstart.md",

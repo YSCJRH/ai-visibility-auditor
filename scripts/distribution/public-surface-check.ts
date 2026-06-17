@@ -13,6 +13,15 @@ type PublicSurfaceCheckOptions = {
   rootDir?: string;
 };
 
+type PackageJson = {
+  version?: unknown;
+};
+
+type ReleaseSnapshotEntry = {
+  tag_name?: unknown;
+  body?: unknown;
+};
+
 const EXPECTED_ACTION_MAJORS = new Map([
   ["actions/checkout", "v5"],
   ["actions/setup-node", "v5"],
@@ -50,6 +59,53 @@ const RUNTIME_CONFIGS = [
   "examples/consumer-repo/.github/answerlens/runtime.yaml"
 ];
 
+const STABLE_RELEASE_SURFACES: Array<{ path: string; snippets: (stableTag: string) => string[] }> = [
+  {
+    path: ".github/workflows/release-distribution.yml",
+    snippets: (stableTag) => [stableTag]
+  },
+  {
+    path: "scripts/distribution/build-site.ts",
+    snippets: (stableTag) => [`?? "${stableTag}"`, `YSCJRH/ai-visibility-auditor@${stableTag}`]
+  },
+  {
+    path: "scripts/distribution/seo-check.ts",
+    snippets: (stableTag) => [`?? "${stableTag}"`]
+  },
+  {
+    path: "scripts/distribution/site-seo.ts",
+    snippets: (stableTag) => [`"${stableTag}"`]
+  },
+  {
+    path: "docs/github-action.md",
+    snippets: (stableTag) => [`YSCJRH/ai-visibility-auditor@${stableTag}`, `currently \`${stableTag}\``]
+  },
+  {
+    path: "docs/zh/github-action.md",
+    snippets: (stableTag) => [`YSCJRH/ai-visibility-auditor@${stableTag}`]
+  },
+  {
+    path: "docs/starter-bundle.md",
+    snippets: (stableTag) => [`YSCJRH/ai-visibility-auditor@${stableTag}`]
+  },
+  {
+    path: "docs/manual-steps.md",
+    snippets: (stableTag) => [`YSCJRH/ai-visibility-auditor@${stableTag}`]
+  },
+  {
+    path: "docs/zh/manual-steps.md",
+    snippets: (stableTag) => [`YSCJRH/ai-visibility-auditor@${stableTag}`]
+  },
+  {
+    path: "examples/consumer-repo/README.md",
+    snippets: (stableTag) => [`YSCJRH/ai-visibility-auditor@${stableTag}`]
+  },
+  {
+    path: "examples/consumer-repo/.github/workflows/answerlens.yml",
+    snippets: (stableTag) => [`YSCJRH/ai-visibility-auditor@${stableTag}`]
+  }
+];
+
 export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions = {}): Promise<Finding[]> {
   const rootDir = path.resolve(options.rootDir ?? process.cwd());
   const findings: Finding[] = [];
@@ -66,6 +122,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkArtifactReviewOrder(rootDir, findings);
   await checkAuditEvalKeyBoundary(rootDir, findings);
   await checkReleasePagesRefresh(rootDir, findings);
+  await checkStableReleaseVersionSync(rootDir, findings);
 
   return findings;
 }
@@ -279,6 +336,97 @@ async function checkReleasePagesRefresh(rootDir: string, findings: Finding[]): P
       path: relativePath,
       message: "Release Distribution must dispatch pages.yml on main after semver releases so live Pages reads the new release metadata."
     });
+  }
+}
+
+async function checkStableReleaseVersionSync(rootDir: string, findings: Finding[]): Promise<void> {
+  const rootPackagePath = "package.json";
+  const cliPackagePath = "apps/cli/package.json";
+  const rootPackage = await readRequiredJson<PackageJson>(rootDir, rootPackagePath, findings, "stable-version-package-readable");
+  const cliPackage = await readRequiredJson<PackageJson>(rootDir, cliPackagePath, findings, "stable-version-package-readable");
+  if (!rootPackage || !cliPackage) {
+    return;
+  }
+
+  if (typeof rootPackage.version !== "string" || typeof cliPackage.version !== "string") {
+    findings.push({
+      ruleId: "stable-version-package-readable",
+      path: `${rootPackagePath}, ${cliPackagePath}`,
+      message: "Root and CLI package versions must both be string values so public release surfaces can be checked."
+    });
+    return;
+  }
+
+  if (rootPackage.version !== cliPackage.version) {
+    findings.push({
+      ruleId: "stable-version-package-drift",
+      path: `${rootPackagePath}, ${cliPackagePath}`,
+      message: `Root package version ${rootPackage.version} must match CLI package version ${cliPackage.version}.`
+    });
+  }
+
+  const stableTag = `v${cliPackage.version}`;
+  const releasesPath = "scripts/distribution/releases-snapshot.json";
+  const releases = await readRequiredJson<ReleaseSnapshotEntry[]>(rootDir, releasesPath, findings, "stable-version-release-snapshot");
+  if (!Array.isArray(releases)) {
+    findings.push({
+      ruleId: "stable-version-release-snapshot",
+      path: releasesPath,
+      message: "Release snapshot must be an array ordered with the latest stable release first."
+    });
+  } else {
+    const latest = releases[0];
+    if (latest?.tag_name !== stableTag) {
+      findings.push({
+        ruleId: "stable-version-release-snapshot",
+        path: releasesPath,
+        message: `Latest release snapshot must be ${stableTag}, found ${String(latest?.tag_name ?? "(missing)")}.`
+      });
+    }
+    if (typeof latest?.body === "string" && !latest.body.includes(stableTag)) {
+      findings.push({
+        ruleId: "stable-version-release-snapshot",
+        path: releasesPath,
+        message: `Latest release notes should mention the current stable tag ${stableTag}.`
+      });
+    }
+  }
+
+  for (const surface of STABLE_RELEASE_SURFACES) {
+    let text: string;
+    try {
+      text = await readFile(path.join(rootDir, surface.path), "utf8");
+    } catch {
+      findings.push({
+        ruleId: "stable-version-surface-pin",
+        path: surface.path,
+        message: `Missing public stable-version surface that should reference ${stableTag}.`
+      });
+      continue;
+    }
+
+    for (const snippet of surface.snippets(stableTag)) {
+      if (!text.includes(snippet)) {
+        findings.push({
+          ruleId: "stable-version-surface-pin",
+          path: surface.path,
+          message: `Expected current stable release snippet ${JSON.stringify(snippet)}.`
+        });
+      }
+    }
+  }
+}
+
+async function readRequiredJson<T>(rootDir: string, relativePath: string, findings: Finding[], ruleId: string): Promise<T | null> {
+  try {
+    return JSON.parse(await readFile(path.join(rootDir, relativePath), "utf8")) as T;
+  } catch (error) {
+    findings.push({
+      ruleId,
+      path: relativePath,
+      message: `Unable to read JSON needed for public release truth-sync: ${error instanceof Error ? error.message : String(error)}`
+    });
+    return null;
   }
 }
 
