@@ -102,6 +102,10 @@ const STABLE_RELEASE_SURFACES: Array<{ path: string; snippets: (stableTag: strin
     snippets: (stableTag) => [`YSCJRH/ai-visibility-auditor@${stableTag}`]
   },
   {
+    path: "docs/release-bump-playbook.md",
+    snippets: () => ["stable-version-*", "fix the drift instead of weakening the rule"]
+  },
+  {
     path: "docs/manual-steps.md",
     snippets: (stableTag) => [`YSCJRH/ai-visibility-auditor@${stableTag}`]
   },

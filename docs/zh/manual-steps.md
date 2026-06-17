@@ -9,10 +9,11 @@
 1. 启用 GitHub Pages，并确认 canonical site URL。
 2. 设置 repository homepage、social preview 和 topics。
 3. 选择 npm 发布路径：trusted publishing 或 `NPM_TOKEN`。
-4. 保持外部复制工作流的 major versions 与仓库一致。
-5. 首次公开部署后，检查 live demo、quickstart 和 release surface。
-6. 保持 Discussions 分类、置顶 onboarding 讨论和 issue 模板联系路径一致。
-7. 检查 bilingual routing：
+4. 每次 semver release bump 之前，先按 [../release-bump-playbook.md](../release-bump-playbook.md) 检查版本、release snapshot、Action pin、Pages fallback 和 npm 状态。
+5. 保持外部复制工作流的 major versions 与仓库一致。
+6. 首次公开部署后，检查 live demo、quickstart 和 release surface。
+7. 保持 Discussions 分类、置顶 onboarding 讨论和 issue 模板联系路径一致。
+8. 检查 bilingual routing：
    - 根路径会按语言偏好进入 `/en/` 或 `/zh/`
    - `/en` 与 `/zh` 页面可以互相切换
    - Pages 上的 demo / starter / docs / releases 都能进入对应语言页面
@@ -81,3 +82,4 @@
 - `eval` 的默认模型配置应来自 `runtime.yaml`，secret 只来自环境变量
 - npm install 文案不应在 registry 能看到包之前暗示 npm 已经可用
 - 如果存在 active 或刚完成的 coordination issue，它应描述当前 release truth，而不是在新的 stable release 出现后仍锚定旧 release
+- release bump PR 应按 [../release-bump-playbook.md](../release-bump-playbook.md) 更新 package version、release snapshot、Action pin、Pages fallback metadata 和 npm 状态

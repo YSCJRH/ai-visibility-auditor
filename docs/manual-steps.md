@@ -7,10 +7,11 @@ These are the smallest manual steps needed to activate the public distribution s
 1. Enable GitHub Pages and confirm the canonical site URL.
 2. Set repository homepage, social preview, and topics so the public front door matches the docs.
 3. Choose the npm publish path: trusted publishing or `NPM_TOKEN`.
-4. Keep copied workflow versions current in external repositories.
-5. After the first public deploy, verify the live demo report, quickstart docs, and release surfaces.
-6. Keep Discussions categories, pinned onboarding discussion, and issue template contact links aligned with the public funnel.
-7. Keep the self-dogfooding note path aligned across release notes, Announcements, and README proof surfaces.
+4. Use [release-bump-playbook.md](release-bump-playbook.md) before every semver release bump.
+5. Keep copied workflow versions current in external repositories.
+6. After the first public deploy, verify the live demo report, quickstart docs, and release surfaces.
+7. Keep Discussions categories, pinned onboarding discussion, and issue template contact links aligned with the public funnel.
+8. Keep the self-dogfooding note path aligned across release notes, Announcements, and README proof surfaces.
 
 ## npm publishing
 
@@ -93,6 +94,7 @@ Keep `.github/ISSUE_TEMPLATE/config.yml` aligned with that routing so first-time
 - npm publish copy should mention both trusted publishing and `NPM_TOKEN`
 - npm install copy should not imply the package is available before the registry returns a visible package
 - any active or recently completed coordination issue should describe the current release truth, not an older release after a newer stable release becomes latest
+- release bump PRs should follow [release-bump-playbook.md](release-bump-playbook.md) so package versions, release snapshots, Action pins, Pages fallback metadata, and npm status stay aligned
 
 ## Current no-token path
 

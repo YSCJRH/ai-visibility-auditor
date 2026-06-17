@@ -212,6 +212,11 @@ async function createPublicSurfaceFixture(): Promise<string> {
   );
   await writeFixtureFile(
     rootDir,
+    "docs/release-bump-playbook.md",
+    "If public:check fails with stable-version-*, fix the drift instead of weakening the rule.\n"
+  );
+  await writeFixtureFile(
+    rootDir,
     "docs/manual-steps.md",
     `Use the reviewed release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`
   );
