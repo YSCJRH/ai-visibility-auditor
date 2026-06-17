@@ -65,6 +65,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkRuntimeConfigs(rootDir, findings);
   await checkArtifactReviewOrder(rootDir, findings);
   await checkAuditEvalKeyBoundary(rootDir, findings);
+  await checkReleasePagesRefresh(rootDir, findings);
 
   return findings;
 }
@@ -252,6 +253,32 @@ async function checkAuditEvalKeyBoundary(rootDir: string, findings: Finding[]): 
         });
       }
     }
+  }
+}
+
+async function checkReleasePagesRefresh(rootDir: string, findings: Finding[]): Promise<void> {
+  const relativePath = ".github/workflows/release-distribution.yml";
+  let text: string;
+  try {
+    text = await readFile(path.join(rootDir, relativePath), "utf8");
+  } catch {
+    return;
+  }
+
+  if (!/\bactions:\s*write\b/.test(text)) {
+    findings.push({
+      ruleId: "release-pages-refresh-permission",
+      path: relativePath,
+      message: "Release Distribution needs actions: write so semver releases can dispatch the Pages workflow after publishing."
+    });
+  }
+
+  if (!/gh\s+workflow\s+run\s+pages\.yml\s+--ref\s+main\b/.test(text)) {
+    findings.push({
+      ruleId: "release-pages-refresh-dispatch",
+      path: relativePath,
+      message: "Release Distribution must dispatch pages.yml on main after semver releases so live Pages reads the new release metadata."
+    });
   }
 }
 
