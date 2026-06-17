@@ -32,10 +32,13 @@ const EXPECTED_ACTION_MAJORS = new Map([
 const TEXT_SURFACES = [
   "README.md",
   "README.zh-CN.md",
+  "CONTRIBUTING.md",
   "action.yml",
   "docs",
   "examples/consumer-repo/README.md",
   "examples/consumer-repo/.github/workflows/answerlens.yml",
+  ".github/ISSUE_TEMPLATE",
+  ".github/pull_request_template.md",
   ".github/workflows",
   ".agents/plugins/marketplace.json",
   "plugins",
@@ -116,6 +119,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
     checkPublicClaims(file, text, findings);
     checkActionMajors(file, text, findings);
     checkRawPayloadUpload(file, text, findings);
+    checkLocalAbsolutePaths(file, text, findings);
   }
 
   await checkRuntimeConfigs(rootDir, findings);
@@ -221,6 +225,22 @@ function checkRawPayloadUpload(file: string, text: string, findings: Finding[]):
         path: `${file}:${index + 1}`,
         message: "Default public artifact uploads must exclude raw/** because eval and manual-import runs may contain raw provider payloads."
       });
+    }
+  });
+}
+
+function checkLocalAbsolutePaths(file: string, text: string, findings: Finding[]): void {
+  const lines = text.split(/\r?\n/);
+  lines.forEach((line, index) => {
+    if (/(?:^|[\s('"=<])(?:file:\/\/\/|\/?[A-Za-z]:[\\/])/.test(line)) {
+      findings.push(
+        finding(
+          "public-local-absolute-path",
+          file,
+          index,
+          "Public docs and GitHub templates must use repository-relative links, not local filesystem paths."
+        )
+      );
     }
   });
 }
