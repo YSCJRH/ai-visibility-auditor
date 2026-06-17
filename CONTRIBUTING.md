@@ -6,8 +6,9 @@ Thanks for helping build AnswerLens.
 
 - Use Issues for actionable work only.
 - Use Discussions for questions, roadmap feedback, and showcases once the GitHub remote is enabled.
-- Read [docs/rule-authoring.md](/D:/SEO/docs/rule-authoring.md) before proposing new audit rules.
-- Read [docs/provider-contract.md](/D:/SEO/docs/provider-contract.md) before adding or changing provider adapters.
+- Read [docs/rule-authoring.md](docs/rule-authoring.md) before proposing new audit rules.
+- Read [docs/provider-contract.md](docs/provider-contract.md) before adding or changing provider adapters.
+- For docs, release, starter, Action, or public report changes, keep the public framing intact: no consumer AI UI scraping, no ranking or answer-placement guarantee, and no public npm install copy until `@answerlens/cli` is visible in the registry.
 
 ## Local setup
 
@@ -34,6 +35,8 @@ pnpm demo:fixture
 - Mention any config, output, or scoring changes.
 - Add or update tests when logic changes.
 - Attach a screenshot or report artifact when the UI or report output changes.
+- For public-facing changes, run `pnpm public:check` and preserve the artifact order: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
+- Do not paste raw provider payloads into public PRs, issues, Discussions, or release notes.
 
 ## Project conventions
 
@@ -57,4 +60,3 @@ Milestones:
 - `v0.1-audit`
 - `v0.2-eval`
 - `v0.3-connectors`
-

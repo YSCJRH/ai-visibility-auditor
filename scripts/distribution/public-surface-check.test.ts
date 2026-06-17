@@ -59,6 +59,16 @@ test("public-surface-check rejects implicit npm install copy and raw payload art
   assert.ok(ruleIds.includes("raw-payload-upload-exposure"));
 });
 
+test("public-surface-check rejects local absolute paths in public contribution surfaces", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(rootDir, "CONTRIBUTING.md", "Read [docs/rule-authoring.md](/D:/SEO/docs/rule-authoring.md).\n");
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("public-local-absolute-path"));
+});
+
 test("public-surface-check rejects runtime secrets, artifact order drift, and missing audit/eval key boundary", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, ".github/answerlens/runtime.yaml", "runtime:\n  api_key: sk-testsecretvalue123\n");
@@ -122,6 +132,36 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(rootDir, "apps/cli/package.json", JSON.stringify({ name: "@answerlens/cli", version: STABLE_VERSION }, null, 2));
   await writeFixtureFile(rootDir, "README.md", "# AnswerLens\nNo ranking guarantees and no consumer AI UI scraping.\n");
   await writeFixtureFile(rootDir, "README.zh-CN.md", "# AnswerLens\n不承诺排名，不抓取消费级 AI UI。\n");
+  await writeFixtureFile(
+    rootDir,
+    "CONTRIBUTING.md",
+    [
+      "# Contributing",
+      "Read [docs/rule-authoring.md](docs/rule-authoring.md).",
+      "Read [docs/provider-contract.md](docs/provider-contract.md)."
+    ].join("\n")
+  );
+  await writeFixtureFile(
+    rootDir,
+    ".github/pull_request_template.md",
+    [
+      "Review generated artifacts in order: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
+      "No consumer AI UI scraping is presented as a product capability.",
+      "Do not paste raw provider payloads from `raw/**` into public PRs."
+    ].join("\n")
+  );
+  await writeFixtureFile(
+    rootDir,
+    ".github/ISSUE_TEMPLATE/audit-teardown.yml",
+    [
+      "name: Audit teardown",
+      "description: Share an AnswerLens run.",
+      "body:",
+      "  - type: markdown",
+      "    attributes:",
+      "      value: Please avoid raw provider payloads, private analytics, consumer AI UI scraping, and ranking guarantees."
+    ].join("\n")
+  );
   await writeFixtureFile(rootDir, ".agents/plugins/marketplace.json", "{\"name\":\"answerlens-codex\",\"plugins\":[]}\n");
   await writeFixtureFile(
     rootDir,
