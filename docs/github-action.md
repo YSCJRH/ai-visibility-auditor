@@ -37,7 +37,7 @@ The public interface is:
 ```
 
 Use the starter files in [examples/consumer-repo/.github](../examples/consumer-repo/.github) as a copyable baseline, then replace the placeholder brand, competitors, prompts, and `site:` URL.
-The checked-in starter workflow pins the current stable Action release, `YSCJRH/ai-visibility-auditor@v0.3.4`; after a newer release, update that pin only after reviewing the release notes.
+The checked-in starter workflow pins the current stable Action release, `YSCJRH/ai-visibility-auditor@v0.3.5`; after a newer release, update that pin only after reviewing the release notes.
 
 If you want the generated Markdown and HTML artifacts to show a friendlier public label than the raw URL or local path, set `brand.site_display_name` in `brand.yaml`.
 If you plan to run `eval`, keep the default provider, model, locale, and timeout in `runtime.yaml` next to `brand.yaml`.
@@ -58,7 +58,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - id: answerlens
-        uses: YSCJRH/ai-visibility-auditor@v0.3.4
+        uses: YSCJRH/ai-visibility-auditor@v0.3.5
         with:
           command: audit
           site: https://www.example.com
@@ -145,7 +145,7 @@ If you do not set `runtime`, AnswerLens tries `runtime.yaml` next to `brand.yaml
 
 The starter bundle is intentionally generic. Replace the example product, domain, competitor list, and prompt pack before using it on a real site.
 Treat it as the shareable adoption asset for forks, releases, and external setup guides.
-Keep the workflow pinned to a reviewed stable release tag, currently `v0.3.4`, instead of a branch or floating ref.
+Keep the workflow pinned to a reviewed stable release tag, currently `v0.3.5`, instead of a branch or floating ref.
 Keep secrets such as `OPENAI_API_KEY` and `PERPLEXITY_API_KEY` in repository or organization secrets, not in `runtime.yaml`.
 
 If you want the full model decision tree in one place, use [model-runtime.md](model-runtime.md).
@@ -183,7 +183,7 @@ This repository uses the same root Action via `uses: ./` in its fixture workflow
 
 ## Runtime note
 
-- The root Action provisions pnpm with Corepack, so external repositories that call a reviewed release tag such as `YSCJRH/ai-visibility-auditor@v0.3.4` do not need to add `pnpm/action-setup` separately.
+- The root Action provisions pnpm with Corepack, so external repositories that call a reviewed release tag such as `YSCJRH/ai-visibility-auditor@v0.3.5` do not need to add `pnpm/action-setup` separately.
 - Repository workflows are hardened for the GitHub Actions Node 24 transition.
 - Self-hosted runners should stay on a runner version compatible with Node 24-based actions.
 - For copied workflows, prefer the same major versions documented in [docs/manual-steps.md](manual-steps.md): `actions/checkout@v5`, `actions/setup-node@v5`, `actions/github-script@v8`, and `actions/upload-artifact@v6`.

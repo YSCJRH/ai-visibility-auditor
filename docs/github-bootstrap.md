@@ -63,7 +63,7 @@ These can stay as the release-history spine. The `v0.3.3` activation umbrella is
 
 ## Issue batching
 
-For post-`v0.3.4` follow-through, keep coordination lightweight:
+For post-`v0.3.5` follow-through, keep coordination lightweight:
 
 - use milestones as the release spine
 - use `kind:*`, `area:*`, and `priority:*` labels for triage
@@ -75,6 +75,8 @@ For post-`v0.3.4` follow-through, keep coordination lightweight:
 - treat [docs/shareable-summary.md](shareable-summary.md) as the canonical share-output contract
 - treat the repository README as the canonical home and the GitHub Pages site as the proof surface
 - treat repo-local skills under [`.agents/skills/`](../.agents/skills/) as the stable place for repeated activation maintenance workflows once they stop changing week to week
+
+`v0.3.5` is the release-parity checkpoint for the post-deploy Pages category polish, dogfood log, and stable starter pins. Do not open a broad umbrella issue for that release unless a concrete repo-editable drift appears.
 
 ## Feedback routing
 

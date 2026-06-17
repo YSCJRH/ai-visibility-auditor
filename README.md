@@ -403,6 +403,7 @@ See [docs/shareable-summary.md](docs/shareable-summary.md) and [docs/badges.md](
 - Released in `v0.3.2` on April 21, 2026: bilingual public Pages and docs, localized report variants, and admin/review language switching
 - Released in `v0.3.3` on June 10, 2026: activation funnel, share-ready artifacts, trust/safety docs, starter bundle hardening, self-dogfood loop, public guardrails, and repo-local Codex plugin workflows
 - Released in `v0.3.4` on June 10, 2026: Pages redirect handling, localized homepage detection, CJK extraction signals, compare metadata coverage, and current stable Action pins
+- Released in `v0.3.5` on June 17, 2026: release assets aligned with the post-deploy Pages category polish, dogfood log, and current stable Action starter pins
 - Current operating focus: [docs/activation-plan.md](docs/activation-plan.md)
 - Full public roadmap: [docs/roadmap.md](docs/roadmap.md)
 
