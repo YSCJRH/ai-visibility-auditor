@@ -71,6 +71,31 @@ test("public-surface-check rejects runtime secrets, artifact order drift, and mi
   assert.ok(ruleIds.includes("audit-eval-key-boundary"));
 });
 
+test("public-surface-check rejects release workflows that cannot refresh Pages after publishing", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/release-distribution.yml",
+    [
+      "name: Release Distribution",
+      "permissions:",
+      "  contents: write",
+      "  id-token: write",
+      "jobs:",
+      "  release:",
+      "    runs-on: ubuntu-latest",
+      "    steps:",
+      "      - run: gh release upload \"$RELEASE_TAG\" dist/packages/*.tgz --clobber"
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("release-pages-refresh-permission"));
+  assert.ok(ruleIds.includes("release-pages-refresh-dispatch"));
+});
+
 async function createPublicSurfaceFixture(): Promise<string> {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-public-surface-"));
   await writeFixtureFile(rootDir, "README.md", "# AnswerLens\nNo ranking guarantees and no consumer AI UI scraping.\n");
@@ -105,6 +130,22 @@ async function createPublicSurfaceFixture(): Promise<string> {
     rootDir,
     ".github/workflows/ci.yml",
     "steps:\n  - uses: actions/checkout@v5\n  - uses: actions/setup-node@v5\n  - uses: actions/github-script@v8\n  - uses: actions/upload-artifact@v6\n"
+  );
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/release-distribution.yml",
+    [
+      "name: Release Distribution",
+      "permissions:",
+      "  actions: write",
+      "  contents: write",
+      "  id-token: write",
+      "jobs:",
+      "  release:",
+      "    runs-on: ubuntu-latest",
+      "    steps:",
+      "      - run: gh workflow run pages.yml --ref main"
+    ].join("\n")
   );
   await writeFixtureFile(
     rootDir,
