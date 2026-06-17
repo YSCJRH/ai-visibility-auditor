@@ -48,7 +48,17 @@ const TEXT_SURFACES = [
 ];
 
 const ARTIFACT_ORDER_SURFACES = [
+  "README.md",
+  "README.zh-CN.md",
+  ".github/pull_request_template.md",
+  ".github/ISSUE_TEMPLATE/audit-teardown.yml",
   "action.yml",
+  "docs/demo-report.md",
+  "docs/quickstart.md",
+  "docs/zh/quickstart.md",
+  "docs/first-run-story.md",
+  "docs/starter-bundle.md",
+  "docs/trust-and-safety.md",
   "docs/shareable-summary.md",
   "docs/github-action.md",
   "docs/zh/github-action.md",
@@ -294,9 +304,9 @@ function flattenConfig(value: unknown, prefix: string[] = []): Array<{ path: str
 async function checkArtifactReviewOrder(rootDir: string, findings: Finding[]): Promise<void> {
   for (const relativePath of ARTIFACT_ORDER_SURFACES) {
     const text = await readFile(path.join(rootDir, relativePath), "utf8");
-    const share = text.indexOf("share-summary");
-    const scorecard = text.indexOf("scorecard");
-    const recommendations = text.indexOf("recommendations");
+    const share = firstIndexOfAny(text, ["share-summary.md", "share-summary-path"]);
+    const scorecard = firstIndexOfAny(text, ["scorecard.md", "scorecard-path"]);
+    const recommendations = firstIndexOfAny(text, ["recommendations.md", "recommendations-path"]);
     if (share === -1 || scorecard === -1 || recommendations === -1 || !(share < scorecard && scorecard < recommendations)) {
       findings.push({
         ruleId: "artifact-review-order",
@@ -305,6 +315,11 @@ async function checkArtifactReviewOrder(rootDir: string, findings: Finding[]): P
       });
     }
   }
+}
+
+function firstIndexOfAny(text: string, needles: string[]): number {
+  const matches = needles.map((needle) => text.indexOf(needle)).filter((index) => index >= 0);
+  return matches.length === 0 ? -1 : Math.min(...matches);
 }
 
 async function checkAuditEvalKeyBoundary(rootDir: string, findings: Finding[]): Promise<void> {

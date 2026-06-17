@@ -84,6 +84,20 @@ test("public-surface-check rejects runtime secrets, artifact order drift, and mi
   assert.ok(ruleIds.includes("audit-eval-key-boundary"));
 });
 
+test("public-surface-check rejects artifact order drift in GitHub intake templates", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    ".github/ISSUE_TEMPLATE/audit-teardown.yml",
+    "description: Link recommendations.md, then scorecard.md, then share-summary.md.\n"
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("artifact-review-order"));
+});
+
 test("public-surface-check rejects release workflows that cannot refresh Pages after publishing", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -130,8 +144,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-public-surface-"));
   await writeFixtureFile(rootDir, "package.json", JSON.stringify({ name: "answerlens-workspace", version: STABLE_VERSION }, null, 2));
   await writeFixtureFile(rootDir, "apps/cli/package.json", JSON.stringify({ name: "@answerlens/cli", version: STABLE_VERSION }, null, 2));
-  await writeFixtureFile(rootDir, "README.md", "# AnswerLens\nNo ranking guarantees and no consumer AI UI scraping.\n");
-  await writeFixtureFile(rootDir, "README.zh-CN.md", "# AnswerLens\n不承诺排名，不抓取消费级 AI UI。\n");
+  await writeFixtureFile(rootDir, "README.md", `# AnswerLens\n${artifactOrderText()}\nNo ranking guarantees and no consumer AI UI scraping.\n`);
+  await writeFixtureFile(rootDir, "README.zh-CN.md", `# AnswerLens\n${artifactOrderText()}\n不承诺排名，不抓取消费级 AI UI。\n`);
   await writeFixtureFile(
     rootDir,
     "CONTRIBUTING.md",
@@ -159,7 +173,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "body:",
       "  - type: markdown",
       "    attributes:",
-      "      value: Please avoid raw provider payloads, private analytics, consumer AI UI scraping, and ranking guarantees."
+      "      value: Review safe artifacts in order: share-summary.md, then scorecard.md, then recommendations.md. Please avoid raw provider payloads, private analytics, consumer AI UI scraping, and ranking guarantees."
     ].join("\n")
   );
   await writeFixtureFile(rootDir, ".agents/plugins/marketplace.json", "{\"name\":\"answerlens-codex\",\"plugins\":[]}\n");
@@ -179,6 +193,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
     ].join("\n")
   );
   await writeFixtureFile(rootDir, "action.yml", artifactOrderText());
+  await writeFixtureFile(rootDir, "docs/demo-report.md", artifactOrderText());
   await writeFixtureFile(rootDir, "docs/shareable-summary.md", artifactOrderText());
   await writeFixtureFile(
     rootDir,
@@ -193,7 +208,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(
     rootDir,
     "docs/starter-bundle.md",
-    `The current starter workflow uses YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`
+    `${artifactOrderText()}\nThe current starter workflow uses YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`
   );
   await writeFixtureFile(
     rootDir,
@@ -253,13 +268,15 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(
     rootDir,
     "docs/quickstart.md",
-    "Basic `audit` does not require provider API keys.\nYou only need provider API keys when you choose to run `eval`.\n"
+    `${artifactOrderText()}\nBasic \`audit\` does not require provider API keys.\nYou only need provider API keys when you choose to run \`eval\`.\n`
   );
   await writeFixtureFile(
     rootDir,
     "docs/zh/quickstart.md",
-    "基础 `audit` 不需要 provider API key。\n只有在你要跑 `eval` 时才需要 provider API key。\n"
+    `${artifactOrderText()}\n基础 \`audit\` 不需要 provider API key。\n只有在你要跑 \`eval\` 时才需要 provider API key。\n`
   );
+  await writeFixtureFile(rootDir, "docs/first-run-story.md", artifactOrderText());
+  await writeFixtureFile(rootDir, "docs/trust-and-safety.md", artifactOrderText());
   await writeFixtureFile(rootDir, ".github/answerlens/runtime.yaml", safeRuntimeYaml());
   await writeFixtureFile(rootDir, "examples/acme/runtime.yaml", safeRuntimeYaml());
   await writeFixtureFile(rootDir, "examples/consumer-repo/.github/answerlens/runtime.yaml", safeRuntimeYaml());

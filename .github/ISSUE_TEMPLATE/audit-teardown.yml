@@ -9,6 +9,7 @@ body:
         Use this for public examples, before/after notes, or "AI may miss this product because..." teardowns.
 
         Please avoid raw provider payloads, private analytics, consumer AI UI scraping, and ranking guarantees.
+        Review safe artifacts in order: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
   - type: input
     id: site
     attributes:
@@ -21,7 +22,7 @@ body:
     id: share-summary
     attributes:
       label: AnswerLens share summary
-      description: Paste `share-summary.md` or `pr-snippet.md`.
+      description: Paste the safe `share-summary.md` excerpt first. Use `pr-snippet.md` later only when you need a copy-ready GitHub block.
       placeholder: |
         ## AnswerLens audit
 
@@ -40,7 +41,7 @@ body:
     id: artifacts
     attributes:
       label: Public artifacts
-      description: Link screenshots, reports, PRs, or release notes that are safe to share.
+      description: Link screenshots, reports, PRs, or release notes that are safe to share. List `share-summary.md`, `scorecard.md`, and `recommendations.md` before optional artifacts.
       placeholder: "- share-summary.md\n- scorecard.md\n- recommendations.md\n- before-after-diff.md"
     validations:
       required: false
