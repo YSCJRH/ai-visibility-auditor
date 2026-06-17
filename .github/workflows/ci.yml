@@ -39,3 +39,4 @@ jobs:
           path: |
             runs/static-good
             runs/consumer-repo
+            !runs/**/raw/**
