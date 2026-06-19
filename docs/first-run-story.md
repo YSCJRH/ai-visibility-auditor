@@ -12,7 +12,7 @@ Use it after this path:
 
 ## Where To Share
 
-Use GitHub Discussions > Show and tell for first-run stories.
+Use the [Show and tell Discussion form](https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell) for first-run stories.
 
 Use Issues only for reproducible bugs, docs gaps, false positives, or concrete rule proposals.
 

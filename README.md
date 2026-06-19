@@ -198,10 +198,10 @@ AnswerLens is designed to turn vague "AI SEO" work into concrete structure, evid
 ## Feedback and community
 
 - First-run question or unclear result: [GitHub Discussions](https://github.com/YSCJRH/ai-visibility-auditor/discussions) in `Q&A`
-- Share a screenshot, artifact, or first-run story: [GitHub Discussions](https://github.com/YSCJRH/ai-visibility-auditor/discussions) in `Show and tell`
+- Share a screenshot, artifact, or first-run story: [Show and tell Discussion form](https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell)
 - Reproducible bug, docs gap, or concrete rule request: [GitHub Issues](https://github.com/YSCJRH/ai-visibility-auditor/issues)
 
-If you try AnswerLens on a real site, use the [first-run story template](docs/first-run-story.md) and tell us which artifact helped first.
+If you try AnswerLens on a real site, use the [first-run story template](docs/first-run-story.md) and the [Show and tell Discussion form](https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell) to tell us which artifact helped first.
 
 ## Repository layout
 
