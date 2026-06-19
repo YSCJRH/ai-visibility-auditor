@@ -124,6 +124,21 @@ const SHARE_LAYER_PROPAGATION_SURFACES = [
   }
 ];
 
+const VISUAL_SHARE_PACKET_SURFACES = [
+  {
+    path: "assets/readme-cover.svg",
+    snippets: ["Review packet", "share-summary.md", "scorecard.md", "recommendations.md"]
+  },
+  {
+    path: "assets/readme-artifacts-preview.svg",
+    snippets: ["share-summary.md", "scorecard.md", "recommendations.md", "pr-snippet.md", "Show and tell", "raw/** stays private"]
+  },
+  {
+    path: "assets/social-preview.svg",
+    snippets: ["Review packet", "share-summary.md", "scorecard.md", "recommendations.md", "pr-snippet.md", "first-run story"]
+  }
+];
+
 const STABLE_RELEASE_SURFACES: Array<{ path: string; snippets: (stableTag: string) => string[] }> = [
   {
     path: ".github/workflows/release-distribution.yml",
@@ -194,6 +209,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkFirstRunStoryBoundary(rootDir, findings);
   await checkFirstRunDiscussionRouting(rootDir, findings);
   await checkShareLayerPropagationBoundary(rootDir, findings);
+  await checkVisualSharePacketBoundary(rootDir, findings);
   await checkStarterAdopterKitBoundary(rootDir, findings);
   await checkReleasePagesRefresh(rootDir, findings);
   await checkPagesPostdeploySmoke(rootDir, findings);
@@ -553,6 +569,43 @@ async function checkShareLayerPropagationBoundary(rootDir: string, findings: Fin
           message: `Generated report sharing surfaces must include the first-run invitation and public sharing boundary: ${snippet}`
         });
       }
+    }
+  }
+}
+
+async function checkVisualSharePacketBoundary(rootDir: string, findings: Finding[]): Promise<void> {
+  for (const surface of VISUAL_SHARE_PACKET_SURFACES) {
+    let text: string;
+    try {
+      text = await readFile(path.join(rootDir, surface.path), "utf8");
+    } catch (error) {
+      findings.push({
+        ruleId: "visual-share-packet-boundary",
+        path: surface.path,
+        message: `Unable to read public visual share-packet surface: ${error instanceof Error ? error.message : String(error)}`
+      });
+      continue;
+    }
+
+    for (const snippet of surface.snippets) {
+      if (!text.includes(snippet)) {
+        findings.push({
+          ruleId: "visual-share-packet-boundary",
+          path: surface.path,
+          message: `Public visual assets must show the share-summary-first review packet: ${snippet}`
+        });
+      }
+    }
+
+    const share = text.indexOf("share-summary.md");
+    const scorecard = text.indexOf("scorecard.md");
+    const recommendations = text.indexOf("recommendations.md");
+    if (share === -1 || scorecard === -1 || recommendations === -1 || !(share < scorecard && scorecard < recommendations)) {
+      findings.push({
+        ruleId: "visual-share-packet-boundary",
+        path: surface.path,
+        message: "Public visual assets must keep the artifact order: share-summary.md, scorecard.md, recommendations.md."
+      });
     }
   }
 }

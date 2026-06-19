@@ -1,6 +1,6 @@
 ﻿<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">Artifact preview</title>
-  <desc id="desc">AnswerLens artifact preview showing run outputs, recommendations, and manifest metadata from the fixture demo.</desc>
+  <desc id="desc">AnswerLens artifact preview showing the share-summary-first review packet and manifest metadata from the fixture demo.</desc>
   <defs>
     <linearGradient id="bg" x1="120" y1="100" x2="1320" y2="820" gradientUnits="userSpaceOnUse">
       <stop stop-color="#081426"/>
@@ -26,25 +26,25 @@
     <rect x="112" y="212" width="482" height="580" rx="30" fill="url(#panel)" stroke="#88B8FF" stroke-opacity="0.22"/>
     <text x="156" y="276" fill="#8CF8D5" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">runs/static-good/</text>
     <g font-family="Consolas, 'Courier New', monospace" font-size="22">
-      <text x="156" y="336" fill="#D7E8FF">site-audit.json</text>
-      <text x="156" y="378" fill="#D7E8FF">issues.json</text>
+      <text x="156" y="336" fill="#D7E8FF">share-summary.md</text>
+      <text x="156" y="378" fill="#D7E8FF">scorecard.md</text>
       <text x="156" y="420" fill="#D7E8FF">recommendations.md</text>
-      <text x="156" y="462" fill="#D7E8FF">scorecard.md</text>
+      <text x="156" y="462" fill="#D7E8FF">pr-snippet.md</text>
       <text x="156" y="504" fill="#D7E8FF">index.html</text>
-      <text x="156" y="546" fill="#D7E8FF">normalized-pages.json</text>
-      <text x="156" y="588" fill="#D7E8FF">competitor-diff.md</text>
-      <text x="156" y="630" fill="#D7E8FF">run.json</text>
+      <text x="156" y="546" fill="#D7E8FF">run.json</text>
+      <text x="156" y="588" fill="#D7E8FF">site-audit.json</text>
+      <text x="156" y="630" fill="#D7E8FF">issues.json</text>
       <text x="156" y="688" fill="#7FB0E1">eval-results.json</text>
-      <text x="156" y="730" fill="#7FB0E1">citation-gap-matrix.json</text>
+      <text x="156" y="730" fill="#7FB0E1">raw/** stays private</text>
     </g>
   </g>
 
   <g filter="url(#shadow)">
     <rect x="638" y="212" width="690" height="268" rx="30" fill="#F8FBFF"/>
-    <text x="682" y="278" fill="#0A1E35" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">recommendations.md</text>
-    <text x="682" y="332" fill="#4E667F" font-family="Segoe UI, Arial, sans-serif" font-size="18">Tighten structure and schema alignment on key pages</text>
-      <text x="682" y="374" fill="#4E667F" font-family="Segoe UI, Arial, sans-serif" font-size="18">Inspect internal link records in site-audit.json</text>
-      <text x="682" y="416" fill="#4E667F" font-family="Segoe UI, Arial, sans-serif" font-size="18">Use share-summary.md and pr-snippet.md in PR review</text>
+    <text x="682" y="278" fill="#0A1E35" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">share-summary.md</text>
+    <text x="682" y="332" fill="#4E667F" font-family="Segoe UI, Arial, sans-serif" font-size="18">Open first, then scorecard.md and recommendations.md</text>
+      <text x="682" y="374" fill="#4E667F" font-family="Segoe UI, Arial, sans-serif" font-size="18">Use pr-snippet.md when the run moves into PR review</text>
+      <text x="682" y="416" fill="#4E667F" font-family="Segoe UI, Arial, sans-serif" font-size="18">Share safe first runs through Show and tell</text>
     <rect x="682" y="438" width="252" height="12" rx="6" fill="#DDE8F6"/>
     <rect x="682" y="438" width="182" height="12" rx="6" fill="#2E63FF"/>
   </g>
@@ -54,7 +54,7 @@
     <text x="682" y="578" fill="#0A1E35" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">run.json</text>
     <g font-family="Consolas, 'Courier New', monospace" font-size="20">
       <text x="682" y="628" fill="#37506A">{"kind": "audit", "id": "ccacc8ca-..."}</text>
-      <text x="682" y="668" fill="#37506A">{"artifacts": ["site-audit.json", "issues.json", ...]}</text>
+      <text x="682" y="668" fill="#37506A">{"artifacts": ["share-summary.md", "scorecard.md", ...]}</text>
       <text x="682" y="708" fill="#37506A">{"summary": {"overallScore": 90, "vavr": null}}</text>
       <text x="682" y="748" fill="#37506A">{"site": "./examples/fixtures/static-good"}</text>
     </g>

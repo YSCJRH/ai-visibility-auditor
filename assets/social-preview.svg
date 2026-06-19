@@ -1,6 +1,6 @@
 <svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">AnswerLens social preview</title>
-  <desc id="desc">AnswerLens social preview with a report-first layout, prominent brand text, a visibility scorecard card, and a compact CLI proof panel.</desc>
+  <desc id="desc">AnswerLens social preview with a report-first layout, prominent brand text, a review packet card, and a compact CLI proof panel.</desc>
   <defs>
     <linearGradient id="bg" x1="88" y1="56" x2="1194" y2="604" gradientUnits="userSpaceOnUse">
       <stop stop-color="#081426"/>
@@ -48,13 +48,14 @@
   </g>
 
   <g filter="url(#shadow)">
-    <rect x="72" y="72" width="360" height="126" rx="24" fill="url(#proofPanel)" stroke="#86B9FF" stroke-opacity="0.18"/>
+    <rect x="72" y="72" width="552" height="150" rx="24" fill="url(#proofPanel)" stroke="#86B9FF" stroke-opacity="0.18"/>
     <circle cx="104" cy="102" r="6" fill="#FF6B6B"/>
     <circle cx="126" cy="102" r="6" fill="#FFD166"/>
     <circle cx="148" cy="102" r="6" fill="#58E6A7"/>
     <text x="102" y="138" fill="#8CF8D5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">CLI proof</text>
     <text x="102" y="168" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="22">$ answerlens audit</text>
-    <text x="102" y="194" fill="#D7E8FF" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="16">scorecard.md   recommendations.md</text>
+    <text x="102" y="194" fill="#D7E8FF" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="15">share-summary.md -&gt; scorecard.md</text>
+    <text x="102" y="216" fill="#B7CDE7" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="15">recommendations.md + pr-snippet.md</text>
   </g>
 
   <text x="72" y="256" fill="#8FD8FF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="0.08em">CI FOR AI DISCOVERABILITY</text>
@@ -66,24 +67,26 @@
 
   <g filter="url(#shadow)">
     <rect x="760" y="82" width="446" height="440" rx="30" fill="#F7FBFF" stroke="#D6E6FF"/>
-    <text x="794" y="128" fill="#2A74E8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" letter-spacing="0.08em">PRIMARY ARTIFACT</text>
-    <text x="794" y="168" fill="#071829" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800">Visibility scorecard</text>
-    <text x="794" y="198" fill="#607088" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18">AI discoverability readiness</text>
+    <text x="794" y="128" fill="#2A74E8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" letter-spacing="0.08em">SHAREABLE RUN</text>
+    <text x="794" y="168" fill="#071829" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800">Review packet</text>
+    <text x="794" y="198" fill="#607088" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18">share-summary.md first</text>
 
     <text x="794" y="284" fill="#0B55D8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="92" font-weight="850">90</text>
     <text x="914" y="284" fill="#516A83" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="600">/100</text>
     <rect x="794" y="302" width="344" height="16" rx="8" fill="#E5EDF8"/>
     <rect x="794" y="302" width="308" height="16" rx="8" fill="url(#scoreBar)"/>
 
-    <rect x="794" y="344" width="126" height="32" rx="16" fill="#EEF4FF"/>
-    <text x="818" y="365" fill="#1155CC" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800">SCORECARD</text>
-    <rect x="932" y="344" width="170" height="32" rx="16" fill="#EAFBF7"/>
-    <text x="956" y="365" fill="#097B5A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800">RECOMMENDATIONS</text>
+    <rect x="794" y="344" width="112" height="32" rx="16" fill="#EEF4FF"/>
+    <text x="818" y="365" fill="#1155CC" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800">SUMMARY</text>
+    <rect x="918" y="344" width="126" height="32" rx="16" fill="#EAFBF7"/>
+    <text x="942" y="365" fill="#097B5A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800">SCORECARD</text>
+    <rect x="1056" y="344" width="94" height="32" rx="16" fill="#F1F6FF"/>
+    <text x="1087" y="365" fill="#4161A8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="800">FIXES</text>
 
     <rect x="794" y="388" width="378" height="1" fill="#E5EDF8"/>
-    <text x="794" y="420" fill="#627A92" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="0.06em">TOP FIX</text>
-    <text x="794" y="452" fill="#071829" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="800">Thin key page</text>
-    <text x="794" y="484" fill="#556E88" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18">Add plain-language proof and</text>
-    <text x="794" y="510" fill="#556E88" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18">stronger evidence blocks.</text>
+    <text x="794" y="420" fill="#627A92" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="0.06em">SHARE NEXT</text>
+    <text x="794" y="452" fill="#071829" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="800">PR snippet + first-run story</text>
+    <text x="794" y="484" fill="#556E88" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18">Forward the public-safe summary,</text>
+    <text x="794" y="510" fill="#556E88" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18">then copy the workflow into CI.</text>
   </g>
 </svg>

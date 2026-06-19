@@ -1,6 +1,6 @@
 <svg width="1600" height="840" viewBox="0 0 1600 840" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">AnswerLens README cover</title>
-  <desc id="desc">AnswerLens hero art with a report-focused layout, a visibility scorecard card, a CLI proof card, and a subdued lens watermark.</desc>
+  <desc id="desc">AnswerLens hero art with a report-focused layout, a review packet card, a CLI proof card, and a subdued lens watermark.</desc>
   <defs>
     <linearGradient id="bg" x1="108" y1="78" x2="1500" y2="780" gradientUnits="userSpaceOnUse">
       <stop stop-color="#081426"/>
@@ -55,9 +55,9 @@
     <circle cx="212" cy="156" r="7" fill="#58E6A7"/>
     <text x="156" y="204" fill="#8CF8D5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="700">CLI proof</text>
     <text x="156" y="242" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="26">$ answerlens audit</text>
-    <text x="156" y="282" fill="#D7E8FF" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="21">scorecard.md</text>
-    <text x="156" y="314" fill="#D7E8FF" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="21">recommendations.md</text>
-    <text x="156" y="346" fill="#B7CDE7" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="21">share-summary.md</text>
+    <text x="156" y="282" fill="#D7E8FF" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="21">share-summary.md</text>
+    <text x="156" y="314" fill="#D7E8FF" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="21">scorecard.md</text>
+    <text x="156" y="346" fill="#B7CDE7" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="21">recommendations.md</text>
   </g>
 
   <text x="120" y="404" fill="#8FD8FF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="0.08em">CI FOR AI DISCOVERABILITY</text>
@@ -70,26 +70,26 @@
 
   <g filter="url(#shadow)">
     <rect x="930" y="108" width="540" height="580" rx="34" fill="#F7FBFF" stroke="#D6E6FF"/>
-    <text x="972" y="164" fill="#2A74E8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" letter-spacing="0.08em">PRIMARY ARTIFACT</text>
-    <text x="972" y="214" fill="#071829" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="34" font-weight="800">Visibility scorecard</text>
-    <text x="972" y="250" fill="#607088" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20">AI discoverability readiness for a real product site</text>
+    <text x="972" y="164" fill="#2A74E8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" letter-spacing="0.08em">SHAREABLE RUN</text>
+    <text x="972" y="214" fill="#071829" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="34" font-weight="800">Review packet</text>
+    <text x="972" y="250" fill="#607088" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20">A GitHub-native evidence bundle for a product site</text>
 
     <text x="972" y="366" fill="#0B55D8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="108" font-weight="850">90</text>
     <text x="1112" y="366" fill="#516A83" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="32" font-weight="600">/100</text>
     <rect x="972" y="392" width="420" height="18" rx="9" fill="#E5EDF8"/>
     <rect x="972" y="392" width="378" height="18" rx="9" fill="url(#scoreBar)"/>
 
-    <rect x="972" y="440" width="146" height="36" rx="18" fill="#EEF4FF"/>
-    <text x="1000" y="463" fill="#1155CC" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800">SCORECARD</text>
-    <rect x="1132" y="440" width="188" height="36" rx="18" fill="#EAFBF7"/>
-    <text x="1160" y="463" fill="#097B5A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800">RECOMMENDATIONS</text>
-    <rect x="1332" y="440" width="96" height="36" rx="18" fill="#F1F6FF"/>
-    <text x="1357" y="463" fill="#4161A8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800">CITED</text>
+    <rect x="972" y="440" width="132" height="36" rx="18" fill="#EEF4FF"/>
+    <text x="1000" y="463" fill="#1155CC" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800">SUMMARY</text>
+    <rect x="1118" y="440" width="146" height="36" rx="18" fill="#EAFBF7"/>
+    <text x="1146" y="463" fill="#097B5A" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800">SCORECARD</text>
+    <rect x="1278" y="440" width="132" height="36" rx="18" fill="#F1F6FF"/>
+    <text x="1323" y="463" fill="#4161A8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800">FIXES</text>
 
     <rect x="972" y="510" width="456" height="1" fill="#E5EDF8"/>
-    <text x="972" y="558" fill="#627A92" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="0.06em">TOP FIX</text>
-    <text x="972" y="606" fill="#071829" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800">Thin key page</text>
-    <text x="972" y="644" fill="#556E88" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="21">Add plain-language proof, stronger evidence blocks,</text>
-    <text x="972" y="674" fill="#556E88" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="21">and clearer sections that AI systems can quote back.</text>
+    <text x="972" y="558" fill="#627A92" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="0.06em">READ FIRST</text>
+    <text x="972" y="606" fill="#071829" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28" font-weight="800">Forwardable summary</text>
+    <text x="972" y="644" fill="#556E88" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="21">Share the run, verify the scorecard, then turn</text>
+    <text x="972" y="674" fill="#556E88" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="21">recommendations into public source-material fixes.</text>
   </g>
 </svg>
