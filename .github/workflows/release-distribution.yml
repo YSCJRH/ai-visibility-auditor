@@ -100,7 +100,8 @@ jobs:
       - name: Write release asset manifest
         run: |
           pnpm release:assets:manifest -- --out dist/release-assets-manifest.json dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz
-          pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json
+          pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json --summary-out dist/release-assets-summary.md
+          cat dist/release-assets-summary.md >> "$GITHUB_STEP_SUMMARY"
       - name: Write release notes
         run: |
           cat <<'EOF' > dist/release-notes.md
@@ -217,4 +218,5 @@ jobs:
             dist/answerlens-demo-audit.tar.gz
             dist/answerlens-site.tar.gz
             dist/release-assets-manifest.json
+            dist/release-assets-summary.md
             dist/site

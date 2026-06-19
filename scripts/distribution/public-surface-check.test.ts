@@ -264,6 +264,43 @@ test("public-surface-check rejects release workflows without asset manifest gene
   assert.ok(ruleIds.includes("release-asset-manifest-gate"));
 });
 
+test("public-surface-check rejects release workflows without manifest job summary evidence", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/release-distribution.yml",
+    [
+      "name: Release Distribution",
+      "permissions:",
+      "  actions: write",
+      "  contents: write",
+      "  id-token: write",
+      "jobs:",
+      "  release:",
+      "    steps:",
+      "      - run: echo \"## Release asset checklist\"",
+      "      - run: echo \"answerlens-cli-*.tgz\"",
+      "      - run: echo \"`answerlens-demo-audit.tar.gz`\"",
+      "      - run: echo \"`answerlens-site.tar.gz`\"",
+      "      - run: pnpm release:assets:manifest -- --out dist/release-assets-manifest.json dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz",
+      "      - run: pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json",
+      "      - run: echo \"`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums\"",
+      "      - run: gh release upload \"$RELEASE_TAG\" dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz dist/release-assets-manifest.json --clobber",
+      "      - uses: actions/upload-artifact@v6",
+      "        with:",
+      "          path: |",
+      "            dist/release-assets-manifest.json",
+      "      - run: echo \"If `npm view @answerlens/cli` returns `404`, keep release assets or local checkout as the public path\"",
+      "      - run: gh workflow run pages.yml --ref main"
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("release-asset-manifest-gate"));
+});
+
 test("public-surface-check rejects release asset docs without downloaded manifest verification", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -712,7 +749,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "Use the helper to replace guessed fields such as published_at with GitHub metadata.",
       "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
       "Run gh release download vX.Y.Z before corepack pnpm release:assets:manifest -- --verify.",
-      "If an older release does not have release-assets-manifest.json, do not imply checksum coverage for that release."
+      "If an older release does not have release-assets-manifest.json, do not imply checksum coverage for that release.",
+      "In the Release Distribution workflow summary, review the Release asset manifest verified table before reusing downloaded release assets."
     ].join("\n")
   );
   await writeFixtureFile(
@@ -823,7 +861,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "const cli = 'answerlens-cli-*.tgz';",
       "const demo = 'answerlens-demo-audit.tar.gz';",
       "const site = 'answerlens-site.tar.gz';",
-      "const boundary = 'do not present npm as activated';"
+      "const boundary = 'do not present npm as activated';",
+      "function formatReleaseAssetsSummary() { return 'Release asset manifest verified'; }"
     ].join("\n")
   );
   await writeFixtureFile(
@@ -868,13 +907,15 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "      - run: echo \"`answerlens-demo-audit.tar.gz`\"",
       "      - run: echo \"`answerlens-site.tar.gz`\"",
       "      - run: pnpm release:assets:manifest -- --out dist/release-assets-manifest.json dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz",
-      "      - run: pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json",
+      "      - run: pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json --summary-out dist/release-assets-summary.md",
+      "      - run: cat dist/release-assets-summary.md >> \"$GITHUB_STEP_SUMMARY\"",
       "      - run: echo \"`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums\"",
       "      - run: gh release upload \"$RELEASE_TAG\" dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz dist/release-assets-manifest.json --clobber",
       "      - uses: actions/upload-artifact@v6",
       "        with:",
       "          path: |",
       "            dist/release-assets-manifest.json",
+      "            dist/release-assets-summary.md",
       "      - run: echo \"If `npm view @answerlens/cli` returns `404`, keep release assets or local checkout as the public path\"",
       `      - run: echo \"Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.\"`,
       "      - run: gh workflow run pages.yml --ref main"

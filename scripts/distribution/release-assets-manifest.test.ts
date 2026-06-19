@@ -1,9 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { promisify } from "node:util";
 import { runReleaseAssetsManifest } from "./release-assets-manifest.ts";
+
+const execFileAsync = promisify(execFile);
+const SCRIPT_PATH = path.resolve("scripts/distribution/release-assets-manifest.ts");
 
 test("release-assets-manifest writes and verifies release asset checksums", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "answerlens-release-assets-"));
@@ -34,6 +39,7 @@ test("release-assets-manifest writes and verifies release asset checksums", asyn
     await runReleaseAssetsManifest({
       outPath: manifestPath,
       verifyPath: manifestPath,
+      summaryOutPath: path.join(root, "dist", "release-assets-summary.md"),
       releaseTag: "v1.2.3",
       filePatterns: []
     });
@@ -41,6 +47,11 @@ test("release-assets-manifest writes and verifies release asset checksums", asyn
     const saved = JSON.parse(await readFile(manifestPath, "utf8")) as { assets: Array<{ sha256: string; sizeBytes: number }> };
     assert.equal(saved.assets[0]?.sha256.length, 64);
     assert.equal(saved.assets[0]?.sizeBytes, "cli tarball".length);
+    const summary = await readFile(path.join(root, "dist", "release-assets-summary.md"), "utf8");
+    assert.match(summary, /## Release asset manifest verified/);
+    assert.match(summary, /\| `answerlens-cli-1\.2\.3\.tgz` \| 11 B \| `[a-f0-9]{64}` \|/);
+    assert.match(summary, /Review order: `share-summary\.md`, then `scorecard\.md`, then `recommendations\.md`/);
+    assert.match(summary, /do not present npm as activated/);
   } finally {
     process.chdir(previousCwd);
   }
@@ -82,6 +93,37 @@ test("release-assets-manifest rejects missing required assets and checksum drift
       }),
       /checksum mismatch/
     );
+  } finally {
+    process.chdir(previousCwd);
+  }
+});
+
+test("release-assets-manifest CLI accepts summary-out with pnpm-style separator", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "answerlens-release-assets-cli-"));
+  await mkdir(path.join(root, "dist", "packages"), { recursive: true });
+  await writeFile(path.join(root, "dist", "packages", "answerlens-cli-1.2.3.tgz"), "cli tarball", "utf8");
+  await writeFile(path.join(root, "dist", "answerlens-demo-audit.tar.gz"), "demo bundle", "utf8");
+  await writeFile(path.join(root, "dist", "answerlens-site.tar.gz"), "site bundle", "utf8");
+
+  const previousCwd = process.cwd();
+  process.chdir(root);
+  try {
+    await execFileAsync(process.execPath, [
+      "--experimental-strip-types",
+      SCRIPT_PATH,
+      "--",
+      "--out",
+      "dist/release-assets-manifest.json",
+      "--summary-out",
+      "dist/release-assets-summary.md",
+      "dist/packages/*.tgz",
+      "dist/answerlens-demo-audit.tar.gz",
+      "dist/answerlens-site.tar.gz"
+    ]);
+
+    const summary = await readFile(path.join(root, "dist", "release-assets-summary.md"), "utf8");
+    assert.match(summary, /Release asset manifest verified/);
+    assert.match(summary, /answerlens-cli-1\.2\.3\.tgz/);
   } finally {
     process.chdir(previousCwd);
   }
