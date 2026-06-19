@@ -740,7 +740,7 @@ async function checkReleaseSnapshotFreshnessGate(rootDir: string, findings: Find
   const requiredSurfaces = [
     {
       path: ciPath,
-      snippets: ["pnpm release:snapshot:check"]
+      snippets: ["pnpm release:snapshot:check", "GITHUB_TOKEN: ${{ github.token }}"]
     },
     {
       path: checkScriptPath,
@@ -804,7 +804,12 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "CLI tarball",
         "answerlens-demo-audit.tar.gz",
         "answerlens-site.tar.gz",
+        "release-assets-manifest.json",
+        "SHA-256",
+        "gh release download vX.Y.Z",
+        "corepack pnpm release:assets:manifest -- --verify",
         "opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
+        "do not backfill a checksum claim",
         "If `npm view @answerlens/cli` returns `404`, do not present npm as activated"
       ]
     },
@@ -815,7 +820,12 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "CLI tarball",
         "answerlens-demo-audit.tar.gz",
         "answerlens-site.tar.gz",
+        "release-assets-manifest.json",
+        "SHA-256",
+        "gh release download vX.Y.Z",
+        "corepack pnpm release:assets:manifest -- --verify",
         "`share-summary.md`、`scorecard.md`、`recommendations.md`",
+        "不要把 checksum claim 回填进公开 release story",
         "如果 `npm view @answerlens/cli` 返回 `404`，不要把 npm 描述成已激活"
       ]
     },
@@ -827,6 +837,9 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "`answerlens-demo-audit.tar.gz`",
         "`answerlens-site.tar.gz`",
         "`release-assets-manifest.json`",
+        "gh release download vX.Y.Z",
+        "corepack pnpm release:assets:manifest -- --verify",
+        "do not imply checksum coverage for that release",
         "`share-summary.md`, then `scorecard.md`, then `recommendations.md`"
       ]
     },

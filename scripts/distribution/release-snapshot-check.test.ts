@@ -82,6 +82,23 @@ test("release-snapshot-check can fetch remote metadata", async () => {
   assert.deepEqual(findings, []);
 });
 
+test("release-snapshot-check sends an authorization header when a GitHub token is available", async () => {
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-release-snapshot-auth-"));
+  const snapshotPath = path.join(rootDir, "snapshot.json");
+  await writeJson(snapshotPath, [release({ tag_name: "v0.3.5" })]);
+
+  const findings = await runReleaseSnapshotCheck({
+    snapshotPath,
+    githubToken: "ghs_example",
+    fetchImpl: async (_url, init) => {
+      assert.equal(init?.headers?.Authorization, "Bearer ghs_example");
+      return responseFor([release({ tag_name: "v0.3.5" })]);
+    }
+  });
+
+  assert.deepEqual(findings, []);
+});
+
 test("release-snapshot-check reports remote API failures", async () => {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-release-snapshot-"));
   const snapshotPath = path.join(rootDir, "snapshot.json");
