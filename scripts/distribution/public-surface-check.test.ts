@@ -191,6 +191,27 @@ test("public-surface-check rejects first-run story templates without explicit re
   assert.ok(ruleIds.includes("first-run-story-boundary"));
 });
 
+test("public-surface-check rejects teardown templates without release asset evidence boundaries", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    ".github/ISSUE_TEMPLATE/audit-teardown.yml",
+    [
+      "name: Audit teardown",
+      "description: Share an AnswerLens run.",
+      "body:",
+      "  - type: markdown",
+      "    attributes:",
+      "      value: Review safe artifacts in order: share-summary.md, then scorecard.md, then recommendations.md. Please avoid raw provider payloads, private analytics, consumer AI UI scraping, and ranking guarantees."
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("first-run-story-boundary"));
+});
+
 test("public-surface-check rejects starter bundle surfaces without adopter-kit review boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -302,7 +323,13 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "body:",
       "  - type: markdown",
       "    attributes:",
-      "      value: Review safe artifacts in order: share-summary.md, then scorecard.md, then recommendations.md. Please avoid raw provider payloads, private analytics, consumer AI UI scraping, and ranking guarantees."
+      "      value: Review safe artifacts in order: share-summary.md, then scorecard.md, then recommendations.md. Please avoid raw provider payloads, private analytics, consumer AI UI scraping, and ranking guarantees.",
+      "  - type: textarea",
+      "    id: artifacts",
+      "    attributes:",
+      "      label: Public artifacts",
+      "      description: If the run used release assets, include the release tag and the asset names; do not use release asset downloads as npm activation proof.",
+      "      placeholder: answerlens-demo-audit.tar.gz and answerlens-site.tar.gz"
     ].join("\n")
   );
   await writeFixtureFile(rootDir, ".agents/plugins/marketplace.json", "{\"name\":\"answerlens-codex\",\"plugins\":[]}\n");
@@ -522,7 +549,13 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "no, keep this as feedback only",
       "no external adoption proof unless I explicitly authorize reuse",
       "no private analytics or raw provider payloads",
-      "Do not present a first-run story as external adoption proof unless the user explicitly authorized public reuse"
+      "Do not present a first-run story as external adoption proof unless the user explicitly authorized public reuse",
+      "Release asset evidence, if relevant",
+      "GitHub release tag URL",
+      "`answerlens-demo-audit.tar.gz`",
+      "`answerlens-site.tar.gz`",
+      "I opened `share-summary.md`, then `scorecard.md`, then `recommendations.md` from the unpacked demo audit bundle",
+      "I am not treating release assets as npm activation proof while `npm view @answerlens/cli` returns `404`"
     ].join("\n")
   );
   await writeFixtureFile(rootDir, "docs/trust-and-safety.md", artifactOrderText());

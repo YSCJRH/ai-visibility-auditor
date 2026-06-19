@@ -357,35 +357,56 @@ async function checkAuditEvalKeyBoundary(rootDir: string, findings: Finding[]): 
 }
 
 async function checkFirstRunStoryBoundary(rootDir: string, findings: Finding[]): Promise<void> {
-  const relativePath = "docs/first-run-story.md";
-  let text: string;
-  try {
-    text = await readFile(path.join(rootDir, relativePath), "utf8");
-  } catch (error) {
-    findings.push({
-      ruleId: "first-run-story-boundary",
-      path: relativePath,
-      message: `Unable to read first-run story template needed for adoption-proof guardrails: ${error instanceof Error ? error.message : String(error)}`
-    });
-    return;
-  }
-
-  const requiredSnippets = [
-    "Permission to quote or reuse publicly",
-    "yes, with these safe links or screenshots only",
-    "no, keep this as feedback only",
-    "no external adoption proof unless I explicitly authorize reuse",
-    "no private analytics or raw provider payloads",
-    "Do not present a first-run story as external adoption proof unless the user explicitly authorized public reuse"
+  const requiredSurfaces = [
+    {
+      path: "docs/first-run-story.md",
+      snippets: [
+        "Permission to quote or reuse publicly",
+        "yes, with these safe links or screenshots only",
+        "no, keep this as feedback only",
+        "no external adoption proof unless I explicitly authorize reuse",
+        "no private analytics or raw provider payloads",
+        "Do not present a first-run story as external adoption proof unless the user explicitly authorized public reuse",
+        "Release asset evidence, if relevant",
+        "GitHub release tag URL",
+        "`answerlens-demo-audit.tar.gz`",
+        "`answerlens-site.tar.gz`",
+        "I opened `share-summary.md`, then `scorecard.md`, then `recommendations.md` from the unpacked demo audit bundle",
+        "I am not treating release assets as npm activation proof while `npm view @answerlens/cli` returns `404`"
+      ]
+    },
+    {
+      path: ".github/ISSUE_TEMPLATE/audit-teardown.yml",
+      snippets: [
+        "If the run used release assets, include the release tag and the asset names",
+        "do not use release asset downloads as npm activation proof",
+        "answerlens-demo-audit.tar.gz",
+        "answerlens-site.tar.gz"
+      ]
+    }
   ];
 
-  for (const snippet of requiredSnippets) {
-    if (!text.includes(snippet)) {
+  for (const surface of requiredSurfaces) {
+    let text: string;
+    try {
+      text = await readFile(path.join(rootDir, surface.path), "utf8");
+    } catch (error) {
       findings.push({
         ruleId: "first-run-story-boundary",
-        path: relativePath,
-        message: `Missing first-run story authorization or safety boundary text: ${snippet}`
+        path: surface.path,
+        message: `Unable to read first-run sharing surface needed for adoption-proof guardrails: ${error instanceof Error ? error.message : String(error)}`
       });
+      continue;
+    }
+
+    for (const snippet of surface.snippets) {
+      if (!text.includes(snippet)) {
+        findings.push({
+          ruleId: "first-run-story-boundary",
+          path: surface.path,
+          message: `Missing first-run story authorization or safety boundary text: ${snippet}`
+        });
+      }
     }
   }
 }
