@@ -50,6 +50,7 @@ Release notes should keep the same product contract:
 - Optional `eval` is BYOK; secrets stay in environment variables or GitHub secrets, not `runtime.yaml`.
 - Public summaries and default GitHub artifacts should not expose raw provider payloads.
 - npm publish is skipped unless `NPM_TOKEN` or trusted publishing is configured.
+- Include a release asset checklist: CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, and the report order `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
 
 Do not add users, stars, forks, downloads, traffic, growth percentages, testimonials, or case studies unless the evidence is visible and explicitly authorized.
 

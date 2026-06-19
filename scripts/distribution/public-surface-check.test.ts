@@ -146,6 +146,16 @@ test("public-surface-check rejects release workflows that cannot refresh Pages a
   assert.ok(ruleIds.includes("release-pages-refresh-dispatch"));
 });
 
+test("public-surface-check rejects release surfaces without asset checklist boundaries", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(rootDir, "docs/manual-steps.md", `Use the reviewed release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`);
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("release-asset-checklist-boundary"));
+});
+
 test("public-surface-check rejects stable version drift across release and adoption surfaces", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, "apps/cli/package.json", JSON.stringify({ name: "@answerlens/cli", version: "0.3.6" }, null, 2));
@@ -359,17 +369,36 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(
     rootDir,
     "docs/release-bump-playbook.md",
-    "If public:check fails with stable-version-*, fix the drift instead of weakening the rule.\n"
+    [
+      "If public:check fails with stable-version-*, fix the drift instead of weakening the rule.",
+      "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`."
+    ].join("\n")
   );
   await writeFixtureFile(
     rootDir,
     "docs/manual-steps.md",
-    `Use the reviewed release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`
+    [
+      `Use the reviewed release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}.`,
+      "## Release asset checklist",
+      "CLI tarball",
+      "answerlens-demo-audit.tar.gz",
+      "answerlens-site.tar.gz",
+      "Open by opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
+      "If `npm view @answerlens/cli` returns `404`, do not present npm as activated."
+    ].join("\n")
   );
   await writeFixtureFile(
     rootDir,
     "docs/zh/manual-steps.md",
-    `使用经过 review 的 release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}。\n`
+    [
+      `使用经过 review 的 release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}。`,
+      "## release assets 检查清单",
+      "CLI tarball",
+      "answerlens-demo-audit.tar.gz",
+      "answerlens-site.tar.gz",
+      "`share-summary.md`、`scorecard.md`、`recommendations.md`",
+      "如果 `npm view @answerlens/cli` 返回 `404`，不要把 npm 描述成已激活。"
+    ].join("\n")
   );
   await writeFixtureFile(
     rootDir,
@@ -433,6 +462,11 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "    runs-on: ubuntu-latest",
       "    steps:",
       `      - run: echo \"Starter bundle pinned to ${STABLE_TAG}\"`,
+      "      - run: echo \"## Release asset checklist\"",
+      "      - run: echo \"answerlens-cli-*.tgz\"",
+      "      - run: echo \"`answerlens-demo-audit.tar.gz`\"",
+      "      - run: echo \"`answerlens-site.tar.gz`\"",
+      "      - run: echo \"If `npm view @answerlens/cli` returns `404`, keep release assets or local checkout as the public path\"",
       "      - run: gh workflow run pages.yml --ref main"
     ].join("\n")
   );
@@ -451,7 +485,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "const preview = 'starter-packet-preview.svg';",
       "const artifactCopy = 'Public-safe artifact: answerlens-report';",
       "const rawCopy = 'raw/** is excluded by default';",
-      "const boundaryCopy = 'No consumer AI UI scraping. No ranking or answer-placement guarantee.';"
+      "const boundaryCopy = 'No consumer AI UI scraping. No ranking or answer-placement guarantee.';",
+      "const releaseChecklist = 'Release asset checklist answerlens-demo-audit.tar.gz answerlens-site.tar.gz share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code> npm view @answerlens/cli';"
     ].join("\n")
   );
   await writeFixtureFile(rootDir, "assets/starter-packet-preview.svg", starterPacketPreviewSvg());

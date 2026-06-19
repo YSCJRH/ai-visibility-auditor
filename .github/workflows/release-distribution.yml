@@ -112,6 +112,13 @@ jobs:
           - Add the GitHub Action: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/github-action.md
           - Download assets from this release: CLI tarball, demo audit bundle, and compiled site bundle
 
+          ## Release asset checklist
+
+          - CLI tarball: use the versioned `answerlens-cli-*.tgz` package for pinned local CLI runs before npm is visible
+          - `answerlens-demo-audit.tar.gz`: unpack the fixture report and open `share-summary.md`, then `scorecard.md`, then `recommendations.md`
+          - `answerlens-site.tar.gz`: inspect the compiled Pages bundle for docs, examples, starter, and release pages at this tag
+          - If `npm view @answerlens/cli` returns `404`, keep release assets or local checkout as the public path; do not present npm as activated
+
           ## What ships
 
           - Release assets rebuilt from the current `main` state after the post-deploy Pages category polish

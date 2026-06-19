@@ -142,6 +142,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkFirstRunStoryBoundary(rootDir, findings);
   await checkStarterAdopterKitBoundary(rootDir, findings);
   await checkReleasePagesRefresh(rootDir, findings);
+  await checkReleaseAssetChecklistBoundary(rootDir, findings);
   await checkStableReleaseVersionSync(rootDir, findings);
   await checkSelfDogfoodLogBoundary(rootDir, findings);
 
@@ -556,6 +557,87 @@ async function checkReleasePagesRefresh(rootDir: string, findings: Finding[]): P
       path: relativePath,
       message: "Release Distribution must dispatch pages.yml on main after semver releases so live Pages reads the new release metadata."
     });
+  }
+}
+
+async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Finding[]): Promise<void> {
+  const requiredSurfaces = [
+    {
+      path: "docs/manual-steps.md",
+      snippets: [
+        "## Release asset checklist",
+        "CLI tarball",
+        "answerlens-demo-audit.tar.gz",
+        "answerlens-site.tar.gz",
+        "opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
+        "If `npm view @answerlens/cli` returns `404`, do not present npm as activated"
+      ]
+    },
+    {
+      path: "docs/zh/manual-steps.md",
+      snippets: [
+        "## release assets 检查清单",
+        "CLI tarball",
+        "answerlens-demo-audit.tar.gz",
+        "answerlens-site.tar.gz",
+        "`share-summary.md`、`scorecard.md`、`recommendations.md`",
+        "如果 `npm view @answerlens/cli` 返回 `404`，不要把 npm 描述成已激活"
+      ]
+    },
+    {
+      path: "docs/release-bump-playbook.md",
+      snippets: [
+        "release asset checklist",
+        "CLI tarball",
+        "`answerlens-demo-audit.tar.gz`",
+        "`answerlens-site.tar.gz`",
+        "`share-summary.md`, then `scorecard.md`, then `recommendations.md`"
+      ]
+    },
+    {
+      path: ".github/workflows/release-distribution.yml",
+      snippets: [
+        "## Release asset checklist",
+        "answerlens-cli-*.tgz",
+        "`answerlens-demo-audit.tar.gz`",
+        "`answerlens-site.tar.gz`",
+        "If `npm view @answerlens/cli` returns `404`, keep release assets or local checkout as the public path"
+      ]
+    },
+    {
+      path: "scripts/distribution/build-site.ts",
+      snippets: [
+        "Release asset checklist",
+        "answerlens-demo-audit.tar.gz",
+        "answerlens-site.tar.gz",
+        "share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>",
+        "npm view @answerlens/cli"
+      ]
+    }
+  ];
+
+  for (const surface of requiredSurfaces) {
+    let text: string;
+    try {
+      text = await readFile(path.join(rootDir, surface.path), "utf8");
+    } catch (error) {
+      findings.push({
+        ruleId: "release-asset-checklist-boundary",
+        path: surface.path,
+        message: `Unable to read release asset checklist surface: ${error instanceof Error ? error.message : String(error)}`
+      });
+      continue;
+    }
+
+    for (const snippet of surface.snippets) {
+      if (!text.includes(snippet)) {
+        findings.push({
+          ruleId: "release-asset-checklist-boundary",
+          path: surface.path,
+          message: `Missing release asset checklist boundary text: ${snippet}`
+        });
+      }
+    }
   }
 }
 
