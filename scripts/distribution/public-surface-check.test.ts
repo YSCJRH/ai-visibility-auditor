@@ -1065,6 +1065,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       `const SHOW_AND_TELL_DISCUSSION_URL = '${SHOW_AND_TELL_DISCUSSION_URL}';`,
       "const nextStep = t(locale, \"report.next.firstRun\");",
       "const boundary = t(locale, \"brand.publicShareBoundary\");",
+      "const htmlPanel = 'reviewPacket Review and share this run';",
       "const prLine = 'First-run story template and Show and tell Discussion form';"
     ].join("\n")
   );
@@ -1081,6 +1082,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
     rootDir,
     "packages/report/src/index.test.ts",
     [
+      "assert.match(htmlReport, /Review and share this run/);",
       "assert.match(shareSummaryMarkdown, /first-run-story.md/);",
       "assert.match(prSnippet, /discussions\\/new\\?category=show-and-tell/);",
       "assert.match(prSnippet, /raw provider payloads/);",

@@ -140,6 +140,7 @@ test("report renderers expose expected audit and eval sections", async () => {
   const prSnippet = await readFile(path.join(tempDir, "pr-snippet.md"), "utf8");
   const recommendations = await readFile(path.join(tempDir, "recommendations.md"), "utf8");
   const htmlReport = await readFile(path.join(tempDir, "index.html"), "utf8");
+  const htmlReportZh = await readFile(path.join(tempDir, "index.zh.html"), "utf8");
   const siteAudit = JSON.parse(await readFile(path.join(tempDir, "site-audit.json"), "utf8")) as {
     pages: Array<{
       internalLinkRecords?: unknown[];
@@ -235,6 +236,17 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(recommendations, /Demo site: AnswerLens static-good fixture demo/);
   assert.match(htmlReport, / \| VAVR: <strong>/);
   assert.match(htmlReport, /AnswerLens static-good fixture demo/);
+  assert.match(htmlReport, /Review and share this run/);
+  assert.match(htmlReport, /share-summary\.md[\s\S]*scorecard\.md[\s\S]*recommendations\.md/);
+  assert.match(htmlReport, /pr-snippet\.md/);
+  assert.match(htmlReport, /AnswerLens starter bundle/);
+  assert.match(htmlReport, /first-run story template/);
+  assert.match(htmlReport, /Show and tell Discussion form/);
+  assert.match(htmlReport, /raw provider payloads/);
+  assert.match(htmlReport, /private analytics/);
+  assert.match(htmlReportZh, /审阅并分享这次运行/);
+  assert.match(htmlReportZh, /share-summary\.md[\s\S]*scorecard\.md[\s\S]*recommendations\.md/);
+  assert.match(htmlReportZh, /Show and tell Discussion form/);
   assert.doesNotMatch(htmlReport, /Source target:/);
   assert.equal(htmlReport.includes(String.fromCharCode(0x74ba)), false);
   assert.ok(siteAudit.pages.some((page) => (page.internalLinkRecords ?? []).length > 0));

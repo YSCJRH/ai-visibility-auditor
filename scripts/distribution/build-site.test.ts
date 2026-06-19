@@ -445,7 +445,15 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(zhPlaybooks, /当前生成的建议/);
   assert.doesNotMatch(zhPlaybooks, /修复循环|把一条建议变成一次页面改动|Page fixes|Fix loop|漏斗/);
   assert.match(demoReport, /AnswerLens static-good fixture demo/);
+  assert.match(demoReport, /Review and share this run/);
+  assert.match(demoReport, /share-summary\.md[\s\S]*scorecard\.md[\s\S]*recommendations\.md/);
+  assert.match(demoReport, /first-run story template/);
+  assert.match(demoReport, /Show and tell Discussion form/);
+  assert.match(demoReport, /raw provider payloads/);
   assert.match(zhDemoReport, /AnswerLens/);
+  assert.match(zhDemoReport, /审阅并分享这次运行/);
+  assert.match(zhDemoReport, /share-summary\.md[\s\S]*scorecard\.md[\s\S]*recommendations\.md/);
+  assert.match(zhDemoReport, /Show and tell Discussion form/);
   assert.match(feed, /AnswerLens releases/);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/en\/examples\//);
   assert.match(sitemap, /https:\/\/yscjrh\.github\.io\/ai-visibility-auditor\/<\/loc>/);

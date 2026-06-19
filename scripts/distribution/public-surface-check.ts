@@ -97,6 +97,8 @@ const SHARE_LAYER_PROPAGATION_SURFACES = [
       "SHOW_AND_TELL_DISCUSSION_URL",
       "report.next.firstRun",
       "brand.publicShareBoundary",
+      "reviewPacket",
+      "Review and share this run",
       "First-run story template",
       "Show and tell Discussion form"
     ]
@@ -113,6 +115,7 @@ const SHARE_LAYER_PROPAGATION_SURFACES = [
   {
     path: "packages/report/src/index.test.ts",
     snippets: [
+      "Review and share this run",
       "first-run-story",
       "discussions\\/new\\?category=show-and-tell",
       "raw provider payloads",
