@@ -181,6 +181,20 @@ test("public-surface-check rejects first-run story templates without explicit re
   assert.ok(ruleIds.includes("first-run-story-boundary"));
 });
 
+test("public-surface-check rejects starter bundle surfaces without adopter-kit review boundaries", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "docs/starter-bundle.md",
+    `${artifactOrderText()}\nThe current starter workflow uses YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("starter-adopter-kit-boundary"));
+});
+
 test("public-surface-check rejects self-dogfood entries without explicit no-claim boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -269,7 +283,17 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(
     rootDir,
     "docs/starter-bundle.md",
-    `${artifactOrderText()}\nThe current starter workflow uses YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`
+    [
+      artifactOrderText(),
+      `The current starter workflow uses YSCJRH/ai-visibility-auditor@${STABLE_TAG}.`,
+      "## Adopter kit checklist",
+      "Copy `.github/answerlens/` and `.github/workflows/answerlens.yml` into the repository you want to audit.",
+      "Put provider keys only in GitHub secrets or local environment variables.",
+      "Review `share-summary.md`, then `scorecard.md`, then `recommendations.md` before you paste `pr-snippet.md`.",
+      "## PR review packet",
+      "Do not attach `raw/**` to public pull requests, issues, releases, or Discussions.",
+      "No consumer AI UI scraping. No ranking or answer-placement guarantee."
+    ].join("\n")
   );
   await writeFixtureFile(
     rootDir,
@@ -286,11 +310,43 @@ async function createPublicSurfaceFixture(): Promise<string> {
     "docs/zh/manual-steps.md",
     `使用经过 review 的 release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}。\n`
   );
-  await writeFixtureFile(rootDir, "examples/consumer-repo/README.md", `${artifactOrderText()}\nPin YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`);
+  await writeFixtureFile(
+    rootDir,
+    "examples/consumer-repo/README.md",
+    [
+      artifactOrderText(),
+      `Pin YSCJRH/ai-visibility-auditor@${STABLE_TAG}.`,
+      "## Adopter kit checklist",
+      "Copy `.github/answerlens/` and `.github/workflows/answerlens.yml` into the repository you want to audit.",
+      "Put provider keys only in GitHub secrets or local environment variables.",
+      "Review `share-summary.md`, then `scorecard.md`, then `recommendations.md` before you paste `pr-snippet.md`.",
+      "## PR review packet",
+      "Do not attach `raw/**` to public pull requests, issues, releases, or Discussions.",
+      "No consumer AI UI scraping. No ranking or answer-placement guarantee."
+    ].join("\n")
+  );
   await writeFixtureFile(
     rootDir,
     "examples/consumer-repo/.github/workflows/answerlens.yml",
-    `${artifactOrderText()}\nsteps:\n  - uses: actions/checkout@v5\n  - uses: YSCJRH/ai-visibility-auditor@${STABLE_TAG}\n  - uses: actions/upload-artifact@v6\n    with:\n      path: |\n        \${{ steps.answerlens.outputs.out-dir }}\n        !\${{ steps.answerlens.outputs.out-dir }}/raw/**\n`
+    [
+      artifactOrderText(),
+      "steps:",
+      "  - uses: actions/checkout@v5",
+      `  - uses: YSCJRH/ai-visibility-auditor@${STABLE_TAG}`,
+      "  - run: |",
+      '      echo "### Adopter kit"',
+      '      echo "- To reuse this setup, copy \\`.github/answerlens/\\` and \\`.github/workflows/answerlens.yml\\`, then replace the brand, competitors, prompts, and \\`site:\\` URL."',
+      '      echo "- Keep non-secret eval defaults in \\`runtime.yaml\\`; put provider keys in GitHub secrets or local environment variables."',
+      '      echo "- Review \\`share-summary.md\\`, then \\`scorecard.md\\`, then \\`recommendations.md\\` before pasting \\`pr-snippet.md\\`."',
+      '      echo "### Safe sharing boundary"',
+      '      echo "- Public PRs should link the summary, scorecard, and recommendations; \\`raw/**\\` is excluded from the uploaded artifact."',
+      '      echo "- AnswerLens audits public source material. No consumer AI UI scraping. No ranking or answer-placement guarantee."',
+      "  - uses: actions/upload-artifact@v6",
+      "    with:",
+      "      path: |",
+      "        ${{ steps.answerlens.outputs.out-dir }}",
+      "        !${{ steps.answerlens.outputs.out-dir }}/raw/**"
+    ].join("\n")
   );
   await writeFixtureFile(
     rootDir,
@@ -327,7 +383,14 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(
     rootDir,
     "scripts/distribution/build-site.ts",
-    `const fallback = releases[0]?.tag_name ?? "${STABLE_TAG}";\nconst pin = "YSCJRH/ai-visibility-auditor@${STABLE_TAG}";\n`
+    [
+      `const fallback = releases[0]?.tag_name ?? "${STABLE_TAG}";`,
+      `const pin = "YSCJRH/ai-visibility-auditor@${STABLE_TAG}";`,
+      "const starterPanel = 'PR review packet';",
+      "const artifactCopy = 'Public-safe artifact: answerlens-report';",
+      "const rawCopy = 'raw/** is excluded by default';",
+      "const boundaryCopy = 'No consumer AI UI scraping. No ranking or answer-placement guarantee.';"
+    ].join("\n")
   );
   await writeFixtureFile(rootDir, "scripts/distribution/seo-check.ts", `const fallback = releases[0]?.tag_name ?? "${STABLE_TAG}";\n`);
   await writeFixtureFile(rootDir, "scripts/distribution/site-seo.ts", `const releaseCopy = { "${STABLE_TAG}": "Stable release" };\n`);
