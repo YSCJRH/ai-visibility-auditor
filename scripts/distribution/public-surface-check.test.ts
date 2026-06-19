@@ -147,6 +147,27 @@ test("public-surface-check rejects release workflows that cannot refresh Pages a
   assert.ok(ruleIds.includes("release-pages-refresh-dispatch"));
 });
 
+test("public-surface-check rejects Pages workflows without live postdeploy smoke checks", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/pages.yml",
+    [
+      "name: Pages",
+      "jobs:",
+      "  deploy:",
+      "    steps:",
+      "      - id: deployment",
+      "        uses: actions/deploy-pages@v5"
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("pages-postdeploy-smoke-check"));
+});
+
 test("public-surface-check rejects release surfaces without asset checklist boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, "docs/manual-steps.md", `Use the reviewed release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`);
@@ -375,7 +396,21 @@ test("public-surface-check rejects self-dogfood entries without explicit no-clai
 
 async function createPublicSurfaceFixture(): Promise<string> {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-public-surface-"));
-  await writeFixtureFile(rootDir, "package.json", JSON.stringify({ name: "answerlens-workspace", version: STABLE_VERSION }, null, 2));
+  await writeFixtureFile(
+    rootDir,
+    "package.json",
+    JSON.stringify(
+      {
+        name: "answerlens-workspace",
+        version: STABLE_VERSION,
+        scripts: {
+          "pages:smoke": "node --experimental-strip-types scripts/distribution/pages-smoke-check.ts"
+        }
+      },
+      null,
+      2
+    )
+  );
   await writeFixtureFile(rootDir, "apps/cli/package.json", JSON.stringify({ name: "@answerlens/cli", version: STABLE_VERSION }, null, 2));
   await writeFixtureFile(
     rootDir,
@@ -633,6 +668,24 @@ async function createPublicSurfaceFixture(): Promise<string> {
     rootDir,
     ".github/workflows/ci.yml",
     "steps:\n  - uses: actions/checkout@v5\n  - uses: actions/setup-node@v5\n  - uses: actions/github-script@v8\n  - uses: actions/upload-artifact@v6\n"
+  );
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/pages.yml",
+    [
+      "name: Pages",
+      "jobs:",
+      "  deploy:",
+      "    permissions:",
+      "      contents: read",
+      "    steps:",
+      "      - id: deployment",
+      "        uses: actions/deploy-pages@v5",
+      "      - name: Smoke check live Pages",
+      "        env:",
+      "          PAGE_URL: ${{ steps.deployment.outputs.page_url }}",
+      "        run: pnpm pages:smoke -- --site-url \"$PAGE_URL\""
+    ].join("\n")
   );
   await writeFixtureFile(
     rootDir,

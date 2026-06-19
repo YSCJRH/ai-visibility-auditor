@@ -147,6 +147,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkFirstRunDiscussionRouting(rootDir, findings);
   await checkStarterAdopterKitBoundary(rootDir, findings);
   await checkReleasePagesRefresh(rootDir, findings);
+  await checkPagesPostdeploySmoke(rootDir, findings);
   await checkReleaseAssetChecklistBoundary(rootDir, findings);
   await checkStableReleaseVersionSync(rootDir, findings);
   await checkSelfDogfoodLogBoundary(rootDir, findings);
@@ -639,6 +640,52 @@ async function checkReleasePagesRefresh(rootDir: string, findings: Finding[]): P
       ruleId: "release-pages-refresh-dispatch",
       path: relativePath,
       message: "Release Distribution must dispatch pages.yml on main after semver releases so live Pages reads the new release metadata."
+    });
+  }
+}
+
+async function checkPagesPostdeploySmoke(rootDir: string, findings: Finding[]): Promise<void> {
+  const pagesWorkflowPath = ".github/workflows/pages.yml";
+  const packageJsonPath = "package.json";
+
+  let workflowText: string;
+  try {
+    workflowText = await readFile(path.join(rootDir, pagesWorkflowPath), "utf8");
+  } catch (error) {
+    findings.push({
+      ruleId: "pages-postdeploy-smoke-check",
+      path: pagesWorkflowPath,
+      message: `Unable to read Pages workflow for postdeploy smoke guardrail: ${error instanceof Error ? error.message : String(error)}`
+    });
+    return;
+  }
+
+  for (const snippet of [
+    "contents: read",
+    "actions/deploy-pages@v5",
+    "PAGE_URL: ${{ steps.deployment.outputs.page_url }}",
+    "pnpm pages:smoke -- --site-url \"$PAGE_URL\""
+  ]) {
+    if (!workflowText.includes(snippet)) {
+      findings.push({
+        ruleId: "pages-postdeploy-smoke-check",
+        path: pagesWorkflowPath,
+        message: `Pages workflow must run the live postdeploy smoke check with the deployment URL: ${snippet}`
+      });
+    }
+  }
+
+  const packageJson = await readRequiredJson<{ scripts?: Record<string, unknown> }>(
+    rootDir,
+    packageJsonPath,
+    findings,
+    "pages-postdeploy-smoke-check"
+  );
+  if (packageJson?.scripts?.["pages:smoke"] !== "node --experimental-strip-types scripts/distribution/pages-smoke-check.ts") {
+    findings.push({
+      ruleId: "pages-postdeploy-smoke-check",
+      path: packageJsonPath,
+      message: "package.json must expose pages:smoke for live Pages postdeploy verification."
     });
   }
 }
