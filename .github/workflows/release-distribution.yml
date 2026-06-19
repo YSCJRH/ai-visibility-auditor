@@ -97,6 +97,10 @@ jobs:
         run: |
           tar -czf dist/answerlens-demo-audit.tar.gz runs/static-good
           tar -czf dist/answerlens-site.tar.gz dist/site
+      - name: Write release asset manifest
+        run: |
+          pnpm release:assets:manifest -- --out dist/release-assets-manifest.json dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz
+          pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json
       - name: Write release notes
         run: |
           cat <<'EOF' > dist/release-notes.md
@@ -117,6 +121,7 @@ jobs:
           - CLI tarball: use the versioned `answerlens-cli-*.tgz` package for pinned local CLI runs before npm is visible
           - `answerlens-demo-audit.tar.gz`: unpack the fixture report and open `share-summary.md`, then `scorecard.md`, then `recommendations.md`
           - `answerlens-site.tar.gz`: inspect the compiled Pages bundle for docs, examples, starter, and release pages at this tag
+          - `release-assets-manifest.json`: verify asset sizes and SHA-256 checksums before reusing downloaded release assets
           - If `npm view @answerlens/cli` returns `404`, keep release assets or local checkout as the public path; do not present npm as activated
 
           ## What ships
@@ -192,7 +197,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload "$RELEASE_TAG" dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz --clobber
+          gh release upload "$RELEASE_TAG" dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz dist/release-assets-manifest.json --clobber
       - name: Refresh Pages release metadata
         if: ${{ env.RELEASE_TAG != '' }}
         env:
@@ -211,4 +216,5 @@ jobs:
             dist/packages
             dist/answerlens-demo-audit.tar.gz
             dist/answerlens-site.tar.gz
+            dist/release-assets-manifest.json
             dist/site
