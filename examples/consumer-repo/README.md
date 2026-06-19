@@ -34,12 +34,35 @@ Keep API keys in GitHub secrets or local environment variables. Do not put them 
 For the first live benchmark pass, the recommended temporary shortcut is `profile: fast-first-eval`.
 If you already have one readable OpenAI baseline and want a provider-level second opinion, use `profile: perplexity-cross-check` as a temporary override.
 
+## Adopter kit checklist
+
+Use this folder as the PR-sized setup kit for an external repository:
+
+1. Copy `.github/answerlens/` and `.github/workflows/answerlens.yml` into the repository you want to audit.
+2. Replace the example product, domain, competitors, prompts, and workflow `site:` URL before the first real run.
+3. Keep non-secret eval defaults in `runtime.yaml`.
+4. Put provider keys only in GitHub secrets or local environment variables.
+5. Run `workflow_dispatch` or open a small pull request that only introduces the AnswerLens starter files.
+6. Review `share-summary.md`, then `scorecard.md`, then `recommendations.md` before you paste `pr-snippet.md`.
+
 When the workflow runs, review the generated artifacts in this order:
 
 1. `share-summary.md`
 2. `scorecard.md`
 3. `recommendations.md`
 
-The starter workflow excludes `raw/**` from the uploaded artifact by default. If you later run `eval` or `manual-import`, raw provider payloads stay out of public artifacts unless you add a separate private debug upload.
+## PR review packet
+
+When the first CI run finishes, paste or adapt this small review note:
+
+```md
+AnswerLens first run:
+- Start with `share-summary.md`, then open `scorecard.md`, then `recommendations.md`.
+- This PR copies the starter bundle into `.github/answerlens/` and runs the pinned Action.
+- Public-safe artifact: `answerlens-report`; `raw/**` is excluded by default.
+- Boundary: AnswerLens audits public source material. No consumer AI UI scraping. No ranking or answer-placement guarantee.
+```
+
+The starter workflow excludes `raw/**` from the uploaded artifact by default. Do not attach `raw/**` to public pull requests, issues, releases, or Discussions. If you later run `eval` or `manual-import`, raw provider payloads stay out of public artifacts unless you add a separate private debug upload.
 
 If you want one local run before CI, start with [../../docs/quickstart.md](../../docs/quickstart.md) and then move the same `.github/answerlens/` folder into the target repository workflow.

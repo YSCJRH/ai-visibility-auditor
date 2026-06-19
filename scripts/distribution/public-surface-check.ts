@@ -140,6 +140,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkArtifactReviewOrder(rootDir, findings);
   await checkAuditEvalKeyBoundary(rootDir, findings);
   await checkFirstRunStoryBoundary(rootDir, findings);
+  await checkStarterAdopterKitBoundary(rootDir, findings);
   await checkReleasePagesRefresh(rootDir, findings);
   await checkStableReleaseVersionSync(rootDir, findings);
   await checkSelfDogfoodLogBoundary(rootDir, findings);
@@ -384,6 +385,80 @@ async function checkFirstRunStoryBoundary(rootDir: string, findings: Finding[]):
         path: relativePath,
         message: `Missing first-run story authorization or safety boundary text: ${snippet}`
       });
+    }
+  }
+}
+
+async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding[]): Promise<void> {
+  const requiredSurfaces = [
+    {
+      path: "docs/starter-bundle.md",
+      snippets: [
+        "## Adopter kit checklist",
+        "## PR review packet",
+        "Copy `.github/answerlens/` and `.github/workflows/answerlens.yml`",
+        "Put provider keys only in GitHub secrets or local environment variables",
+        "Review `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
+        "Do not attach `raw/**`",
+        "No consumer AI UI scraping. No ranking or answer-placement guarantee."
+      ]
+    },
+    {
+      path: "examples/consumer-repo/README.md",
+      snippets: [
+        "## Adopter kit checklist",
+        "## PR review packet",
+        "Copy `.github/answerlens/` and `.github/workflows/answerlens.yml`",
+        "Put provider keys only in GitHub secrets or local environment variables",
+        "Review `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
+        "Do not attach `raw/**`",
+        "No consumer AI UI scraping. No ranking or answer-placement guarantee."
+      ]
+    },
+    {
+      path: "examples/consumer-repo/.github/workflows/answerlens.yml",
+      snippets: [
+        "### Adopter kit",
+        "copy \\`.github/answerlens/\\` and \\`.github/workflows/answerlens.yml\\`",
+        "put provider keys in GitHub secrets or local environment variables",
+        "Review \\`share-summary.md\\`, then \\`scorecard.md\\`, then \\`recommendations.md\\`",
+        "### Safe sharing boundary",
+        "\\`raw/**\\` is excluded from the uploaded artifact",
+        "No consumer AI UI scraping. No ranking or answer-placement guarantee."
+      ]
+    },
+    {
+      path: "scripts/distribution/build-site.ts",
+      snippets: [
+        "PR review packet",
+        "Public-safe artifact: answerlens-report",
+        "raw/** is excluded by default",
+        "No consumer AI UI scraping. No ranking or answer-placement guarantee."
+      ]
+    }
+  ];
+
+  for (const surface of requiredSurfaces) {
+    let text: string;
+    try {
+      text = await readFile(path.join(rootDir, surface.path), "utf8");
+    } catch (error) {
+      findings.push({
+        ruleId: "starter-adopter-kit-boundary",
+        path: surface.path,
+        message: `Unable to read starter adopter-kit surface: ${error instanceof Error ? error.message : String(error)}`
+      });
+      continue;
+    }
+
+    for (const snippet of surface.snippets) {
+      if (!text.includes(snippet)) {
+        findings.push({
+          ruleId: "starter-adopter-kit-boundary",
+          path: surface.path,
+          message: `Missing starter adopter-kit boundary text: ${snippet}`
+        });
+      }
     }
   }
 }
