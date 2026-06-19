@@ -34,8 +34,9 @@ The expected public assets on each semver release are:
 2. `answerlens-demo-audit.tar.gz`, for unpacking the fixture report and opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
 3. `answerlens-site.tar.gz`, for inspecting the compiled Pages bundle for docs, examples, starter, and release pages at that tag.
 4. `release-assets-manifest.json`, for verifying downloaded asset sizes and SHA-256 checksums before reusing the tarballs.
+5. `release-assets-summary.md`, for a human-readable verified asset table that can be pasted into release reviews without exposing raw provider payloads.
 
-For releases that include `release-assets-manifest.json`, download the manifest and the assets into the same directory, then verify the downloaded files from a local checkout:
+For releases that include `release-assets-manifest.json` and `release-assets-summary.md`, download the manifest, summary, and assets into the same directory, then verify the downloaded files from a local checkout:
 
 ```bash
 assets_dir="$(mktemp -d)"
@@ -44,11 +45,12 @@ gh release download vX.Y.Z \
   --pattern answerlens-demo-audit.tar.gz \
   --pattern answerlens-site.tar.gz \
   --pattern release-assets-manifest.json \
+  --pattern release-assets-summary.md \
   --dir "$assets_dir"
 corepack pnpm release:assets:manifest -- --verify "$assets_dir/release-assets-manifest.json"
 ```
 
-If a release predates `release-assets-manifest.json`, do not backfill a checksum claim into the public release story; inspect the available assets and record the gap as release metadata history.
+If a release predates `release-assets-manifest.json` or `release-assets-summary.md`, do not backfill a checksum claim into the public release story; inspect the available assets and record the gap as release metadata history.
 
 If `npm view @answerlens/cli` returns `404`, do not present npm as activated. Keep release assets and local checkout as the public install/download path until the registry package is visible.
 
