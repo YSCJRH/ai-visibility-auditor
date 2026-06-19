@@ -129,6 +129,7 @@ If you want a public, citable overview of that path before opening raw repo file
 If you have not run one real local audit yet, use [docs/quickstart.md](docs/quickstart.md) first. The Action should feel like the CI version of the same artifact-backed workflow, not a separate adoption path.
 
 Treat the starter bundle as the shareable adoption asset for forks, releases, and external setup guides.
+For the first CI pull request, use the starter [Adopter kit checklist](docs/starter-bundle.md#adopter-kit-checklist) and [PR review packet](docs/starter-bundle.md#pr-review-packet) so teammates know which artifact to open and which raw payloads stay private.
 
 The public Action contract is:
 

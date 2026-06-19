@@ -41,6 +41,22 @@ AnswerLens 提供一个可复用的根 Action，让团队把 AI 可发现性检�
 - [../github-action.md](../github-action.md)
 - [../../examples/consumer-repo/.github/workflows/answerlens.yml](../../examples/consumer-repo/.github/workflows/answerlens.yml)
 
+这两个 workflow 示例都应在 `GITHUB_STEP_SUMMARY` 里保留两块内容：
+
+- `Adopter kit`：说明如何复制 `.github/answerlens/` 和 `.github/workflows/answerlens.yml`，以及 secrets 放哪里
+- `Safe sharing boundary`：说明先看 `share-summary.md`、再看 `scorecard.md`、最后看 `recommendations.md`，并且默认上传 artifact 排除 `raw/**`
+
+## 第一次 CI 的 PR 审阅包
+
+第一次 Action 跑完后，用 `GITHUB_STEP_SUMMARY` 里的 `Adopter kit` 和 `Safe sharing boundary` 作为接入 PR 的交接说明。
+
+这段 PR packet 应该回答四件事：
+
+1. 复制了哪些仓库文件：`.github/answerlens/` 和 `.github/workflows/answerlens.yml`
+2. 先打开哪份公开 artifact：`share-summary.md`，然后 `scorecard.md`，最后 `recommendations.md`
+3. secrets 放哪里：GitHub secrets 或本地环境变量，而不是 `runtime.yaml`
+4. 这次结果没有声明什么：不抓取消费级 AI UI，不承诺排名或答案展示位置
+
 ## `eval` 的配置优先级
 
 对 `eval` 来说，AnswerLens 按同一套顺序解析配置：

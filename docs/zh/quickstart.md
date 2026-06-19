@@ -97,3 +97,5 @@ OPENAI_API_KEY=... corepack pnpm eval -- https://www.example.com \
 ## 下一步
 
 如果这次本地 run 已经足够有用，就继续看 [github-action.md](github-action.md)，把同一套 `.github/answerlens/` 结构搬进 CI。
+
+第一次 CI 接入 PR 可以直接使用 [../starter-bundle.md](../starter-bundle.md) 里的 `Adopter kit checklist` 和 `PR review packet`。

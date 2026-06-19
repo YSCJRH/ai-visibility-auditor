@@ -195,6 +195,20 @@ test("public-surface-check rejects starter bundle surfaces without adopter-kit r
   assert.ok(ruleIds.includes("starter-adopter-kit-boundary"));
 });
 
+test("public-surface-check rejects Action docs without first-CI PR packet boundaries", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "docs/github-action.md",
+    `${artifactOrderText()}\nUse YSCJRH/ai-visibility-auditor@${STABLE_TAG}; currently \`${STABLE_TAG}\`.\n`
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("starter-adopter-kit-boundary"));
+});
+
 test("public-surface-check rejects self-dogfood entries without explicit no-claim boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -219,8 +233,26 @@ async function createPublicSurfaceFixture(): Promise<string> {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-public-surface-"));
   await writeFixtureFile(rootDir, "package.json", JSON.stringify({ name: "answerlens-workspace", version: STABLE_VERSION }, null, 2));
   await writeFixtureFile(rootDir, "apps/cli/package.json", JSON.stringify({ name: "@answerlens/cli", version: STABLE_VERSION }, null, 2));
-  await writeFixtureFile(rootDir, "README.md", `# AnswerLens\n${artifactOrderText()}\nNo ranking guarantees and no consumer AI UI scraping.\n`);
-  await writeFixtureFile(rootDir, "README.zh-CN.md", `# AnswerLens\n${artifactOrderText()}\n不承诺排名，不抓取消费级 AI UI。\n`);
+  await writeFixtureFile(
+    rootDir,
+    "README.md",
+    [
+      "# AnswerLens",
+      artifactOrderText(),
+      "No ranking guarantees and no consumer AI UI scraping.",
+      "Use the Adopter kit checklist and PR review packet to show which artifact to open and which raw payloads stay private."
+    ].join("\n")
+  );
+  await writeFixtureFile(
+    rootDir,
+    "README.zh-CN.md",
+    [
+      "# AnswerLens",
+      artifactOrderText(),
+      "不承诺排名，不抓取消费级 AI UI。",
+      "使用 Adopter kit checklist 和 PR review packet，说明哪些 raw payloads 不能公开。"
+    ].join("\n")
+  );
   await writeFixtureFile(
     rootDir,
     "CONTRIBUTING.md",
@@ -273,12 +305,28 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(
     rootDir,
     "docs/github-action.md",
-    `${artifactOrderText()}\nUse YSCJRH/ai-visibility-auditor@${STABLE_TAG}; currently \`${STABLE_TAG}\`.\n`
+    [
+      artifactOrderText(),
+      `Use YSCJRH/ai-visibility-auditor@${STABLE_TAG}; currently \`${STABLE_TAG}\`.`,
+      "### Adopter kit",
+      "### Safe sharing boundary",
+      "## First CI PR packet",
+      "Use the `Adopter kit` and `Safe sharing boundary` blocks in `GITHUB_STEP_SUMMARY`.",
+      "The packet says no consumer AI UI scraping and no ranking or answer-placement guarantee."
+    ].join("\n")
   );
   await writeFixtureFile(
     rootDir,
     "docs/zh/github-action.md",
-    `${artifactOrderText()}\n使用 YSCJRH/ai-visibility-auditor@${STABLE_TAG}。\n`
+    [
+      artifactOrderText(),
+      `使用 YSCJRH/ai-visibility-auditor@${STABLE_TAG}。`,
+      "Adopter kit",
+      "Safe sharing boundary",
+      "## 第一次 CI 的 PR 审阅包",
+      "`share-summary.md`，然后 `scorecard.md`，最后 `recommendations.md`",
+      "不抓取消费级 AI UI，不承诺排名或答案展示位置"
+    ].join("\n")
   );
   await writeFixtureFile(
     rootDir,
@@ -397,12 +445,22 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(
     rootDir,
     "docs/quickstart.md",
-    `${artifactOrderText()}\nBasic \`audit\` does not require provider API keys.\nYou only need provider API keys when you choose to run \`eval\`.\n`
+    [
+      artifactOrderText(),
+      "Basic `audit` does not require provider API keys.",
+      "You only need provider API keys when you choose to run `eval`.",
+      "Use the Adopter kit checklist and PR review packet for the first CI pull request."
+    ].join("\n")
   );
   await writeFixtureFile(
     rootDir,
     "docs/zh/quickstart.md",
-    `${artifactOrderText()}\n基础 \`audit\` 不需要 provider API key。\n只有在你要跑 \`eval\` 时才需要 provider API key。\n`
+    [
+      artifactOrderText(),
+      "基础 `audit` 不需要 provider API key。",
+      "只有在你要跑 `eval` 时才需要 provider API key。",
+      "第一次 CI 接入 PR 使用 Adopter kit checklist 和 PR review packet。"
+    ].join("\n")
   );
   await writeFixtureFile(
     rootDir,
