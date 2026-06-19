@@ -444,7 +444,10 @@ async function checkFirstRunDiscussionRouting(rootDir: string, findings: Finding
     "docs/quickstart.md",
     "docs/zh/quickstart.md",
     "docs/first-run-story.md",
-    ".github/ISSUE_TEMPLATE/config.yml"
+    ".github/ISSUE_TEMPLATE/config.yml",
+    ".github/workflows/release-distribution.yml",
+    "scripts/distribution/releases-snapshot.json",
+    "scripts/distribution/build-site.ts"
   ];
 
   for (const relativePath of requiredSurfaces) {

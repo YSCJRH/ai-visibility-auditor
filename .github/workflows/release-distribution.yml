@@ -156,6 +156,7 @@ jobs:
           ## Follow-through
 
           - Track public-source self-dogfooding loops in https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/self-dogfood-log.md
+          - Share safe first-run artifacts through https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell
           - Open focused issues only when a concrete repo-editable gap remains
           EOF
       - name: Create or update GitHub release
