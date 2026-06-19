@@ -379,6 +379,8 @@ async function checkFirstRunStoryBoundary(rootDir: string, findings: Finding[]):
         "GitHub release tag URL",
         "`answerlens-demo-audit.tar.gz`",
         "`answerlens-site.tar.gz`",
+        "`release-assets-manifest.json`, if present on that release",
+        "`release-assets-summary.md`, if present on that release",
         "I opened `share-summary.md`, then `scorecard.md`, then `recommendations.md` from the unpacked demo audit bundle",
         "I am not treating release assets as npm activation proof while `npm view @answerlens/cli` returns `404`"
       ]
@@ -386,10 +388,12 @@ async function checkFirstRunStoryBoundary(rootDir: string, findings: Finding[]):
     {
       path: ".github/ISSUE_TEMPLATE/audit-teardown.yml",
       snippets: [
-        "If the run used release assets, include the release tag and the asset names",
+        "If the run used release assets, include the release tag, asset names, and `release-assets-summary.md` when present",
         "do not use release asset downloads as npm activation proof",
         "answerlens-demo-audit.tar.gz",
-        "answerlens-site.tar.gz"
+        "answerlens-site.tar.gz",
+        "release-assets-manifest.json if present",
+        "release-assets-summary.md if present"
       ]
     },
     {
@@ -402,6 +406,8 @@ async function checkFirstRunStoryBoundary(rootDir: string, findings: Finding[]):
         "GitHub release tag URL",
         "`answerlens-demo-audit.tar.gz`",
         "`answerlens-site.tar.gz`",
+        "`release-assets-manifest.json`, if present on that release",
+        "`release-assets-summary.md`, if present on that release",
         "I opened `share-summary.md`, then `scorecard.md`, then `recommendations.md` from the unpacked demo audit bundle",
         "I am not treating release assets as npm activation proof while `npm view @answerlens/cli` returns `404`",
         "This post does not claim ranking lift, traffic lift, answer-surface placement, or external adoption proof",
