@@ -1,0 +1,54 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">AnswerLens starter packet preview</title>
+  <desc id="desc">A public-safe preview of the first CI review packet with the adopter kit, artifact order, and safe sharing boundary.</desc>
+  <defs>
+    <linearGradient id="bg" x1="110" y1="100" x2="1320" y2="820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#071522"/>
+      <stop offset="0.55" stop-color="#10243D"/>
+      <stop offset="1" stop-color="#16351F"/>
+    </linearGradient>
+    <linearGradient id="card" x1="180" y1="180" x2="1240" y2="820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCFDFF"/>
+      <stop offset="1" stop-color="#EFF6FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="30" flood-color="#020914" flood-opacity="0.38"/>
+    </filter>
+  </defs>
+
+  <rect width="1440" height="900" rx="40" fill="url(#bg)"/>
+  <rect x="102" y="90" width="1236" height="720" rx="34" fill="url(#card)" filter="url(#shadow)"/>
+
+  <text x="152" y="152" fill="#0B1E33" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="760">AnswerLens first CI packet</text>
+  <text x="152" y="196" fill="#5B6E83" font-family="Segoe UI, Arial, sans-serif" font-size="22">A review-safe handoff for copying AnswerLens into another GitHub repository</text>
+
+  <rect x="152" y="242" width="512" height="246" rx="24" fill="#0D2238"/>
+  <text x="190" y="300" fill="#8DF7D5" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700">Adopter kit</text>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="21">
+    <text x="190" y="350" fill="#DDEBFA">Copy .github/answerlens/</text>
+    <text x="190" y="390" fill="#DDEBFA">Copy .github/workflows/answerlens.yml</text>
+    <text x="190" y="430" fill="#DDEBFA">Replace brand, prompts, competitors, site URL</text>
+  </g>
+
+  <rect x="152" y="526" width="512" height="220" rx="24" fill="#F7FBFF" stroke="#D6E5F4"/>
+  <text x="190" y="584" fill="#0B1E33" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700">Open artifacts in order</text>
+  <g font-family="Consolas, 'Courier New', monospace" font-size="22">
+    <text x="190" y="636" fill="#2551D8">1. share-summary.md</text>
+    <text x="190" y="678" fill="#2E7D5B">2. scorecard.md</text>
+    <text x="190" y="720" fill="#8A5A0A">3. recommendations.md</text>
+  </g>
+
+  <rect x="708" y="242" width="582" height="504" rx="24" fill="#FFFFFF" stroke="#D6E5F4"/>
+  <text x="748" y="300" fill="#0B1E33" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700">PR review packet</text>
+  <rect x="748" y="332" width="502" height="1" fill="#D6E5F4"/>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="21">
+    <text x="748" y="382" fill="#263D55">Start with share-summary.md.</text>
+    <text x="748" y="424" fill="#263D55">Then open scorecard.md.</text>
+    <text x="748" y="466" fill="#263D55">Then open recommendations.md.</text>
+    <text x="748" y="528" fill="#263D55">Public-safe artifact: answerlens-report.</text>
+    <text x="748" y="570" fill="#263D55">raw/** is excluded by default.</text>
+    <text x="748" y="632" fill="#263D55">Secrets stay in GitHub secrets or env vars.</text>
+    <text x="748" y="674" fill="#263D55">No consumer AI UI scraping.</text>
+    <text x="748" y="716" fill="#263D55">No ranking or answer-placement guarantee.</text>
+  </g>
+</svg>

@@ -44,6 +44,8 @@ Use this as a copyable PR setup kit, not only as an internal fixture:
 
 When the first CI run finishes, the useful PR comment is small:
 
+![AnswerLens starter packet preview](../assets/starter-packet-preview.svg)
+
 ```md
 AnswerLens first run:
 - Start with `share-summary.md`, then open `scorecard.md`, then `recommendations.md`.
