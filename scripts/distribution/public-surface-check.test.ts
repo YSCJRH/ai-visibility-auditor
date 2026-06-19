@@ -163,6 +163,24 @@ test("public-surface-check rejects stable version drift across release and adopt
   assert.ok(ruleIds.includes("stable-version-surface-pin"));
 });
 
+test("public-surface-check rejects first-run story templates without explicit reuse permission", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "docs/first-run-story.md",
+    [
+      "# First-Run Story",
+      artifactOrderText(),
+      "Share any first run as adoption proof."
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("first-run-story-boundary"));
+});
+
 test("public-surface-check rejects self-dogfood entries without explicit no-claim boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -323,7 +341,19 @@ async function createPublicSurfaceFixture(): Promise<string> {
     "docs/zh/quickstart.md",
     `${artifactOrderText()}\n基础 \`audit\` 不需要 provider API key。\n只有在你要跑 \`eval\` 时才需要 provider API key。\n`
   );
-  await writeFixtureFile(rootDir, "docs/first-run-story.md", artifactOrderText());
+  await writeFixtureFile(
+    rootDir,
+    "docs/first-run-story.md",
+    [
+      artifactOrderText(),
+      "Permission to quote or reuse publicly",
+      "yes, with these safe links or screenshots only",
+      "no, keep this as feedback only",
+      "no external adoption proof unless I explicitly authorize reuse",
+      "no private analytics or raw provider payloads",
+      "Do not present a first-run story as external adoption proof unless the user explicitly authorized public reuse"
+    ].join("\n")
+  );
   await writeFixtureFile(rootDir, "docs/trust-and-safety.md", artifactOrderText());
   await writeFixtureFile(
     rootDir,

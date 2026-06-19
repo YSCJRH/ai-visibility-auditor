@@ -41,10 +41,15 @@ The next artifact I would open:
 
 One page or source-material change I would try next:
 
+Permission to quote or reuse publicly:
+- [ ] yes, with these safe links or screenshots only
+- [ ] no, keep this as feedback only
+
 What I am not claiming:
 - no ranking guarantee
 - no answer-surface placement claim
 - no traffic lift claim
+- no external adoption proof unless I explicitly authorize reuse
 - no consumer AI UI scraping
 
 Safe links or screenshots:
@@ -63,6 +68,7 @@ Avoid unverified proof:
 - no fake users, stars, downloads, or traffic claims
 - no "ranked higher in ChatGPT" claims unless there is separately authorized, reviewed evidence
 - no private analytics or raw provider payloads
+- no public adoption proof unless the author checked an explicit permission-to-quote box and supplied safe links or screenshots
 
 ## Maintainer Follow-Up
 

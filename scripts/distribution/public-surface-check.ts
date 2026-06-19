@@ -139,6 +139,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkRuntimeConfigs(rootDir, findings);
   await checkArtifactReviewOrder(rootDir, findings);
   await checkAuditEvalKeyBoundary(rootDir, findings);
+  await checkFirstRunStoryBoundary(rootDir, findings);
   await checkReleasePagesRefresh(rootDir, findings);
   await checkStableReleaseVersionSync(rootDir, findings);
   await checkSelfDogfoodLogBoundary(rootDir, findings);
@@ -349,6 +350,40 @@ async function checkAuditEvalKeyBoundary(rootDir: string, findings: Finding[]): 
           message: `Missing first-run key boundary text: ${snippet}`
         });
       }
+    }
+  }
+}
+
+async function checkFirstRunStoryBoundary(rootDir: string, findings: Finding[]): Promise<void> {
+  const relativePath = "docs/first-run-story.md";
+  let text: string;
+  try {
+    text = await readFile(path.join(rootDir, relativePath), "utf8");
+  } catch (error) {
+    findings.push({
+      ruleId: "first-run-story-boundary",
+      path: relativePath,
+      message: `Unable to read first-run story template needed for adoption-proof guardrails: ${error instanceof Error ? error.message : String(error)}`
+    });
+    return;
+  }
+
+  const requiredSnippets = [
+    "Permission to quote or reuse publicly",
+    "yes, with these safe links or screenshots only",
+    "no, keep this as feedback only",
+    "no external adoption proof unless I explicitly authorize reuse",
+    "no private analytics or raw provider payloads",
+    "Do not present a first-run story as external adoption proof unless the user explicitly authorized public reuse"
+  ];
+
+  for (const snippet of requiredSnippets) {
+    if (!text.includes(snippet)) {
+      findings.push({
+        ruleId: "first-run-story-boundary",
+        path: relativePath,
+        message: `Missing first-run story authorization or safety boundary text: ${snippet}`
+      });
     }
   }
 }
