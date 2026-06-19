@@ -212,6 +212,29 @@ test("public-surface-check rejects teardown templates without release asset evid
   assert.ok(ruleIds.includes("first-run-story-boundary"));
 });
 
+test("public-surface-check rejects discussion templates without first-run safety boundaries", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    ".github/DISCUSSION_TEMPLATE/show-and-tell.yml",
+    [
+      "title: \"[First run] \"",
+      "body:",
+      "  - type: textarea",
+      "    id: result",
+      "    attributes:",
+      "      label: Result",
+      "      description: Share anything from the run."
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("first-run-story-boundary"));
+  assert.ok(ruleIds.includes("artifact-review-order"));
+});
+
 test("public-surface-check rejects starter bundle surfaces without adopter-kit review boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -330,6 +353,54 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "      label: Public artifacts",
       "      description: If the run used release assets, include the release tag and the asset names; do not use release asset downloads as npm activation proof.",
       "      placeholder: answerlens-demo-audit.tar.gz and answerlens-site.tar.gz"
+    ].join("\n")
+  );
+  await writeFixtureFile(
+    rootDir,
+    ".github/DISCUSSION_TEMPLATE/show-and-tell.yml",
+    [
+      "title: \"[First run] \"",
+      "body:",
+      "  - type: markdown",
+      "    attributes:",
+      "      value: Share a first AnswerLens run that is safe for public discussion. Start with `share-summary.md`, then `scorecard.md`, then `recommendations.md`. Do not paste API keys, private analytics, raw provider payloads.",
+      "  - type: textarea",
+      "    id: primary-artifacts",
+      "    attributes:",
+      "      label: Primary artifacts opened in order",
+      "      value: |",
+      "        - share-summary.md:",
+      "        - scorecard.md:",
+      "        - recommendations.md:",
+      "  - type: textarea",
+      "    id: release-asset-evidence",
+      "    attributes:",
+      "      label: Release asset evidence, if relevant",
+      "      value: |",
+      "        - GitHub release tag URL:",
+      "        - `answerlens-demo-audit.tar.gz`:",
+      "        - `answerlens-site.tar.gz`:",
+      "        - I opened `share-summary.md`, then `scorecard.md`, then `recommendations.md` from the unpacked demo audit bundle",
+      "        - I am not treating release assets as npm activation proof while `npm view @answerlens/cli` returns `404`",
+      "  - type: checkboxes",
+      "    id: safety-boundary",
+      "    attributes:",
+      "      label: Public sharing boundary",
+      "      options:",
+      "        - label: This post does not claim ranking lift, traffic lift, answer-surface placement, or external adoption proof.",
+      "          required: true",
+      "        - label: Basic `audit` needs no provider key; optional `eval` is BYOK and uses my own provider account.",
+      "          required: true",
+      "        - label: AnswerLens audits public source material; it does not scrape consumer AI UIs or guarantee rankings.",
+      "          required: true",
+      "  - type: dropdown",
+      "    id: reuse-permission",
+      "    attributes:",
+      "      label: Permission to quote or reuse publicly",
+      "      description: A first-run story is not external adoption proof unless you explicitly authorize public reuse.",
+      "      options:",
+      "        - \"yes, with these safe links or screenshots only\"",
+      "        - \"no, keep this as feedback only\""
     ].join("\n")
   );
   await writeFixtureFile(rootDir, ".agents/plugins/marketplace.json", "{\"name\":\"answerlens-codex\",\"plugins\":[]}\n");

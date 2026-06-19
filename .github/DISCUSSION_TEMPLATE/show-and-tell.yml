@@ -1,0 +1,91 @@
+title: "[First run] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share a first AnswerLens run that is safe for public discussion. Start with `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
+
+        Do not paste API keys, private analytics, raw provider payloads, customer-confidential evidence, ranking guarantees, answer-placement claims, or consumer AI UI scraping claims.
+  - type: input
+    id: audited-surface
+    attributes:
+      label: Audited public surface
+      description: Link the public site, fixture, PR, or release tag you actually used.
+      placeholder: "https://example.com, PR URL, or release tag URL"
+    validations:
+      required: true
+  - type: dropdown
+    id: run-type
+    attributes:
+      label: Run type
+      options:
+        - fixture demo
+        - real-site audit
+        - GitHub Action run
+        - release assets
+    validations:
+      required: true
+  - type: textarea
+    id: primary-artifacts
+    attributes:
+      label: Primary artifacts opened in order
+      description: Keep the review order fixed before adding optional screenshots or links.
+      value: |
+        - share-summary.md:
+        - scorecard.md:
+        - recommendations.md:
+    validations:
+      required: true
+  - type: textarea
+    id: result-summary
+    attributes:
+      label: What the run showed
+      description: Summarize the result as a diagnostic signal, not as an AI ranking or answer-placement claim.
+      placeholder: "Readiness score, top missing source material, and the next public page I would improve."
+    validations:
+      required: true
+  - type: textarea
+    id: release-asset-evidence
+    attributes:
+      label: Release asset evidence, if relevant
+      description: Fill this only when the run used GitHub release assets.
+      value: |
+        - GitHub release tag URL:
+        - CLI tarball, such as `answerlens-cli-*.tgz`:
+        - `answerlens-demo-audit.tar.gz`:
+        - `answerlens-site.tar.gz`:
+        - I opened `share-summary.md`, then `scorecard.md`, then `recommendations.md` from the unpacked demo audit bundle:
+        - I am not treating release assets as npm activation proof while `npm view @answerlens/cli` returns `404`:
+    validations:
+      required: false
+  - type: checkboxes
+    id: safety-boundary
+    attributes:
+      label: Public sharing boundary
+      options:
+        - label: This post does not include raw provider payloads, API keys, or private analytics.
+          required: true
+        - label: This post does not claim ranking lift, traffic lift, answer-surface placement, or external adoption proof.
+          required: true
+        - label: Basic `audit` needs no provider key; optional `eval` is BYOK and uses my own provider account.
+          required: true
+        - label: AnswerLens audits public source material; it does not scrape consumer AI UIs or guarantee rankings.
+          required: true
+  - type: dropdown
+    id: reuse-permission
+    attributes:
+      label: Permission to quote or reuse publicly
+      description: A first-run story is not external adoption proof unless you explicitly authorize public reuse.
+      options:
+        - "yes, with these safe links or screenshots only"
+        - "no, keep this as feedback only"
+    validations:
+      required: true
+  - type: textarea
+    id: safe-links
+    attributes:
+      label: Safe links or screenshots maintainers may cite
+      description: Leave blank or write N/A if you selected no reuse permission.
+      placeholder: "Links to public artifacts, PRs, screenshots, or release assets that are safe to quote."
+    validations:
+      required: false

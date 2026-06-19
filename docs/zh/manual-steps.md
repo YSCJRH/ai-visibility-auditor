@@ -78,6 +78,8 @@
 - `Show and tell`：截图、artifacts 和 first-run 报告
 - `Announcements`：release 和 roadmap 更新
 
+仓库内已经提供 `.github/DISCUSSION_TEMPLATE/show-and-tell.yml`，用于 `Show and tell` 分类。它只会在 Discussions 已启用、且该分类 slug 为 `show-and-tell` 后生效。这个表单会保持 `share-summary.md`、`scorecard.md`、`recommendations.md` 的阅读顺序，在相关时收集 release asset evidence，并重复 npm `404`、BYOK、不承诺排名、不公开 raw payload、需要明确授权复用这些边界。
+
 另外固定一个置顶 onboarding 讨论：
 
 - `Start here: share your first AnswerLens run`
