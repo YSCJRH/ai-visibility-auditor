@@ -12,6 +12,7 @@ type PageArgs = {
   canonical: string;
   alternates: Record<"en" | "zh-CN" | "x-default", string>;
   h1: string;
+  body?: string;
   jsonLd: unknown[];
 };
 
@@ -130,6 +131,48 @@ test("seo-check rejects invalid and unsorted release metadata", async () => {
   assert.ok(ruleIds.includes("release-metadata-date"));
 });
 
+test("seo-check rejects release pages with drifted latest CTA and asset checklist", async () => {
+  const root = await createSeoFixture();
+  await writePage(
+    root.siteDir,
+    "en/releases/index.html",
+    page({
+      canonical: `${SITE_URL}en/releases/`,
+      alternates: {
+        en: `${SITE_URL}en/releases/`,
+        "zh-CN": `${SITE_URL}zh/releases/`,
+        "x-default": `${SITE_URL}releases/`
+      },
+      h1: "Releases",
+      body: `<p><a href="https://github.com/example/project/releases/tag/v9.9.8">Open an older release</a></p><p>Open recommendations.md, then scorecard.md, then share-summary.md.</p>`,
+      jsonLd: [
+        {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Releases",
+          url: `${SITE_URL}en/releases/`,
+          description: "Release page."
+        },
+        breadcrumb(`${SITE_URL}en/`, `${SITE_URL}en/releases/`)
+      ]
+    })
+  );
+
+  const findings = await runSeoCheck({
+    siteDir: root.siteDir,
+    siteUrl: SITE_URL,
+    releasesPath: root.releasesPath,
+    reportDir: root.reportDir
+  });
+
+  const ruleIds = findings.map((finding) => finding.ruleId);
+  assert.ok(ruleIds.includes("release-page-latest-link"));
+  assert.ok(ruleIds.includes("release-page-latest-tag"));
+  assert.ok(ruleIds.includes("release-page-asset-checklist"));
+  assert.ok(ruleIds.includes("release-page-npm-boundary"));
+  assert.ok(ruleIds.includes("release-page-artifact-order"));
+});
+
 async function createSeoFixture(): Promise<{ siteDir: string; releasesPath: string; reportDir: string }> {
   const siteDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-seo-site-"));
   const reportDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-seo-report-"));
@@ -163,6 +206,7 @@ async function createSeoFixture(): Promise<{ siteDir: string; releasesPath: stri
 
   await writePage(siteDir, "index.html", redirectPage(`${SITE_URL}en/`));
   await writePage(siteDir, "starter/index.html", redirectPage(`${SITE_URL}en/starter/`));
+  await writePage(siteDir, "releases/index.html", redirectPage(`${SITE_URL}en/releases/`));
   await writePage(
     siteDir,
     "en/index.html",
@@ -204,6 +248,54 @@ async function createSeoFixture(): Promise<{ siteDir: string; releasesPath: stri
           url: `${SITE_URL}zh/`,
           softwareVersion: VERSION
         }
+      ]
+    })
+  );
+  await writePage(
+    siteDir,
+    "en/releases/index.html",
+    page({
+      canonical: `${SITE_URL}en/releases/`,
+      alternates: {
+        en: `${SITE_URL}en/releases/`,
+        "zh-CN": `${SITE_URL}zh/releases/`,
+        "x-default": `${SITE_URL}releases/`
+      },
+      h1: "Releases",
+      body: releasePageBody("en"),
+      jsonLd: [
+        {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Releases",
+          url: `${SITE_URL}en/releases/`,
+          description: "Release page."
+        },
+        breadcrumb(`${SITE_URL}en/`, `${SITE_URL}en/releases/`)
+      ]
+    })
+  );
+  await writePage(
+    siteDir,
+    "zh/releases/index.html",
+    page({
+      canonical: `${SITE_URL}zh/releases/`,
+      alternates: {
+        en: `${SITE_URL}en/releases/`,
+        "zh-CN": `${SITE_URL}zh/releases/`,
+        "x-default": `${SITE_URL}releases/`
+      },
+      h1: "Releases",
+      body: releasePageBody("zh-CN"),
+      jsonLd: [
+        {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Releases",
+          url: `${SITE_URL}zh/releases/`,
+          description: "Release page."
+        },
+        breadcrumb(`${SITE_URL}zh/`, `${SITE_URL}zh/releases/`)
       ]
     })
   );
@@ -255,7 +347,16 @@ async function createSeoFixture(): Promise<{ siteDir: string; releasesPath: stri
   );
   await writeFile(
     path.join(siteDir, "sitemap.xml"),
-    sitemap([SITE_URL, `${SITE_URL}en/`, `${SITE_URL}zh/`, `${SITE_URL}en/starter/`, `${SITE_URL}zh/starter/`]),
+    sitemap([
+      SITE_URL,
+      `${SITE_URL}en/`,
+      `${SITE_URL}zh/`,
+      `${SITE_URL}releases/`,
+      `${SITE_URL}en/releases/`,
+      `${SITE_URL}zh/releases/`,
+      `${SITE_URL}en/starter/`,
+      `${SITE_URL}zh/starter/`
+    ]),
     "utf8"
   );
 
@@ -273,6 +374,9 @@ function redirectPage(target: string): string {
 }
 
 function page(args: PageArgs): string {
+  const body =
+    args.body ??
+    "<h2>What to open first?</h2><p>Start with share-summary.md, then scorecard.md, then recommendations.md.</p>";
   return `<!doctype html>
 <html>
   <head>
@@ -294,8 +398,16 @@ function page(args: PageArgs): string {
     <meta name="twitter:image:alt" content="AnswerLens report preview." />
     <script type="application/ld+json">${JSON.stringify(args.jsonLd)}</script>
   </head>
-  <body><main><h1>${args.h1}</h1><h2>What to open first?</h2><p>Start with share-summary.md, then scorecard.md, then recommendations.md.</p></main></body>
+  <body><main><h1>${args.h1}</h1>${body}</main></body>
 </html>`;
+}
+
+function releasePageBody(locale: "en" | "zh-CN"): string {
+  if (locale === "zh-CN") {
+    return `<p><a href="https://github.com/example/project/releases/tag/${VERSION}">打开最新发布 ${VERSION}</a></p><h2>release 下载 检查清单</h2><p>CLI tarball；如果 <code>npm view @answerlens/cli</code> 返回 <code>404</code>，继续使用 release assets 或本地 checkout。</p><p><code>answerlens-demo-audit.tar.gz</code> 和 <code>answerlens-site.tar.gz</code></p><p>每次都按同一顺序审阅报告：<code>share-summary.md</code>，然后 <code>scorecard.md</code>，然后 <code>recommendations.md</code>。</p>`;
+  }
+
+  return `<p><a href="https://github.com/example/project/releases/tag/${VERSION}">Open latest release ${VERSION}</a></p><h2>Release asset checklist</h2><p>CLI tarball; if <code>npm view @answerlens/cli</code> returns <code>404</code>, keep release assets or a local checkout.</p><p><code>answerlens-demo-audit.tar.gz</code> and <code>answerlens-site.tar.gz</code></p><p>Review reports in order: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`;
 }
 
 function breadcrumb(home: string, current: string): unknown {

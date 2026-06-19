@@ -67,7 +67,8 @@ export async function runSeoCheck(options: CliOptions): Promise<Finding[]> {
   const findings: Finding[] = [];
   const releases = await readReleaseMetadata(options.releasesPath, findings);
   checkReleaseMetadata(options.releasesPath, releases, findings);
-  const latestRelease = latestStableReleaseTag(releases) ?? FALLBACK_LATEST_RELEASE;
+  const latestStableRelease = findLatestStableRelease(releases);
+  const latestRelease = releaseTag(latestStableRelease) ?? FALLBACK_LATEST_RELEASE;
   const sitemapPath = path.join(options.siteDir, "sitemap.xml");
   const sitemap = await readFile(sitemapPath, "utf8");
   const sitemapUrls = parseSitemapUrls(sitemap);
@@ -118,6 +119,7 @@ export async function runSeoCheck(options: CliOptions): Promise<Finding[]> {
     checkHead(page.file, page.$, canonical, latestRelease, findings);
     checkHreflang(page.file, page.$, canonical, options.siteUrl, pageByCanonical, findings);
     checkJsonLd(page.file, page.$, canonical, latestRelease, findings);
+    checkReleasePageContract(page.file, page.$, canonical, latestStableRelease, findings);
     await checkInternalLinks(options.siteDir, options.siteUrl, canonical, page.file, page.$, findings);
     if (page.locale === "zh-CN") {
       checkChineseVisibleText(page.file, page.$, findings);
@@ -345,6 +347,73 @@ function checkFaqJsonLd(
   }
 }
 
+function checkReleasePageContract(
+  file: string,
+  $: cheerio.CheerioAPI,
+  canonical: string,
+  latestRelease: ReleaseEntry | null,
+  findings: Finding[]
+): void {
+  const canonicalUrl = safeUrl(canonical);
+  if (!canonicalUrl?.pathname.endsWith("/releases/")) {
+    return;
+  }
+
+  const text = visiblePageTextWithInlineCode($);
+  const latestTag = releaseTag(latestRelease);
+  const latestUrl = releaseUrl(latestRelease);
+  if (!latestTag || !latestUrl) {
+    findings.push(finding("release-page-latest-link", file, "Release page cannot identify the latest stable release URL."));
+    return;
+  }
+
+  const links = new Set<string>();
+  $("a[href]").each((_, node) => {
+    const href = $(node).attr("href")?.trim();
+    if (!href) {
+      return;
+    }
+    try {
+      links.add(new URL(href, canonical).href);
+    } catch {
+      // Invalid links are reported by checkInternalLinks or social URL checks.
+    }
+  });
+
+  if (!links.has(latestUrl)) {
+    findings.push(finding("release-page-latest-link", file, `Release page must link to the latest stable release URL ${latestUrl}.`));
+  }
+
+  if (!text.includes(latestTag)) {
+    findings.push(finding("release-page-latest-tag", file, `Release page must show the latest stable tag ${latestTag}.`));
+  }
+
+  for (const snippet of ["answerlens-demo-audit.tar.gz", "answerlens-site.tar.gz"]) {
+    if (!text.includes(snippet)) {
+      findings.push(finding("release-page-asset-checklist", file, `Release page asset checklist is missing ${snippet}.`));
+    }
+  }
+
+  if (!/(Release asset checklist|release 下载 检查清单)/.test(text)) {
+    findings.push(finding("release-page-asset-checklist", file, "Release page is missing the release asset checklist heading."));
+  }
+
+  for (const snippet of ["npm view @answerlens/cli", "404"]) {
+    if (!text.includes(snippet)) {
+      findings.push(finding("release-page-npm-boundary", file, `Release page must keep the npm-not-visible boundary: ${snippet}.`));
+    }
+  }
+
+  checkSnippetOrder(
+    file,
+    text,
+    ["share-summary.md", "scorecard.md", "recommendations.md"],
+    "release-page-artifact-order",
+    "Release page must preserve the report review order: share-summary.md, scorecard.md, recommendations.md.",
+    findings
+  );
+}
+
 async function checkInternalLinks(
   siteDir: string,
   siteUrl: string,
@@ -525,9 +594,16 @@ function checkReleaseMetadata(releasesPath: string, releases: ReleaseEntry[], fi
   }
 }
 
-function latestStableReleaseTag(releases: ReleaseEntry[]): string | null {
-  const release = releases.find((entry) => entry.draft !== true && typeof entry.tag_name === "string" && isStableReleaseTag(entry.tag_name));
+function findLatestStableRelease(releases: ReleaseEntry[]): ReleaseEntry | null {
+  return releases.find((entry) => entry.draft !== true && typeof entry.tag_name === "string" && isStableReleaseTag(entry.tag_name)) ?? null;
+}
+
+function releaseTag(release: ReleaseEntry | null): string | null {
   return typeof release?.tag_name === "string" ? release.tag_name : null;
+}
+
+function releaseUrl(release: ReleaseEntry | null): string | null {
+  return typeof release?.html_url === "string" ? release.html_url : null;
 }
 
 function releaseLabel(release: ReleaseEntry, index: number): string {
@@ -645,6 +721,31 @@ function visiblePageText($: cheerio.CheerioAPI): string {
   const clone = $.root().clone();
   clone.find("script,style,pre,code").remove();
   return clone.text().replace(/\s+/g, " ").trim();
+}
+
+function visiblePageTextWithInlineCode($: cheerio.CheerioAPI): string {
+  const clone = $.root().clone();
+  clone.find("script,style,pre").remove();
+  return clone.text().replace(/\s+/g, " ").trim();
+}
+
+function checkSnippetOrder(
+  file: string,
+  text: string,
+  snippets: string[],
+  ruleId: string,
+  message: string,
+  findings: Finding[]
+): void {
+  let previousIndex = -1;
+  for (const snippet of snippets) {
+    const index = text.indexOf(snippet);
+    if (index === -1 || index <= previousIndex) {
+      findings.push(finding(ruleId, file, message));
+      return;
+    }
+    previousIndex = index;
+  }
 }
 
 function isRedirectPage($: cheerio.CheerioAPI): boolean {
