@@ -533,6 +533,16 @@ test("public-surface-check rejects starter bundle surfaces without adopter-kit r
   assert.ok(ruleIds.includes("starter-adopter-kit-boundary"));
 });
 
+test("public-surface-check rejects generated share layers without first-run sharing boundaries", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(rootDir, "docs/shareable-summary.md", artifactOrderText());
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("share-layer-propagation-boundary"));
+});
+
 test("public-surface-check rejects starter packet preview drift", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, "assets/starter-packet-preview.svg", "<svg><title>AnswerLens starter packet preview</title></svg>\n");
@@ -738,7 +748,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
   );
   await writeFixtureFile(rootDir, "action.yml", artifactOrderText());
   await writeFixtureFile(rootDir, "docs/demo-report.md", `${artifactOrderText()}\nShare first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.`);
-  await writeFixtureFile(rootDir, "docs/shareable-summary.md", artifactOrderText());
+  await writeFixtureFile(rootDir, "docs/shareable-summary.md", shareLayerContractText());
   await writeFixtureFile(
     rootDir,
     "docs/github-action.md",
@@ -1047,11 +1057,50 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(rootDir, ".github/answerlens/runtime.yaml", safeRuntimeYaml());
   await writeFixtureFile(rootDir, "examples/acme/runtime.yaml", safeRuntimeYaml());
   await writeFixtureFile(rootDir, "examples/consumer-repo/.github/answerlens/runtime.yaml", safeRuntimeYaml());
+  await writeFixtureFile(
+    rootDir,
+    "packages/report/src/index.ts",
+    [
+      "const FIRST_RUN_STORY_URL = 'https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/first-run-story.md';",
+      `const SHOW_AND_TELL_DISCUSSION_URL = '${SHOW_AND_TELL_DISCUSSION_URL}';`,
+      "const nextStep = t(locale, \"report.next.firstRun\");",
+      "const boundary = t(locale, \"brand.publicShareBoundary\");",
+      "const prLine = 'First-run story template and Show and tell Discussion form';"
+    ].join("\n")
+  );
+  await writeFixtureFile(
+    rootDir,
+    "packages/i18n/src/index.ts",
+    [
+      "Keep API keys, private analytics, and raw provider payloads out of public PRs, issues, release notes, and Discussions.",
+      "If this first run is safe to discuss, use the first-run story template and Show and tell Discussion form.",
+      "raw provider payloads"
+    ].join("\n")
+  );
+  await writeFixtureFile(
+    rootDir,
+    "packages/report/src/index.test.ts",
+    [
+      "assert.match(shareSummaryMarkdown, /first-run-story.md/);",
+      "assert.match(prSnippet, /discussions\\/new\\?category=show-and-tell/);",
+      "assert.match(prSnippet, /raw provider payloads/);",
+      "assert.match(prSnippet, /private analytics/);"
+    ].join("\n")
+  );
   return rootDir;
 }
 
 function artifactOrderText(): string {
   return "Review share-summary.md first, then scorecard.md, then recommendations.md.";
+}
+
+function shareLayerContractText(): string {
+  return [
+    artifactOrderText(),
+    "Use the AnswerLens starter bundle when this workflow is ready to move into another repository: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/starter-bundle.md",
+    `If this first run is safe to discuss, use the first-run story template and Show and tell Discussion form: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/first-run-story.md and ${SHOW_AND_TELL_DISCUSSION_URL}`,
+    "Keep API keys, private analytics, and raw provider payloads out of public PRs, issues, release notes, and Discussions."
+  ].join("\n");
 }
 
 function safeRuntimeYaml(): string {

@@ -76,6 +76,51 @@ const RUNTIME_CONFIGS = [
   "examples/consumer-repo/.github/answerlens/runtime.yaml"
 ];
 
+const SHARE_LAYER_PROPAGATION_SURFACES = [
+  {
+    path: "docs/shareable-summary.md",
+    snippets: [
+      "first-run story template",
+      "Show and tell Discussion form",
+      "raw provider payloads",
+      "private analytics",
+      "docs/starter-bundle.md",
+      "share-summary.md",
+      "scorecard.md",
+      "recommendations.md"
+    ]
+  },
+  {
+    path: "packages/report/src/index.ts",
+    snippets: [
+      "FIRST_RUN_STORY_URL",
+      "SHOW_AND_TELL_DISCUSSION_URL",
+      "report.next.firstRun",
+      "brand.publicShareBoundary",
+      "First-run story template",
+      "Show and tell Discussion form"
+    ]
+  },
+  {
+    path: "packages/i18n/src/index.ts",
+    snippets: [
+      "Keep API keys, private analytics, and raw provider payloads",
+      "first-run story template",
+      "Show and tell Discussion form",
+      "raw provider payloads"
+    ]
+  },
+  {
+    path: "packages/report/src/index.test.ts",
+    snippets: [
+      "first-run-story",
+      "discussions\\/new\\?category=show-and-tell",
+      "raw provider payloads",
+      "private analytics"
+    ]
+  }
+];
+
 const STABLE_RELEASE_SURFACES: Array<{ path: string; snippets: (stableTag: string) => string[] }> = [
   {
     path: ".github/workflows/release-distribution.yml",
@@ -145,6 +190,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkAuditEvalKeyBoundary(rootDir, findings);
   await checkFirstRunStoryBoundary(rootDir, findings);
   await checkFirstRunDiscussionRouting(rootDir, findings);
+  await checkShareLayerPropagationBoundary(rootDir, findings);
   await checkStarterAdopterKitBoundary(rootDir, findings);
   await checkReleasePagesRefresh(rootDir, findings);
   await checkPagesPostdeploySmoke(rootDir, findings);
@@ -478,6 +524,32 @@ async function checkFirstRunDiscussionRouting(rootDir: string, findings: Finding
         path: relativePath,
         message: `First-run sharing should link directly to the Show and tell Discussion form: ${SHOW_AND_TELL_DISCUSSION_URL}`
       });
+    }
+  }
+}
+
+async function checkShareLayerPropagationBoundary(rootDir: string, findings: Finding[]): Promise<void> {
+  for (const surface of SHARE_LAYER_PROPAGATION_SURFACES) {
+    let text: string;
+    try {
+      text = await readFile(path.join(rootDir, surface.path), "utf8");
+    } catch (error) {
+      findings.push({
+        ruleId: "share-layer-propagation-boundary",
+        path: surface.path,
+        message: `Unable to read share-layer propagation surface: ${error instanceof Error ? error.message : String(error)}`
+      });
+      continue;
+    }
+
+    for (const snippet of surface.snippets) {
+      if (!text.includes(snippet)) {
+        findings.push({
+          ruleId: "share-layer-propagation-boundary",
+          path: surface.path,
+          message: `Generated report sharing surfaces must include the first-run invitation and public sharing boundary: ${snippet}`
+        });
+      }
     }
   }
 }
