@@ -396,7 +396,13 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(releases, /v0\.3\.0/);
   assert.match(releases, /Use the latest release/);
   assert.match(releases, /Open latest release/);
+  assert.match(releases, /Release asset checklist/);
+  assert.match(releases, /answerlens-demo-audit\.tar\.gz/);
+  assert.match(releases, /answerlens-site\.tar\.gz/);
+  assert.match(releases, /npm view @answerlens\/cli/);
   assert.match(zhReleases, /打开 GitHub 发布页/);
+  assert.match(zhReleases, /release 下载 检查清单/);
+  assert.match(zhReleases, /answerlens-demo-audit\.tar\.gz/);
   assert.match(zhReleases, /AnswerLens v0\.3\.2 延续/);
   assert.doesNotMatch(zhReleases, /What ships/);
   assert.doesNotMatch(zhReleases, /Known limits/);

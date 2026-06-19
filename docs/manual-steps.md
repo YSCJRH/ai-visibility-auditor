@@ -24,6 +24,18 @@ These are the smallest manual steps needed to activate the public distribution s
 
 If `npm view @answerlens/cli` returns `404`, treat npm as not yet activated; use GitHub release assets or a local checkout until one publish path is configured and the package is visible in the registry.
 
+## Release asset checklist
+
+Use release assets as the second public front door after the live demo, fixture demo, real-site quickstart, and GitHub Action path are understandable.
+
+The expected public assets on each semver release are:
+
+1. CLI tarball, such as `answerlens-cli-*.tgz`, for pinned local CLI runs before npm is visible.
+2. `answerlens-demo-audit.tar.gz`, for unpacking the fixture report and opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
+3. `answerlens-site.tar.gz`, for inspecting the compiled Pages bundle for docs, examples, starter, and release pages at that tag.
+
+If `npm view @answerlens/cli` returns `404`, do not present npm as activated. Keep release assets and local checkout as the public install/download path until the registry package is visible.
+
 ## GitHub Pages
 
 1. Enable GitHub Pages with **Source: GitHub Actions**.

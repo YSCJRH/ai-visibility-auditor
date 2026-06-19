@@ -29,6 +29,18 @@
 
 如果 `npm view @answerlens/cli` 返回 `404`，就把 npm 视为尚未激活；在配置好其中一种发布路径并能在 registry 看到包之前，继续使用 GitHub release assets 或本地 checkout。
 
+## release assets 检查清单
+
+先看 live demo、fixture demo、真实站点 quickstart 和 GitHub Action 路径；这些都能理解之后，再把 release assets 当作第二个公开入口。
+
+每个 semver release 应该提供这些公开资源：
+
+1. CLI tarball，例如 `answerlens-cli-*.tgz`，用于 npm package 可见之前的固定版本本地 CLI。
+2. `answerlens-demo-audit.tar.gz`，用于解压 fixture 报告，并按 `share-summary.md`、`scorecard.md`、`recommendations.md` 的顺序审阅。
+3. `answerlens-site.tar.gz`，用于检查该 tag 对应的 docs、examples、starter 和 release 页面编译结果。
+
+如果 `npm view @answerlens/cli` 返回 `404`，不要把 npm 描述成已激活。继续把 release assets 和本地 checkout 作为公开下载与运行路径，直到 registry package 可见。
+
 ## GitHub Pages
 
 1. 启用 **Source: GitHub Actions**。
