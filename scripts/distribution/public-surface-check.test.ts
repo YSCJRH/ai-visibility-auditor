@@ -798,7 +798,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
     ].join("\n")
   );
   await writeFixtureFile(rootDir, "assets/starter-packet-preview.svg", starterPacketPreviewSvg());
-  await writeFixtureFile(rootDir, "scripts/distribution/seo-check.ts", `const fallback = releases[0]?.tag_name ?? "${STABLE_TAG}";\n`);
+  await writeFixtureFile(rootDir, "scripts/distribution/seo-check.ts", `const FALLBACK_LATEST_RELEASE = "${STABLE_TAG}";\n`);
   await writeFixtureFile(rootDir, "scripts/distribution/site-seo.ts", `const releaseCopy = { "${STABLE_TAG}": "Stable release" };\n`);
   await writeFixtureFile(
     rootDir,

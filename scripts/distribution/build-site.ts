@@ -50,6 +50,8 @@ type ReleaseEntry = {
   html_url: string;
   published_at?: string;
   body?: string;
+  draft?: boolean;
+  prerelease?: boolean;
 };
 
 type LocalizedText = string | Partial<Record<Locale, string>>;
@@ -152,6 +154,10 @@ function formatReadableDate(value: string | undefined, fallback: string, locale:
     month: locale === "zh-CN" ? "numeric" : "short",
     day: "numeric"
   }).format(date);
+}
+
+function isStableReleaseTag(tagName: string): boolean {
+  return /^v\d+\.\d+\.\d+$/.test(tagName);
 }
 
 async function readJson<T>(filePath: string): Promise<T> {
@@ -1298,6 +1304,41 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             : "<p>Release metadata has not been compiled yet.</p>"
         );
 
+  const renderReleaseMetadataPanel = (locale: Locale): string => {
+    const latestRelease = releases[0];
+    const stableReleaseCount = releases.filter((release) => isStableReleaseTag(release.tag_name)).length;
+    const latestSummary =
+      latestRelease === undefined
+        ? locale === "zh-CN"
+          ? "待编译"
+          : "pending"
+        : `${latestRelease.tag_name} (${formatReadableDate(latestRelease.published_at, updatedAt, locale)})`;
+
+    if (locale === "zh-CN") {
+      return renderPanel(
+        "发布元数据",
+        "索引健康度",
+        `<p>这个索引从 GitHub 发布元数据编译，并在 Pages 发布前由 SEO gate 检查数量、日期和排序。</p><ul>${renderList([
+          `<strong>最新发布：</strong> ${escapeHtml(latestSummary)}`,
+          `<strong>已编译发布数：</strong> ${String(releases.length)}`,
+          `<strong>稳定 semver 发布数：</strong> ${String(stableReleaseCount)}`,
+          "报告审阅顺序保持不变：<code>share-summary.md</code>、<code>scorecard.md</code>、<code>recommendations.md</code>。"
+        ])}</ul>`
+      );
+    }
+
+    return renderPanel(
+      "Release metadata",
+      "Snapshot health",
+      `<p>This index is compiled from GitHub Releases metadata, then checked by the Pages SEO gate for count, dates, and ordering before publication.</p><ul>${renderList([
+        `<strong>Latest release:</strong> ${escapeHtml(latestSummary)}`,
+        `<strong>Compiled releases:</strong> ${String(releases.length)}`,
+        `<strong>Stable semver releases:</strong> ${String(stableReleaseCount)}`,
+        "The report review order stays fixed: <code>share-summary.md</code>, <code>scorecard.md</code>, then <code>recommendations.md</code>."
+      ])}</ul>`
+    );
+  };
+
   const artifactLinks = shareSummary.artifacts
     .map((artifact) => `<li><a href="../examples/static-good/${escapeHtml(artifact)}">${escapeHtml(artifact)}</a></li>`)
     .join("");
@@ -1634,6 +1675,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             "<strong>answerlens-demo-audit.tar.gz</strong>: unpack the fixture report and review <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.",
             "<strong>answerlens-site.tar.gz</strong>: inspect the compiled Pages bundle when you need the exact docs, examples, starter, and release pages from that tag."
           ])}</ul><p>If <code>npm view @answerlens/cli</code> returns <code>404</code>, keep using release assets or a local checkout; do not present npm as activated.</p>`)}
+          ${renderReleaseMetadataPanel("en")}
         </section>
         <section class="section grid">${renderReleaseCards("en")}</section>`,
         "zh-CN": `<section class="hero"><p class="eyebrow">版本化分发</p><h1>下载最新的 AnswerLens 发布版本。</h1><p>这个页面把当前版本、发布说明、demo bundle 和编译后的站点 bundle 放在同一个入口里，方便你按固定顺序评估和下载。</p><div class="heroActions"><a class="ctaLink" href="${escapeHtml(releases[0]?.html_url ?? `${REPO_URL}/releases`)}">打开最新发布</a><a class="ctaLink ctaLinkSecondary" href="${escapeHtml(new URL("examples/static-good/index.html", siteUrl).href)}">打开在线演示</a></div></section>
@@ -1644,6 +1686,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             "<strong>answerlens-demo-audit.tar.gz</strong>：解压 fixture 报告，并按 <code>share-summary.md</code>、<code>scorecard.md</code>、<code>recommendations.md</code> 的顺序审阅。",
             "<strong>answerlens-site.tar.gz</strong>：需要核对某个 tag 对应的 docs、examples、starter 和 release 页面时，查看编译后的 Pages bundle。"
           ])}</ul><p>如果 <code>npm view @answerlens/cli</code> 返回 <code>404</code>，继续使用 release assets 或本地 checkout；不要把 npm 描述成已激活。</p>`)}
+          ${renderReleaseMetadataPanel("zh-CN")}
         </section>
         <section class="section grid">${renderReleaseCards("zh-CN")}</section>`
       },
