@@ -553,6 +553,16 @@ test("public-surface-check rejects starter packet preview drift", async () => {
   assert.ok(ruleIds.includes("starter-adopter-kit-boundary"));
 });
 
+test("public-surface-check rejects visual assets without a share-summary-first packet", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(rootDir, "assets/social-preview.svg", "<svg><text>scorecard.md recommendations.md</text></svg>\n");
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("visual-share-packet-boundary"));
+});
+
 test("public-surface-check rejects Action docs without first-CI PR packet boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -997,6 +1007,9 @@ async function createPublicSurfaceFixture(): Promise<string> {
     ].join("\n")
   );
   await writeFixtureFile(rootDir, "assets/starter-packet-preview.svg", starterPacketPreviewSvg());
+  await writeFixtureFile(rootDir, "assets/readme-cover.svg", visualSharePacketSvg());
+  await writeFixtureFile(rootDir, "assets/readme-artifacts-preview.svg", visualSharePacketSvg());
+  await writeFixtureFile(rootDir, "assets/social-preview.svg", visualSharePacketSvg());
   await writeFixtureFile(rootDir, "scripts/distribution/seo-check.ts", `const FALLBACK_LATEST_RELEASE = "${STABLE_TAG}";\n`);
   await writeFixtureFile(rootDir, "scripts/distribution/site-seo.ts", `const releaseCopy = { "${STABLE_TAG}": "Stable release" };\n`);
   await writeFixtureFile(
@@ -1121,6 +1134,22 @@ function starterPacketPreviewSvg(): string {
     "<text>raw/** is excluded by default</text>",
     "<text>No consumer AI UI scraping</text>",
     "<text>No ranking or answer-placement guarantee</text>",
+    "</svg>"
+  ].join("\n");
+}
+
+function visualSharePacketSvg(): string {
+  return [
+    "<svg>",
+    "<title>AnswerLens visual share packet</title>",
+    "<text>Review packet</text>",
+    "<text>share-summary.md</text>",
+    "<text>scorecard.md</text>",
+    "<text>recommendations.md</text>",
+    "<text>pr-snippet.md</text>",
+    "<text>Show and tell</text>",
+    "<text>first-run story</text>",
+    "<text>raw/** stays private</text>",
     "</svg>"
   ].join("\n");
 }

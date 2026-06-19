@@ -8,6 +8,12 @@ import { buildSocialPreview } from "./build-social-preview.ts";
 test("build-social-preview renders a 1280x640 PNG", async () => {
   const outDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-social-preview-"));
   const outputPath = path.join(outDir, "social-preview.png");
+  const sourceSvg = await readFile(path.resolve("assets/social-preview.svg"), "utf8");
+
+  assert.match(sourceSvg, /Review packet/);
+  assert.match(sourceSvg, /share-summary\.md[\s\S]*scorecard\.md[\s\S]*recommendations\.md/);
+  assert.match(sourceSvg, /pr-snippet\.md/);
+  assert.match(sourceSvg, /first-run story/);
 
   await buildSocialPreview({ outputPath });
 

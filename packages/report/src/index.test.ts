@@ -331,8 +331,13 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(gitignore, /^seofull\.md$/m);
   assert.match(coverSvg, /<svg[^>]+1600[^>]+840/);
   assert.match(coverSvg, /AnswerLens/);
+  assert.match(coverSvg, /Review packet/);
+  assert.match(coverSvg, /share-summary\.md[\s\S]*scorecard\.md[\s\S]*recommendations\.md/);
   assert.match(scorecardPreviewSvg, /Scorecard preview/);
   assert.match(artifactPreviewSvg, /Artifact preview/);
+  assert.match(artifactPreviewSvg, /share-summary\.md[\s\S]*scorecard\.md[\s\S]*recommendations\.md/);
+  assert.match(artifactPreviewSvg, /pr-snippet\.md/);
+  assert.match(artifactPreviewSvg, /Show and tell/);
   assert.match(showcaseSvg, /Before and after showcase/);
   assert.ok(normalizedPages.length > 0);
   assert.ok(normalizedPages.some((page) => (page.internalLinkRecords ?? []).length > 0));
