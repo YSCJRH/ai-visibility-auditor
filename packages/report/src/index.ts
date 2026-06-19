@@ -1001,6 +1001,32 @@ export function renderScorecardHtml(result: AuditResult, locale: Locale = "en"):
     result.summary.missingPageTypes.length > 0
       ? result.summary.missingPageTypes.map((pageType) => `<li>${escapeHtml(pageType)}</li>`).join("")
       : `<li>${escapeHtml(t(locale, "report.noIssues"))}</li>`;
+  const reviewPacket =
+    locale === "zh-CN"
+      ? `<section class="panel reviewPacket" style="margin-top: 20px;">
+        <h2>审阅并分享这次运行</h2>
+        <p>先按固定顺序打开核心报告，再复制可公开讨论的摘要。</p>
+        <ol>
+          <li><a href="./share-summary.zh.md">share-summary.md</a>：先读人能直接转发的摘要。</li>
+          <li><a href="./scorecard.zh.md">scorecard.md</a>：核对覆盖范围、检查项和分数来源。</li>
+          <li><a href="./recommendations.zh.md">recommendations.md</a>：把主要缺口变成页面修复。</li>
+        </ol>
+        <p>需要带进 PR review 时，再使用 <a href="./pr-snippet.zh.md">pr-snippet.md</a>。准备复制到其他仓库时，打开 <a href="${escapeHtml(STARTER_BUNDLE_URL)}">AnswerLens starter bundle</a>。</p>
+        <p>如果这次 first run 适合公开讨论，请使用 <a href="${escapeHtml(FIRST_RUN_STORY_URL)}">first-run story template</a> 和 <a href="${escapeHtml(SHOW_AND_TELL_DISCUSSION_URL)}">Show and tell Discussion form</a>。</p>
+        <p class="guardrail">${escapeHtml(t(locale, "brand.disclaimer"))} ${escapeHtml(t(locale, "brand.publicShareBoundary"))}</p>
+      </section>`
+      : `<section class="panel reviewPacket" style="margin-top: 20px;">
+        <h2>Review and share this run</h2>
+        <p>Open the core reports in order before copying a public-safe summary.</p>
+        <ol>
+          <li><a href="./share-summary.md">share-summary.md</a>: start with the forwardable summary.</li>
+          <li><a href="./scorecard.md">scorecard.md</a>: verify coverage, checks, and score drivers.</li>
+          <li><a href="./recommendations.md">recommendations.md</a>: turn the top gaps into page fixes.</li>
+        </ol>
+        <p>Use <a href="./pr-snippet.md">pr-snippet.md</a> for PR review. Use the <a href="${escapeHtml(STARTER_BUNDLE_URL)}">AnswerLens starter bundle</a> when this workflow is ready to move into another repository.</p>
+        <p>If this first run is safe to discuss, use the <a href="${escapeHtml(FIRST_RUN_STORY_URL)}">first-run story template</a> and <a href="${escapeHtml(SHOW_AND_TELL_DISCUSSION_URL)}">Show and tell Discussion form</a>.</p>
+        <p class="guardrail">${escapeHtml(t(locale, "brand.disclaimer"))} ${escapeHtml(t(locale, "brand.publicShareBoundary"))}</p>
+      </section>`;
 
   return `<!doctype html>
 <html lang="${locale === "zh-CN" ? "zh-CN" : "en"}">
@@ -1062,6 +1088,23 @@ export function renderScorecardHtml(result: AuditResult, locale: Locale = "en"):
         padding: 10px 8px;
         vertical-align: top;
       }
+      .reviewPacket ol {
+        margin: 12px 0;
+        padding-left: 22px;
+      }
+      .reviewPacket li {
+        margin: 8px 0;
+      }
+      .reviewPacket a {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .guardrail {
+        border-top: 1px solid var(--border);
+        margin: 16px 0 0;
+        padding-top: 14px;
+        color: #4b5b6b;
+      }
     </style>
   </head>
   <body>
@@ -1075,6 +1118,7 @@ export function renderScorecardHtml(result: AuditResult, locale: Locale = "en"):
         <p><a href="${locale === "zh-CN" ? "./index.html" : "./index.zh.html"}">${escapeHtml(locale === "zh-CN" ? "English" : "简体中文")}</a></p>
         ${renderSiteHtmlNotes(result.site, locale)}
       </section>
+      ${reviewPacket}
       <section class="grid">${bucketCards}</section>
       <section class="panel">
         <h2>${locale === "zh-CN" ? "缺失覆盖" : "Missing coverage"}</h2>

@@ -51,6 +51,28 @@ const ROUTES: RouteCheck[] = [
     snippets: ["下载最新的 AnswerLens 发布版本", SHOW_AND_TELL_DISCUSSION_URL, ...ARTIFACT_ORDER_SNIPPETS]
   },
   {
+    path: "examples/static-good/index.html",
+    label: "English live demo report",
+    snippets: [
+      "Review and share this run",
+      SHOW_AND_TELL_DISCUSSION_URL,
+      "first-run story template",
+      "raw provider payloads",
+      ...ARTIFACT_ORDER_SNIPPETS
+    ]
+  },
+  {
+    path: "zh/examples/static-good/index.html",
+    label: "Chinese live demo report",
+    snippets: [
+      "审阅并分享这次运行",
+      SHOW_AND_TELL_DISCUSSION_URL,
+      "first-run story template",
+      "raw provider payloads",
+      ...ARTIFACT_ORDER_SNIPPETS
+    ]
+  },
+  {
     path: "en/use-case/open-source-maintainers/",
     label: "Open-source maintainer page",
     snippets: ["AnswerLens for open-source maintainers.", SHOW_AND_TELL_DISCUSSION_URL, "reuse permission", "raw-payload boundaries"]

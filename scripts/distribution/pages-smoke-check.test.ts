@@ -23,6 +23,12 @@ test("pages-smoke-check reports missing snippets and unreadable routes", async (
       if (url.endsWith("/zh/releases/")) {
         return responseFor(url, "temporary outage", 503);
       }
+      if (url.endsWith("/zh/examples/static-good/index.html")) {
+        return responseFor(url, "审阅并分享这次运行 share-summary.md scorecard.md recommendations.md");
+      }
+      if (url.endsWith("/examples/static-good/index.html")) {
+        return responseFor(url, "Review and share this run share-summary.md scorecard.md recommendations.md");
+      }
       if (url.endsWith("/en/use-case/open-source-maintainers/")) {
         return responseFor(url, "AnswerLens for open-source maintainers.");
       }
@@ -30,19 +36,14 @@ test("pages-smoke-check reports missing snippets and unreadable routes", async (
     }
   });
 
-  assert.deepEqual(
-    findings.map((finding) => finding.ruleId),
-    [
-      "pages-live-snippet",
-      "pages-live-route",
-      "pages-live-snippet",
-      "pages-live-snippet",
-      "pages-live-snippet"
-    ]
-  );
+  assert.equal(findings.length, 11);
+  assert.equal(findings.filter((finding) => finding.ruleId === "pages-live-route").length, 1);
+  assert.equal(findings.filter((finding) => finding.ruleId === "pages-live-snippet").length, 10);
   assert.match(findings[0].url, /\/en\/releases\/$/);
   assert.match(findings[1].url, /\/zh\/releases\/$/);
-  assert.match(findings[2].url, /\/en\/use-case\/open-source-maintainers\/$/);
+  assert.match(findings[2].url, /\/examples\/static-good\/index\.html$/);
+  assert.match(findings[5].url, /\/zh\/examples\/static-good\/index\.html$/);
+  assert.match(findings[8].url, /\/en\/use-case\/open-source-maintainers\/$/);
 });
 
 function pageForUrl(url: string): string {
@@ -60,6 +61,30 @@ function pageForUrl(url: string): string {
     return [
       "下载最新的 AnswerLens 发布版本",
       SHOW_AND_TELL_DISCUSSION_URL,
+      "share-summary.md",
+      "scorecard.md",
+      "recommendations.md"
+    ].join("\n");
+  }
+
+  if (url.endsWith("/zh/examples/static-good/index.html")) {
+    return [
+      "审阅并分享这次运行",
+      SHOW_AND_TELL_DISCUSSION_URL,
+      "first-run story template",
+      "raw provider payloads",
+      "share-summary.md",
+      "scorecard.md",
+      "recommendations.md"
+    ].join("\n");
+  }
+
+  if (url.endsWith("/examples/static-good/index.html")) {
+    return [
+      "Review and share this run",
+      SHOW_AND_TELL_DISCUSSION_URL,
+      "first-run story template",
+      "raw provider payloads",
       "share-summary.md",
       "scorecard.md",
       "recommendations.md"
