@@ -141,6 +141,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkAuditEvalKeyBoundary(rootDir, findings);
   await checkReleasePagesRefresh(rootDir, findings);
   await checkStableReleaseVersionSync(rootDir, findings);
+  await checkSelfDogfoodLogBoundary(rootDir, findings);
 
   return findings;
 }
@@ -452,6 +453,55 @@ async function checkStableReleaseVersionSync(rootDir: string, findings: Finding[
           message: `Expected current stable release snippet ${JSON.stringify(snippet)}.`
         });
       }
+    }
+  }
+}
+
+async function checkSelfDogfoodLogBoundary(rootDir: string, findings: Finding[]): Promise<void> {
+  const relativePath = "docs/self-dogfood-log.md";
+  let text: string;
+  try {
+    text = await readFile(path.join(rootDir, relativePath), "utf8");
+  } catch (error) {
+    findings.push({
+      ruleId: "self-dogfood-log-boundary",
+      path: relativePath,
+      message: `Unable to read self-dogfood log needed for public claim guardrails: ${error instanceof Error ? error.message : String(error)}`
+    });
+    return;
+  }
+
+  const entriesSection = text.split(/^## Entries\b/m)[1] ?? "";
+  const entries = entriesSection
+    .split(/^### /m)
+    .slice(1)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+  if (entries.length === 0) {
+    findings.push({
+      ruleId: "self-dogfood-log-boundary",
+      path: relativePath,
+      message: "Self-dogfood log must keep at least one dated entry with explicit no-claim boundaries."
+    });
+    return;
+  }
+
+  for (const entry of entries) {
+    const title = entry.split(/\r?\n/, 1)[0] ?? "(untitled entry)";
+    const hasThingsNotClaimed = /- Things not claimed:/i.test(entry);
+    const preservesNoClaims =
+      /\bno ranking\b/i.test(entry) &&
+      /\bno traffic\b/i.test(entry) &&
+      /\bno answer-surface\b/i.test(entry) &&
+      /\bno external adoption\b/i.test(entry);
+
+    if (!hasThingsNotClaimed || !preservesNoClaims) {
+      findings.push({
+        ruleId: "self-dogfood-log-boundary",
+        path: relativePath,
+        message: `Self-dogfood entry "${title}" must explicitly say what is not claimed: no ranking, traffic, answer-surface placement, or external adoption proof.`
+      });
     }
   }
 }

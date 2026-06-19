@@ -163,6 +163,26 @@ test("public-surface-check rejects stable version drift across release and adopt
   assert.ok(ruleIds.includes("stable-version-surface-pin"));
 });
 
+test("public-surface-check rejects self-dogfood entries without explicit no-claim boundaries", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "docs/self-dogfood-log.md",
+    [
+      "# Self-Dogfood Log",
+      "## Entries",
+      "### 2026-06-19: Drifted Entry",
+      "- Audited surface: Pages.",
+      "- Things not claimed: this run improved the project."
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("self-dogfood-log-boundary"));
+});
+
 async function createPublicSurfaceFixture(): Promise<string> {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-public-surface-"));
   await writeFixtureFile(rootDir, "package.json", JSON.stringify({ name: "answerlens-workspace", version: STABLE_VERSION }, null, 2));
@@ -305,6 +325,16 @@ async function createPublicSurfaceFixture(): Promise<string> {
   );
   await writeFixtureFile(rootDir, "docs/first-run-story.md", artifactOrderText());
   await writeFixtureFile(rootDir, "docs/trust-and-safety.md", artifactOrderText());
+  await writeFixtureFile(
+    rootDir,
+    "docs/self-dogfood-log.md",
+    [
+      "# Self-Dogfood Log",
+      "## Entries",
+      "### 2026-06-19: Compliant Entry",
+      "- Things not claimed: no ranking lift, no traffic lift, no answer-surface placement, and no external adoption proof."
+    ].join("\n")
+  );
   await writeFixtureFile(rootDir, ".github/answerlens/runtime.yaml", safeRuntimeYaml());
   await writeFixtureFile(rootDir, "examples/acme/runtime.yaml", safeRuntimeYaml());
   await writeFixtureFile(rootDir, "examples/consumer-repo/.github/answerlens/runtime.yaml", safeRuntimeYaml());
