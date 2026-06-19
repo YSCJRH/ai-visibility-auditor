@@ -442,7 +442,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
         scripts: {
           "pages:smoke": "node --experimental-strip-types scripts/distribution/pages-smoke-check.ts",
           "release:snapshot:check": "node --experimental-strip-types scripts/distribution/release-snapshot-check.ts",
-          test: "node --experimental-strip-types --experimental-test-isolation=none --test scripts/distribution/public-surface-check.test.ts scripts/distribution/release-snapshot-check.test.ts"
+          "release:snapshot:refresh": "node --experimental-strip-types scripts/distribution/release-snapshot-refresh.ts",
+          test: "node --experimental-strip-types --experimental-test-isolation=none --test scripts/distribution/public-surface-check.test.ts scripts/distribution/release-snapshot-check.test.ts scripts/distribution/release-snapshot-refresh.test.ts"
         }
       },
       null,
@@ -635,6 +636,9 @@ async function createPublicSurfaceFixture(): Promise<string> {
     "docs/release-bump-playbook.md",
     [
       "If public:check fails with stable-version-*, fix the drift instead of weakening the rule.",
+      "Run corepack pnpm release:snapshot:refresh -- --write after GitHub publishes the release.",
+      "Run corepack pnpm release:snapshot:check after refreshing the snapshot.",
+      "Use the helper to replace guessed fields such as published_at with GitHub metadata.",
       "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`."
     ].join("\n")
   );
@@ -714,6 +718,17 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "const rule = 'release-snapshot-freshness';",
       "const url = `https://api.github.com/repos/${repository}/releases?per_page=20`;",
       "const stable = draft !== true && release.prerelease !== true;"
+    ].join("\n")
+  );
+  await writeFixtureFile(
+    rootDir,
+    "scripts/distribution/release-snapshot-refresh.ts",
+    [
+      "export async function runReleaseSnapshotRefresh() {}",
+      "const userAgent = 'answerlens-release-snapshot-refresh';",
+      "const publicRelease = release.draft !== true;",
+      "await writeFile(snapshotPath, nextText, 'utf8');",
+      "console.log('Re-run with --write to update scripts/distribution/releases-snapshot.json.');"
     ].join("\n")
   );
   await writeFixtureFile(

@@ -15,6 +15,15 @@ npm view @answerlens/cli version --json --fetch-timeout=5000 --fetch-retries=0
 
 If npm still returns `E404`, keep npm described as a manual activation item and keep using GitHub release assets or a local checkout in public docs.
 
+For existing published releases, refresh the local snapshot from GitHub before editing release-facing copy:
+
+```bash
+corepack pnpm release:snapshot:refresh -- --write
+corepack pnpm release:snapshot:check
+```
+
+For a new unreleased semver tag, prepare the intended snapshot entry from the planned release notes during the release PR, then run the refresh command above after the Release Distribution workflow publishes the GitHub release. That follow-up replaces guessed fields such as `published_at` with GitHub's actual metadata.
+
 ## Release PR Scope
 
 A release bump PR should update these surfaces together:
@@ -77,11 +86,13 @@ gh release view vX.Y.Z --json tagName,publishedAt,url,isDraft,isPrerelease
 gh run list --branch main --limit 5 --json name,status,conclusion,headSha,url
 npm view @answerlens/cli version --json --fetch-timeout=5000 --fetch-retries=0
 corepack pnpm public:check
+corepack pnpm release:snapshot:refresh -- --write
+corepack pnpm release:snapshot:check
 corepack pnpm build:site
 corepack pnpm seo:check
 ```
 
-If npm still returns `E404`, do not add npm install copy. Record trusted publishing or `NPM_TOKEN` as a manual step.
+If `release:snapshot:refresh -- --write` changes `scripts/distribution/releases-snapshot.json`, review the diff and ship a small truth-sync PR before making new Pages or release claims. If npm still returns `E404`, do not add npm install copy. Record trusted publishing or `NPM_TOKEN` as a manual step.
 
 ## What Not To Do
 

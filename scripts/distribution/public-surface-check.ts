@@ -707,6 +707,14 @@ async function checkReleaseSnapshotFreshnessGate(rootDir: string, findings: Find
       message: "package.json must expose release:snapshot:check so release metadata freshness is locally runnable."
     });
   }
+  const expectedRefreshScript = "node --experimental-strip-types scripts/distribution/release-snapshot-refresh.ts";
+  if (packageJson?.scripts?.["release:snapshot:refresh"] !== expectedRefreshScript) {
+    findings.push({
+      ruleId: "release-snapshot-freshness-gate",
+      path: packageJsonPath,
+      message: "package.json must expose release:snapshot:refresh so release metadata can be refreshed from GitHub."
+    });
+  }
 
   const testScript = typeof packageJson?.scripts?.test === "string" ? packageJson.scripts.test : "";
   if (!testScript.includes("scripts/distribution/release-snapshot-check.test.ts")) {
@@ -716,20 +724,47 @@ async function checkReleaseSnapshotFreshnessGate(rootDir: string, findings: Find
       message: "package.json test script must include release-snapshot-check.test.ts."
     });
   }
+  if (!testScript.includes("scripts/distribution/release-snapshot-refresh.test.ts")) {
+    findings.push({
+      ruleId: "release-snapshot-freshness-gate",
+      path: packageJsonPath,
+      message: "package.json test script must include release-snapshot-refresh.test.ts."
+    });
+  }
 
   const ciPath = ".github/workflows/ci.yml";
-  const scriptPath = "scripts/distribution/release-snapshot-check.ts";
+  const checkScriptPath = "scripts/distribution/release-snapshot-check.ts";
+  const refreshScriptPath = "scripts/distribution/release-snapshot-refresh.ts";
+  const playbookPath = "docs/release-bump-playbook.md";
   const requiredSurfaces = [
     {
       path: ciPath,
       snippets: ["pnpm release:snapshot:check"]
     },
     {
-      path: scriptPath,
+      path: checkScriptPath,
       snippets: [
         "release-snapshot-freshness",
         "https://api.github.com/repos/${repository}/releases?per_page=20",
         "draft !== true && release.prerelease !== true"
+      ]
+    },
+    {
+      path: refreshScriptPath,
+      snippets: [
+        "answerlens-release-snapshot-refresh",
+        "runReleaseSnapshotRefresh",
+        "writeFile(snapshotPath",
+        "release.draft !== true",
+        "Re-run with --write"
+      ]
+    },
+    {
+      path: playbookPath,
+      snippets: [
+        "corepack pnpm release:snapshot:refresh -- --write",
+        "corepack pnpm release:snapshot:check",
+        "published_at"
       ]
     }
   ];
