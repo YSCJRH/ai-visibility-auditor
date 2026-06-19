@@ -204,6 +204,27 @@ test("public-surface-check rejects release snapshot freshness gates that are not
   assert.ok(ruleIds.includes("release-snapshot-freshness-gate"));
 });
 
+test("public-surface-check rejects release snapshot CI without an authenticated GitHub token", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/ci.yml",
+    [
+      "steps:",
+      "  - uses: actions/checkout@v5",
+      "  - uses: actions/setup-node@v5",
+      "  - uses: actions/github-script@v8",
+      "  - uses: actions/upload-artifact@v6",
+      "  - run: pnpm release:snapshot:check"
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("release-snapshot-freshness-gate"));
+});
+
 test("public-surface-check rejects release surfaces without asset checklist boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, "docs/manual-steps.md", `Use the reviewed release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`);
@@ -241,6 +262,26 @@ test("public-surface-check rejects release workflows without asset manifest gene
   const ruleIds = findings.map((finding) => finding.ruleId);
 
   assert.ok(ruleIds.includes("release-asset-manifest-gate"));
+});
+
+test("public-surface-check rejects release asset docs without downloaded manifest verification", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "docs/release-bump-playbook.md",
+    [
+      "If public:check fails with stable-version-*, fix the drift instead of weakening the rule.",
+      "Run corepack pnpm release:snapshot:refresh -- --write after GitHub publishes the release.",
+      "Run corepack pnpm release:snapshot:check after refreshing the snapshot.",
+      "Use the helper to replace guessed fields such as published_at with GitHub metadata.",
+      "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`."
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("release-asset-checklist-boundary"));
 });
 
 test("public-surface-check rejects stable version drift across release and adoption surfaces", async () => {
@@ -669,7 +710,9 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "Run corepack pnpm release:snapshot:refresh -- --write after GitHub publishes the release.",
       "Run corepack pnpm release:snapshot:check after refreshing the snapshot.",
       "Use the helper to replace guessed fields such as published_at with GitHub metadata.",
-      "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`."
+      "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
+      "Run gh release download vX.Y.Z before corepack pnpm release:assets:manifest -- --verify.",
+      "If an older release does not have release-assets-manifest.json, do not imply checksum coverage for that release."
     ].join("\n")
   );
   await writeFixtureFile(
@@ -681,7 +724,12 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "CLI tarball",
       "answerlens-demo-audit.tar.gz",
       "answerlens-site.tar.gz",
+      "release-assets-manifest.json",
+      "SHA-256",
+      "gh release download vX.Y.Z",
+      "corepack pnpm release:assets:manifest -- --verify",
       "Open by opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
+      "If a release predates release-assets-manifest.json, do not backfill a checksum claim.",
       "If `npm view @answerlens/cli` returns `404`, do not present npm as activated."
     ].join("\n")
   );
@@ -694,7 +742,12 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "CLI tarball",
       "answerlens-demo-audit.tar.gz",
       "answerlens-site.tar.gz",
+      "release-assets-manifest.json",
+      "SHA-256",
+      "gh release download vX.Y.Z",
+      "corepack pnpm release:assets:manifest -- --verify",
       "`share-summary.md`、`scorecard.md`、`recommendations.md`",
+      "不要把 checksum claim 回填进公开 release story",
       "如果 `npm view @answerlens/cli` 返回 `404`，不要把 npm 描述成已激活。"
     ].join("\n")
   );
@@ -739,7 +792,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(
     rootDir,
     ".github/workflows/ci.yml",
-    "steps:\n  - uses: actions/checkout@v5\n  - uses: actions/setup-node@v5\n  - uses: actions/github-script@v8\n  - uses: actions/upload-artifact@v6\n  - run: pnpm release:snapshot:check\n"
+    "steps:\n  - uses: actions/checkout@v5\n  - uses: actions/setup-node@v5\n  - uses: actions/github-script@v8\n  - uses: actions/upload-artifact@v6\n  - run: pnpm release:snapshot:check\n    env:\n      GITHUB_TOKEN: ${{ github.token }}\n"
   );
   await writeFixtureFile(
     rootDir,

@@ -46,7 +46,12 @@ export async function runReleaseSnapshotCheck(options: ReleaseSnapshotCheckOptio
   const snapshot = await readReleaseFile(snapshotPath, "release-snapshot-read", findings);
   const remote = options.remoteReleasesPath
     ? await readReleaseFile(path.resolve(options.remoteReleasesPath), "release-snapshot-remote", findings)
-    : await fetchRemoteReleases(repository, options.githubToken ?? process.env.GITHUB_TOKEN, options.fetchImpl ?? (globalThis.fetch as unknown as FetchLike), findings);
+    : await fetchRemoteReleases(
+        repository,
+        options.githubToken ?? process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN,
+        options.fetchImpl ?? (globalThis.fetch as unknown as FetchLike),
+        findings
+      );
 
   if (!snapshot || !remote) {
     return findings;

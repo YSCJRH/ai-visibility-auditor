@@ -33,6 +33,22 @@ The expected public assets on each semver release are:
 1. CLI tarball, such as `answerlens-cli-*.tgz`, for pinned local CLI runs before npm is visible.
 2. `answerlens-demo-audit.tar.gz`, for unpacking the fixture report and opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
 3. `answerlens-site.tar.gz`, for inspecting the compiled Pages bundle for docs, examples, starter, and release pages at that tag.
+4. `release-assets-manifest.json`, for verifying downloaded asset sizes and SHA-256 checksums before reusing the tarballs.
+
+For releases that include `release-assets-manifest.json`, download the manifest and the assets into the same directory, then verify the downloaded files from a local checkout:
+
+```bash
+assets_dir="$(mktemp -d)"
+gh release download vX.Y.Z \
+  --pattern 'answerlens-cli-*.tgz' \
+  --pattern answerlens-demo-audit.tar.gz \
+  --pattern answerlens-site.tar.gz \
+  --pattern release-assets-manifest.json \
+  --dir "$assets_dir"
+corepack pnpm release:assets:manifest -- --verify "$assets_dir/release-assets-manifest.json"
+```
+
+If a release predates `release-assets-manifest.json`, do not backfill a checksum claim into the public release story; inspect the available assets and record the gap as release metadata history.
 
 If `npm view @answerlens/cli` returns `404`, do not present npm as activated. Keep release assets and local checkout as the public install/download path until the registry package is visible.
 

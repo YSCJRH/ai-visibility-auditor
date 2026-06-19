@@ -84,7 +84,14 @@ Confirm the public state after the workflow completes:
 ```bash
 gh release view vX.Y.Z --json tagName,publishedAt,url,isDraft,isPrerelease
 gh run list --branch main --limit 5 --json name,status,conclusion,headSha,url
-gh release download vX.Y.Z --pattern release-assets-manifest.json --dir /tmp/answerlens-release-assets
+assets_dir="$(mktemp -d)"
+gh release download vX.Y.Z \
+  --pattern 'answerlens-cli-*.tgz' \
+  --pattern answerlens-demo-audit.tar.gz \
+  --pattern answerlens-site.tar.gz \
+  --pattern release-assets-manifest.json \
+  --dir "$assets_dir"
+corepack pnpm release:assets:manifest -- --verify "$assets_dir/release-assets-manifest.json"
 npm view @answerlens/cli version --json --fetch-timeout=5000 --fetch-retries=0
 corepack pnpm public:check
 corepack pnpm release:snapshot:refresh -- --write
@@ -93,7 +100,7 @@ corepack pnpm build:site
 corepack pnpm seo:check
 ```
 
-If `release:snapshot:refresh -- --write` changes `scripts/distribution/releases-snapshot.json`, review the diff and ship a small truth-sync PR before making new Pages or release claims. If npm still returns `E404`, do not add npm install copy. Record trusted publishing or `NPM_TOKEN` as a manual step.
+If `release:snapshot:refresh -- --write` changes `scripts/distribution/releases-snapshot.json`, review the diff and ship a small truth-sync PR before making new Pages or release claims. If npm still returns `E404`, do not add npm install copy. If an older release does not have `release-assets-manifest.json`, do not imply checksum coverage for that release. Record trusted publishing or `NPM_TOKEN` as a manual step.
 
 ## What Not To Do
 
