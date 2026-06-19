@@ -8,7 +8,7 @@ Use it after this path:
 2. Run `corepack pnpm demo:fixture`.
 3. Run one real-site audit with [quickstart.md](quickstart.md).
 4. Open `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
-5. If you used release assets, record the release tag and the asset names instead of implying npm is activated.
+5. If you used release assets, record the release tag, asset names, and `release-assets-summary.md` when the release provides it instead of implying npm is activated.
 
 ## Where To Share
 
@@ -46,6 +46,8 @@ Release asset evidence, if relevant:
 - [ ] CLI tarball, such as `answerlens-cli-*.tgz`
 - [ ] `answerlens-demo-audit.tar.gz`
 - [ ] `answerlens-site.tar.gz`
+- [ ] `release-assets-manifest.json`, if present on that release
+- [ ] `release-assets-summary.md`, if present on that release
 - [ ] I opened `share-summary.md`, then `scorecard.md`, then `recommendations.md` from the unpacked demo audit bundle
 - [ ] I am not treating release assets as npm activation proof while `npm view @answerlens/cli` returns `404`
 
