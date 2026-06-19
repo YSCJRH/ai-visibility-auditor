@@ -41,7 +41,7 @@ body:
     id: artifacts
     attributes:
       label: Public artifacts
-      description: Link screenshots, reports, PRs, or release notes that are safe to share. List `share-summary.md`, `scorecard.md`, and `recommendations.md` before optional artifacts.
-      placeholder: "- share-summary.md\n- scorecard.md\n- recommendations.md\n- before-after-diff.md"
+      description: Link screenshots, reports, PRs, or release notes that are safe to share. List `share-summary.md`, `scorecard.md`, and `recommendations.md` before optional artifacts. If the run used release assets, include the release tag and the asset names; do not use release asset downloads as npm activation proof.
+      placeholder: "- share-summary.md\n- scorecard.md\n- recommendations.md\n- release tag: vX.Y.Z, or the exact tag you used\n- release assets: answerlens-demo-audit.tar.gz, answerlens-site.tar.gz"
     validations:
       required: false
