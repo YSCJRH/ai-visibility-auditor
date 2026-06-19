@@ -214,6 +214,35 @@ test("public-surface-check rejects release surfaces without asset checklist boun
   assert.ok(ruleIds.includes("release-asset-checklist-boundary"));
 });
 
+test("public-surface-check rejects release workflows without asset manifest generation", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/release-distribution.yml",
+    [
+      "name: Release Distribution",
+      "permissions:",
+      "  actions: write",
+      "  contents: write",
+      "  id-token: write",
+      "jobs:",
+      "  release:",
+      "    steps:",
+      "      - run: echo \"## Release asset checklist\"",
+      "      - run: echo \"answerlens-cli-*.tgz\"",
+      "      - run: echo \"`answerlens-demo-audit.tar.gz`\"",
+      "      - run: echo \"`answerlens-site.tar.gz`\"",
+      "      - run: echo \"If `npm view @answerlens/cli` returns `404`, keep release assets or local checkout as the public path\"",
+      "      - run: gh workflow run pages.yml --ref main"
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("release-asset-manifest-gate"));
+});
+
 test("public-surface-check rejects stable version drift across release and adoption surfaces", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, "apps/cli/package.json", JSON.stringify({ name: "@answerlens/cli", version: "0.3.6" }, null, 2));
@@ -441,9 +470,10 @@ async function createPublicSurfaceFixture(): Promise<string> {
         version: STABLE_VERSION,
         scripts: {
           "pages:smoke": "node --experimental-strip-types scripts/distribution/pages-smoke-check.ts",
+          "release:assets:manifest": "node --experimental-strip-types scripts/distribution/release-assets-manifest.ts",
           "release:snapshot:check": "node --experimental-strip-types scripts/distribution/release-snapshot-check.ts",
           "release:snapshot:refresh": "node --experimental-strip-types scripts/distribution/release-snapshot-refresh.ts",
-          test: "node --experimental-strip-types --experimental-test-isolation=none --test scripts/distribution/public-surface-check.test.ts scripts/distribution/release-snapshot-check.test.ts scripts/distribution/release-snapshot-refresh.test.ts"
+          test: "node --experimental-strip-types --experimental-test-isolation=none --test scripts/distribution/public-surface-check.test.ts scripts/distribution/release-assets-manifest.test.ts scripts/distribution/release-snapshot-check.test.ts scripts/distribution/release-snapshot-refresh.test.ts"
         }
       },
       null,
@@ -639,7 +669,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "Run corepack pnpm release:snapshot:refresh -- --write after GitHub publishes the release.",
       "Run corepack pnpm release:snapshot:check after refreshing the snapshot.",
       "Use the helper to replace guessed fields such as published_at with GitHub metadata.",
-      "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`."
+      "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`."
     ].join("\n")
   );
   await writeFixtureFile(
@@ -733,6 +763,18 @@ async function createPublicSurfaceFixture(): Promise<string> {
   );
   await writeFixtureFile(
     rootDir,
+    "scripts/distribution/release-assets-manifest.ts",
+    [
+      "const kind = 'answerlens-release-assets-manifest';",
+      "const checksum = 'sha256';",
+      "const cli = 'answerlens-cli-*.tgz';",
+      "const demo = 'answerlens-demo-audit.tar.gz';",
+      "const site = 'answerlens-site.tar.gz';",
+      "const boundary = 'do not present npm as activated';"
+    ].join("\n")
+  );
+  await writeFixtureFile(
+    rootDir,
     ".github/workflows/pages.yml",
     [
       "name: Pages",
@@ -772,6 +814,14 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "      - run: echo \"answerlens-cli-*.tgz\"",
       "      - run: echo \"`answerlens-demo-audit.tar.gz`\"",
       "      - run: echo \"`answerlens-site.tar.gz`\"",
+      "      - run: pnpm release:assets:manifest -- --out dist/release-assets-manifest.json dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz",
+      "      - run: pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json",
+      "      - run: echo \"`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums\"",
+      "      - run: gh release upload \"$RELEASE_TAG\" dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz dist/release-assets-manifest.json --clobber",
+      "      - uses: actions/upload-artifact@v6",
+      "        with:",
+      "          path: |",
+      "            dist/release-assets-manifest.json",
       "      - run: echo \"If `npm view @answerlens/cli` returns `404`, keep release assets or local checkout as the public path\"",
       `      - run: echo \"Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.\"`,
       "      - run: gh workflow run pages.yml --ref main"

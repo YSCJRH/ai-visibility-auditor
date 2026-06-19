@@ -59,7 +59,7 @@ Release notes should keep the same product contract:
 - Optional `eval` is BYOK; secrets stay in environment variables or GitHub secrets, not `runtime.yaml`.
 - Public summaries and default GitHub artifacts should not expose raw provider payloads.
 - npm publish is skipped unless `NPM_TOKEN` or trusted publishing is configured.
-- Include a release asset checklist: CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, and the report order `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
+- Include a release asset checklist: CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, and the report order `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
 
 Do not add users, stars, forks, downloads, traffic, growth percentages, testimonials, or case studies unless the evidence is visible and explicitly authorized.
 
@@ -75,7 +75,7 @@ git tag vX.Y.Z
 git push origin vX.Y.Z
 ```
 
-The `Release Distribution` workflow validates that `apps/cli/package.json` matches the tag, runs the release gate, publishes or updates the GitHub release, uploads release assets, skips npm when credentials are unavailable, and dispatches the Pages workflow on `main`.
+The `Release Distribution` workflow validates that `apps/cli/package.json` matches the tag, runs the release gate, writes and verifies `release-assets-manifest.json`, publishes or updates the GitHub release, uploads release assets, skips npm when credentials are unavailable, and dispatches the Pages workflow on `main`.
 
 ## Post-Release Verification
 
@@ -84,6 +84,7 @@ Confirm the public state after the workflow completes:
 ```bash
 gh release view vX.Y.Z --json tagName,publishedAt,url,isDraft,isPrerelease
 gh run list --branch main --limit 5 --json name,status,conclusion,headSha,url
+gh release download vX.Y.Z --pattern release-assets-manifest.json --dir /tmp/answerlens-release-assets
 npm view @answerlens/cli version --json --fetch-timeout=5000 --fetch-retries=0
 corepack pnpm public:check
 corepack pnpm release:snapshot:refresh -- --write

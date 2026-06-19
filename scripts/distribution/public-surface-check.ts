@@ -150,6 +150,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkPagesPostdeploySmoke(rootDir, findings);
   await checkReleaseSnapshotFreshnessGate(rootDir, findings);
   await checkReleaseAssetChecklistBoundary(rootDir, findings);
+  await checkReleaseAssetManifestGate(rootDir, findings);
   await checkStableReleaseVersionSync(rootDir, findings);
   await checkSelfDogfoodLogBoundary(rootDir, findings);
 
@@ -825,6 +826,7 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "CLI tarball",
         "`answerlens-demo-audit.tar.gz`",
         "`answerlens-site.tar.gz`",
+        "`release-assets-manifest.json`",
         "`share-summary.md`, then `scorecard.md`, then `recommendations.md`"
       ]
     },
@@ -869,6 +871,83 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
           ruleId: "release-asset-checklist-boundary",
           path: surface.path,
           message: `Missing release asset checklist boundary text: ${snippet}`
+        });
+      }
+    }
+  }
+}
+
+async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[]): Promise<void> {
+  const packageJsonPath = "package.json";
+  const packageJson = await readRequiredJson<{ scripts?: Record<string, unknown> }>(
+    rootDir,
+    packageJsonPath,
+    findings,
+    "release-asset-manifest-gate"
+  );
+  const expectedScript = "node --experimental-strip-types scripts/distribution/release-assets-manifest.ts";
+  if (packageJson?.scripts?.["release:assets:manifest"] !== expectedScript) {
+    findings.push({
+      ruleId: "release-asset-manifest-gate",
+      path: packageJsonPath,
+      message: "package.json must expose release:assets:manifest so release asset checksums are locally runnable."
+    });
+  }
+
+  const testScript = typeof packageJson?.scripts?.test === "string" ? packageJson.scripts.test : "";
+  if (!testScript.includes("scripts/distribution/release-assets-manifest.test.ts")) {
+    findings.push({
+      ruleId: "release-asset-manifest-gate",
+      path: packageJsonPath,
+      message: "package.json test script must include release-assets-manifest.test.ts."
+    });
+  }
+
+  const workflowPath = ".github/workflows/release-distribution.yml";
+  const scriptPath = "scripts/distribution/release-assets-manifest.ts";
+  const requiredSurfaces = [
+    {
+      path: workflowPath,
+      snippets: [
+        "pnpm release:assets:manifest -- --out dist/release-assets-manifest.json",
+        "pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json",
+        "`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums",
+        "dist/release-assets-manifest.json --clobber",
+        "dist/release-assets-manifest.json"
+      ]
+    },
+    {
+      path: scriptPath,
+      snippets: [
+        "answerlens-release-assets-manifest",
+        "sha256",
+        "answerlens-cli-*.tgz",
+        "answerlens-demo-audit.tar.gz",
+        "answerlens-site.tar.gz",
+        "do not present npm as activated"
+      ]
+    }
+  ];
+
+  for (const surface of requiredSurfaces) {
+    let text: string;
+    try {
+      text = await readFile(path.join(rootDir, surface.path), "utf8");
+    } catch (error) {
+      findings.push({
+        ruleId: "release-asset-manifest-gate",
+        path: surface.path,
+        message: `Unable to read release asset manifest surface: ${error instanceof Error ? error.message : String(error)}`
+      });
+      continue;
+    }
+
+    for (const snippet of surface.snippets) {
+      if (!text.includes(snippet)) {
+        findings.push({
+          ruleId: "release-asset-manifest-gate",
+          path: surface.path,
+          message: `Missing release asset manifest gate snippet: ${snippet}`
         });
       }
     }
