@@ -39,8 +39,9 @@
 2. `answerlens-demo-audit.tar.gz`，用于解压 fixture 报告，并按 `share-summary.md`、`scorecard.md`、`recommendations.md` 的顺序审阅。
 3. `answerlens-site.tar.gz`，用于检查该 tag 对应的 docs、examples、starter 和 release 页面编译结果。
 4. `release-assets-manifest.json`，用于在复用 tarball 之前校验已下载文件的大小和 SHA-256 checksum。
+5. `release-assets-summary.md`，用于读取可转发的 verified asset table；它可以进入 release review，但不暴露 raw provider payloads。
 
-对于包含 `release-assets-manifest.json` 的 release，把 manifest 和所有 assets 下载到同一个目录，然后在本地 checkout 中校验已下载文件：
+对于同时包含 `release-assets-manifest.json` 和 `release-assets-summary.md` 的 release，把 manifest、summary 和所有 assets 下载到同一个目录，然后在本地 checkout 中校验已下载文件：
 
 ```bash
 assets_dir="$(mktemp -d)"
@@ -49,11 +50,12 @@ gh release download vX.Y.Z \
   --pattern answerlens-demo-audit.tar.gz \
   --pattern answerlens-site.tar.gz \
   --pattern release-assets-manifest.json \
+  --pattern release-assets-summary.md \
   --dir "$assets_dir"
 corepack pnpm release:assets:manifest -- --verify "$assets_dir/release-assets-manifest.json"
 ```
 
-如果某个 release 早于 `release-assets-manifest.json`，不要把 checksum claim 回填进公开 release story；只检查已有 assets，并把这个缺口记录为 release metadata 历史。
+如果某个 release 早于 `release-assets-manifest.json` 或 `release-assets-summary.md`，不要把 checksum claim 回填进公开 release story；只检查已有 assets，并把这个缺口记录为 release metadata 历史。
 
 如果 `npm view @answerlens/cli` 返回 `404`，不要把 npm 描述成已激活。继续把 release assets 和本地 checkout 作为公开下载与运行路径，直到 registry package 可见。
 

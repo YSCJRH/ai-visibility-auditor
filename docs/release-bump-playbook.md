@@ -59,7 +59,7 @@ Release notes should keep the same product contract:
 - Optional `eval` is BYOK; secrets stay in environment variables or GitHub secrets, not `runtime.yaml`.
 - Public summaries and default GitHub artifacts should not expose raw provider payloads.
 - npm publish is skipped unless `NPM_TOKEN` or trusted publishing is configured.
-- Include a release asset checklist: CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, and the report order `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
+- Include a release asset checklist: CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, `release-assets-summary.md`, and the report order `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
 
 Do not add users, stars, forks, downloads, traffic, growth percentages, testimonials, or case studies unless the evidence is visible and explicitly authorized.
 
@@ -75,7 +75,7 @@ git tag vX.Y.Z
 git push origin vX.Y.Z
 ```
 
-The `Release Distribution` workflow validates that `apps/cli/package.json` matches the tag, runs the release gate, writes and verifies `release-assets-manifest.json`, publishes or updates the GitHub release, uploads release assets, skips npm when credentials are unavailable, and dispatches the Pages workflow on `main`.
+The `Release Distribution` workflow validates that `apps/cli/package.json` matches the tag, runs the release gate, writes and verifies `release-assets-manifest.json`, writes `release-assets-summary.md`, publishes or updates the GitHub release, uploads release assets, skips npm when credentials are unavailable, and dispatches the Pages workflow on `main`.
 
 ## Post-Release Verification
 
@@ -90,6 +90,7 @@ gh release download vX.Y.Z \
   --pattern answerlens-demo-audit.tar.gz \
   --pattern answerlens-site.tar.gz \
   --pattern release-assets-manifest.json \
+  --pattern release-assets-summary.md \
   --dir "$assets_dir"
 corepack pnpm release:assets:manifest -- --verify "$assets_dir/release-assets-manifest.json"
 npm view @answerlens/cli version --json --fetch-timeout=5000 --fetch-retries=0
@@ -100,9 +101,9 @@ corepack pnpm build:site
 corepack pnpm seo:check
 ```
 
-In the Release Distribution workflow summary, review the `Release asset manifest verified` table before reusing downloaded release assets.
+Open `release-assets-summary.md` first when you only need the human-readable checksum table; run the manifest verification command before reusing tarballs. In the Release Distribution workflow summary, review the `Release asset manifest verified` table before reusing downloaded release assets.
 
-If `release:snapshot:refresh -- --write` changes `scripts/distribution/releases-snapshot.json`, review the diff and ship a small truth-sync PR before making new Pages or release claims. If npm still returns `E404`, do not add npm install copy. If an older release does not have `release-assets-manifest.json`, do not imply checksum coverage for that release. Record trusted publishing or `NPM_TOKEN` as a manual step.
+If `release:snapshot:refresh -- --write` changes `scripts/distribution/releases-snapshot.json`, review the diff and ship a small truth-sync PR before making new Pages or release claims. If npm still returns `E404`, do not add npm install copy. If an older release does not have `release-assets-manifest.json` or `release-assets-summary.md`, do not imply checksum coverage for that release. Record trusted publishing or `NPM_TOKEN` as a manual step.
 
 ## What Not To Do
 

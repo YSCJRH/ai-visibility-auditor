@@ -805,6 +805,7 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "answerlens-demo-audit.tar.gz",
         "answerlens-site.tar.gz",
         "release-assets-manifest.json",
+        "release-assets-summary.md",
         "SHA-256",
         "gh release download vX.Y.Z",
         "corepack pnpm release:assets:manifest -- --verify",
@@ -821,6 +822,7 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "answerlens-demo-audit.tar.gz",
         "answerlens-site.tar.gz",
         "release-assets-manifest.json",
+        "release-assets-summary.md",
         "SHA-256",
         "gh release download vX.Y.Z",
         "corepack pnpm release:assets:manifest -- --verify",
@@ -837,6 +839,7 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "`answerlens-demo-audit.tar.gz`",
         "`answerlens-site.tar.gz`",
         "`release-assets-manifest.json`",
+        "`release-assets-summary.md`",
         "gh release download vX.Y.Z",
         "corepack pnpm release:assets:manifest -- --verify",
         "do not imply checksum coverage for that release",
@@ -850,6 +853,7 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "answerlens-cli-*.tgz",
         "`answerlens-demo-audit.tar.gz`",
         "`answerlens-site.tar.gz`",
+        "`release-assets-summary.md`",
         "If `npm view @answerlens/cli` returns `404`, keep release assets or local checkout as the public path"
       ]
     },
@@ -927,7 +931,8 @@ async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[
         "--summary-out dist/release-assets-summary.md",
         "cat dist/release-assets-summary.md >> \"$GITHUB_STEP_SUMMARY\"",
         "`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums",
-        "dist/release-assets-manifest.json --clobber",
+        "`release-assets-summary.md`: read the verified asset table",
+        "dist/release-assets-manifest.json dist/release-assets-summary.md --clobber",
         "dist/release-assets-manifest.json",
         "dist/release-assets-summary.md"
       ]
@@ -950,6 +955,7 @@ async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[
       snippets: [
         "Release Distribution workflow summary",
         "Release asset manifest verified",
+        "release-assets-summary.md",
         "before reusing downloaded release assets"
       ]
     }
