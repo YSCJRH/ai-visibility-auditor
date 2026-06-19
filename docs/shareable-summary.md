@@ -48,6 +48,7 @@ Audit whether a product site can be read, cited, compared, and recommended by AI
 2. Open `recommendations.md` to turn the top gap into a page-level fix.
 3. Use `pr-snippet.md` when you want a copy-ready GitHub block.
 4. Use the AnswerLens starter bundle when this workflow is ready to move into another repository: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/starter-bundle.md
+5. If this first run is safe to discuss, use the first-run story template and Show and tell Discussion form: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/first-run-story.md and https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell
 
 ## Shareable artifacts
 
@@ -60,6 +61,7 @@ Audit whether a product site can be read, cited, compared, and recommended by AI
 ## Guardrails
 
 AnswerLens does not scrape consumer AI UIs, auto-post content, or guarantee answer-surface rankings.
+Keep API keys, private analytics, and raw provider payloads out of public PRs, issues, release notes, and Discussions.
 ```
 
 ## `share-summary.json`
@@ -128,8 +130,11 @@ Use this when a team wants a copy-ready GitHub block:
 - Recommendations: `recommendations.md`
 - Machine-readable summary: `share-summary.json`
 - Copyable starter: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/starter-bundle.md
+- First-run story template: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/first-run-story.md
+- Show and tell Discussion form: https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell
 
 AnswerLens does not scrape consumer AI UIs, auto-post content, or guarantee answer-surface rankings.
+Keep API keys, private analytics, and raw provider payloads out of public PRs, issues, release notes, and Discussions.
 
 </details>
 ```
@@ -139,6 +144,8 @@ AnswerLens does not scrape consumer AI UIs, auto-post content, or guarantee answ
 - Do not label these outputs as rankings.
 - Do not imply AnswerLens can guarantee placement in ChatGPT, Perplexity, Google AI Overviews, or any other answer surface.
 - Do not include raw provider payloads in the share layer.
+- Do not include API keys, private analytics, or raw provider payloads in public PRs, issues, release notes, or Discussions.
+- Keep first-run stories tied to the template and Show and tell Discussion form when the run is safe and authorized to discuss.
 - Keep default summaries short enough to read inside GitHub job summaries.
 - Treat `competitivePositionScore` as reviewed comparative validation, not as an official answer-surface rank.
 - Treat stability as a credibility note for repeated samples, not as a promise that answer surfaces are controllable.

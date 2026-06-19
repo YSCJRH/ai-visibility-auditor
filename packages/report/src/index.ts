@@ -108,6 +108,10 @@ interface ShareSummary {
 
 const SHARE_DISCLAIMER =
   "AnswerLens does not scrape consumer AI UIs, auto-post content, or guarantee answer-surface rankings.";
+const STARTER_BUNDLE_URL = "https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/starter-bundle.md";
+const FIRST_RUN_STORY_URL = "https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/first-run-story.md";
+const SHOW_AND_TELL_DISCUSSION_URL =
+  "https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell";
 
 function localizeText(value: string, locale: Locale, kind: "issueTitle" | "fixHint" | "recommendationTitle" | "rationale" | "expectedOutcome"): string {
   if (kind === "issueTitle") {
@@ -524,7 +528,8 @@ function renderShareSummaryMarkdown(summary: ShareSummary, locale: Locale = "en"
     `1. ${t(locale, "report.next.scorecard")}`,
     `2. ${t(locale, "report.next.recommendations")}`,
     `3. ${t(locale, "report.next.prSnippet")}`,
-    `4. ${t(locale, "report.next.starter")}`
+    `4. ${t(locale, "report.next.starter", { starterBundleUrl: STARTER_BUNDLE_URL })}`,
+    `5. ${t(locale, "report.next.firstRun", { firstRunStoryUrl: FIRST_RUN_STORY_URL, showAndTellUrl: SHOW_AND_TELL_DISCUSSION_URL })}`
   ].join("\n");
 
   return `# ${t(locale, "report.shareSummary.title")}
@@ -568,6 +573,7 @@ ${artifacts}
 ## ${t(locale, "report.guardrails")}
 
 ${t(locale, "brand.disclaimer")}
+${t(locale, "brand.publicShareBoundary")}
 `;
 }
 
@@ -609,9 +615,12 @@ ${topFixes}
 - Scorecard: \`scorecard.md\`
 - Recommendations: \`recommendations.md\`
 - Machine-readable summary: \`share-summary.json\`
-- Copyable starter: https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/starter-bundle.md
+- Copyable starter: ${STARTER_BUNDLE_URL}
+- First-run story template: ${FIRST_RUN_STORY_URL}
+- Show and tell Discussion form: ${SHOW_AND_TELL_DISCUSSION_URL}
 
 ${t(locale, "brand.disclaimer")}
+${t(locale, "brand.publicShareBoundary")}
 
 </details>
 `;

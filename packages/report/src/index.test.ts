@@ -215,7 +215,11 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(shareSummaryMarkdown, /AI may miss this product because/);
   assert.match(shareSummaryMarkdown, /## Next review steps/);
   assert.match(shareSummaryMarkdown, /AnswerLens starter bundle/);
+  assert.match(shareSummaryMarkdown, /first-run story template/);
+  assert.match(shareSummaryMarkdown, /Show and tell Discussion form/);
   assert.match(shareSummaryMarkdown, /does not scrape consumer AI UIs/);
+  assert.match(shareSummaryMarkdown, /raw provider payloads/);
+  assert.match(shareSummaryMarkdown, /private analytics/);
   assert.doesNotMatch(shareSummaryMarkdown, /Manual validation: CPS/);
   assert.doesNotMatch(shareSummaryMarkdown, /Stability:/);
   assert.match(prSnippet, /## AnswerLens audit/);
@@ -223,6 +227,10 @@ test("report renderers expose expected audit and eval sections", async () => {
   assert.match(prSnippet, /<details>/);
   assert.match(prSnippet, /Share summary: `share-summary\.md`[\s\S]*Scorecard: `scorecard\.md`[\s\S]*Recommendations: `recommendations\.md`/);
   assert.match(prSnippet, /Copyable starter: https:\/\/github\.com\/YSCJRH\/ai-visibility-auditor\/blob\/main\/docs\/starter-bundle\.md/);
+  assert.match(prSnippet, /First-run story template: https:\/\/github\.com\/YSCJRH\/ai-visibility-auditor\/blob\/main\/docs\/first-run-story\.md/);
+  assert.match(prSnippet, /Show and tell Discussion form: https:\/\/github\.com\/YSCJRH\/ai-visibility-auditor\/discussions\/new\?category=show-and-tell/);
+  assert.match(prSnippet, /raw provider payloads/);
+  assert.match(prSnippet, /private analytics/);
   assert.match(recommendations, /# AnswerLens Recommendations/);
   assert.match(recommendations, /Demo site: AnswerLens static-good fixture demo/);
   assert.match(htmlReport, / \| VAVR: <strong>/);
