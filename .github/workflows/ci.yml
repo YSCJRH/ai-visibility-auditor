@@ -27,6 +27,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm public:check
+      - run: pnpm release:snapshot:check
       - run: pnpm demo:fixture
       - run: pnpm demo:consumer-repo
       - run: pnpm build:admin

@@ -148,6 +148,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkStarterAdopterKitBoundary(rootDir, findings);
   await checkReleasePagesRefresh(rootDir, findings);
   await checkPagesPostdeploySmoke(rootDir, findings);
+  await checkReleaseSnapshotFreshnessGate(rootDir, findings);
   await checkReleaseAssetChecklistBoundary(rootDir, findings);
   await checkStableReleaseVersionSync(rootDir, findings);
   await checkSelfDogfoodLogBoundary(rootDir, findings);
@@ -687,6 +688,74 @@ async function checkPagesPostdeploySmoke(rootDir: string, findings: Finding[]): 
       path: packageJsonPath,
       message: "package.json must expose pages:smoke for live Pages postdeploy verification."
     });
+  }
+}
+
+async function checkReleaseSnapshotFreshnessGate(rootDir: string, findings: Finding[]): Promise<void> {
+  const packageJsonPath = "package.json";
+  const packageJson = await readRequiredJson<{ scripts?: Record<string, unknown> }>(
+    rootDir,
+    packageJsonPath,
+    findings,
+    "release-snapshot-freshness-gate"
+  );
+  const expectedScript = "node --experimental-strip-types scripts/distribution/release-snapshot-check.ts";
+  if (packageJson?.scripts?.["release:snapshot:check"] !== expectedScript) {
+    findings.push({
+      ruleId: "release-snapshot-freshness-gate",
+      path: packageJsonPath,
+      message: "package.json must expose release:snapshot:check so release metadata freshness is locally runnable."
+    });
+  }
+
+  const testScript = typeof packageJson?.scripts?.test === "string" ? packageJson.scripts.test : "";
+  if (!testScript.includes("scripts/distribution/release-snapshot-check.test.ts")) {
+    findings.push({
+      ruleId: "release-snapshot-freshness-gate",
+      path: packageJsonPath,
+      message: "package.json test script must include release-snapshot-check.test.ts."
+    });
+  }
+
+  const ciPath = ".github/workflows/ci.yml";
+  const scriptPath = "scripts/distribution/release-snapshot-check.ts";
+  const requiredSurfaces = [
+    {
+      path: ciPath,
+      snippets: ["pnpm release:snapshot:check"]
+    },
+    {
+      path: scriptPath,
+      snippets: [
+        "release-snapshot-freshness",
+        "https://api.github.com/repos/${repository}/releases?per_page=20",
+        "draft !== true && release.prerelease !== true"
+      ]
+    }
+  ];
+
+  for (const surface of requiredSurfaces) {
+    let text: string;
+    try {
+      text = await readFile(path.join(rootDir, surface.path), "utf8");
+    } catch (error) {
+      findings.push({
+        ruleId: "release-snapshot-freshness-gate",
+        path: surface.path,
+        message: `Unable to read release snapshot freshness surface: ${error instanceof Error ? error.message : String(error)}`
+      });
+      continue;
+    }
+
+    for (const snippet of surface.snippets) {
+      if (!text.includes(snippet)) {
+        findings.push({
+          ruleId: "release-snapshot-freshness-gate",
+          path: surface.path,
+          message: `Release snapshot freshness gate is missing required snippet ${JSON.stringify(snippet)}.`
+        });
+      }
+    }
   }
 }
 

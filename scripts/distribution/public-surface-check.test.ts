@@ -168,6 +168,42 @@ test("public-surface-check rejects Pages workflows without live postdeploy smoke
   assert.ok(ruleIds.includes("pages-postdeploy-smoke-check"));
 });
 
+test("public-surface-check rejects release snapshot freshness gates that are not wired into package and CI", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "package.json",
+    JSON.stringify(
+      {
+        name: "answerlens-workspace",
+        version: STABLE_VERSION,
+        scripts: {
+          "pages:smoke": "node --experimental-strip-types scripts/distribution/pages-smoke-check.ts",
+          test: "node --test scripts/distribution/public-surface-check.test.ts"
+        }
+      },
+      null,
+      2
+    )
+  );
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/ci.yml",
+    [
+      "steps:",
+      "  - uses: actions/checkout@v5",
+      "  - uses: actions/setup-node@v5",
+      "  - uses: actions/github-script@v8",
+      "  - uses: actions/upload-artifact@v6"
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("release-snapshot-freshness-gate"));
+});
+
 test("public-surface-check rejects release surfaces without asset checklist boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, "docs/manual-steps.md", `Use the reviewed release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`);
@@ -404,7 +440,9 @@ async function createPublicSurfaceFixture(): Promise<string> {
         name: "answerlens-workspace",
         version: STABLE_VERSION,
         scripts: {
-          "pages:smoke": "node --experimental-strip-types scripts/distribution/pages-smoke-check.ts"
+          "pages:smoke": "node --experimental-strip-types scripts/distribution/pages-smoke-check.ts",
+          "release:snapshot:check": "node --experimental-strip-types scripts/distribution/release-snapshot-check.ts",
+          test: "node --experimental-strip-types --experimental-test-isolation=none --test scripts/distribution/public-surface-check.test.ts scripts/distribution/release-snapshot-check.test.ts"
         }
       },
       null,
@@ -667,7 +705,16 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(
     rootDir,
     ".github/workflows/ci.yml",
-    "steps:\n  - uses: actions/checkout@v5\n  - uses: actions/setup-node@v5\n  - uses: actions/github-script@v8\n  - uses: actions/upload-artifact@v6\n"
+    "steps:\n  - uses: actions/checkout@v5\n  - uses: actions/setup-node@v5\n  - uses: actions/github-script@v8\n  - uses: actions/upload-artifact@v6\n  - run: pnpm release:snapshot:check\n"
+  );
+  await writeFixtureFile(
+    rootDir,
+    "scripts/distribution/release-snapshot-check.ts",
+    [
+      "const rule = 'release-snapshot-freshness';",
+      "const url = `https://api.github.com/repos/${repository}/releases?per_page=20`;",
+      "const stable = draft !== true && release.prerelease !== true;"
+    ].join("\n")
   );
   await writeFixtureFile(
     rootDir,
