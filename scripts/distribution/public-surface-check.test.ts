@@ -256,6 +256,65 @@ test("public-surface-check rejects first-run sharing surfaces without direct Sho
   assert.ok(ruleIds.includes("first-run-discussion-routing"));
 });
 
+test("public-surface-check rejects release and Pages surfaces without direct Show and tell routing", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/release-distribution.yml",
+    [
+      "name: Release Distribution",
+      "permissions:",
+      "  actions: write",
+      "  contents: write",
+      "  id-token: write",
+      "on:",
+      "  workflow_dispatch:",
+      "    inputs:",
+      "      tag-name:",
+      `        description: \"Optional semver tag to simulate or publish, for example ${STABLE_TAG}.\"`,
+      "jobs:",
+      "  release:",
+      "    runs-on: ubuntu-latest",
+      "    steps:",
+      `      - run: echo \"Starter bundle pinned to ${STABLE_TAG}\"`,
+      "      - run: echo \"## Release asset checklist\"",
+      "      - run: echo \"answerlens-cli-*.tgz\"",
+      "      - run: echo \"`answerlens-demo-audit.tar.gz`\"",
+      "      - run: echo \"`answerlens-site.tar.gz`\"",
+      "      - run: echo \"If `npm view @answerlens/cli` returns `404`, keep release assets or local checkout as the public path\"",
+      "      - run: gh workflow run pages.yml --ref main"
+    ].join("\n")
+  );
+  await writeFixtureFile(
+    rootDir,
+    "scripts/distribution/releases-snapshot.json",
+    JSON.stringify([{ tag_name: STABLE_TAG, body: `Release notes for ${STABLE_TAG}.` }], null, 2)
+  );
+  await writeFixtureFile(
+    rootDir,
+    "scripts/distribution/build-site.ts",
+    [
+      `const fallback = releases[0]?.tag_name ?? "${STABLE_TAG}";`,
+      `const pin = "YSCJRH/ai-visibility-auditor@${STABLE_TAG}";`,
+      "const starterPanel = 'PR review packet';",
+      "const preview = 'starter-packet-preview.svg';",
+      "const artifactCopy = 'Public-safe artifact: answerlens-report';",
+      "const rawCopy = 'raw/** is excluded by default';",
+      "const boundaryCopy = 'No consumer AI UI scraping. No ranking or answer-placement guarantee.';",
+      "const releaseChecklist = 'Release asset checklist answerlens-demo-audit.tar.gz answerlens-site.tar.gz share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code> npm view @answerlens/cli';"
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const paths = findings.filter((finding) => finding.ruleId === "first-run-discussion-routing").map((finding) => finding.path).sort();
+
+  assert.deepEqual(paths, [
+    ".github/workflows/release-distribution.yml",
+    "scripts/distribution/build-site.ts",
+    "scripts/distribution/releases-snapshot.json"
+  ]);
+});
+
 test("public-surface-check rejects starter bundle surfaces without adopter-kit review boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -599,13 +658,14 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "      - run: echo \"`answerlens-demo-audit.tar.gz`\"",
       "      - run: echo \"`answerlens-site.tar.gz`\"",
       "      - run: echo \"If `npm view @answerlens/cli` returns `404`, keep release assets or local checkout as the public path\"",
+      `      - run: echo \"Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.\"`,
       "      - run: gh workflow run pages.yml --ref main"
     ].join("\n")
   );
   await writeFixtureFile(
     rootDir,
     "scripts/distribution/releases-snapshot.json",
-    JSON.stringify([{ tag_name: STABLE_TAG, body: `Release notes for ${STABLE_TAG}.` }], null, 2)
+    JSON.stringify([{ tag_name: STABLE_TAG, body: `Release notes for ${STABLE_TAG}. Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.` }], null, 2)
   );
   await writeFixtureFile(
     rootDir,
@@ -618,7 +678,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "const artifactCopy = 'Public-safe artifact: answerlens-report';",
       "const rawCopy = 'raw/** is excluded by default';",
       "const boundaryCopy = 'No consumer AI UI scraping. No ranking or answer-placement guarantee.';",
-      "const releaseChecklist = 'Release asset checklist answerlens-demo-audit.tar.gz answerlens-site.tar.gz share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code> npm view @answerlens/cli';"
+      "const releaseChecklist = 'Release asset checklist answerlens-demo-audit.tar.gz answerlens-site.tar.gz share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code> npm view @answerlens/cli';",
+      `const firstRunDiscussion = "${SHOW_AND_TELL_DISCUSSION_URL}";`
     ].join("\n")
   );
   await writeFixtureFile(rootDir, "assets/starter-packet-preview.svg", starterPacketPreviewSvg());
