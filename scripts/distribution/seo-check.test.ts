@@ -59,12 +59,107 @@ test("seo-check rejects drifted x-default, JSON-LD URLs, breadcrumbs, and sitema
   assert.ok(ruleIds.includes("sitemap-duplicate-url"));
 });
 
+test("seo-check rejects incomplete release metadata", async () => {
+  const root = await createSeoFixture();
+  await writeFile(
+    root.releasesPath,
+    `${JSON.stringify(
+      [
+        {
+          tag_name: VERSION,
+          html_url: `https://github.com/example/project/releases/tag/${VERSION}`,
+          published_at: "2026-06-17T12:38:46Z"
+        }
+      ],
+      null,
+      2
+    )}\n`,
+    "utf8"
+  );
+
+  const findings = await runSeoCheck({
+    siteDir: root.siteDir,
+    siteUrl: SITE_URL,
+    releasesPath: root.releasesPath,
+    reportDir: root.reportDir
+  });
+
+  const ruleIds = findings.map((finding) => finding.ruleId);
+  assert.ok(ruleIds.includes("release-metadata-count"));
+  assert.ok(ruleIds.includes("release-metadata-stable-count"));
+});
+
+test("seo-check rejects invalid and unsorted release metadata", async () => {
+  const root = await createSeoFixture();
+  await writeFile(
+    root.releasesPath,
+    `${JSON.stringify(
+      [
+        {
+          tag_name: VERSION,
+          html_url: `https://github.com/example/project/releases/tag/${VERSION}`,
+          published_at: "2026-06-10T00:00:00Z"
+        },
+        {
+          tag_name: "v9.9.8",
+          html_url: "not-a-url",
+          published_at: "2026-06-18T00:00:00Z"
+        },
+        {
+          tag_name: "v9.9.7",
+          html_url: "https://github.com/example/project/releases/tag/v9.9.7",
+          published_at: "not-a-date"
+        }
+      ],
+      null,
+      2
+    )}\n`,
+    "utf8"
+  );
+
+  const findings = await runSeoCheck({
+    siteDir: root.siteDir,
+    siteUrl: SITE_URL,
+    releasesPath: root.releasesPath,
+    reportDir: root.reportDir
+  });
+
+  const ruleIds = findings.map((finding) => finding.ruleId);
+  assert.ok(ruleIds.includes("release-metadata-order"));
+  assert.ok(ruleIds.includes("release-metadata-url"));
+  assert.ok(ruleIds.includes("release-metadata-date"));
+});
+
 async function createSeoFixture(): Promise<{ siteDir: string; releasesPath: string; reportDir: string }> {
   const siteDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-seo-site-"));
   const reportDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-seo-report-"));
   const releasesDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-seo-releases-"));
   const releasesPath = path.join(releasesDir, "releases.json");
-  await writeFile(releasesPath, `${JSON.stringify([{ tag_name: VERSION }], null, 2)}\n`, "utf8");
+  await writeFile(
+    releasesPath,
+    `${JSON.stringify(
+      [
+        {
+          tag_name: VERSION,
+          html_url: `https://github.com/example/project/releases/tag/${VERSION}`,
+          published_at: "2026-06-17T12:38:46Z"
+        },
+        {
+          tag_name: "v9.9.8",
+          html_url: "https://github.com/example/project/releases/tag/v9.9.8",
+          published_at: "2026-06-10T12:00:00Z"
+        },
+        {
+          tag_name: "v9.9.7",
+          html_url: "https://github.com/example/project/releases/tag/v9.9.7",
+          published_at: "2026-06-01T12:00:00Z"
+        }
+      ],
+      null,
+      2
+    )}\n`,
+    "utf8"
+  );
 
   await writePage(siteDir, "index.html", redirectPage(`${SITE_URL}en/`));
   await writePage(siteDir, "starter/index.html", redirectPage(`${SITE_URL}en/starter/`));

@@ -87,7 +87,7 @@ const STABLE_RELEASE_SURFACES: Array<{ path: string; snippets: (stableTag: strin
   },
   {
     path: "scripts/distribution/seo-check.ts",
-    snippets: (stableTag) => [`?? "${stableTag}"`]
+    snippets: (stableTag) => [`FALLBACK_LATEST_RELEASE = "${stableTag}"`]
   },
   {
     path: "scripts/distribution/site-seo.ts",

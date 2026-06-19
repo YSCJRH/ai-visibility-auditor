@@ -6,7 +6,11 @@ import { XMLParser } from "fast-xml-parser";
 import { checkLocaleText, type SeoLocale } from "./site-seo.ts";
 
 type ReleaseEntry = {
-  tag_name: string;
+  tag_name?: unknown;
+  html_url?: unknown;
+  published_at?: unknown;
+  draft?: unknown;
+  prerelease?: unknown;
 };
 
 type Finding = {
@@ -24,6 +28,9 @@ type CliOptions = {
 };
 
 const DEFAULT_SITE_URL = "https://yscjrh.github.io/ai-visibility-auditor/";
+const FALLBACK_LATEST_RELEASE = "v0.3.5";
+const MIN_RELEASE_METADATA_COUNT = 3;
+const MIN_STABLE_RELEASE_METADATA_COUNT = 2;
 const XML_PARSER = new XMLParser({ ignoreAttributes: false });
 
 function parseArgs(argv: string[]): CliOptions {
@@ -58,7 +65,9 @@ function parseArgs(argv: string[]): CliOptions {
 
 export async function runSeoCheck(options: CliOptions): Promise<Finding[]> {
   const findings: Finding[] = [];
-  const latestRelease = await readLatestRelease(options.releasesPath);
+  const releases = await readReleaseMetadata(options.releasesPath, findings);
+  checkReleaseMetadata(options.releasesPath, releases, findings);
+  const latestRelease = latestStableReleaseTag(releases) ?? FALLBACK_LATEST_RELEASE;
   const sitemapPath = path.join(options.siteDir, "sitemap.xml");
   const sitemap = await readFile(sitemapPath, "utf8");
   const sitemapUrls = parseSitemapUrls(sitemap);
@@ -446,9 +455,91 @@ async function listHtmlFiles(root: string): Promise<string[]> {
   return files.flat();
 }
 
-async function readLatestRelease(releasesPath: string): Promise<string> {
-  const releases = JSON.parse(await readFile(releasesPath, "utf8")) as ReleaseEntry[];
-  return releases[0]?.tag_name ?? "v0.3.5";
+async function readReleaseMetadata(releasesPath: string, findings: Finding[]): Promise<ReleaseEntry[]> {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(await readFile(releasesPath, "utf8"));
+  } catch (error) {
+    findings.push(finding("release-metadata-json", releasesPath, `Release metadata is not valid JSON: ${errorMessage(error)}.`));
+    return [];
+  }
+
+  if (!Array.isArray(parsed)) {
+    findings.push(finding("release-metadata-json", releasesPath, "Release metadata must be a JSON array."));
+    return [];
+  }
+
+  return parsed as ReleaseEntry[];
+}
+
+function checkReleaseMetadata(releasesPath: string, releases: ReleaseEntry[], findings: Finding[]): void {
+  const publicReleases = releases.filter((release) => release.draft !== true);
+
+  if (publicReleases.length < MIN_RELEASE_METADATA_COUNT) {
+    findings.push(
+      finding(
+        "release-metadata-count",
+        releasesPath,
+        `Release index should include at least ${MIN_RELEASE_METADATA_COUNT} public releases; found ${publicReleases.length}.`
+      )
+    );
+  }
+
+  const stableReleaseCount = publicReleases.filter((release) => typeof release.tag_name === "string" && isStableReleaseTag(release.tag_name)).length;
+  if (stableReleaseCount < MIN_STABLE_RELEASE_METADATA_COUNT) {
+    findings.push(
+      finding(
+        "release-metadata-stable-count",
+        releasesPath,
+        `Release index should include at least ${MIN_STABLE_RELEASE_METADATA_COUNT} stable semver releases; found ${stableReleaseCount}.`
+      )
+    );
+  }
+
+  let previousPublishedAt: number | null = null;
+  for (const [index, release] of publicReleases.entries()) {
+    const label = releaseLabel(release, index);
+    if (typeof release.tag_name !== "string" || release.tag_name.trim().length === 0) {
+      findings.push(finding("release-metadata-tag", releasesPath, `Release entry ${index + 1} is missing tag_name.`));
+    }
+
+    if (typeof release.html_url !== "string" || !isAbsoluteHttpUrl(release.html_url)) {
+      findings.push(finding("release-metadata-url", releasesPath, `Release ${label} is missing an absolute html_url.`));
+    }
+
+    if (typeof release.published_at !== "string") {
+      findings.push(finding("release-metadata-date", releasesPath, `Release ${label} is missing published_at.`));
+      continue;
+    }
+
+    const publishedAt = Date.parse(release.published_at);
+    if (Number.isNaN(publishedAt)) {
+      findings.push(finding("release-metadata-date", releasesPath, `Release ${label} has an invalid published_at value: ${release.published_at}.`));
+      continue;
+    }
+
+    if (previousPublishedAt !== null && publishedAt > previousPublishedAt) {
+      findings.push(finding("release-metadata-order", releasesPath, `Release ${label} is newer than the preceding release entry.`));
+    }
+    previousPublishedAt = publishedAt;
+  }
+}
+
+function latestStableReleaseTag(releases: ReleaseEntry[]): string | null {
+  const release = releases.find((entry) => entry.draft !== true && typeof entry.tag_name === "string" && isStableReleaseTag(entry.tag_name));
+  return typeof release?.tag_name === "string" ? release.tag_name : null;
+}
+
+function releaseLabel(release: ReleaseEntry, index: number): string {
+  return typeof release.tag_name === "string" && release.tag_name.length > 0 ? release.tag_name : `entry ${index + 1}`;
+}
+
+function isStableReleaseTag(tagName: string): boolean {
+  return /^v\d+\.\d+\.\d+$/.test(tagName);
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 async function writeReports(reportDir: string, findings: Finding[]): Promise<void> {
