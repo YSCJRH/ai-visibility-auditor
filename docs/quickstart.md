@@ -114,5 +114,6 @@ Do not paste API keys, private analytics, or raw provider payloads into public P
 Once the local run feels useful, continue to [docs/github-action.md](github-action.md) and keep the same `.github/answerlens/` folder shape plus the same artifact review order.
 
 The GitHub Action should feel like the same artifact contract on a schedule or pull request, not a different product surface.
+Use the starter bundle [Adopter kit checklist](starter-bundle.md#adopter-kit-checklist) and [PR review packet](starter-bundle.md#pr-review-packet) for the first CI pull request.
 
 If this is your first real-site run, open a [GitHub Discussion](https://github.com/YSCJRH/ai-visibility-auditor/discussions) and tell us which artifact helped first.

@@ -392,6 +392,58 @@ async function checkFirstRunStoryBoundary(rootDir: string, findings: Finding[]):
 async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding[]): Promise<void> {
   const requiredSurfaces = [
     {
+      path: "README.md",
+      snippets: [
+        "Adopter kit checklist",
+        "PR review packet",
+        "which artifact to open and which raw payloads stay private"
+      ]
+    },
+    {
+      path: "README.zh-CN.md",
+      snippets: [
+        "Adopter kit checklist",
+        "PR review packet",
+        "哪些 raw payloads 不能公开"
+      ]
+    },
+    {
+      path: "docs/quickstart.md",
+      snippets: [
+        "Adopter kit checklist",
+        "PR review packet",
+        "the first CI pull request"
+      ]
+    },
+    {
+      path: "docs/zh/quickstart.md",
+      snippets: [
+        "Adopter kit checklist",
+        "PR review packet",
+        "第一次 CI 接入 PR"
+      ]
+    },
+    {
+      path: "docs/github-action.md",
+      snippets: [
+        "### Adopter kit",
+        "### Safe sharing boundary",
+        "## First CI PR packet",
+        "Adopter kit` and `Safe sharing boundary",
+        "no consumer AI UI scraping and no ranking or answer-placement guarantee"
+      ]
+    },
+    {
+      path: "docs/zh/github-action.md",
+      snippets: [
+        "Adopter kit",
+        "Safe sharing boundary",
+        "## 第一次 CI 的 PR 审阅包",
+        "`share-summary.md`，然后 `scorecard.md`，最后 `recommendations.md`",
+        "不抓取消费级 AI UI，不承诺排名或答案展示位置"
+      ]
+    },
+    {
       path: "docs/starter-bundle.md",
       snippets: [
         "## Adopter kit checklist",

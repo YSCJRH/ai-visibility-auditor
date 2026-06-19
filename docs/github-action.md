@@ -82,6 +82,15 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "### run.json" >> "$GITHUB_STEP_SUMMARY"
           echo "\`${{ steps.answerlens.outputs.run-json-path }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Adopter kit" >> "$GITHUB_STEP_SUMMARY"
+          echo "- To reuse this setup, copy \`.github/answerlens/\` and \`.github/workflows/answerlens.yml\`, then replace the brand, competitors, prompts, and \`site:\` URL." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Keep non-secret eval defaults in \`runtime.yaml\`; put provider keys in GitHub secrets or local environment variables." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Review \`share-summary.md\`, then \`scorecard.md\`, then \`recommendations.md\` before pasting \`pr-snippet.md\`." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Safe sharing boundary" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Public PRs should link the summary, scorecard, and recommendations; \`raw/**\` is excluded from the uploaded artifact." >> "$GITHUB_STEP_SUMMARY"
+          echo "- AnswerLens audits public source material. No consumer AI UI scraping. No ranking or answer-placement guarantee." >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v6
         with:
@@ -153,6 +162,17 @@ If you want a temporary shortcut on top of the starter defaults, use `profile: f
 If you already have one readable OpenAI baseline and want a provider-level second opinion, use `profile: perplexity-cross-check` instead of replacing the starter default permanently.
 
 If you want one last sanity check before CI, run the command path in [quickstart.md](quickstart.md) and confirm that `share-summary.md`, `scorecard.md`, and `recommendations.md` are enough to explain the run to someone else.
+
+## First CI PR packet
+
+When the first Action run finishes, use the `Adopter kit` and `Safe sharing boundary` blocks in `GITHUB_STEP_SUMMARY` as the handoff note for the setup PR.
+
+The review packet should answer four things without opening raw payloads:
+
+1. Which repository files were copied: `.github/answerlens/` and `.github/workflows/answerlens.yml`.
+2. Which public artifact to open first: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
+3. Where secrets belong: GitHub secrets or local environment variables, not `runtime.yaml`.
+4. What this result does not claim: no consumer AI UI scraping and no ranking or answer-placement guarantee.
 
 ## What to publish into `GITHUB_STEP_SUMMARY`
 
