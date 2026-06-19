@@ -924,9 +924,12 @@ async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[
       snippets: [
         "pnpm release:assets:manifest -- --out dist/release-assets-manifest.json",
         "pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json",
+        "--summary-out dist/release-assets-summary.md",
+        "cat dist/release-assets-summary.md >> \"$GITHUB_STEP_SUMMARY\"",
         "`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums",
         "dist/release-assets-manifest.json --clobber",
-        "dist/release-assets-manifest.json"
+        "dist/release-assets-manifest.json",
+        "dist/release-assets-summary.md"
       ]
     },
     {
@@ -937,7 +940,17 @@ async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[
         "answerlens-cli-*.tgz",
         "answerlens-demo-audit.tar.gz",
         "answerlens-site.tar.gz",
-        "do not present npm as activated"
+        "do not present npm as activated",
+        "Release asset manifest verified",
+        "formatReleaseAssetsSummary"
+      ]
+    },
+    {
+      path: "docs/release-bump-playbook.md",
+      snippets: [
+        "Release Distribution workflow summary",
+        "Release asset manifest verified",
+        "before reusing downloaded release assets"
       ]
     }
   ];

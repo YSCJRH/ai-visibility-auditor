@@ -23,6 +23,7 @@ type ReleaseAssetsManifest = {
 type Options = {
   outPath: string;
   verifyPath?: string;
+  summaryOutPath?: string;
   releaseTag: string | null;
   filePatterns: string[];
 };
@@ -36,6 +37,7 @@ function parseArgs(argv: string[]): Options {
   const filePatterns: string[] = [];
   let outPath = "dist/release-assets-manifest.json";
   let verifyPath: string | undefined;
+  let summaryOutPath: string | undefined;
   let releaseTag = process.env.RELEASE_TAG?.trim() || null;
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -53,6 +55,11 @@ function parseArgs(argv: string[]): Options {
       index += 1;
       continue;
     }
+    if (token === "--summary-out") {
+      summaryOutPath = requiredValue(argv, index);
+      index += 1;
+      continue;
+    }
     if (token === "--release-tag") {
       releaseTag = requiredValue(argv, index);
       index += 1;
@@ -64,7 +71,7 @@ function parseArgs(argv: string[]): Options {
     filePatterns.push(token);
   }
 
-  return { outPath, verifyPath, releaseTag, filePatterns };
+  return { outPath, verifyPath, summaryOutPath, releaseTag, filePatterns };
 }
 
 function requiredValue(argv: string[], index: number): string {
@@ -155,7 +162,7 @@ function assertRequiredAssets(assets: ReleaseAsset[]): void {
   }
 }
 
-async function verifyManifest(manifestPath: string): Promise<void> {
+async function verifyManifest(manifestPath: string): Promise<ReleaseAssetsManifest> {
   const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as ReleaseAssetsManifest;
   if (manifest.kind !== "answerlens-release-assets-manifest" || manifest.schemaVersion !== 1 || !Array.isArray(manifest.assets)) {
     throw new Error("Release asset manifest has an unsupported shape.");
@@ -176,6 +183,7 @@ async function verifyManifest(manifestPath: string): Promise<void> {
       throw new Error(`Release asset checksum mismatch for ${asset.name}.`);
     }
   }
+  return manifest;
 }
 
 async function resolveAssetPath(asset: ReleaseAsset, manifestDir: string): Promise<string> {
@@ -199,13 +207,49 @@ function normalizePath(file: string): string {
 
 export async function runReleaseAssetsManifest(options: Options): Promise<ReleaseAssetsManifest | null> {
   if (options.verifyPath) {
-    await verifyManifest(options.verifyPath);
+    const manifest = await verifyManifest(options.verifyPath);
+    if (options.summaryOutPath) {
+      await writeFile(options.summaryOutPath, formatReleaseAssetsSummary(manifest), "utf8");
+    }
     return null;
   }
 
   const manifest = await buildManifest(options);
   await writeFile(options.outPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  if (options.summaryOutPath) {
+    await writeFile(options.summaryOutPath, formatReleaseAssetsSummary(manifest), "utf8");
+  }
   return manifest;
+}
+
+export function formatReleaseAssetsSummary(manifest: ReleaseAssetsManifest): string {
+  const releaseTag = manifest.releaseTag ? `\`${manifest.releaseTag}\`` : "not set";
+  const rows = manifest.assets
+    .map((asset) => `| \`${asset.name}\` | ${formatBytes(asset.sizeBytes)} | \`${asset.sha256}\` |`)
+    .join("\n");
+
+  return [
+    "## Release asset manifest verified",
+    "",
+    `- Release tag: ${releaseTag}`,
+    `- Review order: \`${manifest.artifactReviewOrder[0]}\`, then \`${manifest.artifactReviewOrder[1]}\`, then \`${manifest.artifactReviewOrder[2]}\``,
+    `- npm boundary: ${manifest.npmVisibilityBoundary}`,
+    "",
+    "| Asset | Size | SHA-256 |",
+    "| --- | ---: | --- |",
+    rows,
+    ""
+  ].join("\n");
+}
+
+function formatBytes(sizeBytes: number): string {
+  if (sizeBytes < 1024) {
+    return `${sizeBytes} B`;
+  }
+  if (sizeBytes < 1024 * 1024) {
+    return `${(sizeBytes / 1024).toFixed(1)} KiB`;
+  }
+  return `${(sizeBytes / (1024 * 1024)).toFixed(1)} MiB`;
 }
 
 async function main(): Promise<void> {

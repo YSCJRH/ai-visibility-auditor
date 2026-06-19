@@ -100,6 +100,8 @@ corepack pnpm build:site
 corepack pnpm seo:check
 ```
 
+In the Release Distribution workflow summary, review the `Release asset manifest verified` table before reusing downloaded release assets.
+
 If `release:snapshot:refresh -- --write` changes `scripts/distribution/releases-snapshot.json`, review the diff and ship a small truth-sync PR before making new Pages or release claims. If npm still returns `E404`, do not add npm install copy. If an older release does not have `release-assets-manifest.json`, do not imply checksum coverage for that release. Record trusted publishing or `NPM_TOKEN` as a manual step.
 
 ## What Not To Do
