@@ -131,6 +131,8 @@ If you have not run one real local audit yet, use [docs/quickstart.md](docs/quic
 Treat the starter bundle as the shareable adoption asset for forks, releases, and external setup guides.
 For the first CI pull request, use the starter [Adopter kit checklist](docs/starter-bundle.md#adopter-kit-checklist) and [PR review packet](docs/starter-bundle.md#pr-review-packet) so teammates know which artifact to open and which raw payloads stay private.
 
+![AnswerLens starter packet preview](assets/starter-packet-preview.svg)
+
 The public Action contract is:
 
 - `uses: YSCJRH/ai-visibility-auditor@vX`

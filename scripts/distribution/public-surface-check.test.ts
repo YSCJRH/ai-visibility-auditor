@@ -195,6 +195,16 @@ test("public-surface-check rejects starter bundle surfaces without adopter-kit r
   assert.ok(ruleIds.includes("starter-adopter-kit-boundary"));
 });
 
+test("public-surface-check rejects starter packet preview drift", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(rootDir, "assets/starter-packet-preview.svg", "<svg><title>AnswerLens starter packet preview</title></svg>\n");
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("starter-adopter-kit-boundary"));
+});
+
 test("public-surface-check rejects Action docs without first-CI PR packet boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -240,6 +250,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "# AnswerLens",
       artifactOrderText(),
       "No ranking guarantees and no consumer AI UI scraping.",
+      "![AnswerLens starter packet preview](assets/starter-packet-preview.svg)",
       "Use the Adopter kit checklist and PR review packet to show which artifact to open and which raw payloads stay private."
     ].join("\n")
   );
@@ -250,6 +261,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "# AnswerLens",
       artifactOrderText(),
       "不承诺排名，不抓取消费级 AI UI。",
+      "![AnswerLens starter packet preview](assets/starter-packet-preview.svg)",
       "使用 Adopter kit checklist 和 PR review packet，说明哪些 raw payloads 不能公开。"
     ].join("\n")
   );
@@ -339,6 +351,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "Put provider keys only in GitHub secrets or local environment variables.",
       "Review `share-summary.md`, then `scorecard.md`, then `recommendations.md` before you paste `pr-snippet.md`.",
       "## PR review packet",
+      "![AnswerLens starter packet preview](../assets/starter-packet-preview.svg)",
       "Do not attach `raw/**` to public pull requests, issues, releases, or Discussions.",
       "No consumer AI UI scraping. No ranking or answer-placement guarantee."
     ].join("\n")
@@ -435,11 +448,13 @@ async function createPublicSurfaceFixture(): Promise<string> {
       `const fallback = releases[0]?.tag_name ?? "${STABLE_TAG}";`,
       `const pin = "YSCJRH/ai-visibility-auditor@${STABLE_TAG}";`,
       "const starterPanel = 'PR review packet';",
+      "const preview = 'starter-packet-preview.svg';",
       "const artifactCopy = 'Public-safe artifact: answerlens-report';",
       "const rawCopy = 'raw/** is excluded by default';",
       "const boundaryCopy = 'No consumer AI UI scraping. No ranking or answer-placement guarantee.';"
     ].join("\n")
   );
+  await writeFixtureFile(rootDir, "assets/starter-packet-preview.svg", starterPacketPreviewSvg());
   await writeFixtureFile(rootDir, "scripts/distribution/seo-check.ts", `const fallback = releases[0]?.tag_name ?? "${STABLE_TAG}";\n`);
   await writeFixtureFile(rootDir, "scripts/distribution/site-seo.ts", `const releaseCopy = { "${STABLE_TAG}": "Stable release" };\n`);
   await writeFixtureFile(
@@ -498,6 +513,22 @@ function artifactOrderText(): string {
 
 function safeRuntimeYaml(): string {
   return "runtime:\n  provider: openai\n  model: gpt-5.1-mini\n";
+}
+
+function starterPacketPreviewSvg(): string {
+  return [
+    "<svg>",
+    "<title>AnswerLens starter packet preview</title>",
+    "<text>Adopter kit</text>",
+    "<text>PR review packet</text>",
+    "<text>share-summary.md</text>",
+    "<text>scorecard.md</text>",
+    "<text>recommendations.md</text>",
+    "<text>raw/** is excluded by default</text>",
+    "<text>No consumer AI UI scraping</text>",
+    "<text>No ranking or answer-placement guarantee</text>",
+    "</svg>"
+  ].join("\n");
 }
 
 async function writeFixtureFile(rootDir: string, relativePath: string, contents: string): Promise<void> {

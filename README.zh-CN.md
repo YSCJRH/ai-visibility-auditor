@@ -33,6 +33,8 @@ AnswerLens 是一个面向产品网站的命令行优先 AI 可见性审计器�
 每一步都保持同样的报告顺序：`share-summary.md`，然后 `scorecard.md`，最后 `recommendations.md`。
 第一次 CI 接入 PR 可以沿用 [starter bundle](docs/starter-bundle.md) 里的 `Adopter kit checklist` 和 `PR review packet`，让队友知道先看哪份 artifact，以及哪些 raw payloads 不能公开。
 
+![AnswerLens starter packet preview](assets/starter-packet-preview.svg)
+
 如果你一开始就知道自己要接 CI，Action 文档当然仍然公开可用；但最容易完成的首次路径仍然是：演示报告 -> 示例站点 -> 真实站点 -> Action。
 
 ## 你会得到什么

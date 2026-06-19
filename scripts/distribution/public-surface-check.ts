@@ -396,6 +396,7 @@ async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding
       snippets: [
         "Adopter kit checklist",
         "PR review packet",
+        "assets/starter-packet-preview.svg",
         "which artifact to open and which raw payloads stay private"
       ]
     },
@@ -404,6 +405,7 @@ async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding
       snippets: [
         "Adopter kit checklist",
         "PR review packet",
+        "assets/starter-packet-preview.svg",
         "哪些 raw payloads 不能公开"
       ]
     },
@@ -449,6 +451,7 @@ async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding
         "## Adopter kit checklist",
         "## PR review packet",
         "Copy `.github/answerlens/` and `.github/workflows/answerlens.yml`",
+        "../assets/starter-packet-preview.svg",
         "Put provider keys only in GitHub secrets or local environment variables",
         "Review `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
         "Do not attach `raw/**`",
@@ -483,9 +486,24 @@ async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding
       path: "scripts/distribution/build-site.ts",
       snippets: [
         "PR review packet",
+        "starter-packet-preview.svg",
         "Public-safe artifact: answerlens-report",
         "raw/** is excluded by default",
         "No consumer AI UI scraping. No ranking or answer-placement guarantee."
+      ]
+    },
+    {
+      path: "assets/starter-packet-preview.svg",
+      snippets: [
+        "AnswerLens starter packet preview",
+        "Adopter kit",
+        "PR review packet",
+        "share-summary.md",
+        "scorecard.md",
+        "recommendations.md",
+        "raw/** is excluded by default",
+        "No consumer AI UI scraping",
+        "No ranking or answer-placement guarantee"
       ]
     }
   ];
