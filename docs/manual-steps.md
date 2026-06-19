@@ -74,6 +74,8 @@ Keep Discussions enabled and create these categories:
 - `Show and tell` for screenshots, artifacts, and first-run reports
 - `Announcements` for release and roadmap updates
 
+The repository includes `.github/DISCUSSION_TEMPLATE/show-and-tell.yml` for the `Show and tell` category. It only activates after Discussions are enabled and that category uses the `show-and-tell` slug. The form keeps `share-summary.md`, then `scorecard.md`, then `recommendations.md` first, asks for release asset evidence when relevant, and repeats the npm `404`, BYOK, no-ranking, no raw-payload, and explicit reuse-permission boundaries.
+
 Also pin one onboarding discussion:
 
 - `Start here: share your first AnswerLens run`

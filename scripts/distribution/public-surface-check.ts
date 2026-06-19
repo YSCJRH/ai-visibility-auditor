@@ -37,6 +37,7 @@ const TEXT_SURFACES = [
   "docs",
   "examples/consumer-repo/README.md",
   "examples/consumer-repo/.github/workflows/answerlens.yml",
+  ".github/DISCUSSION_TEMPLATE",
   ".github/ISSUE_TEMPLATE",
   ".github/pull_request_template.md",
   ".github/workflows",
@@ -51,6 +52,7 @@ const ARTIFACT_ORDER_SURFACES = [
   "README.md",
   "README.zh-CN.md",
   ".github/pull_request_template.md",
+  ".github/DISCUSSION_TEMPLATE/show-and-tell.yml",
   ".github/ISSUE_TEMPLATE/audit-teardown.yml",
   "action.yml",
   "docs/demo-report.md",
@@ -382,6 +384,26 @@ async function checkFirstRunStoryBoundary(rootDir: string, findings: Finding[]):
         "do not use release asset downloads as npm activation proof",
         "answerlens-demo-audit.tar.gz",
         "answerlens-site.tar.gz"
+      ]
+    },
+    {
+      path: ".github/DISCUSSION_TEMPLATE/show-and-tell.yml",
+      snippets: [
+        "Share a first AnswerLens run that is safe for public discussion",
+        "Start with `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
+        "Do not paste API keys, private analytics, raw provider payloads",
+        "Release asset evidence, if relevant",
+        "GitHub release tag URL",
+        "`answerlens-demo-audit.tar.gz`",
+        "`answerlens-site.tar.gz`",
+        "I opened `share-summary.md`, then `scorecard.md`, then `recommendations.md` from the unpacked demo audit bundle",
+        "I am not treating release assets as npm activation proof while `npm view @answerlens/cli` returns `404`",
+        "This post does not claim ranking lift, traffic lift, answer-surface placement, or external adoption proof",
+        "Basic `audit` needs no provider key; optional `eval` is BYOK and uses my own provider account",
+        "AnswerLens audits public source material; it does not scrape consumer AI UIs or guarantee rankings",
+        "A first-run story is not external adoption proof unless you explicitly authorize public reuse",
+        "yes, with these safe links or screenshots only",
+        "no, keep this as feedback only"
       ]
     }
   ];
