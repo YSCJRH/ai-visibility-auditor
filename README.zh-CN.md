@@ -75,6 +75,14 @@ AnswerLens 是一个面向产品网站的命令行优先 AI 可见性审计器�
 - [分发计划](docs/zh/distribution-plan.md)
 - [Admin 控制台说明](docs/zh/admin-console.md)
 
+## 反馈和社区
+
+- 第一次试用问题或不清楚的结果：用 [GitHub Discussions](https://github.com/YSCJRH/ai-visibility-auditor/discussions) 的 `Q&A`
+- 分享截图、artifact 或 first-run story：用 [Show and tell Discussion form](https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell)
+- 可复现 bug、文档缺口或具体规则请求：用 [GitHub Issues](https://github.com/YSCJRH/ai-visibility-auditor/issues)
+
+如果你用真实站点试跑了 AnswerLens，请配合 [First-run story template](docs/first-run-story.md) 说明哪份 artifact 最先帮到你。
+
 如果你要跑 live `eval`，请把默认 provider / model / locale / timeout 放进 `runtime.yaml`，把 `OPENAI_API_KEY` 和 `PERPLEXITY_API_KEY` 继续放在环境变量里。需要临时切换推荐配置时，再用 `profile` / `--profile`。第一次 benchmark pass 建议先用 `fast-first-eval`；如果已经有一轮可读的 OpenAI baseline，再用 `perplexity-cross-check` 做 provider 级别的第二意见检查。完整规则和场景决策表见 [docs/zh/model-runtime.md](docs/zh/model-runtime.md)。
 
 如果你需要完整英文细节、更多命令示例和所有仓库文档，请继续查看 [README.md](README.md) 和 `docs/` 下的英文原文。

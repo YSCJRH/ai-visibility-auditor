@@ -7,6 +7,7 @@ import { runPublicSurfaceCheck } from "./public-surface-check.ts";
 
 const STABLE_VERSION = "0.3.5";
 const STABLE_TAG = `v${STABLE_VERSION}`;
+const SHOW_AND_TELL_DISCUSSION_URL = "https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell";
 
 test("public-surface-check passes a minimal compliant public surface", async () => {
   const rootDir = await createPublicSurfaceFixture();
@@ -235,6 +236,26 @@ test("public-surface-check rejects discussion templates without first-run safety
   assert.ok(ruleIds.includes("artifact-review-order"));
 });
 
+test("public-surface-check rejects first-run sharing surfaces without direct Show and tell routing", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "docs/quickstart.md",
+    [
+      artifactOrderText(),
+      "Basic `audit` does not require provider API keys.",
+      "You only need provider API keys when you choose to run `eval`.",
+      "Use the Adopter kit checklist and PR review packet for the first CI pull request.",
+      "Open a general GitHub Discussion after the run."
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("first-run-discussion-routing"));
+});
+
 test("public-surface-check rejects starter bundle surfaces without adopter-kit review boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -305,7 +326,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
       artifactOrderText(),
       "No ranking guarantees and no consumer AI UI scraping.",
       "![AnswerLens starter packet preview](assets/starter-packet-preview.svg)",
-      "Use the Adopter kit checklist and PR review packet to show which artifact to open and which raw payloads stay private."
+      "Use the Adopter kit checklist and PR review packet to show which artifact to open and which raw payloads stay private.",
+      `Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.`
     ].join("\n")
   );
   await writeFixtureFile(
@@ -316,7 +338,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
       artifactOrderText(),
       "不承诺排名，不抓取消费级 AI UI。",
       "![AnswerLens starter packet preview](assets/starter-packet-preview.svg)",
-      "使用 Adopter kit checklist 和 PR review packet，说明哪些 raw payloads 不能公开。"
+      "使用 Adopter kit checklist 和 PR review packet，说明哪些 raw payloads 不能公开。",
+      `用 ${SHOW_AND_TELL_DISCUSSION_URL} 分享 first-run story。`
     ].join("\n")
   );
   await writeFixtureFile(
@@ -353,6 +376,17 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "      label: Public artifacts",
       "      description: If the run used release assets, include the release tag and the asset names; do not use release asset downloads as npm activation proof.",
       "      placeholder: answerlens-demo-audit.tar.gz and answerlens-site.tar.gz"
+    ].join("\n")
+  );
+  await writeFixtureFile(
+    rootDir,
+    ".github/ISSUE_TEMPLATE/config.yml",
+    [
+      "blank_issues_enabled: false",
+      "contact_links:",
+      "  - name: Share your first run",
+      `    url: ${SHOW_AND_TELL_DISCUSSION_URL}`,
+      "    about: Use the Show and tell form to share artifacts, screenshots, or what you learned from your first AnswerLens run."
     ].join("\n")
   );
   await writeFixtureFile(
@@ -420,7 +454,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
     ].join("\n")
   );
   await writeFixtureFile(rootDir, "action.yml", artifactOrderText());
-  await writeFixtureFile(rootDir, "docs/demo-report.md", artifactOrderText());
+  await writeFixtureFile(rootDir, "docs/demo-report.md", `${artifactOrderText()}\nShare first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.`);
   await writeFixtureFile(rootDir, "docs/shareable-summary.md", artifactOrderText());
   await writeFixtureFile(
     rootDir,
@@ -597,7 +631,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
       artifactOrderText(),
       "Basic `audit` does not require provider API keys.",
       "You only need provider API keys when you choose to run `eval`.",
-      "Use the Adopter kit checklist and PR review packet for the first CI pull request."
+      "Use the Adopter kit checklist and PR review packet for the first CI pull request.",
+      `Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.`
     ].join("\n")
   );
   await writeFixtureFile(
@@ -607,7 +642,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
       artifactOrderText(),
       "基础 `audit` 不需要 provider API key。",
       "只有在你要跑 `eval` 时才需要 provider API key。",
-      "第一次 CI 接入 PR 使用 Adopter kit checklist 和 PR review packet。"
+      "第一次 CI 接入 PR 使用 Adopter kit checklist 和 PR review packet。",
+      `用 ${SHOW_AND_TELL_DISCUSSION_URL} 分享 first-run story。`
     ].join("\n")
   );
   await writeFixtureFile(
@@ -626,7 +662,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "`answerlens-demo-audit.tar.gz`",
       "`answerlens-site.tar.gz`",
       "I opened `share-summary.md`, then `scorecard.md`, then `recommendations.md` from the unpacked demo audit bundle",
-      "I am not treating release assets as npm activation proof while `npm view @answerlens/cli` returns `404`"
+      "I am not treating release assets as npm activation proof while `npm view @answerlens/cli` returns `404`",
+      `Use ${SHOW_AND_TELL_DISCUSSION_URL} for first-run stories.`
     ].join("\n")
   );
   await writeFixtureFile(rootDir, "docs/trust-and-safety.md", artifactOrderText());

@@ -46,4 +46,4 @@ Use `share-summary.md` or `pr-snippet.md` when posting examples. Avoid sharing r
 
 Use [trust-and-safety.md](trust-and-safety.md) before posting a result outside your team.
 
-If the fixture report helped you understand AnswerLens, use the [first-run story template](first-run-story.md) and tell us which artifact clicked first in [GitHub Discussions](https://github.com/YSCJRH/ai-visibility-auditor/discussions).
+If the fixture report helped you understand AnswerLens, use the [first-run story template](first-run-story.md) and tell us which artifact clicked first in the [Show and tell Discussion form](https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell).

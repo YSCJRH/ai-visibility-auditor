@@ -22,6 +22,8 @@ type ReleaseSnapshotEntry = {
   body?: unknown;
 };
 
+const SHOW_AND_TELL_DISCUSSION_URL = "https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell";
+
 const EXPECTED_ACTION_MAJORS = new Map([
   ["actions/checkout", "v5"],
   ["actions/setup-node", "v5"],
@@ -142,6 +144,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkArtifactReviewOrder(rootDir, findings);
   await checkAuditEvalKeyBoundary(rootDir, findings);
   await checkFirstRunStoryBoundary(rootDir, findings);
+  await checkFirstRunDiscussionRouting(rootDir, findings);
   await checkStarterAdopterKitBoundary(rootDir, findings);
   await checkReleasePagesRefresh(rootDir, findings);
   await checkReleaseAssetChecklistBoundary(rootDir, findings);
@@ -429,6 +432,40 @@ async function checkFirstRunStoryBoundary(rootDir: string, findings: Finding[]):
           message: `Missing first-run story authorization or safety boundary text: ${snippet}`
         });
       }
+    }
+  }
+}
+
+async function checkFirstRunDiscussionRouting(rootDir: string, findings: Finding[]): Promise<void> {
+  const requiredSurfaces = [
+    "README.md",
+    "README.zh-CN.md",
+    "docs/demo-report.md",
+    "docs/quickstart.md",
+    "docs/zh/quickstart.md",
+    "docs/first-run-story.md",
+    ".github/ISSUE_TEMPLATE/config.yml"
+  ];
+
+  for (const relativePath of requiredSurfaces) {
+    let text: string;
+    try {
+      text = await readFile(path.join(rootDir, relativePath), "utf8");
+    } catch (error) {
+      findings.push({
+        ruleId: "first-run-discussion-routing",
+        path: relativePath,
+        message: `Unable to read first-run Discussion routing surface: ${error instanceof Error ? error.message : String(error)}`
+      });
+      continue;
+    }
+
+    if (!text.includes(SHOW_AND_TELL_DISCUSSION_URL)) {
+      findings.push({
+        ruleId: "first-run-discussion-routing",
+        path: relativePath,
+        message: `First-run sharing should link directly to the Show and tell Discussion form: ${SHOW_AND_TELL_DISCUSSION_URL}`
+      });
     }
   }
 }

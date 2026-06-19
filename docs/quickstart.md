@@ -105,7 +105,7 @@ Then use:
 
 Use [trust-and-safety.md](trust-and-safety.md) before posting a result outside your team.
 
-If the run is safe to discuss publicly, use the [first-run story template](first-run-story.md). A useful first-run story says which artifact helped first, which source-material gap it exposed, and what you would fix next.
+If the run is safe to discuss publicly, use the [first-run story template](first-run-story.md) and the [Show and tell Discussion form](https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell). A useful first-run story says which artifact helped first, which source-material gap it exposed, and what you would fix next.
 
 Do not paste API keys, private analytics, or raw provider payloads into public PRs, issues, release notes, or Discussions.
 
@@ -116,4 +116,4 @@ Once the local run feels useful, continue to [docs/github-action.md](github-acti
 The GitHub Action should feel like the same artifact contract on a schedule or pull request, not a different product surface.
 Use the starter bundle [Adopter kit checklist](starter-bundle.md#adopter-kit-checklist) and [PR review packet](starter-bundle.md#pr-review-packet) for the first CI pull request.
 
-If this is your first real-site run, open a [GitHub Discussion](https://github.com/YSCJRH/ai-visibility-auditor/discussions) and tell us which artifact helped first.
+If this is your first real-site run, open the [Show and tell Discussion form](https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell) and tell us which artifact helped first.

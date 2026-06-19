@@ -90,7 +90,7 @@ OPENAI_API_KEY=... corepack pnpm eval -- https://www.example.com \
 
 公开分享前先看 [../trust-and-safety.md](../trust-and-safety.md)。
 
-如果这次 run 可以公开讨论，可以使用 [../first-run-story.md](../first-run-story.md) 模板。一个有用的 first-run story 应该说明哪份 artifact 最先帮到你、暴露了哪个 source-material 缺口，以及下一步准备修哪一页。
+如果这次 run 可以公开讨论，可以使用 [../first-run-story.md](../first-run-story.md) 模板，并打开 [Show and tell Discussion form](https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell)。一个有用的 first-run story 应该说明哪份 artifact 最先帮到你、暴露了哪个 source-material 缺口，以及下一步准备修哪一页。
 
 不要把 API key、私有 analytics 或 raw provider payloads 粘贴到公开 PR、issue、release notes 或 Discussions。
 
