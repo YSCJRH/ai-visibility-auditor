@@ -97,16 +97,13 @@ jobs:
         run: |
           tar -czf dist/answerlens-demo-audit.tar.gz runs/static-good
           tar -czf dist/answerlens-site.tar.gz dist/site
-      - name: Verify release demo audit bundle
-        run: |
-          mkdir -p dist/release-demo-audit-check
-          tar -xzf dist/answerlens-demo-audit.tar.gz -C dist/release-demo-audit-check
-          node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out dist/release-demo-audit-check/runs/static-good
       - name: Write release asset manifest
         run: |
           pnpm release:assets:manifest -- --out dist/release-assets-manifest.json dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz
           pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json --summary-out dist/release-assets-summary.md
           cat dist/release-assets-summary.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Smoke check release assets
+        run: pnpm release:assets:smoke -- --dir dist --work-dir dist/release-assets-smoke-check
       - name: Write release notes
         run: |
           cat <<'EOF' > dist/release-notes.md
@@ -126,7 +123,7 @@ jobs:
 
           - CLI tarball: use the versioned `answerlens-cli-*.tgz` package for pinned local CLI runs before npm is visible
           - `answerlens-demo-audit.tar.gz`: unpack the fixture report and open `share-summary.md`, then `scorecard.md`, then `recommendations.md`
-          - The Release Distribution workflow unpacks `answerlens-demo-audit.tar.gz` and runs `scripts/distribution/demo-fixture-artifact-check.ts` before uploading release assets
+          - The Release Distribution workflow runs `pnpm release:assets:smoke -- --dir dist` before uploading release assets
           - `answerlens-site.tar.gz`: inspect the compiled Pages bundle for docs, examples, starter, and release pages at this tag
           - `release-assets-manifest.json`: verify asset sizes and SHA-256 checksums before reusing downloaded release assets
           - `release-assets-summary.md`: read the verified asset table before forwarding or reusing downloaded release assets

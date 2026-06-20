@@ -41,7 +41,7 @@
 4. `release-assets-manifest.json`，用于在复用 tarball 之前校验已下载文件的大小和 SHA-256 checksum。
 5. `release-assets-summary.md`，用于读取可转发的 verified asset table；它可以进入 release review，但不暴露 raw provider payloads。
 
-对于同时包含 `release-assets-manifest.json` 和 `release-assets-summary.md` 的 release，把 manifest、summary 和所有 assets 下载到同一个目录，然后在本地 checkout 中校验已下载文件：
+对于同时包含 `release-assets-manifest.json` 和 `release-assets-summary.md` 的 release，把 manifest、summary 和所有 assets 下载到同一个目录，然后在本地 checkout 中运行 smoke command。它会校验 manifest checksum、检查 `release-assets-summary.md`、解压 demo audit bundle、确认 `share-summary.md`、`scorecard.md`、`recommendations.md` 的阅读顺序，并检查编译后站点的 release 入口：
 
 ```bash
 assets_dir="$(mktemp -d)"
@@ -52,10 +52,7 @@ gh release download vX.Y.Z \
   --pattern release-assets-manifest.json \
   --pattern release-assets-summary.md \
   --dir "$assets_dir"
-corepack pnpm release:assets:manifest -- --verify "$assets_dir/release-assets-manifest.json"
-mkdir -p "$assets_dir/demo-audit-check"
-tar -xzf "$assets_dir/answerlens-demo-audit.tar.gz" -C "$assets_dir/demo-audit-check"
-node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out "$assets_dir/demo-audit-check/runs/static-good"
+corepack pnpm release:assets:smoke -- --dir "$assets_dir"
 ```
 
 如果某个 release 早于 `release-assets-manifest.json` 或 `release-assets-summary.md`，不要把 checksum claim 回填进公开 release story；只检查已有 assets，并把这个缺口记录为 release metadata 历史。

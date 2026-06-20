@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -93,6 +93,41 @@ test("release-assets-manifest rejects missing required assets and checksum drift
       }),
       /checksum mismatch/
     );
+  } finally {
+    process.chdir(previousCwd);
+  }
+});
+
+test("release-assets-manifest verifies downloaded assets next to the manifest before local build paths", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "answerlens-release-assets-download-"));
+  await mkdir(path.join(root, "dist", "packages"), { recursive: true });
+  await mkdir(path.join(root, "download"), { recursive: true });
+  await writeFile(path.join(root, "dist", "packages", "answerlens-cli-1.2.3.tgz"), "downloaded cli tarball", "utf8");
+  await writeFile(path.join(root, "dist", "answerlens-demo-audit.tar.gz"), "demo bundle", "utf8");
+  await writeFile(path.join(root, "dist", "answerlens-site.tar.gz"), "site bundle", "utf8");
+
+  const previousCwd = process.cwd();
+  process.chdir(root);
+  try {
+    const manifestPath = path.join(root, "dist", "release-assets-manifest.json");
+    await runReleaseAssetsManifest({
+      outPath: manifestPath,
+      releaseTag: "v1.2.3",
+      filePatterns: ["dist/packages/*.tgz", "dist/answerlens-demo-audit.tar.gz", "dist/answerlens-site.tar.gz"]
+    });
+
+    await copyFile(manifestPath, path.join(root, "download", "release-assets-manifest.json"));
+    await copyFile(path.join(root, "dist", "packages", "answerlens-cli-1.2.3.tgz"), path.join(root, "download", "answerlens-cli-1.2.3.tgz"));
+    await copyFile(path.join(root, "dist", "answerlens-demo-audit.tar.gz"), path.join(root, "download", "answerlens-demo-audit.tar.gz"));
+    await copyFile(path.join(root, "dist", "answerlens-site.tar.gz"), path.join(root, "download", "answerlens-site.tar.gz"));
+    await writeFile(path.join(root, "dist", "packages", "answerlens-cli-1.2.3.tgz"), "stale local build tarball", "utf8");
+
+    await runReleaseAssetsManifest({
+      outPath: path.join(root, "download", "release-assets-manifest.json"),
+      verifyPath: path.join(root, "download", "release-assets-manifest.json"),
+      releaseTag: "v1.2.3",
+      filePatterns: []
+    });
   } finally {
     process.chdir(previousCwd);
   }

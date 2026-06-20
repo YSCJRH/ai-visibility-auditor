@@ -434,19 +434,14 @@ test("public-surface-check rejects release workflows without unpacked demo bundl
   await writeFixtureFile(
     rootDir,
     ".github/workflows/release-distribution.yml",
-    workflow
-      .replace("      - run: tar -xzf dist/answerlens-demo-audit.tar.gz -C dist/release-demo-audit-check\n", "")
-      .replace(
-        "      - run: node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out dist/release-demo-audit-check/runs/static-good\n",
-        ""
-      )
+    workflow.replace("      - run: pnpm release:assets:smoke -- --dir dist\n", "")
   );
 
   const findings = await runPublicSurfaceCheck({ rootDir });
   const demoBundleFinding = findings.find(
     (finding) =>
       finding.ruleId === "release-asset-manifest-gate" &&
-      finding.message.includes("scripts/distribution/demo-fixture-artifact-check.ts --out dist/release-demo-audit-check/runs/static-good")
+      finding.message.includes("pnpm release:assets:smoke -- --dir dist")
   );
 
   assert.ok(demoBundleFinding);
@@ -759,9 +754,10 @@ async function createPublicSurfaceFixture(): Promise<string> {
         scripts: {
           "pages:smoke": "node --experimental-strip-types scripts/distribution/pages-smoke-check.ts",
           "release:assets:manifest": "node --experimental-strip-types scripts/distribution/release-assets-manifest.ts",
+          "release:assets:smoke": "node --experimental-strip-types scripts/distribution/release-assets-smoke-check.ts",
           "release:snapshot:check": "node --experimental-strip-types scripts/distribution/release-snapshot-check.ts",
           "release:snapshot:refresh": "node --experimental-strip-types scripts/distribution/release-snapshot-refresh.ts",
-          test: "node --experimental-strip-types --experimental-test-isolation=none --test scripts/distribution/public-surface-check.test.ts scripts/distribution/release-assets-manifest.test.ts scripts/distribution/release-snapshot-check.test.ts scripts/distribution/release-snapshot-refresh.test.ts"
+          test: "node --experimental-strip-types --experimental-test-isolation=none --test scripts/distribution/public-surface-check.test.ts scripts/distribution/release-assets-manifest.test.ts scripts/distribution/release-assets-smoke-check.test.ts scripts/distribution/release-snapshot-check.test.ts scripts/distribution/release-snapshot-refresh.test.ts"
         }
       },
       null,
@@ -966,8 +962,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "Run corepack pnpm release:snapshot:check after refreshing the snapshot.",
       "Use the helper to replace guessed fields such as published_at with GitHub metadata.",
       "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, `release-assets-summary.md`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
-      "Run gh release download vX.Y.Z with release-assets-summary.md before corepack pnpm release:assets:manifest -- --verify.",
-      "Run node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out after unpacking the release demo audit bundle.",
+      "Run gh release download vX.Y.Z with release-assets-summary.md before corepack pnpm release:assets:smoke -- --dir \"$assets_dir\".",
+      "The smoke command verifies manifest checksums before reusing downloaded release assets.",
       "If an older release does not have release-assets-manifest.json or release-assets-summary.md, do not imply checksum coverage for that release.",
       "In the Release Distribution workflow summary, review the Release asset manifest verified table before reusing downloaded release assets."
     ].join("\n")
@@ -985,8 +981,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "release-assets-summary.md",
       "SHA-256",
       "gh release download vX.Y.Z",
-      "corepack pnpm release:assets:manifest -- --verify",
-      "node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out",
+      "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\"",
+      "manifest checksums",
       "Open by opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
       "If a release predates release-assets-manifest.json or release-assets-summary.md, do not backfill a checksum claim.",
       "If `npm view @answerlens/cli` returns `404`, do not present npm as activated."
@@ -1005,8 +1001,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "release-assets-summary.md",
       "SHA-256",
       "gh release download vX.Y.Z",
-      "corepack pnpm release:assets:manifest -- --verify",
-      "node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out",
+      "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\"",
+      "manifest checksum",
       "`share-summary.md`、`scorecard.md`、`recommendations.md`",
       "不要把 checksum claim 回填进公开 release story",
       "如果 `npm view @answerlens/cli` 返回 `404`，不要把 npm 描述成已激活。"
@@ -1090,6 +1086,20 @@ async function createPublicSurfaceFixture(): Promise<string> {
   );
   await writeFixtureFile(
     rootDir,
+    "scripts/distribution/release-assets-smoke-check.ts",
+    [
+      "export async function runReleaseAssetsSmokeCheck() {}",
+      "const manifest = 'runReleaseAssetsManifest';",
+      "const demo = 'runDemoFixtureArtifactCheck';",
+      "const summary = 'release-assets-summary.md';",
+      "const demoBundle = 'answerlens-demo-audit.tar.gz';",
+      "const siteBundle = 'answerlens-site.tar.gz';",
+      "const order = 'share-summary.md scorecard.md recommendations.md';",
+      "const npmBoundary = 'npm view @answerlens/cli';"
+    ].join("\n")
+  );
+  await writeFixtureFile(
+    rootDir,
     ".github/workflows/pages.yml",
     [
       "name: Pages",
@@ -1129,11 +1139,9 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "      - run: echo \"answerlens-cli-*.tgz\"",
       "      - run: echo \"`answerlens-demo-audit.tar.gz`\"",
       "      - run: echo \"`answerlens-site.tar.gz`\"",
-      "      - run: mkdir -p dist/release-demo-audit-check",
-      "      - run: tar -xzf dist/answerlens-demo-audit.tar.gz -C dist/release-demo-audit-check",
-      "      - run: node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out dist/release-demo-audit-check/runs/static-good",
       "      - run: pnpm release:assets:manifest -- --out dist/release-assets-manifest.json dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz",
       "      - run: pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json --summary-out dist/release-assets-summary.md",
+      "      - run: pnpm release:assets:smoke -- --dir dist",
       "      - run: cat dist/release-assets-summary.md >> \"$GITHUB_STEP_SUMMARY\"",
       "      - run: echo \"`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums\"",
       "      - run: echo \"`release-assets-summary.md`: read the verified asset table\"",
