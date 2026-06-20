@@ -1449,6 +1449,19 @@ async function checkStableReleaseVersionSync(rootDir: string, findings: Finding[
         message: `Latest release notes should mention the current stable tag ${stableTag}.`
       });
     }
+    if (
+      typeof latest?.body === "string" &&
+      !latest.body.includes(
+        "`Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`"
+      )
+    ) {
+      findings.push({
+        ruleId: "stable-version-release-snapshot",
+        path: releasesPath,
+        message:
+          "Latest release notes must include the release review path: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`."
+      });
+    }
   }
 
   for (const surface of STABLE_RELEASE_SURFACES) {
