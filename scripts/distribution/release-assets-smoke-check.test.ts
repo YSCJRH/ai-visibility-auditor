@@ -49,6 +49,16 @@ test("release-assets-smoke-check rejects a release asset summary without the CLI
   assert.match(finding.message, /answerlens-cli-/);
 });
 
+test("release-assets-smoke-check rejects a release asset summary without checksum table headers", async () => {
+  const fixture = await createReleaseAssetsFixture({ brokenReleaseSummaryMissingChecksumHeader: true });
+
+  const findings = await runReleaseAssetsSmokeCheck({ assetsDir: fixture.assetsDir });
+  const finding = findings.find((item) => item.ruleId === "release-asset-summary");
+
+  assert.ok(finding);
+  assert.match(finding.message, /Asset \| Size \| SHA-256/);
+});
+
 test("release-assets-smoke-check writes a release review summary on success", async () => {
   const fixture = await createReleaseAssetsFixture();
   const summaryPath = path.join(fixture.rootDir, "release-assets-smoke-summary.md");
@@ -121,6 +131,7 @@ async function createReleaseAssetsFixture(
   options: {
     brokenCliReadme?: boolean;
     brokenDemoBundle?: boolean;
+    brokenReleaseSummaryMissingChecksumHeader?: boolean;
     brokenReleaseSummaryMissingCli?: boolean;
     brokenSiteBundle?: boolean;
     cliTarballInPackagesDir?: boolean;
@@ -166,6 +177,10 @@ async function createReleaseAssetsFixture(
   });
   if (options.brokenReleaseSummaryMissingCli === true) {
     await removeLinesContaining(path.join(assetsDir, "release-assets-summary.md"), "answerlens-cli-");
+  }
+  if (options.brokenReleaseSummaryMissingChecksumHeader === true) {
+    await removeLinesContaining(path.join(assetsDir, "release-assets-summary.md"), "| Asset |");
+    await removeLinesContaining(path.join(assetsDir, "release-assets-summary.md"), "| --- |");
   }
 
   return { rootDir, assetsDir };

@@ -216,6 +216,8 @@ async function verifySummary(assetsDir: string, findings: ReleaseAssetsSmokeFind
     "Release asset manifest verified",
     "Review order: `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
     "do not present npm as activated",
+    "| Asset | Size | SHA-256 |",
+    "| --- | ---: | --- |",
     "answerlens-cli-",
     "answerlens-demo-audit.tar.gz",
     "answerlens-site.tar.gz"
