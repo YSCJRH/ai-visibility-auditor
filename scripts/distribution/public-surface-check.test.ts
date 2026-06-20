@@ -378,6 +378,31 @@ test("public-surface-check rejects release snapshot refresh without review path 
   assert.ok(reviewPathFinding);
 });
 
+test("public-surface-check rejects release playbooks without refresh failure guidance", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  const playbookPath = path.join(rootDir, "docs/release-bump-playbook.md");
+  const playbook = await readFile(playbookPath, "utf8");
+  await writeFixtureFile(
+    rootDir,
+    "docs/release-bump-playbook.md",
+    playbook
+      .replace("If release:snapshot:refresh fails because the latest stable release is missing the release review path, edit the GitHub Release body first.\n", "")
+      .replace(
+        "Do not bypass the refresh guard; open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`.\n",
+        ""
+      )
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const guidanceFinding = findings.find(
+    (finding) =>
+      finding.ruleId === "release-snapshot-freshness-gate" &&
+      finding.message.includes("latest stable release is missing the release review path")
+  );
+
+  assert.ok(guidanceFinding);
+});
+
 test("public-surface-check rejects release surfaces without asset checklist boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, "docs/manual-steps.md", `Use the reviewed release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`);
@@ -1146,7 +1171,9 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "After the smoke run, confirm its `Release review path` line says to open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
       "The smoke command verifies manifest checksums before reusing downloaded release assets.",
       "If an older release does not have release-assets-manifest.json or release-assets-summary.md, do not imply checksum coverage for that release.",
-      "In the Release Distribution workflow summary, review the Release asset manifest verified and Release asset smoke check passed sections before reusing downloaded release assets."
+      "In the Release Distribution workflow summary, review the Release asset manifest verified and Release asset smoke check passed sections before reusing downloaded release assets.",
+      "If release:snapshot:refresh fails because the latest stable release is missing the release review path, edit the GitHub Release body first.",
+      "Do not bypass the refresh guard; open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`."
     ].join("\n")
   );
   await writeFixtureFile(

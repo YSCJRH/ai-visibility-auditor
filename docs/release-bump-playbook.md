@@ -113,6 +113,8 @@ Open `release-assets-summary.md` first when you only need the human-readable che
 
 If `release:snapshot:refresh -- --write` changes `scripts/distribution/releases-snapshot.json`, review the diff and ship a small truth-sync PR before making new Pages or release claims. If npm still returns `E404`, do not add npm install copy. If an older release does not have `release-assets-manifest.json` or `release-assets-summary.md`, do not imply checksum coverage for that release. Record trusted publishing or `NPM_TOKEN` as a manual step.
 
+If `release:snapshot:refresh -- --write` fails because the latest stable release is missing the release review path, edit the GitHub Release body first. Add the public review path exactly as `Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`. Then rerun `corepack pnpm release:snapshot:refresh -- --write` and `corepack pnpm release:snapshot:check`; do not bypass the refresh guard or commit a snapshot copied from a release body that omits the artifact order.
+
 ## What Not To Do
 
 - Do not tag a release from a branch that has not passed the release gate.
