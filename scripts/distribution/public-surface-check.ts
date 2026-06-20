@@ -1129,9 +1129,9 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "release-assets-summary.md",
         "SHA-256",
         "gh release download vX.Y.Z",
-        "corepack pnpm release:assets:manifest -- --verify",
-        "scripts/distribution/demo-fixture-artifact-check.ts --out",
-        "opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
+        "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\"",
+        "manifest checksums",
+        "`share-summary.md`, then `scorecard.md`, then `recommendations.md`",
         "do not backfill a checksum claim",
         "If `npm view @answerlens/cli` returns `404`, do not present npm as activated"
       ]
@@ -1147,7 +1147,8 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "release-assets-summary.md",
         "SHA-256",
         "gh release download vX.Y.Z",
-        "corepack pnpm release:assets:manifest -- --verify",
+        "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\"",
+        "manifest checksum",
         "`share-summary.md`、`scorecard.md`、`recommendations.md`",
         "不要把 checksum claim 回填进公开 release story",
         "如果 `npm view @answerlens/cli` 返回 `404`，不要把 npm 描述成已激活"
@@ -1163,8 +1164,8 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "`release-assets-manifest.json`",
         "`release-assets-summary.md`",
         "gh release download vX.Y.Z",
-        "corepack pnpm release:assets:manifest -- --verify",
-        "scripts/distribution/demo-fixture-artifact-check.ts --out",
+        "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\"",
+        "manifest checksums",
         "do not imply checksum coverage for that release",
         "`share-summary.md`, then `scorecard.md`, then `recommendations.md`"
       ]
@@ -1233,6 +1234,14 @@ async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[
       message: "package.json must expose release:assets:manifest so release asset checksums are locally runnable."
     });
   }
+  const expectedSmokeScript = "node --experimental-strip-types scripts/distribution/release-assets-smoke-check.ts";
+  if (packageJson?.scripts?.["release:assets:smoke"] !== expectedSmokeScript) {
+    findings.push({
+      ruleId: "release-asset-manifest-gate",
+      path: packageJsonPath,
+      message: "package.json must expose release:assets:smoke so downloaded release assets are locally reusable."
+    });
+  }
 
   const testScript = typeof packageJson?.scripts?.test === "string" ? packageJson.scripts.test : "";
   if (!testScript.includes("scripts/distribution/release-assets-manifest.test.ts")) {
@@ -1242,9 +1251,17 @@ async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[
       message: "package.json test script must include release-assets-manifest.test.ts."
     });
   }
+  if (!testScript.includes("scripts/distribution/release-assets-smoke-check.test.ts")) {
+    findings.push({
+      ruleId: "release-asset-manifest-gate",
+      path: packageJsonPath,
+      message: "package.json test script must include release-assets-smoke-check.test.ts."
+    });
+  }
 
   const workflowPath = ".github/workflows/release-distribution.yml";
   const scriptPath = "scripts/distribution/release-assets-manifest.ts";
+  const smokeScriptPath = "scripts/distribution/release-assets-smoke-check.ts";
   const requiredSurfaces = [
     {
       path: workflowPath,
@@ -1252,9 +1269,7 @@ async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[
         "pnpm release:assets:manifest -- --out dist/release-assets-manifest.json",
         "pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json",
         "--summary-out dist/release-assets-summary.md",
-        "mkdir -p dist/release-demo-audit-check",
-        "tar -xzf dist/answerlens-demo-audit.tar.gz -C dist/release-demo-audit-check",
-        "scripts/distribution/demo-fixture-artifact-check.ts --out dist/release-demo-audit-check/runs/static-good",
+        "pnpm release:assets:smoke -- --dir dist",
         "cat dist/release-assets-summary.md >> \"$GITHUB_STEP_SUMMARY\"",
         "`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums",
         "`release-assets-summary.md`: read the verified asset table",
@@ -1277,11 +1292,27 @@ async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[
       ]
     },
     {
+      path: smokeScriptPath,
+      snippets: [
+        "runReleaseAssetsSmokeCheck",
+        "runReleaseAssetsManifest",
+        "runDemoFixtureArtifactCheck",
+        "release-assets-summary.md",
+        "answerlens-demo-audit.tar.gz",
+        "answerlens-site.tar.gz",
+        "share-summary.md",
+        "scorecard.md",
+        "recommendations.md",
+        "npm view @answerlens/cli"
+      ]
+    },
+    {
       path: "docs/release-bump-playbook.md",
       snippets: [
         "Release Distribution workflow summary",
         "Release asset manifest verified",
         "release-assets-summary.md",
+        "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\"",
         "before reusing downloaded release assets"
       ]
     }

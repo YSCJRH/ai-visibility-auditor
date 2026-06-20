@@ -187,7 +187,7 @@ async function verifyManifest(manifestPath: string): Promise<ReleaseAssetsManife
 }
 
 async function resolveAssetPath(asset: ReleaseAsset, manifestDir: string): Promise<string> {
-  const candidates = [asset.path, path.join(manifestDir, asset.name)];
+  const candidates = [path.join(manifestDir, asset.name), asset.path];
   for (const candidate of candidates) {
     try {
       const stats = await stat(candidate);
