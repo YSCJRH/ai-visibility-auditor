@@ -51,8 +51,11 @@ AnswerLens first run:
 - Start with `share-summary.md`, then open `scorecard.md`, then `recommendations.md`.
 - This PR copies the starter bundle into `.github/answerlens/` and runs the pinned Action.
 - Public-safe artifact: `answerlens-report`; `raw/**` is excluded by default.
+- Safe next step: if authorized, use the first-run story template and Show and tell Discussion form.
 - Boundary: AnswerLens audits public source material. No consumer AI UI scraping. No ranking or answer-placement guarantee.
 ```
+
+Use the [first-run story template](first-run-story.md) and [Show and tell Discussion form](https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell) only when the run is safe and authorized to discuss publicly.
 
 ## Review artifacts in this order
 

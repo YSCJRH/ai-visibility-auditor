@@ -856,8 +856,12 @@ async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding
       snippets: [
         "### Adopter kit",
         "### Safe sharing boundary",
+        "### Share this first run",
         "## First CI PR packet",
-        "Adopter kit` and `Safe sharing boundary",
+        "Adopter kit`, `Safe sharing boundary`, and `Share this first run",
+        "first-run story template",
+        "Show and tell Discussion form",
+        "API keys, private analytics, or raw provider payloads",
         "no consumer AI UI scraping and no ranking or answer-placement guarantee"
       ]
     },
@@ -866,8 +870,12 @@ async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding
       snippets: [
         "Adopter kit",
         "Safe sharing boundary",
+        "Share this first run",
         "## 第一次 CI 的 PR 审阅包",
         "`share-summary.md`，然后 `scorecard.md`，最后 `recommendations.md`",
+        "first-run story template",
+        "Show and tell Discussion form",
+        "API keys、私有 analytics 或 raw provider payloads",
         "不抓取消费级 AI UI，不承诺排名或答案展示位置"
       ]
     },
@@ -880,6 +888,7 @@ async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding
         "../assets/starter-packet-preview.svg",
         "Put provider keys only in GitHub secrets or local environment variables",
         "Review `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
+        "Safe next step: if authorized, use the first-run story template and Show and tell Discussion form.",
         "Do not attach `raw/**`",
         "No consumer AI UI scraping. No ranking or answer-placement guarantee."
       ]
@@ -892,6 +901,7 @@ async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding
         "Copy `.github/answerlens/` and `.github/workflows/answerlens.yml`",
         "Put provider keys only in GitHub secrets or local environment variables",
         "Review `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
+        "Safe next step: if authorized, use the first-run story template and Show and tell Discussion form.",
         "Do not attach `raw/**`",
         "No consumer AI UI scraping. No ranking or answer-placement guarantee."
       ]
@@ -905,7 +915,11 @@ async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding
         "Review \\`share-summary.md\\`, then \\`scorecard.md\\`, then \\`recommendations.md\\`",
         "### Safe sharing boundary",
         "\\`raw/**\\` is excluded from the uploaded artifact",
-        "No consumer AI UI scraping. No ranking or answer-placement guarantee."
+        "No consumer AI UI scraping. No ranking or answer-placement guarantee.",
+        "### Share this first run",
+        "first-run story template",
+        "Show and tell Discussion form",
+        "API keys, private analytics, or raw provider payloads"
       ]
     },
     {
@@ -914,6 +928,7 @@ async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding
         "PR review packet",
         "starter-packet-preview.svg",
         "Public-safe artifact: answerlens-report",
+        "Safe next step: if authorized, use the first-run story template and Show and tell Discussion form.",
         "raw/** is excluded by default",
         "No consumer AI UI scraping. No ranking or answer-placement guarantee."
       ]
@@ -927,6 +942,7 @@ async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding
         "share-summary.md",
         "scorecard.md",
         "recommendations.md",
+        "Safe first-run story link",
         "raw/** is excluded by default",
         "No consumer AI UI scraping",
         "No ranking or answer-placement guarantee"

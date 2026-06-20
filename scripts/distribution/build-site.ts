@@ -1839,9 +1839,10 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             `<a href="${escapeHtml(repoBlob("examples/consumer-repo/.github/workflows/answerlens.yml"))}">answerlens.yml</a>`
           ])}</ul>`)}
           ${renderPanel("Report review order", "Review flow", `<div class="artifactRail"><div class="artifactItem"><strong>share-summary.md</strong><p>Use this for the audit overview and PR summary.</p></div><div class="artifactItem"><strong>scorecard.md</strong><p>Use this to inspect coverage, checks, and scoring.</p></div><div class="artifactItem"><strong>recommendations.md</strong><p>Use this as the fix list after review.</p></div></div><p>Then use <code>pr-snippet.md</code> for GitHub copy and <code>run.json</code> for machine-readable metadata.</p>`)}
-          ${renderPanel("PR review packet", "Copy into review", `<img class="starterPreview" src="${escapeHtml(starterPacketPreviewUrl)}" alt="AnswerLens starter packet preview" loading="lazy"><p>Use this after the first CI run so teammates know what to open and what not to publish.</p><pre class="markdown">AnswerLens first run:
+          ${renderPanel("PR review packet", "Copy into review", `<img class="starterPreview" src="${escapeHtml(starterPacketPreviewUrl)}" alt="AnswerLens starter packet preview" loading="lazy"><p>Use this after the first CI run so teammates know what to open, what not to publish, and how to share safely if authorized.</p><pre class="markdown">AnswerLens first run:
 - Start with share-summary.md, then open scorecard.md, then recommendations.md.
 - Public-safe artifact: answerlens-report; raw/** is excluded by default.
+- Safe next step: if authorized, use the first-run story template and Show and tell Discussion form.
 - Boundary: AnswerLens audits public source material. No consumer AI UI scraping. No ranking or answer-placement guarantee.</pre>`)}
         </section>
         <section class="section grid">
@@ -1883,9 +1884,10 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             `<a href="${escapeHtml(repoBlob("examples/consumer-repo/.github/workflows/answerlens.yml"))}">answerlens.yml</a>`
           ])}</ul>`)}
           ${renderPanel("先按这个顺序审阅", "审阅顺序", `<div class="artifactRail"><div class="artifactItem"><strong>share-summary.md</strong><p>用于审计概览和 PR 摘要。</p></div><div class="artifactItem"><strong>scorecard.md</strong><p>用于检查覆盖、规则和得分。</p></div><div class="artifactItem"><strong>recommendations.md</strong><p>用于审阅后的修复清单。</p></div></div><p>看完这三份之后，再用 <code>pr-snippet.md</code> 处理 GitHub 文案，用 <code>run.json</code> 处理机器可读元数据。</p>`)}
-          ${renderPanel("PR 审阅包", "复制到审阅里", `<img class="starterPreview" src="${escapeHtml(starterPacketPreviewUrl)}" alt="AnswerLens starter packet preview" loading="lazy"><p>第一次 CI 跑完后，用这一小段告诉团队先看什么、哪些内容不要公开。</p><pre class="markdown">AnswerLens first run:
+          ${renderPanel("PR 审阅包", "复制到审阅里", `<img class="starterPreview" src="${escapeHtml(starterPacketPreviewUrl)}" alt="AnswerLens starter packet preview" loading="lazy"><p>第一次 CI 跑完后，用这一小段告诉团队先看什么、哪些内容不要公开，以及已有授权时如何安全分享。</p><pre class="markdown">AnswerLens first run:
 - 先看 share-summary.md，再看 scorecard.md，最后看 recommendations.md。
 - 可公开审阅的 artifact：answerlens-report；默认排除 raw/**。
+- 安全下一步：如果已有授权，用 first-run story template 和 Show and tell Discussion form 分享。
 - 边界：AnswerLens 审计公开 source material，不抓取消费级 AI UI，不承诺排名或答案展示位置。</pre>`)}
         </section>
         <section class="section grid">

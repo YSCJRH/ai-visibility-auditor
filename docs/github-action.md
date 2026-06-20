@@ -91,6 +91,10 @@ jobs:
           echo "### Safe sharing boundary" >> "$GITHUB_STEP_SUMMARY"
           echo "- Public PRs should link the summary, scorecard, and recommendations; \`raw/**\` is excluded from the uploaded artifact." >> "$GITHUB_STEP_SUMMARY"
           echo "- AnswerLens audits public source material. No consumer AI UI scraping. No ranking or answer-placement guarantee." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Share this first run" >> "$GITHUB_STEP_SUMMARY"
+          echo "- If this run is safe and authorized to discuss, use the [first-run story template](https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/first-run-story.md) and [Show and tell Discussion form](https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell)." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Do not include API keys, private analytics, or raw provider payloads." >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v6
         with:
@@ -165,14 +169,15 @@ If you want one last sanity check before CI, run the command path in [quickstart
 
 ## First CI PR packet
 
-When the first Action run finishes, use the `Adopter kit` and `Safe sharing boundary` blocks in `GITHUB_STEP_SUMMARY` as the handoff note for the setup PR.
+When the first Action run finishes, use the `Adopter kit`, `Safe sharing boundary`, and `Share this first run` blocks in `GITHUB_STEP_SUMMARY` as the handoff note for the setup PR.
 
-The review packet should answer four things without opening raw payloads:
+The review packet should answer five things without opening raw payloads:
 
 1. Which repository files were copied: `.github/answerlens/` and `.github/workflows/answerlens.yml`.
 2. Which public artifact to open first: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
 3. Where secrets belong: GitHub secrets or local environment variables, not `runtime.yaml`.
 4. What this result does not claim: no consumer AI UI scraping and no ranking or answer-placement guarantee.
+5. How to share safely if authorized: use the first-run story template and Show and tell Discussion form, without API keys, private analytics, or raw provider payloads.
 
 ## What to publish into `GITHUB_STEP_SUMMARY`
 
@@ -180,6 +185,7 @@ The review packet should answer four things without opening raw payloads:
 - `scorecard-path` and `recommendations-path` as the next two review artifacts after the summary
 - `pr-snippet.md` for the copy-ready block that can move into PRs or issues
 - `run-json-path` as the pointer to the machine-readable manifest
+- the first-run story link when the result is safe and authorized to discuss publicly
 
 Upload the report bundle for review, but keep `raw/**` excluded from the default artifact. `eval` and `manual-import` runs may write raw provider payloads there for debugging and auditability.
 
