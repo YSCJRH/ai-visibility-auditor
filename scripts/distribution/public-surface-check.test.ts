@@ -497,6 +497,26 @@ test("public-surface-check rejects release workflows without unpacked demo bundl
   assert.ok(demoBundleFinding);
 });
 
+test("public-surface-check rejects release smoke summaries without a review path", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  const smokeScriptPath = path.join(rootDir, "scripts/distribution/release-assets-smoke-check.ts");
+  const smokeScript = await readFile(smokeScriptPath, "utf8");
+  await writeFixtureFile(
+    rootDir,
+    "scripts/distribution/release-assets-smoke-check.ts",
+    smokeScript
+      .replace("function formatReleaseReviewPath() { return 'Open release-assets-summary.md, then the demo audit share-summary.md, scorecard.md, and recommendations.md.'; }\n", "")
+      .replace("const reviewPath = 'Release review path';\n", "")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const reviewPathFinding = findings.find(
+    (finding) => finding.ruleId === "release-asset-manifest-gate" && finding.message.includes("Release review path")
+  );
+
+  assert.ok(reviewPathFinding);
+});
+
 test("public-surface-check rejects release asset docs without downloaded manifest verification", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -1167,6 +1187,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
     [
       "export async function runReleaseAssetsSmokeCheck() {}",
       "export function formatReleaseAssetsSmokeSummary() { return 'Release asset smoke check passed'; }",
+      "function formatReleaseReviewPath() { return 'Open release-assets-summary.md, then the demo audit share-summary.md, scorecard.md, and recommendations.md.'; }",
+      "const reviewPath = 'Release review path';",
       "const manifest = 'runReleaseAssetsManifest';",
       "const demo = 'runDemoFixtureArtifactCheck';",
       "const option = 'summaryOutPath';",
