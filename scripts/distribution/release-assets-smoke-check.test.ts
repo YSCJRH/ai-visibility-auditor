@@ -39,6 +39,16 @@ test("release-assets-smoke-check rejects premature npm runner copy inside the CL
   assert.match(finding.message, /registry package is visible/);
 });
 
+test("release-assets-smoke-check rejects a release asset summary without the CLI tarball", async () => {
+  const fixture = await createReleaseAssetsFixture({ brokenReleaseSummaryMissingCli: true });
+
+  const findings = await runReleaseAssetsSmokeCheck({ assetsDir: fixture.assetsDir });
+  const finding = findings.find((item) => item.ruleId === "release-asset-summary");
+
+  assert.ok(finding);
+  assert.match(finding.message, /answerlens-cli-/);
+});
+
 test("release-assets-smoke-check writes a release review summary on success", async () => {
   const fixture = await createReleaseAssetsFixture();
   const summaryPath = path.join(fixture.rootDir, "release-assets-smoke-summary.md");
@@ -111,6 +121,7 @@ async function createReleaseAssetsFixture(
   options: {
     brokenCliReadme?: boolean;
     brokenDemoBundle?: boolean;
+    brokenReleaseSummaryMissingCli?: boolean;
     brokenSiteBundle?: boolean;
     cliTarballInPackagesDir?: boolean;
   } = {}
@@ -153,8 +164,20 @@ async function createReleaseAssetsFixture(
     releaseTag: "v1.2.3",
     filePatterns: []
   });
+  if (options.brokenReleaseSummaryMissingCli === true) {
+    await removeLinesContaining(path.join(assetsDir, "release-assets-summary.md"), "answerlens-cli-");
+  }
 
   return { rootDir, assetsDir };
+}
+
+async function removeLinesContaining(filePath: string, snippet: string): Promise<void> {
+  const text = await readFile(filePath, "utf8");
+  const filtered = text
+    .split(/\r?\n/)
+    .filter((line) => !line.includes(snippet))
+    .join("\n");
+  await writeFile(filePath, filtered.endsWith("\n") ? filtered : `${filtered}\n`, "utf8");
 }
 
 async function writeCliPackageFixture(packageDir: string, brokenReadme: boolean): Promise<void> {
