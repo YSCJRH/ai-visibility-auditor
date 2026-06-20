@@ -36,6 +36,7 @@ const TEXT_SURFACES = [
   "README.zh-CN.md",
   "CONTRIBUTING.md",
   "action.yml",
+  "apps/cli/README.md",
   "docs",
   "examples/consumer-repo/README.md",
   "examples/consumer-repo/.github/workflows/answerlens.yml",

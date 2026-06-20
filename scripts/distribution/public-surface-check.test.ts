@@ -63,6 +63,18 @@ test("public-surface-check rejects implicit npm install copy and raw payload art
   assert.ok(ruleIds.includes("raw-payload-upload-exposure"));
 });
 
+test("public-surface-check scans the CLI package README shipped in release tarballs", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(rootDir, "apps/cli/README.md", "Run AnswerLens with npx @answerlens/cli audit.");
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const finding = findings.find(
+    (item) => item.ruleId === "public-npm-install-claim" && item.path.startsWith("apps/cli/README.md:")
+  );
+
+  assert.ok(finding);
+});
+
 test("public-surface-check rejects default run artifact uploads without raw exclusion", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
