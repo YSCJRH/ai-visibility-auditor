@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { access, mkdtemp, readFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { loadBrandConfig, loadCompetitorsConfig, loadPromptsConfig, runAudit } from "../../packages/core/src/index.ts";
@@ -54,6 +54,10 @@ test("build-site writes indexable pages and metadata", async () => {
     createDemoRun(),
     createConsumerRun(),
     mkdtemp(path.join(os.tmpdir(), "answerlens-site-"))
+  ]);
+  await Promise.all([
+    writeNestedFile(path.join(demoRunDir, "raw", "provider.json"), "{}\n"),
+    writeNestedFile(path.join(consumerRunDir, "raw", "provider.json"), "{}\n")
   ]);
 
   await buildSite({
@@ -265,6 +269,8 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /Run the sample site/);
   assert.match(home, /Open quickstart/);
   assert.match(home, /Open Action docs/);
+  assert.match(home, /Reuse release assets/);
+  assert.match(home, /Open release-assets-summary\.md before forwarding tarballs or demo bundles/);
   assert.match(home, /SoftwareApplication/);
   assert.match(home, /"applicationCategory":"AI visibility auditor for product websites"/);
   assert.doesNotMatch(home, /DeveloperApplication/);
@@ -275,6 +281,10 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(home, /Check the public story/);
   assert.match(home, /What it outputs/);
   assert.match(home, /Best fit/);
+  await assert.rejects(access(path.join(outDir, "examples", "static-good", "raw", "provider.json")), { code: "ENOENT" });
+  await assert.rejects(access(path.join(outDir, "starter", "example-run", "raw", "provider.json")), { code: "ENOENT" });
+  await assert.rejects(access(path.join(outDir, "en", "examples", "static-good", "raw", "provider.json")), { code: "ENOENT" });
+  await assert.rejects(access(path.join(outDir, "zh", "starter", "example-run", "raw", "provider.json")), { code: "ENOENT" });
   assert.match(zhHome, /zh\/examples\/static-good\/index\.html/);
   assert.match(zhHome, /locale-switcher/);
   assert.match(zhHome, /检查公开叙事/);
@@ -282,6 +292,8 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(zhHome, /适合谁/);
   assert.match(zhHome, /当你的网站会成为 AI 回答的素材时/);
   assert.match(zhHome, /先看输出，再设置/);
+  assert.match(zhHome, /复用发布资源/);
+  assert.match(zhHome, /先打开 release-assets-summary\.md/);
   assert.match(zhHome, /不是托管监测看板/);
   assert.match(zhHome, /不会抓取消费级 AI 应用界面/);
   assert.doesNotMatch(zhHome, /CLI-first|artifact-first|dashboard|答案页排名|漏斗/);
@@ -490,3 +502,8 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.equal(demoReport.includes("\uFFFD"), false);
   assert.equal(feed.includes("\uFFFD"), false);
 });
+
+async function writeNestedFile(filePath: string, body: string): Promise<void> {
+  await mkdir(path.dirname(filePath), { recursive: true });
+  await writeFile(filePath, body, "utf8");
+}

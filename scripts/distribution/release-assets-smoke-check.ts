@@ -42,6 +42,8 @@ const REQUIRED_ASSET_FILES = [
   "release-assets-summary.md"
 ] as const;
 
+const CLI_README_NPM_BOUNDARY = "Until the public npm package is visible";
+
 const SITE_ENTRYPOINTS = [
   {
     path: "index.html",
@@ -318,6 +320,14 @@ async function verifyCliTarball(
       message: `CLI package README.md must keep public claim boundaries for downloaded release assets: ${finding.message}`
     });
   }
+
+  if (!readme.includes(CLI_README_NPM_BOUNDARY)) {
+    findings.push({
+      ruleId: "release-cli-tarball-readme",
+      path: displayPath(readmePath),
+      message: "CLI package README.md must say to use release assets or a local checkout until the public npm package is visible."
+    });
+  }
 }
 
 async function findCliPackageReadme(extractDir: string): Promise<string | null> {
@@ -342,7 +352,7 @@ async function verifySiteBundle(
 ): Promise<void> {
   const bundlePath = path.join(assetsDir, "answerlens-site.tar.gz");
   const extractDir = path.join(workDir, "site");
-  if (!(await extractTarball(bundlePath, extractDir, "release-site-bundle", findings))) {
+  if (!(await extractTarball(bundlePath, extractDir, "release-site-bundle", findings, { rejectRawEntries: true }))) {
     return;
   }
 
@@ -386,7 +396,8 @@ async function extractTarball(
   tarballPath: string,
   extractDir: string,
   ruleId: string,
-  findings: ReleaseAssetsSmokeFinding[]
+  findings: ReleaseAssetsSmokeFinding[],
+  options: { rejectRawEntries?: boolean } = {}
 ): Promise<boolean> {
   if (!(await requireFile(tarballPath, ruleId, findings))) {
     return false;
@@ -415,6 +426,16 @@ async function extractTarball(
     return false;
   }
 
+  const rawEntry = options.rejectRawEntries === true ? entries.find((entry) => hasRawPathSegment(entry)) : undefined;
+  if (rawEntry) {
+    findings.push({
+      ruleId,
+      path: displayPath(tarballPath),
+      message: `Tarball must not include raw provider payload paths in public release assets: ${rawEntry}`
+    });
+    return false;
+  }
+
   try {
     await mkdir(extractDir, { recursive: true });
     await execFileAsync("tar", ["-xzf", tarballPath, "-C", extractDir], { maxBuffer: 16 * 1024 * 1024 });
@@ -427,6 +448,10 @@ async function extractTarball(
     });
     return false;
   }
+}
+
+function hasRawPathSegment(entry: string): boolean {
+  return entry.split(/[\\/]+/).includes("raw");
 }
 
 function isUnsafeTarEntry(entry: string): boolean {

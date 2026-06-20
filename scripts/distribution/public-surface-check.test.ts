@@ -863,6 +863,46 @@ test("public-surface-check rejects starter bundle surfaces without adopter-kit r
   assert.ok(ruleIds.includes("starter-adopter-kit-boundary"));
 });
 
+test("public-surface-check rejects primary funnels without release asset handoff", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "README.md",
+    [
+      "# AnswerLens",
+      artifactOrderText(),
+      "No ranking guarantees and no consumer AI UI scraping.",
+      "![AnswerLens starter packet preview](assets/starter-packet-preview.svg)",
+      "Use the Adopter kit checklist and PR review packet to show which artifact to open and which raw payloads stay private.",
+      `Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.`
+    ].join("\n")
+  );
+  await writeFixtureFile(
+    rootDir,
+    "scripts/distribution/build-site.ts",
+    [
+      `const fallback = releases[0]?.tag_name ?? "${STABLE_TAG}";`,
+      `const pin = "YSCJRH/ai-visibility-auditor@${STABLE_TAG}";`,
+      "const starterPanel = 'PR review packet';",
+      "const preview = 'starter-packet-preview.svg';",
+      "const artifactCopy = 'Public-safe artifact: answerlens-report';",
+      "const safeNextStep = 'Safe next step: if authorized, use the first-run story template and Show and tell Discussion form.';",
+      "const rawCopy = 'raw/** is excluded by default';",
+      "const boundaryCopy = 'No consumer AI UI scraping. No ranking or answer-placement guarantee.';",
+      "const releaseChecklist = 'Release asset checklist answerlens-demo-audit.tar.gz answerlens-site.tar.gz share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code> starter-bundle.md handoff examples/consumer-repo first-run story template Show and tell Discussion form raw provider payloads npm view @answerlens/cli';",
+      `const firstRunDiscussion = "${SHOW_AND_TELL_DISCUSSION_URL}";`
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const paths = findings
+    .filter((finding) => finding.ruleId === "primary-funnel-release-assets-handoff")
+    .map((finding) => finding.path)
+    .sort();
+
+  assert.deepEqual([...new Set(paths)], ["README.md", "scripts/distribution/build-site.ts"]);
+});
+
 test("public-surface-check rejects copied starter workflows without first-run sharing handoff", async () => {
   const rootDir = await createPublicSurfaceFixture();
   const workflowPath = "examples/consumer-repo/.github/workflows/answerlens.yml";
@@ -1017,6 +1057,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "No ranking guarantees and no consumer AI UI scraping.",
       "![AnswerLens starter packet preview](assets/starter-packet-preview.svg)",
       "Use the Adopter kit checklist and PR review packet to show which artifact to open and which raw payloads stay private.",
+      "Download latest release assets and open `release-assets-summary.md`, then the demo audit `share-summary.md`, `scorecard.md`, and `recommendations.md`.",
       "- `share-summary.md`",
       "- `scorecard.md`",
       "- `recommendations.md`",
@@ -1034,6 +1075,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "![AnswerLens starter packet preview](assets/starter-packet-preview.svg)",
       "[repo 内演示 walkthrough](docs/zh/demo-report.md)",
       "使用 Adopter kit checklist 和 PR review packet，说明哪些 raw payloads 不能公开。",
+      "下载最新发布资源，先打开 `release-assets-summary.md`，再看 demo audit 的 `share-summary.md`、`scorecard.md`、`recommendations.md`。",
       `用 ${SHOW_AND_TELL_DISCUSSION_URL} 分享 first-run story。`
     ].join("\n")
   );
@@ -1492,6 +1534,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "const safeNextStep = 'Safe next step: if authorized, use the first-run story template and Show and tell Discussion form.';",
       "const rawCopy = 'raw/** is excluded by default';",
       "const boundaryCopy = 'No consumer AI UI scraping. No ranking or answer-placement guarantee.';",
+      "const primaryFunnel = 'Reuse release assets. Open release-assets-summary.md before forwarding tarballs or demo bundles. 复用发布资源，先打开 release-assets-summary.md。';",
       "const releaseChecklist = 'Release asset checklist answerlens-demo-audit.tar.gz answerlens-site.tar.gz share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code> starter-bundle.md handoff examples/consumer-repo first-run story template Show and tell Discussion form raw provider payloads npm view @answerlens/cli';",
       `const firstRunDiscussion = "${SHOW_AND_TELL_DISCUSSION_URL}";`
     ].join("\n")

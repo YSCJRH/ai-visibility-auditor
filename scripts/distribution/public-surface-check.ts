@@ -248,6 +248,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkVisualSharePacketBoundary(rootDir, findings);
   await checkReviewPacketOutputContracts(rootDir, findings);
   await checkStarterAdopterKitBoundary(rootDir, findings);
+  await checkPrimaryFunnelReleaseAssetHandoff(rootDir, findings);
   await checkReleasePagesRefresh(rootDir, findings);
   await checkPagesPostdeploySmoke(rootDir, findings);
   await checkReleaseSnapshotFreshnessGate(rootDir, findings);
@@ -969,6 +970,60 @@ async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding
           ruleId: "starter-adopter-kit-boundary",
           path: surface.path,
           message: `Missing starter adopter-kit boundary text: ${snippet}`
+        });
+      }
+    }
+  }
+}
+
+async function checkPrimaryFunnelReleaseAssetHandoff(rootDir: string, findings: Finding[]): Promise<void> {
+  const requiredSurfaces = [
+    {
+      path: "README.md",
+      snippets: [
+        "Download latest release assets",
+        "release-assets-summary.md",
+        "demo audit `share-summary.md`, `scorecard.md`, and `recommendations.md`"
+      ]
+    },
+    {
+      path: "README.zh-CN.md",
+      snippets: [
+        "下载最新发布资源",
+        "release-assets-summary.md",
+        "demo audit 的 `share-summary.md`、`scorecard.md`、`recommendations.md`"
+      ]
+    },
+    {
+      path: "scripts/distribution/build-site.ts",
+      snippets: [
+        "Reuse release assets",
+        "Open release-assets-summary.md before forwarding tarballs or demo bundles.",
+        "复用发布资源",
+        "先打开 release-assets-summary.md"
+      ]
+    }
+  ];
+
+  for (const surface of requiredSurfaces) {
+    let text: string;
+    try {
+      text = await readFile(path.join(rootDir, surface.path), "utf8");
+    } catch (error) {
+      findings.push({
+        ruleId: "primary-funnel-release-assets-handoff",
+        path: surface.path,
+        message: `Unable to read primary funnel release-assets handoff surface: ${error instanceof Error ? error.message : String(error)}`
+      });
+      continue;
+    }
+
+    for (const snippet of surface.snippets) {
+      if (!text.includes(snippet)) {
+        findings.push({
+          ruleId: "primary-funnel-release-assets-handoff",
+          path: surface.path,
+          message: `Missing primary funnel release-assets handoff text: ${snippet}`
         });
       }
     }

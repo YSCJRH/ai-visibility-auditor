@@ -31,12 +31,25 @@ test("release-assets-smoke-check rejects premature npm runner copy inside the CL
   const fixture = await createReleaseAssetsFixture({ brokenCliReadme: true });
 
   const findings = await runReleaseAssetsSmokeCheck({ assetsDir: fixture.assetsDir });
-  const finding = findings.find((item) => item.ruleId === "release-cli-tarball-readme");
+  const finding = findings.find(
+    (item) => item.ruleId === "release-cli-tarball-readme" && item.message.includes("public claim boundaries")
+  );
 
   assert.ok(finding);
   assert.match(finding.path, /answerlens-cli-1\.2\.3\.tgz:README\.md:/);
   assert.match(finding.message, /public claim boundaries/);
   assert.match(finding.message, /registry package is visible/);
+});
+
+test("release-assets-smoke-check rejects CLI tarball README without npm visibility boundary", async () => {
+  const fixture = await createReleaseAssetsFixture({ missingCliReadmeNpmBoundary: true });
+
+  const findings = await runReleaseAssetsSmokeCheck({ assetsDir: fixture.assetsDir });
+  const finding = findings.find(
+    (item) => item.ruleId === "release-cli-tarball-readme" && item.message.includes("until the public npm package is visible")
+  );
+
+  assert.ok(finding);
 });
 
 test("release-assets-smoke-check rejects a release asset summary without the CLI tarball", async () => {
@@ -109,6 +122,16 @@ test("release-assets-smoke-check rejects a site bundle without release entrypoin
   assert.ok(ruleIds.includes("release-site-bundle"));
 });
 
+test("release-assets-smoke-check rejects a site bundle containing raw payload paths", async () => {
+  const fixture = await createReleaseAssetsFixture({ siteBundleHasRawPayload: true });
+
+  const findings = await runReleaseAssetsSmokeCheck({ assetsDir: fixture.assetsDir });
+  const finding = findings.find((item) => item.ruleId === "release-site-bundle");
+
+  assert.ok(finding);
+  assert.match(finding.message, /raw provider payload paths/);
+});
+
 test("release-assets-smoke-check CLI accepts pnpm-style separator", async () => {
   const fixture = await createReleaseAssetsFixture();
   const summaryPath = path.join(fixture.rootDir, "cli-smoke-summary.md");
@@ -153,6 +176,8 @@ async function createReleaseAssetsFixture(
     brokenReleaseSummaryMissingCli?: boolean;
     brokenSiteBundle?: boolean;
     cliTarballInPackagesDir?: boolean;
+    missingCliReadmeNpmBoundary?: boolean;
+    siteBundleHasRawPayload?: boolean;
   } = {}
 ): Promise<{ rootDir: string; assetsDir: string }> {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-release-assets-smoke-"));
@@ -167,13 +192,19 @@ async function createReleaseAssetsFixture(
       ? path.join(assetsDir, "packages", "answerlens-cli-1.2.3.tgz")
       : path.join(assetsDir, "answerlens-cli-1.2.3.tgz");
   await mkdir(path.dirname(cliTarballPath), { recursive: true });
-  await writeCliPackageFixture(path.join(cliSource, "package"), options.brokenCliReadme === true);
+  await writeCliPackageFixture(path.join(cliSource, "package"), {
+    missingNpmBoundary: options.missingCliReadmeNpmBoundary === true,
+    unsafeNpmRunner: options.brokenCliReadme === true
+  });
   await execFileAsync("tar", ["-czf", cliTarballPath, "-C", cliSource, "package"]);
 
   await writeDemoAuditFixture(path.join(demoSource, "runs", "static-good"), options.brokenDemoBundle === true);
   await execFileAsync("tar", ["-czf", path.join(assetsDir, "answerlens-demo-audit.tar.gz"), "-C", demoSource, "runs/static-good"]);
 
   await writeSiteFixture(path.join(siteSource, "dist", "site"), options.brokenSiteBundle === true);
+  if (options.siteBundleHasRawPayload === true) {
+    await writeNestedFile(path.join(siteSource, "dist", "site", "examples", "static-good", "raw", "provider.json"), "{}\n");
+  }
   await execFileAsync("tar", ["-czf", path.join(assetsDir, "answerlens-site.tar.gz"), "-C", siteSource, "dist/site"]);
 
   const manifestPath = path.join(assetsDir, "release-assets-manifest.json");
@@ -218,7 +249,10 @@ async function removeLinesContaining(filePath: string, snippet: string): Promise
   await writeFile(filePath, filtered.endsWith("\n") ? filtered : `${filtered}\n`, "utf8");
 }
 
-async function writeCliPackageFixture(packageDir: string, brokenReadme: boolean): Promise<void> {
+async function writeCliPackageFixture(
+  packageDir: string,
+  options: { missingNpmBoundary?: boolean; unsafeNpmRunner?: boolean }
+): Promise<void> {
   await mkdir(packageDir, { recursive: true });
   await writeFile(
     path.join(packageDir, "package.json"),
@@ -238,7 +272,10 @@ async function writeCliPackageFixture(packageDir: string, brokenReadme: boolean)
       "# AnswerLens CLI",
       "",
       "`@answerlens/cli` is the publish-ready package for AnswerLens.",
-      brokenReadme ? "Run it with npx @answerlens/cli audit." : "Use the versioned release tarball for pinned local CLI runs before npm is visible.",
+      options.unsafeNpmRunner === true ? "Run it with npx @answerlens/cli audit." : "Use the versioned release tarball for pinned local CLI runs before npm is visible.",
+      options.missingNpmBoundary === true
+        ? "Release tarballs stay available for pinned local CLI runs."
+        : "Until the public npm package is visible, use the versioned GitHub release tarball or a local checkout for CLI runs.",
       "AnswerLens is a CLI-first AI visibility auditor for product websites."
     ].join("\n"),
     "utf8"
