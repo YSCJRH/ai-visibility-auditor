@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 
-type Finding = {
+export type Finding = {
   ruleId: string;
   path: string;
   message: string;
@@ -50,6 +50,9 @@ const TEXT_SURFACES = [
   "scripts/distribution/site-seo.ts",
   "scripts/distribution/releases-snapshot.json"
 ];
+
+const PUBLIC_NPM_INSTALL_CLAIM_PATTERN =
+  /(npm\s+(install|i|exec|x)\s+@answerlens\/cli|npx\s+@answerlens\/cli|pnpm\s+(add|dlx|exec)\s+@answerlens\/cli|yarn\s+(add|dlx)\s+@answerlens\/cli|bunx\s+@answerlens\/cli|@answerlens\/cli.{0,80}\b(cli\s+)?installs?\b|\b(cli\s+)?installs?\b.{0,80}@answerlens\/cli)/i;
 
 const ARTIFACT_ORDER_SURFACES = [
   "README.md",
@@ -256,6 +259,12 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   return findings;
 }
 
+export function findPublicClaimFindings(file: string, text: string): Finding[] {
+  const findings: Finding[] = [];
+  checkPublicClaims(file, text, findings);
+  return findings;
+}
+
 async function collectTextSurfaceFiles(rootDir: string): Promise<string[]> {
   const files = new Set<string>();
   for (const surface of TEXT_SURFACES) {
@@ -320,11 +329,7 @@ function checkPublicClaims(file: string, text: string, findings: Finding[]): voi
       findings.push(finding("public-fake-proof", file, index, "Do not add rating, review, download, testimonial, customer-proof, or star-count claims without verified visible proof."));
     }
 
-    if (
-      /(npm\s+(install|i|exec|x)\s+@answerlens\/cli|npx\s+@answerlens\/cli|pnpm\s+(add|dlx|exec)\s+@answerlens\/cli|yarn\s+(add|dlx)\s+@answerlens\/cli|bunx\s+@answerlens\/cli|@answerlens\/cli.{0,80}\b(cli\s+)?installs?\b|\b(cli\s+)?installs?\b.{0,80}@answerlens\/cli)/i.test(
-        normalized
-      )
-    ) {
+    if (isPublicNpmInstallClaimLine(lines, index)) {
       findings.push(finding("public-npm-install-claim", file, index, "Do not promote @answerlens/cli as an npm install, npx, or package-runner path until the public registry package is visible."));
     }
 
@@ -332,6 +337,18 @@ function checkPublicClaims(file: string, text: string, findings: Finding[]): voi
       findings.push(finding("public-robots-host-claim", file, index, "Project-site robots.txt must not be described as host-level robots control."));
     }
   });
+}
+
+function isPublicNpmInstallClaimLine(lines: string[], index: number): boolean {
+  const normalized = lines[index]?.trim() ?? "";
+  if (!normalized) {
+    return false;
+  }
+  const context = lines.slice(Math.max(0, index - 5), index + 1).join(" ");
+  if (isNegativeBoundary(normalized) || isNegativeBoundary(context)) {
+    return false;
+  }
+  return PUBLIC_NPM_INSTALL_CLAIM_PATTERN.test(normalized);
 }
 
 function checkRawPayloadUpload(file: string, text: string, findings: Finding[]): void {

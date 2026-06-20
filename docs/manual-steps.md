@@ -36,7 +36,7 @@ The expected public assets on each semver release are:
 4. `release-assets-manifest.json`, for verifying downloaded asset sizes and SHA-256 checksums before reusing the tarballs.
 5. `release-assets-summary.md`, for a human-readable verified asset table that can be pasted into release reviews without exposing raw provider payloads.
 
-For releases that include `release-assets-manifest.json` and `release-assets-summary.md`, download the manifest, summary, and assets into the same directory, then run the smoke command from a local checkout. It verifies the manifest checksums, checks `release-assets-summary.md`, unpacks the demo audit bundle, confirms `share-summary.md`, then `scorecard.md`, then `recommendations.md`, and checks the compiled site release entrypoints:
+For releases that include `release-assets-manifest.json` and `release-assets-summary.md`, download the manifest, summary, and assets into the same directory, then run the smoke command from a local checkout. It verifies the manifest checksums, checks `release-assets-summary.md`, unpacks the CLI tarball to check the package README npm boundary, unpacks the demo audit bundle, confirms `share-summary.md`, then `scorecard.md`, then `recommendations.md`, and checks the compiled site release entrypoints:
 
 ```bash
 assets_dir="$(mktemp -d)"
@@ -50,7 +50,7 @@ gh release download vX.Y.Z \
 corepack pnpm release:assets:smoke -- --dir "$assets_dir" --summary-out "$assets_dir/release-assets-smoke-summary.md"
 ```
 
-Use `release-assets-smoke-summary.md` as maintainer review evidence for the downloaded bundle. Do not upload it as adoption proof by itself; it only says the downloaded release assets passed local integrity and artifact-order checks.
+Use `release-assets-smoke-summary.md` as maintainer review evidence for the downloaded bundle. Do not upload it as adoption proof by itself; it only says the downloaded release assets passed local integrity, package README boundary, and artifact-order checks.
 
 If a release predates `release-assets-manifest.json` or `release-assets-summary.md`, do not backfill a checksum claim into the public release story; inspect the available assets and record the gap as release metadata history.
 
