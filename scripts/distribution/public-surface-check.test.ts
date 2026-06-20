@@ -619,6 +619,22 @@ test("public-surface-check rejects stable version drift across release and adopt
   assert.ok(ruleIds.includes("stable-version-surface-pin"));
 });
 
+test("public-surface-check rejects latest release snapshots without a body review path", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "scripts/distribution/releases-snapshot.json",
+    JSON.stringify([{ tag_name: STABLE_TAG, body: `Release notes for ${STABLE_TAG}.` }], null, 2)
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const reviewPathFinding = findings.find(
+    (finding) => finding.ruleId === "stable-version-release-snapshot" && finding.message.includes("release review path")
+  );
+
+  assert.ok(reviewPathFinding);
+});
+
 test("public-surface-check rejects first-run story templates without explicit reuse permission", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -1333,7 +1349,19 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(
     rootDir,
     "scripts/distribution/releases-snapshot.json",
-    JSON.stringify([{ tag_name: STABLE_TAG, body: `Release notes for ${STABLE_TAG}. Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.` }], null, 2)
+    JSON.stringify(
+      [
+        {
+          tag_name: STABLE_TAG,
+          body: [
+            `Release notes for ${STABLE_TAG}. Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.`,
+            "`Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`"
+          ].join("\n")
+        }
+      ],
+      null,
+      2
+    )
   );
   await writeFixtureFile(
     rootDir,
