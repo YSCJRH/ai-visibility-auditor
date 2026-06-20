@@ -1316,6 +1316,7 @@ async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[
         "cat dist/release-assets-smoke-summary.md >> \"$GITHUB_STEP_SUMMARY\"",
         "The Release Distribution workflow runs `pnpm release:assets:smoke -- --dir dist --work-dir dist/release-assets-smoke-check --summary-out dist/release-assets-smoke-summary.md` before uploading release assets",
         "`release-assets-smoke-summary.md` is kept in the workflow summary and internal artifact as maintainer review evidence; do not treat it as standalone adoption proof",
+        "`Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
         "`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums",
         "`release-assets-summary.md`: read the verified asset table",
         "dist/release-assets-manifest.json dist/release-assets-summary.md --clobber",
