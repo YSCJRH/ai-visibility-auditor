@@ -23,6 +23,9 @@ test("pages-smoke-check reports missing snippets and unreadable routes", async (
       if (url.endsWith("/zh/releases/")) {
         return responseFor(url, "temporary outage", 503);
       }
+      if (isNeutralReleaseUrl(url)) {
+        return responseFor(url, "AnswerLens locale redirect");
+      }
       if (url.endsWith("/zh/examples/static-good/index.html")) {
         return responseFor(url, "审阅并分享这次运行 share-summary.md scorecard.md recommendations.md");
       }
@@ -36,21 +39,36 @@ test("pages-smoke-check reports missing snippets and unreadable routes", async (
     }
   });
 
-  assert.equal(findings.length, 11);
+  assert.equal(findings.length, 19);
   assert.equal(findings.filter((finding) => finding.ruleId === "pages-live-route").length, 1);
-  assert.equal(findings.filter((finding) => finding.ruleId === "pages-live-snippet").length, 10);
-  assert.match(findings[0].url, /\/en\/releases\/$/);
-  assert.match(findings[1].url, /\/zh\/releases\/$/);
-  assert.match(findings[2].url, /\/examples\/static-good\/index\.html$/);
-  assert.match(findings[5].url, /\/zh\/examples\/static-good\/index\.html$/);
-  assert.match(findings[8].url, /\/en\/use-case\/open-source-maintainers\/$/);
+  assert.equal(findings.filter((finding) => finding.ruleId === "pages-live-snippet").length, 18);
+  assert.ok(findings.some((finding) => /\/releases\/$/.test(finding.url) && finding.message.includes("en/releases/")));
+  assert.ok(findings.some((finding) => /\/en\/releases\/$/.test(finding.url) && finding.message.includes("release-assets-summary.md")));
+  assert.ok(findings.some((finding) => /\/zh\/releases\/$/.test(finding.url) && finding.ruleId === "pages-live-route"));
+  assert.ok(findings.some((finding) => /\/examples\/static-good\/index\.html$/.test(finding.url)));
+  assert.ok(findings.some((finding) => /\/zh\/examples\/static-good\/index\.html$/.test(finding.url)));
+  assert.ok(findings.some((finding) => /\/en\/use-case\/open-source-maintainers\/$/.test(finding.url)));
 });
 
 function pageForUrl(url: string): string {
+  if (isNeutralReleaseUrl(url)) {
+    return [
+      "AnswerLens locale redirect",
+      "en/releases/",
+      "zh/releases/",
+      "Continue in English",
+      "继续中文"
+    ].join("\n");
+  }
+
   if (url.endsWith("/en/releases/")) {
     return [
       "Download the latest AnswerLens release.",
       SHOW_AND_TELL_DISCUSSION_URL,
+      "release-assets-summary.md",
+      "release-assets-smoke-summary.md",
+      "Release review path",
+      "standalone adoption proof",
       "share-summary.md",
       "scorecard.md",
       "recommendations.md"
@@ -61,6 +79,10 @@ function pageForUrl(url: string): string {
     return [
       "下载最新的 AnswerLens 发布版本",
       SHOW_AND_TELL_DISCUSSION_URL,
+      "release-assets-summary.md",
+      "release-assets-smoke-summary.md",
+      "Release review path",
+      "standalone adoption proof",
       "share-summary.md",
       "scorecard.md",
       "recommendations.md"
@@ -101,6 +123,11 @@ function pageForUrl(url: string): string {
   }
 
   throw new Error(`Unexpected URL ${url}`);
+}
+
+function isNeutralReleaseUrl(url: string): boolean {
+  const pathname = new URL(url).pathname;
+  return pathname.endsWith("/releases/") && !pathname.includes("/en/releases/") && !pathname.includes("/zh/releases/");
 }
 
 function responseFor(url: string, body: string, status = 200): Response {

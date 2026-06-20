@@ -315,6 +315,10 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(developerAdvocacyPluralRedirect, /use-case\/developer-advocacy\//);
   assert.match(openSourcePluralRedirect, /use-case\/open-source-maintainers\//);
   assert.match(openSourcePluralZhRedirect, /zh\/use-case\/open-source-maintainers\//);
+  assert.match(releasesRedirect, /en\/releases\//);
+  assert.match(releasesRedirect, /zh\/releases\//);
+  assert.match(releasesRedirect, /Continue in English/);
+  assert.match(releasesRedirect, /继续中文/);
   assert.match(playbooks, /aria-current="page">Fixes<\/a>/);
   assert.match(playbooks, /Know what you are fixing/);
   assert.match(playbooks, /Run the 5-minute check on your site/);
@@ -405,6 +409,10 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(releases, /Stable semver releases:<\/strong> 9/);
   assert.match(releases, /answerlens-demo-audit\.tar\.gz/);
   assert.match(releases, /answerlens-site\.tar\.gz/);
+  assert.match(releases, /release-assets-summary\.md/);
+  assert.match(releases, /release-assets-smoke-summary\.md/);
+  assert.match(releases, /Release review path/);
+  assert.match(releases, /standalone adoption proof/);
   assert.match(releases, /npm view @answerlens\/cli/);
   assert.match(releases, /discussions\/new\?category=show-and-tell/);
   assert.match(zhReleases, /打开 GitHub 发布页/);
@@ -415,6 +423,10 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(zhReleases, /已编译发布数：<\/strong> 10/);
   assert.match(zhReleases, /稳定 semver 发布数：<\/strong> 9/);
   assert.match(zhReleases, /answerlens-demo-audit\.tar\.gz/);
+  assert.match(zhReleases, /release-assets-summary\.md/);
+  assert.match(zhReleases, /release-assets-smoke-summary\.md/);
+  assert.match(zhReleases, /Release review path/);
+  assert.match(zhReleases, /standalone adoption proof/);
   assert.match(zhReleases, /discussions\/new\?category=show-and-tell/);
   assert.match(zhReleases, /AnswerLens v0\.3\.2 延续/);
   assert.doesNotMatch(zhReleases, /What ships/);

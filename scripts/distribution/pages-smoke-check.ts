@@ -41,14 +41,35 @@ const ARTIFACT_ORDER_SNIPPETS = ["share-summary.md", "scorecard.md", "recommenda
 
 const ROUTES: RouteCheck[] = [
   {
+    path: "releases/",
+    label: "Neutral release redirect",
+    snippets: ["AnswerLens locale redirect", "en/releases/", "zh/releases/", "Continue in English", "继续中文"]
+  },
+  {
     path: "en/releases/",
     label: "English release page",
-    snippets: ["Download the latest AnswerLens release.", SHOW_AND_TELL_DISCUSSION_URL, ...ARTIFACT_ORDER_SNIPPETS]
+    snippets: [
+      "Download the latest AnswerLens release.",
+      SHOW_AND_TELL_DISCUSSION_URL,
+      "release-assets-summary.md",
+      "release-assets-smoke-summary.md",
+      "Release review path",
+      "standalone adoption proof",
+      ...ARTIFACT_ORDER_SNIPPETS
+    ]
   },
   {
     path: "zh/releases/",
     label: "Chinese release page",
-    snippets: ["下载最新的 AnswerLens 发布版本", SHOW_AND_TELL_DISCUSSION_URL, ...ARTIFACT_ORDER_SNIPPETS]
+    snippets: [
+      "下载最新的 AnswerLens 发布版本",
+      SHOW_AND_TELL_DISCUSSION_URL,
+      "release-assets-summary.md",
+      "release-assets-smoke-summary.md",
+      "Release review path",
+      "standalone adoption proof",
+      ...ARTIFACT_ORDER_SNIPPETS
+    ]
   },
   {
     path: "examples/static-good/index.html",
