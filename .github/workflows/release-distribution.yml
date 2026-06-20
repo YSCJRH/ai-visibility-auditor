@@ -130,7 +130,7 @@ jobs:
           - `Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`
           - `answerlens-site.tar.gz`: inspect the compiled Pages bundle for docs, examples, starter, and release pages at this tag
           - `release-assets-manifest.json`: verify asset sizes and SHA-256 checksums before reusing downloaded release assets
-          - `release-assets-summary.md`: read the verified asset table before forwarding or reusing downloaded release assets
+          - `release-assets-summary.md`: read the verified asset table and adopter handoff before forwarding or reusing downloaded release assets
           - If `npm view @answerlens/cli` returns `404`, keep release assets or local checkout as the public path; do not present npm as activated
 
           ## What ships

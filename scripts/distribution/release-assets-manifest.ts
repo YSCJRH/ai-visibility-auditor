@@ -32,6 +32,11 @@ const REQUIRED_ASSET_NAMES = ["answerlens-demo-audit.tar.gz", "answerlens-site.t
 const CLI_TARBALL_PATTERN = /^answerlens-cli-.+\.tgz$/;
 const NPM_VISIBILITY_BOUNDARY =
   "If npm view @answerlens/cli returns 404, use release assets or a local checkout; do not present npm as activated.";
+const STARTER_BUNDLE_URL = "https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/starter-bundle.md";
+const CONSUMER_REPO_URL = "https://github.com/YSCJRH/ai-visibility-auditor/tree/main/examples/consumer-repo";
+const FIRST_RUN_STORY_URL = "https://github.com/YSCJRH/ai-visibility-auditor/blob/main/docs/first-run-story.md";
+const SHOW_AND_TELL_DISCUSSION_URL =
+  "https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell";
 
 function parseArgs(argv: string[]): Options {
   const filePatterns: string[] = [];
@@ -234,6 +239,14 @@ export function formatReleaseAssetsSummary(manifest: ReleaseAssetsManifest): str
     `- Release tag: ${releaseTag}`,
     `- Review order: \`${manifest.artifactReviewOrder[0]}\`, then \`${manifest.artifactReviewOrder[1]}\`, then \`${manifest.artifactReviewOrder[2]}\``,
     `- npm boundary: ${manifest.npmVisibilityBoundary}`,
+    "",
+    "## Release review path",
+    "",
+    `- Open \`release-assets-summary.md\`, then the demo audit \`${manifest.artifactReviewOrder[0]}\`, then \`${manifest.artifactReviewOrder[1]}\`, then \`${manifest.artifactReviewOrder[2]}\`.`,
+    "- Use `answerlens-demo-audit.tar.gz` as the fixture report bundle and `answerlens-site.tar.gz` as the compiled public site bundle for this tag.",
+    `- Copy this workflow from the starter bundle: ${STARTER_BUNDLE_URL} and examples/consumer-repo: ${CONSUMER_REPO_URL}`,
+    `- If the first run is safe and authorized to discuss, use the first-run story template: ${FIRST_RUN_STORY_URL} and the Show and tell Discussion form: ${SHOW_AND_TELL_DISCUSSION_URL}`,
+    "- Boundary: AnswerLens audits public source material; it does not scrape consumer AI UIs, does not prove rankings or answer placement, and does not include API keys, private analytics, or raw provider payloads in public release reviews, PRs, issues, release notes, or Discussions.",
     "",
     "| Asset | Size | SHA-256 |",
     "| --- | ---: | --- |",
