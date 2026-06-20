@@ -5,6 +5,9 @@ import os from "node:os";
 import path from "node:path";
 import { runReleaseSnapshotRefresh } from "./release-snapshot-refresh.ts";
 
+const RELEASE_REVIEW_PATH =
+  "`Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`";
+
 test("release-snapshot-refresh reports changed tags without writing by default", async () => {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-release-snapshot-refresh-"));
   const snapshotPath = path.join(rootDir, "snapshot.json");
@@ -26,11 +29,11 @@ test("release-snapshot-refresh writes normalized public release metadata when re
   const snapshotPath = path.join(rootDir, "snapshot.json");
   const remotePath = path.join(rootDir, "remote.json");
   await writeJson(snapshotPath, [
-    release({ tag_name: "v0.3.5", body: "Already fresh\n" }),
+    release({ tag_name: "v0.3.5", body: releaseBody("Already fresh\n") }),
     release({ tag_name: "v0.3.4", body: "Old body" })
   ]);
   await writeJson(remotePath, [
-    release({ tag_name: "v0.3.5", body: "Already fresh" }),
+    release({ tag_name: "v0.3.5", body: releaseBody("Already fresh") }),
     release({ tag_name: "v0.3.4", body: "New body\r\n" }),
     release({ tag_name: "v0.4.0-alpha.1", prerelease: true }),
     release({ tag_name: "v0.4.0", draft: true })
@@ -45,8 +48,25 @@ test("release-snapshot-refresh writes normalized public release metadata when re
     snapshot.map((item) => item.tag_name),
     ["v0.3.5", "v0.3.4", "v0.4.0-alpha.1"]
   );
-  assert.equal(snapshot[0].body, "Already fresh\n");
+  assert.equal(snapshot[0].body, releaseBody("Already fresh"));
   assert.equal(snapshot[1].body, "New body");
+});
+
+test("release-snapshot-refresh rejects latest stable release bodies without a review path", async () => {
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-release-snapshot-refresh-"));
+  const snapshotPath = path.join(rootDir, "snapshot.json");
+  const remotePath = path.join(rootDir, "remote.json");
+  const current = release({ tag_name: "v0.3.5" });
+  await writeJson(snapshotPath, [current]);
+  await writeJson(remotePath, [release({ tag_name: "v0.3.6", body: "Release notes for v0.3.6." }), current]);
+
+  await assert.rejects(
+    runReleaseSnapshotRefresh({ snapshotPath, remoteReleasesPath: remotePath, write: true }),
+    /Latest stable release v0\.3\.6 is missing the release review path/
+  );
+
+  const snapshot = JSON.parse(await readFile(snapshotPath, "utf8")) as ReleaseFixture[];
+  assert.deepEqual(snapshot, [JSON.parse(JSON.stringify(current))]);
 });
 
 test("release-snapshot-refresh reports fresh snapshots", async () => {
@@ -117,10 +137,14 @@ function release(overrides: Partial<ReleaseFixture>): ReleaseFixture {
     name: overrides.name ?? tag,
     html_url: overrides.html_url ?? `https://github.com/YSCJRH/ai-visibility-auditor/releases/tag/${tag}`,
     published_at: overrides.published_at ?? "2026-06-17T12:38:46Z",
-    body: overrides.body ?? "Release body\nwith exact public notes",
+    body: overrides.body ?? releaseBody("Release body\nwith exact public notes"),
     draft: overrides.draft,
     prerelease: overrides.prerelease
   };
+}
+
+function releaseBody(prefix: string): string {
+  return `${prefix}\n${RELEASE_REVIEW_PATH}`;
 }
 
 function responseFor(body: unknown, status = 200): Response {

@@ -1104,8 +1104,12 @@ async function checkReleaseSnapshotFreshnessGate(rootDir: string, findings: Find
       snippets: [
         "answerlens-release-snapshot-refresh",
         "runReleaseSnapshotRefresh",
+        "validateLatestStableReleaseReviewPath",
+        "Latest stable release",
+        "`Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
         "writeFile(snapshotPath",
         "release.draft !== true",
+        "release.prerelease !== true",
         "Re-run with --write"
       ]
     },

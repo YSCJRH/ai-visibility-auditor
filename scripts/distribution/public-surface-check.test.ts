@@ -352,6 +352,32 @@ test("public-surface-check rejects release snapshot CI without a strict main gat
   assert.ok(strictGateFinding);
 });
 
+test("public-surface-check rejects release snapshot refresh without review path validation", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  const refreshPath = path.join(rootDir, "scripts/distribution/release-snapshot-refresh.ts");
+  const refreshScript = await readFile(refreshPath, "utf8");
+  await writeFixtureFile(
+    rootDir,
+    "scripts/distribution/release-snapshot-refresh.ts",
+    refreshScript
+      .replace("function validateLatestStableReleaseReviewPath() { return 'Latest stable release'; }\n", "")
+      .replace(
+        "const reviewPath = '`Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`';\n",
+        ""
+      )
+      .replace(" && release.prerelease !== true", "")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const reviewPathFinding = findings.find(
+    (finding) =>
+      finding.ruleId === "release-snapshot-freshness-gate" &&
+      finding.message.includes("validateLatestStableReleaseReviewPath")
+  );
+
+  assert.ok(reviewPathFinding);
+});
+
 test("public-surface-check rejects release surfaces without asset checklist boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, "docs/manual-steps.md", `Use the reviewed release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`);
@@ -1245,7 +1271,9 @@ async function createPublicSurfaceFixture(): Promise<string> {
     [
       "export async function runReleaseSnapshotRefresh() {}",
       "const userAgent = 'answerlens-release-snapshot-refresh';",
-      "const publicRelease = release.draft !== true;",
+      "function validateLatestStableReleaseReviewPath() { return 'Latest stable release'; }",
+      "const reviewPath = '`Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`';",
+      "const publicRelease = release.draft !== true && release.prerelease !== true;",
       "await writeFile(snapshotPath, nextText, 'utf8');",
       "console.log('Re-run with --write to update scripts/distribution/releases-snapshot.json.');"
     ].join("\n")

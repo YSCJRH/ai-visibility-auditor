@@ -48,6 +48,9 @@ export type ReleaseSnapshotRefreshOptions = {
 
 const DEFAULT_REPOSITORY = "YSCJRH/ai-visibility-auditor";
 const DEFAULT_SNAPSHOT_PATH = "scripts/distribution/releases-snapshot.json";
+const STABLE_RELEASE_TAG_PATTERN = /^v\d+\.\d+\.\d+$/;
+const RELEASE_REVIEW_PATH_SNIPPET =
+  "`Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`";
 
 export async function runReleaseSnapshotRefresh(options: ReleaseSnapshotRefreshOptions = {}): Promise<ReleaseSnapshotRefreshResult> {
   const snapshotPath = path.resolve(options.snapshotPath ?? DEFAULT_SNAPSHOT_PATH);
@@ -56,6 +59,7 @@ export async function runReleaseSnapshotRefresh(options: ReleaseSnapshotRefreshO
   const remote = options.remoteReleasesPath
     ? await readRemoteFile(path.resolve(options.remoteReleasesPath))
     : await fetchRemoteReleases(repository, options.githubToken ?? process.env.GITHUB_TOKEN, options.fetchImpl ?? (globalThis.fetch as unknown as FetchLike));
+  validateLatestStableReleaseReviewPath(remote);
   const nextSnapshot = normalizeReleaseSnapshot(remote, currentSnapshot);
   if (nextSnapshot.length === 0) {
     throw new Error("GitHub release metadata did not contain any public releases to snapshot.");
@@ -89,6 +93,28 @@ function normalizeReleaseSnapshot(releases: RemoteReleaseEntry[], currentSnapsho
       const current = currentByTag.get(entry.tag_name);
       return current && equivalentEntry(current, entry) ? current : entry;
     });
+}
+
+function validateLatestStableReleaseReviewPath(releases: RemoteReleaseEntry[]): void {
+  const latestStable = releases.find(isStablePublicRelease);
+  if (!latestStable) {
+    return;
+  }
+
+  const tagName = stringField(latestStable, "tag_name");
+  const body = normalizeBody(stringField(latestStable, "body"));
+  if (body.includes(RELEASE_REVIEW_PATH_SNIPPET)) {
+    return;
+  }
+
+  throw new Error(
+    `Latest stable release ${tagName} is missing the release review path: open release-assets-summary.md, then the demo audit share-summary.md, scorecard.md, and recommendations.md.`
+  );
+}
+
+function isStablePublicRelease(release: RemoteReleaseEntry): boolean {
+  const tagName = stringField(release, "tag_name");
+  return Boolean(tagName && STABLE_RELEASE_TAG_PATTERN.test(tagName) && release.draft !== true && release.prerelease !== true);
 }
 
 function toSnapshotEntry(release: RemoteReleaseEntry): ReleaseSnapshotEntry | null {
