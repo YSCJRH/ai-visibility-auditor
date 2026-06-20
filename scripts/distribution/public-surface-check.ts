@@ -1120,7 +1120,11 @@ async function checkReleaseSnapshotFreshnessGate(rootDir: string, findings: Find
         "corepack pnpm release:snapshot:check -- --allow-planned-latest",
         "corepack pnpm release:snapshot:check",
         "main push uses strict mode",
-        "published_at"
+        "published_at",
+        "fails because the latest stable release is missing the release review path",
+        "edit the GitHub Release body first",
+        "open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
+        "refresh guard"
       ]
     }
   ];
