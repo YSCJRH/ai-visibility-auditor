@@ -811,6 +811,7 @@ test("public-surface-check rejects release and Pages surfaces without direct Sho
       "const starterPanel = 'PR review packet';",
       "const preview = 'starter-packet-preview.svg';",
       "const artifactCopy = 'Public-safe artifact: answerlens-report';",
+      "const safeNextStep = 'Safe next step: if authorized, use the first-run story template and Show and tell Discussion form.';",
       "const rawCopy = 'raw/** is excluded by default';",
       "const boundaryCopy = 'No consumer AI UI scraping. No ranking or answer-placement guarantee.';",
       "const releaseChecklist = 'Release asset checklist answerlens-demo-audit.tar.gz answerlens-site.tar.gz share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code> npm view @answerlens/cli';"
@@ -833,6 +834,25 @@ test("public-surface-check rejects starter bundle surfaces without adopter-kit r
     rootDir,
     "docs/starter-bundle.md",
     `${artifactOrderText()}\nThe current starter workflow uses YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("starter-adopter-kit-boundary"));
+});
+
+test("public-surface-check rejects copied starter workflows without first-run sharing handoff", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  const workflowPath = "examples/consumer-repo/.github/workflows/answerlens.yml";
+  const workflow = await readFile(path.join(rootDir, workflowPath), "utf8");
+  await writeFixtureFile(
+    rootDir,
+    workflowPath,
+    workflow
+      .replace('      echo "### Share this first run"\n', "")
+      .replace('      echo "- If this run is safe and authorized to discuss, use the first-run story template and Show and tell Discussion form."\n', "")
+      .replace('      echo "- Do not include API keys, private analytics, or raw provider payloads."\n', "")
   );
 
   const findings = await runPublicSurfaceCheck({ rootDir });
@@ -1121,8 +1141,11 @@ async function createPublicSurfaceFixture(): Promise<string> {
       `Use YSCJRH/ai-visibility-auditor@${STABLE_TAG}; currently \`${STABLE_TAG}\`.`,
       "### Adopter kit",
       "### Safe sharing boundary",
+      "### Share this first run",
       "## First CI PR packet",
-      "Use the `Adopter kit` and `Safe sharing boundary` blocks in `GITHUB_STEP_SUMMARY`.",
+      "Use the `Adopter kit`, `Safe sharing boundary`, and `Share this first run` blocks in `GITHUB_STEP_SUMMARY`.",
+      "Use the first-run story template and Show and tell Discussion form.",
+      "Do not include API keys, private analytics, or raw provider payloads.",
       "The packet says no consumer AI UI scraping and no ranking or answer-placement guarantee."
     ].join("\n")
   );
@@ -1134,8 +1157,11 @@ async function createPublicSurfaceFixture(): Promise<string> {
       `使用 YSCJRH/ai-visibility-auditor@${STABLE_TAG}。`,
       "Adopter kit",
       "Safe sharing boundary",
+      "Share this first run",
       "## 第一次 CI 的 PR 审阅包",
       "`share-summary.md`，然后 `scorecard.md`，最后 `recommendations.md`",
+      "使用 first-run story template 和 Show and tell Discussion form。",
+      "不要包含 API keys、私有 analytics 或 raw provider payloads。",
       "不抓取消费级 AI UI，不承诺排名或答案展示位置"
     ].join("\n")
   );
@@ -1151,6 +1177,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "Review `share-summary.md`, then `scorecard.md`, then `recommendations.md` before you paste `pr-snippet.md`.",
       "## PR review packet",
       "![AnswerLens starter packet preview](../assets/starter-packet-preview.svg)",
+      "Safe next step: if authorized, use the first-run story template and Show and tell Discussion form.",
       "Do not attach `raw/**` to public pull requests, issues, releases, or Discussions.",
       "No consumer AI UI scraping. No ranking or answer-placement guarantee."
     ].join("\n")
@@ -1233,6 +1260,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "Put provider keys only in GitHub secrets or local environment variables.",
       "Review `share-summary.md`, then `scorecard.md`, then `recommendations.md` before you paste `pr-snippet.md`.",
       "## PR review packet",
+      "Safe next step: if authorized, use the first-run story template and Show and tell Discussion form.",
       "Do not attach `raw/**` to public pull requests, issues, releases, or Discussions.",
       "No consumer AI UI scraping. No ranking or answer-placement guarantee."
     ].join("\n")
@@ -1253,6 +1281,9 @@ async function createPublicSurfaceFixture(): Promise<string> {
       '      echo "### Safe sharing boundary"',
       '      echo "- Public PRs should link the summary, scorecard, and recommendations; \\`raw/**\\` is excluded from the uploaded artifact."',
       '      echo "- AnswerLens audits public source material. No consumer AI UI scraping. No ranking or answer-placement guarantee."',
+      '      echo "### Share this first run"',
+      '      echo "- If this run is safe and authorized to discuss, use the first-run story template and Show and tell Discussion form."',
+      '      echo "- Do not include API keys, private analytics, or raw provider payloads."',
       "  - uses: actions/upload-artifact@v6",
       "    with:",
       "      path: |",
@@ -1427,6 +1458,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "const starterPanel = 'PR review packet';",
       "const preview = 'starter-packet-preview.svg';",
       "const artifactCopy = 'Public-safe artifact: answerlens-report';",
+      "const safeNextStep = 'Safe next step: if authorized, use the first-run story template and Show and tell Discussion form.';",
       "const rawCopy = 'raw/** is excluded by default';",
       "const boundaryCopy = 'No consumer AI UI scraping. No ranking or answer-placement guarantee.';",
       "const releaseChecklist = 'Release asset checklist answerlens-demo-audit.tar.gz answerlens-site.tar.gz share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code> npm view @answerlens/cli';",
@@ -1574,6 +1606,7 @@ function starterPacketPreviewSvg(): string {
     "<text>share-summary.md</text>",
     "<text>scorecard.md</text>",
     "<text>recommendations.md</text>",
+    "<text>Safe first-run story link</text>",
     "<text>raw/** is excluded by default</text>",
     "<text>No consumer AI UI scraping</text>",
     "<text>No ranking or answer-placement guarantee</text>",
