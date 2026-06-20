@@ -1264,6 +1264,11 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "answerlens-demo-audit.tar.gz",
         "answerlens-site.tar.gz",
         "share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>",
+        "starter-bundle.md handoff",
+        "examples/consumer-repo",
+        "first-run story template",
+        "Show and tell Discussion form",
+        "raw provider payloads",
         "npm view @answerlens/cli"
       ]
     }

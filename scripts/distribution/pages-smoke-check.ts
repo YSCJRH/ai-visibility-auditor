@@ -54,6 +54,11 @@ const ROUTES: RouteCheck[] = [
       "release-assets-summary.md",
       "release-assets-smoke-summary.md",
       "Release review path",
+      "starter-bundle.md",
+      "examples/consumer-repo",
+      "first-run story template",
+      "Show and tell Discussion form",
+      "raw provider payloads",
       "standalone adoption proof",
       ...ARTIFACT_ORDER_SNIPPETS
     ]
@@ -67,6 +72,11 @@ const ROUTES: RouteCheck[] = [
       "release-assets-summary.md",
       "release-assets-smoke-summary.md",
       "Release review path",
+      "starter-bundle.md",
+      "examples/consumer-repo",
+      "first-run story template",
+      "Show and tell Discussion form",
+      "raw provider payloads",
       "standalone adoption proof",
       ...ARTIFACT_ORDER_SNIPPETS
     ]
