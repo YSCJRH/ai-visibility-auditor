@@ -177,7 +177,11 @@ const REVIEW_PACKET_OUTPUT_CONTRACT_SURFACES = [
 const STABLE_RELEASE_SURFACES: Array<{ path: string; snippets: (stableTag: string) => string[] }> = [
   {
     path: ".github/workflows/release-distribution.yml",
-    snippets: (stableTag) => [stableTag]
+    snippets: (stableTag) => [
+      stableTag,
+      "`{{RELEASE_TAG}}` Action release",
+      'replaceAll("{{RELEASE_TAG}}", releaseTag)'
+    ]
   },
   {
     path: "scripts/distribution/build-site.ts",

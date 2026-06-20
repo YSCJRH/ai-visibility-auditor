@@ -691,6 +691,26 @@ test("public-surface-check rejects stable version drift across release and adopt
   assert.ok(ruleIds.includes("stable-version-surface-pin"));
 });
 
+test("public-surface-check rejects release notes with a hard-coded Action release tag", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  const workflowPath = path.join(rootDir, ".github/workflows/release-distribution.yml");
+  const workflow = await readFile(workflowPath, "utf8");
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/release-distribution.yml",
+    workflow
+      .replace("`{{RELEASE_TAG}}` Action release", `\`${STABLE_TAG}\` Action release`)
+      .replace('      - run: node -e \'const releaseTag = process.env.RELEASE_TAG; "".replaceAll("{{RELEASE_TAG}}", releaseTag)\'\n', "")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const workflowFindings = findings.filter(
+    (finding) => finding.ruleId === "stable-version-surface-pin" && finding.path === ".github/workflows/release-distribution.yml"
+  );
+
+  assert.ok(workflowFindings.some((finding) => finding.message.includes("{{RELEASE_TAG}}")));
+});
+
 test("public-surface-check rejects latest release snapshots without a body review path", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -1493,6 +1513,8 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "      - run: echo \"`Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`\"",
       "      - run: echo \"`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums\"",
       "      - run: echo \"`release-assets-summary.md`: read the verified asset table and adopter handoff\"",
+      "      - run: echo \"Starter bundle and GitHub Action docs pinned to the reviewed `{{RELEASE_TAG}}` Action release\"",
+      "      - run: node -e 'const releaseTag = process.env.RELEASE_TAG; \"\".replaceAll(\"{{RELEASE_TAG}}\", releaseTag)'",
       "      - run: gh release upload \"$RELEASE_TAG\" dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz dist/release-assets-manifest.json dist/release-assets-summary.md --clobber",
       "      - uses: actions/upload-artifact@v6",
       "        with:",

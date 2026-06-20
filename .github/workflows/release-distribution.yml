@@ -138,7 +138,7 @@ jobs:
           - Release assets rebuilt from the current `main` state after the release smoke-summary evidence pass
           - Release asset smoke summaries in the workflow summary and internal release-distribution artifact
           - Release snapshot checking that supports planned release PRs while still verifying the latest published release
-          - Starter bundle and GitHub Action docs pinned to the reviewed `v0.3.6` Action release
+          - Starter bundle and GitHub Action docs pinned to the reviewed `{{RELEASE_TAG}}` Action release
           - The same fixture demo, consumer-repo demo, public-claim checks, typecheck, tests, and SEO checks as the release gate
           - Publish-ready CLI bundle and tarball plus repo-native report artifacts
 
@@ -173,6 +173,7 @@ jobs:
           - Share safe first-run artifacts through https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell
           - Open focused issues only when a concrete repo-editable gap remains
           EOF
+          node -e 'const fs = require("node:fs"); const releaseTag = process.env.RELEASE_TAG; if (!releaseTag) throw new Error("RELEASE_TAG is required"); const path = "dist/release-notes.md"; fs.writeFileSync(path, fs.readFileSync(path, "utf8").replaceAll("{{RELEASE_TAG}}", releaseTag));'
       - name: Create or update GitHub release
         if: ${{ env.RELEASE_TAG != '' }}
         env:
