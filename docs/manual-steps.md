@@ -68,7 +68,7 @@ If `npm view @answerlens/cli` returns `404`, do not present npm as activated. Ke
 ## GitHub Actions runtime
 
 1. Keep self-hosted runners on a version compatible with Node 24-based JavaScript actions.
-2. The root `AnswerLens` Action provisions pnpm with Corepack, so copied adopter workflows do not need a separate `pnpm/action-setup` step when they call the repository Action with a reviewed release tag such as `YSCJRH/ai-visibility-auditor@v0.3.5`.
+2. The root `AnswerLens` Action provisions pnpm with Corepack, so copied adopter workflows do not need a separate `pnpm/action-setup` step when they call the repository Action with a reviewed release tag such as `YSCJRH/ai-visibility-auditor@v0.3.6`.
 3. For `eval`, keep non-secret provider defaults in `runtime.yaml` next to `brand.yaml`; keep API keys in repository or organization secrets.
 4. If you maintain copied workflows outside this repository, prefer the same major action versions used here:
    `actions/checkout@v5`, `actions/setup-node@v5`, `actions/github-script@v8`, and `actions/upload-artifact@v6`.

@@ -1106,7 +1106,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   ]);
 
   const updatedAt = formatDate(releases[0]?.published_at, shareSummary.run.generatedAt);
-  const latestReleaseVersion = releases[0]?.tag_name ?? "v0.3.5";
+  const latestReleaseVersion = releases[0]?.tag_name ?? "v0.3.6";
 
   await mkdir(path.join(outDir, "docs"), { recursive: true });
   await mkdir(path.join(outDir, "releases"), { recursive: true });
@@ -1819,7 +1819,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             "<code>prompts.yaml</code>: buyer, comparison, and citation questions for your real audience.",
             "<code>runtime.yaml</code>: non-secret eval defaults for provider, model, locale, samples, timeout, and optional base URL.",
             "<code>answerlens.yml</code>: the GitHub Actions workflow that runs AnswerLens in CI and uploads the same report files, pinned to the current stable Action release."
-          ])}</ul><p>The current starter workflow uses <code>YSCJRH/ai-visibility-auditor@v0.3.5</code>; after a newer release, update that pin only after reviewing the release notes.</p><p>Keep API keys in GitHub secrets or local environment variables, not in <code>runtime.yaml</code>.</p>`)}
+          ])}</ul><p>The current starter workflow uses <code>YSCJRH/ai-visibility-auditor@v0.3.6</code>; after a newer release, update that pin only after reviewing the release notes.</p><p>Keep API keys in GitHub secrets or local environment variables, not in <code>runtime.yaml</code>.</p>`)}
         </section>
         <section class="section grid">
           ${renderPanel("Files to copy", "Copyable sources", `<ul>${renderList([
@@ -1863,7 +1863,7 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
             "<code>prompts.yaml</code>：写给真实买家与评估场景的比较、引用和推荐问题。",
             "<code>runtime.yaml</code>：保存非 secret 的 eval 默认值，例如 provider、model、locale、samples 和 timeout。",
             "<code>answerlens.yml</code>：在 CI 里运行 AnswerLens、上传同一组报告文件，并 pin 到当前稳定 Action release 的 GitHub Actions workflow。"
-          ])}</ul><p>当前 starter workflow 使用 <code>YSCJRH/ai-visibility-auditor@v0.3.5</code>；有新 release 后，先读 release notes，再更新这个 pin。</p><p>API keys 继续放在 GitHub secrets 或本地环境变量里，不要写进 <code>runtime.yaml</code>。</p>`)}
+          ])}</ul><p>当前 starter workflow 使用 <code>YSCJRH/ai-visibility-auditor@v0.3.6</code>；有新 release 后，先读 release notes，再更新这个 pin。</p><p>API keys 继续放在 GitHub secrets 或本地环境变量里，不要写进 <code>runtime.yaml</code>。</p>`)}
         </section>
         <section class="section grid">
           ${renderPanel("需要复制的文件", "可复制来源", `<ul>${renderList([

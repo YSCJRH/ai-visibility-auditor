@@ -38,6 +38,11 @@ const DEFAULT_DESCRIPTION = "AnswerLens is a CLI-first AI visibility auditor for
 const DEFAULT_TAGLINE = "CI for AI discoverability.";
 
 const RELEASE_SUMMARIES: Record<string, Record<SeoLocale, string>> = {
+  "v0.3.6": {
+    en: "AnswerLens v0.3.6 ships release asset smoke-summary evidence, planned-release snapshot checks, and stable Action starter pins for the current release.",
+    "zh-CN":
+      "AnswerLens v0.3.6 发布 release asset smoke-summary 证据、planned-release snapshot 检查，以及当前稳定 Action starter pin。"
+  },
   "v0.3.5": {
     en: "AnswerLens v0.3.5 aligns release assets with the post-deploy Pages category polish, self-dogfood log, and current stable Action starter pins.",
     "zh-CN":

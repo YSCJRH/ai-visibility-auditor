@@ -1061,12 +1061,14 @@ async function checkReleaseSnapshotFreshnessGate(rootDir: string, findings: Find
   const requiredSurfaces = [
     {
       path: ciPath,
-      snippets: ["pnpm release:snapshot:check", "GITHUB_TOKEN: ${{ github.token }}"]
+      snippets: ["pnpm release:snapshot:check -- --allow-planned-latest", "GITHUB_TOKEN: ${{ github.token }}"]
     },
     {
       path: checkScriptPath,
       snippets: [
         "release-snapshot-freshness",
+        "allowPlannedLatest",
+        "Planned latest release snapshot must be followed by the latest published stable release",
         "https://api.github.com/repos/${repository}/releases?per_page=20",
         "draft !== true && release.prerelease !== true"
       ]
@@ -1085,6 +1087,7 @@ async function checkReleaseSnapshotFreshnessGate(rootDir: string, findings: Find
       path: playbookPath,
       snippets: [
         "corepack pnpm release:snapshot:refresh -- --write",
+        "corepack pnpm release:snapshot:check -- --allow-planned-latest",
         "corepack pnpm release:snapshot:check",
         "published_at"
       ]

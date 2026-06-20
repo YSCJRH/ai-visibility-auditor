@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { runPublicSurfaceCheck } from "./public-surface-check.ts";
 
-const STABLE_VERSION = "0.3.5";
+const STABLE_VERSION = "0.3.6";
 const STABLE_TAG = `v${STABLE_VERSION}`;
 const SHOW_AND_TELL_DISCUSSION_URL = "https://github.com/YSCJRH/ai-visibility-auditor/discussions/new?category=show-and-tell";
 
@@ -298,7 +298,7 @@ test("public-surface-check rejects release snapshot CI without an authenticated 
       "  - uses: actions/setup-node@v5",
       "  - uses: actions/github-script@v8",
       "  - uses: actions/upload-artifact@v6",
-      "  - run: pnpm release:snapshot:check"
+      "  - run: pnpm release:snapshot:check -- --allow-planned-latest"
     ].join("\n")
   );
 
@@ -461,6 +461,7 @@ test("public-surface-check rejects release asset docs without downloaded manifes
     [
       "If public:check fails with stable-version-*, fix the drift instead of weakening the rule.",
       "Run corepack pnpm release:snapshot:refresh -- --write after GitHub publishes the release.",
+      "Run corepack pnpm release:snapshot:check -- --allow-planned-latest during the release PR.",
       "Run corepack pnpm release:snapshot:check after refreshing the snapshot.",
       "Use the helper to replace guessed fields such as published_at with GitHub metadata.",
       "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, `release-assets-summary.md`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`."
@@ -475,7 +476,7 @@ test("public-surface-check rejects release asset docs without downloaded manifes
 
 test("public-surface-check rejects stable version drift across release and adoption surfaces", async () => {
   const rootDir = await createPublicSurfaceFixture();
-  await writeFixtureFile(rootDir, "apps/cli/package.json", JSON.stringify({ name: "@answerlens/cli", version: "0.3.6" }, null, 2));
+  await writeFixtureFile(rootDir, "apps/cli/package.json", JSON.stringify({ name: "@answerlens/cli", version: "0.3.7" }, null, 2));
   await writeFixtureFile(
     rootDir,
     "examples/consumer-repo/.github/workflows/answerlens.yml",
@@ -965,6 +966,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
     [
       "If public:check fails with stable-version-*, fix the drift instead of weakening the rule.",
       "Run corepack pnpm release:snapshot:refresh -- --write after GitHub publishes the release.",
+      "Run corepack pnpm release:snapshot:check -- --allow-planned-latest during the release PR.",
       "Run corepack pnpm release:snapshot:check after refreshing the snapshot.",
       "Use the helper to replace guessed fields such as published_at with GitHub metadata.",
       "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, `release-assets-summary.md`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
@@ -1060,13 +1062,15 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(
     rootDir,
     ".github/workflows/ci.yml",
-    "steps:\n  - uses: actions/checkout@v5\n  - uses: actions/setup-node@v5\n  - uses: actions/github-script@v8\n  - uses: actions/upload-artifact@v6\n  - run: pnpm release:snapshot:check\n    env:\n      GITHUB_TOKEN: ${{ github.token }}\n"
+    "steps:\n  - uses: actions/checkout@v5\n  - uses: actions/setup-node@v5\n  - uses: actions/github-script@v8\n  - uses: actions/upload-artifact@v6\n  - run: pnpm release:snapshot:check -- --allow-planned-latest\n    env:\n      GITHUB_TOKEN: ${{ github.token }}\n"
   );
   await writeFixtureFile(
     rootDir,
     "scripts/distribution/release-snapshot-check.ts",
     [
       "const rule = 'release-snapshot-freshness';",
+      "const allowPlannedLatest = true;",
+      "const plannedMessage = 'Planned latest release snapshot must be followed by the latest published stable release';",
       "const url = `https://api.github.com/repos/${repository}/releases?per_page=20`;",
       "const stable = draft !== true && release.prerelease !== true;"
     ].join("\n")

@@ -17,7 +17,7 @@ Non-goals that stay fixed across roadmap stages:
 
 ## Near-term priorities
 
-Recently completed on `main` and released through `v0.3.5`:
+Recently completed on `main` and released through `v0.3.6`:
 
 - `#9` Schema-text consistency and evidence density rules
 - `#10` Internal link context, anchor quality, and rule registry
@@ -28,6 +28,7 @@ Recently completed on `main` and released through `v0.3.5`:
 - activation funnel, share-ready artifacts, trust/safety docs, starter bundle hardening, self-dogfood loop, public guardrails, and repo-local Codex plugin workflows
 - Pages redirect handling, localized homepage detection, CJK extraction signals, compare metadata coverage, and current stable Action pins
 - release assets aligned with the post-deploy Pages category polish, self-dogfood log, and current stable Action starter pins
+- release asset smoke-summary evidence, planned-release snapshot checks, and current stable Action starter pins
 
 Why `#9` and `#10` came first:
 
@@ -183,6 +184,22 @@ Current status:
 - release parity, stable starter pins, release snapshot, and public roadmap copy are implemented on `main`
 - `v0.3.5` was released on June 17, 2026
 
+### `v0.3.6`
+
+Primary focus: release smoke evidence and planned-release truth-sync
+
+Planned outcome:
+
+- publish release assets with a human-readable smoke summary in the workflow summary and internal release-distribution artifact
+- let release bump PRs prepare the next snapshot entry without weakening verification of the latest already-published release
+- keep starter bundle and GitHub Action docs pinned to the reviewed stable Action release
+- preserve the existing product boundary: no new audit engine, no consumer AI UI scraping, no ranking guarantees, and no dashboard-first rewrite
+
+Current status:
+
+- release smoke-summary output, planned-release snapshot checks, stable starter pins, and release-facing docs are implemented on `main`
+- `v0.3.6` was released on June 20, 2026
+
 ## GitHub alignment
 
 Current milestone mapping:
@@ -203,6 +220,7 @@ Release planning:
 - `v0.3.3` is released and adds the GitHub-native activation loop, trust/safety surfaces, starter hardening, public guardrails, and repo-local Codex plugin workflows
 - `v0.3.4` is released and tightens the self-dogfooding crawler, CJK extraction, compare metadata coverage, Pages category copy, and current stable Action pins
 - `v0.3.5` is released and aligns release assets with the post-deploy Pages category polish, self-dogfood log, and current stable Action starter pins
+- `v0.3.6` is released and adds release asset smoke-summary evidence, planned-release snapshot checks, and current stable Action starter pins
 
 This document is the canonical public roadmap. README, release notes, and umbrella issues should link back here instead of restating divergent plans.
 
@@ -210,7 +228,7 @@ Canonical distribution follow-through lives in [docs/distribution-plan.md](distr
 
 ## Current operating focus
 
-With `v0.3.5` released on June 17, 2026, near-term work can move from one-time activation hardening into repeatable adoption proof, release truth-sync, and self-dogfooding follow-through while staying inside the existing product boundary.
+With `v0.3.6` released on June 20, 2026, near-term work can move from one-time activation hardening into repeatable adoption proof, release truth-sync, and self-dogfooding follow-through while staying inside the existing product boundary.
 
 - Canonical brief: [docs/activation-plan.md](activation-plan.md)
 - Completed activation umbrella: [#33](https://github.com/YSCJRH/ai-visibility-auditor/issues/33)
