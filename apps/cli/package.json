@@ -1,6 +1,6 @@
 {
   "name": "@answerlens/cli",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "CLI-first AI visibility auditor for product websites.",
   "private": false,
   "type": "module",

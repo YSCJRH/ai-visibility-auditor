@@ -74,7 +74,7 @@ corepack pnpm release:assets:smoke -- --dir "$assets_dir" --summary-out "$assets
 ## GitHub Actions runtime
 
 1. 自托管 runner 需要保持在兼容 Node 24-based JavaScript actions 的版本上。
-2. 根 `AnswerLens` Action 会通过 Corepack provision pnpm，所以外部仓库使用经过 review 的 release tag，例如 `YSCJRH/ai-visibility-auditor@v0.3.5` 时，不需要再单独加 `pnpm/action-setup`。
+2. 根 `AnswerLens` Action 会通过 Corepack provision pnpm，所以外部仓库使用经过 review 的 release tag，例如 `YSCJRH/ai-visibility-auditor@v0.3.6` 时，不需要再单独加 `pnpm/action-setup`。
 3. 对 `eval` 来说，把默认 provider / model / locale / timeout 放进 `runtime.yaml`，并让它和 `brand.yaml` 位于同一目录。
 4. `OPENAI_API_KEY` 和 `PERPLEXITY_API_KEY` 继续放在 repository 或 organization secrets 里，不要写进 `runtime.yaml`。
 5. 如果你在仓库外维护复制版 workflow，尽量保持和这里相同的 major 版本：

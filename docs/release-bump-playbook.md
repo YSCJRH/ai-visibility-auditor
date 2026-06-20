@@ -24,6 +24,12 @@ corepack pnpm release:snapshot:check
 
 For a new unreleased semver tag, prepare the intended snapshot entry from the planned release notes during the release PR, then run the refresh command above after the Release Distribution workflow publishes the GitHub release. That follow-up replaces guessed fields such as `published_at` with GitHub's actual metadata.
 
+During the release PR, use the planned-latest mode so CI can verify the prepared top entry while still checking that the next local snapshot entry matches the latest already-published GitHub release:
+
+```bash
+corepack pnpm release:snapshot:check -- --allow-planned-latest
+```
+
 ## Release PR Scope
 
 A release bump PR should update these surfaces together:

@@ -34,6 +34,7 @@ export type ReleaseSnapshotCheckOptions = {
   repository?: string;
   githubToken?: string;
   fetchImpl?: FetchLike;
+  allowPlannedLatest?: boolean;
 };
 
 const DEFAULT_REPOSITORY = "YSCJRH/ai-visibility-auditor";
@@ -57,7 +58,8 @@ export async function runReleaseSnapshotCheck(options: ReleaseSnapshotCheckOptio
     return findings;
   }
 
-  const localLatest = firstStableRelease(snapshot);
+  const localStable = stableReleases(snapshot);
+  let localLatest = localStable[0];
   const remoteLatest = firstStableRelease(remote);
   if (!localLatest || !remoteLatest) {
     findings.push({
@@ -66,6 +68,19 @@ export async function runReleaseSnapshotCheck(options: ReleaseSnapshotCheckOptio
       message: "Release snapshot and remote metadata must both contain at least one stable public release."
     });
     return findings;
+  }
+
+  if (options.allowPlannedLatest && isPlannedLatest(localLatest, remoteLatest, repository)) {
+    localLatest = localStable[1];
+    if (!localLatest) {
+      findings.push({
+        ruleId: "release-snapshot-freshness",
+        path: snapshotPath,
+        message:
+          "Planned latest release snapshot must be followed by the latest published stable release when --allow-planned-latest is used."
+      });
+      return findings;
+    }
   }
 
   compareField("tag_name", localLatest, remoteLatest, snapshotPath, findings);
@@ -150,10 +165,45 @@ async function fetchRemoteReleases(
 }
 
 function firstStableRelease(releases: ReleaseEntry[]): ReleaseEntry | undefined {
-  return releases.find((release) => {
+  return stableReleases(releases)[0];
+}
+
+function stableReleases(releases: ReleaseEntry[]): ReleaseEntry[] {
+  return releases.filter((release) => {
     const tag = stringField(release, "tag_name");
     return Boolean(tag && /^v\d+\.\d+\.\d+$/.test(tag) && release.draft !== true && release.prerelease !== true);
   });
+}
+
+function isPlannedLatest(localLatest: ReleaseEntry, remoteLatest: ReleaseEntry, repository: string): boolean {
+  const localTag = stringField(localLatest, "tag_name");
+  const remoteTag = stringField(remoteLatest, "tag_name");
+  const comparison = compareSemverTags(localTag, remoteTag);
+  if (comparison === null || comparison <= 0) {
+    return false;
+  }
+
+  const expectedUrl = `https://github.com/${repository}/releases/tag/${localTag}`;
+  const localUrl = stringField(localLatest, "html_url");
+  return !localUrl || localUrl === expectedUrl;
+}
+
+function compareSemverTags(left: string, right: string): number | null {
+  const leftMatch = /^v(\d+)\.(\d+)\.(\d+)$/.exec(left);
+  const rightMatch = /^v(\d+)\.(\d+)\.(\d+)$/.exec(right);
+  if (!leftMatch || !rightMatch) {
+    return null;
+  }
+
+  for (let index = 1; index <= 3; index += 1) {
+    const leftValue = Number(leftMatch[index]);
+    const rightValue = Number(rightMatch[index]);
+    if (leftValue !== rightValue) {
+      return leftValue > rightValue ? 1 : -1;
+    }
+  }
+
+  return 0;
 }
 
 function compareField(
@@ -216,7 +266,8 @@ function parseArgs(argv: string[]): ReleaseSnapshotCheckOptions {
     snapshotPath: flags.get("snapshot"),
     remoteReleasesPath: flags.get("remote-releases"),
     repository: flags.get("repository"),
-    githubToken: flags.get("github-token")
+    githubToken: flags.get("github-token"),
+    allowPlannedLatest: flags.get("allow-planned-latest") === "true"
   };
 }
 

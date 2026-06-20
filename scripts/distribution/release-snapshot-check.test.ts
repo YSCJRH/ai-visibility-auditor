@@ -64,6 +64,61 @@ test("release-snapshot-check ignores draft and prerelease entries before the lat
   assert.deepEqual(findings, []);
 });
 
+test("release-snapshot-check allows a planned latest release when the published latest follows it", async () => {
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-release-snapshot-planned-"));
+  const snapshotPath = path.join(rootDir, "snapshot.json");
+  const remotePath = path.join(rootDir, "remote.json");
+  const published = release({ tag_name: "v0.3.5" });
+  const planned = release({
+    tag_name: "v0.3.6",
+    published_at: "2026-06-20T00:00:00Z",
+    body: "Planned release notes for v0.3.6"
+  });
+  await writeJson(snapshotPath, [planned, published]);
+  await writeJson(remotePath, [published]);
+
+  const findings = await runReleaseSnapshotCheck({
+    snapshotPath,
+    remoteReleasesPath: remotePath,
+    allowPlannedLatest: true
+  });
+
+  assert.deepEqual(findings, []);
+});
+
+test("release-snapshot-check still rejects planned latest releases without the release-bump flag", async () => {
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-release-snapshot-planned-strict-"));
+  const snapshotPath = path.join(rootDir, "snapshot.json");
+  const remotePath = path.join(rootDir, "remote.json");
+  const published = release({ tag_name: "v0.3.5" });
+  const planned = release({ tag_name: "v0.3.6", body: "Planned release notes for v0.3.6" });
+  await writeJson(snapshotPath, [planned, published]);
+  await writeJson(remotePath, [published]);
+
+  const findings = await runReleaseSnapshotCheck({ snapshotPath, remoteReleasesPath: remotePath });
+
+  assert.ok(findings.some((finding) => finding.message.includes("tag_name is stale")));
+});
+
+test("release-snapshot-check rejects planned latest releases when the published latest is stale", async () => {
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-release-snapshot-planned-stale-"));
+  const snapshotPath = path.join(rootDir, "snapshot.json");
+  const remotePath = path.join(rootDir, "remote.json");
+  await writeJson(snapshotPath, [
+    release({ tag_name: "v0.3.6", body: "Planned release notes for v0.3.6" }),
+    release({ tag_name: "v0.3.4" })
+  ]);
+  await writeJson(remotePath, [release({ tag_name: "v0.3.5" })]);
+
+  const findings = await runReleaseSnapshotCheck({
+    snapshotPath,
+    remoteReleasesPath: remotePath,
+    allowPlannedLatest: true
+  });
+
+  assert.ok(findings.some((finding) => finding.message.includes("tag_name is stale")));
+});
+
 test("release-snapshot-check can fetch remote metadata", async () => {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "answerlens-release-snapshot-"));
   const snapshotPath = path.join(rootDir, "snapshot.json");

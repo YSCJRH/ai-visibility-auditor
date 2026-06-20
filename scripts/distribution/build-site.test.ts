@@ -361,7 +361,7 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(starter, /AnswerLens starter packet preview/);
   assert.match(starter, /runtime\.yaml/);
   assert.match(starter, /non-secret eval defaults/i);
-  assert.match(starter, /YSCJRH\/ai-visibility-auditor@v0\.3\.5/);
+  assert.match(starter, /YSCJRH\/ai-visibility-auditor@v0\.3\.6/);
   assert.match(starter, /starter\/example-run\/share-summary\.md/);
   assert.match(zhStarter, /assets\/starter-packet-preview\.svg/);
   assert.match(pricing, /AnswerLens is open source\. You bring the provider keys you choose\./);
@@ -401,8 +401,8 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(releases, /Release metadata/);
   assert.match(releases, /Snapshot health/);
   assert.match(releases, /compiled from GitHub Releases metadata/);
-  assert.match(releases, /Compiled releases:<\/strong> 9/);
-  assert.match(releases, /Stable semver releases:<\/strong> 8/);
+  assert.match(releases, /Compiled releases:<\/strong> 10/);
+  assert.match(releases, /Stable semver releases:<\/strong> 9/);
   assert.match(releases, /answerlens-demo-audit\.tar\.gz/);
   assert.match(releases, /answerlens-site\.tar\.gz/);
   assert.match(releases, /npm view @answerlens\/cli/);
@@ -412,8 +412,8 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(zhReleases, /发布元数据/);
   assert.match(zhReleases, /索引健康度/);
   assert.match(zhReleases, /GitHub 发布元数据/);
-  assert.match(zhReleases, /已编译发布数：<\/strong> 9/);
-  assert.match(zhReleases, /稳定 semver 发布数：<\/strong> 8/);
+  assert.match(zhReleases, /已编译发布数：<\/strong> 10/);
+  assert.match(zhReleases, /稳定 semver 发布数：<\/strong> 9/);
   assert.match(zhReleases, /answerlens-demo-audit\.tar\.gz/);
   assert.match(zhReleases, /discussions\/new\?category=show-and-tell/);
   assert.match(zhReleases, /AnswerLens v0\.3\.2 延续/);

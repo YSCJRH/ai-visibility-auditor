@@ -28,7 +28,7 @@ type CliOptions = {
 };
 
 const DEFAULT_SITE_URL = "https://yscjrh.github.io/ai-visibility-auditor/";
-const FALLBACK_LATEST_RELEASE = "v0.3.5";
+const FALLBACK_LATEST_RELEASE = "v0.3.6";
 const MIN_RELEASE_METADATA_COUNT = 3;
 const MIN_STABLE_RELEASE_METADATA_COUNT = 2;
 const XML_PARSER = new XMLParser({ ignoreAttributes: false });
