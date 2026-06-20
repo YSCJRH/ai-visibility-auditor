@@ -1,12 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { runReleaseAssetsManifest } from "./release-assets-manifest.ts";
-import { runReleaseAssetsSmokeCheck } from "./release-assets-smoke-check.ts";
+import { formatReleaseAssetsSmokeSummary, runReleaseAssetsSmokeCheck } from "./release-assets-smoke-check.ts";
 
 const execFileAsync = promisify(execFile);
 const SCRIPT_PATH = path.resolve("scripts/distribution/release-assets-smoke-check.ts");
@@ -25,6 +25,22 @@ test("release-assets-smoke-check accepts workflow dist package layout", async ()
   const findings = await runReleaseAssetsSmokeCheck({ assetsDir: fixture.assetsDir });
 
   assert.deepEqual(findings, []);
+});
+
+test("release-assets-smoke-check writes a release review summary on success", async () => {
+  const fixture = await createReleaseAssetsFixture();
+  const summaryPath = path.join(fixture.rootDir, "release-assets-smoke-summary.md");
+
+  const findings = await runReleaseAssetsSmokeCheck({ assetsDir: fixture.assetsDir, summaryOutPath: summaryPath });
+
+  assert.deepEqual(findings, []);
+  const summary = await readFile(summaryPath, "utf8");
+  assert.match(summary, /## Release asset smoke check passed/);
+  assert.match(summary, /Review order: `share-summary\.md`, then `scorecard\.md`, then `recommendations\.md`/);
+  assert.match(summary, /do not present npm as activated/);
+  assert.match(summary, /raw provider payloads/);
+  assert.match(summary, /answerlens-demo-audit\.tar\.gz/);
+  assert.match(summary, /answerlens-site\.tar\.gz/);
 });
 
 test("release-assets-smoke-check rejects a demo bundle with drifted first-run artifacts", async () => {
@@ -47,16 +63,35 @@ test("release-assets-smoke-check rejects a site bundle without release entrypoin
 
 test("release-assets-smoke-check CLI accepts pnpm-style separator", async () => {
   const fixture = await createReleaseAssetsFixture();
+  const summaryPath = path.join(fixture.rootDir, "cli-smoke-summary.md");
 
   const { stdout } = await execFileAsync(process.execPath, [
     "--experimental-strip-types",
     SCRIPT_PATH,
     "--",
     "--dir",
-    fixture.assetsDir
+    fixture.assetsDir,
+    "--summary-out",
+    summaryPath
   ]);
 
   assert.match(stdout, /Release asset smoke check passed/);
+  assert.match(await readFile(summaryPath, "utf8"), /Release asset smoke check passed/);
+});
+
+test("formatReleaseAssetsSmokeSummary preserves public boundaries", () => {
+  const summary = formatReleaseAssetsSmokeSummary({
+    assetsDir: "downloaded-assets",
+    checkedAt: "2026-06-20T00:00:00.000Z",
+    artifactReviewOrder: ["share-summary.md", "scorecard.md", "recommendations.md"],
+    checks: ["verified demo bundle"]
+  });
+
+  assert.match(summary, /downloaded-assets/);
+  assert.match(summary, /share-summary\.md`, then `scorecard\.md`, then `recommendations\.md/);
+  assert.match(summary, /npm view @answerlens\/cli/);
+  assert.match(summary, /do not present npm as activated/);
+  assert.match(summary, /raw provider payloads/);
 });
 
 async function createReleaseAssetsFixture(

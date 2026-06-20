@@ -1129,7 +1129,9 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "release-assets-summary.md",
         "SHA-256",
         "gh release download vX.Y.Z",
-        "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\"",
+        "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\"",
+        "release-assets-smoke-summary.md",
+        "not upload it as adoption proof by itself",
         "manifest checksums",
         "`share-summary.md`, then `scorecard.md`, then `recommendations.md`",
         "do not backfill a checksum claim",
@@ -1147,7 +1149,9 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "release-assets-summary.md",
         "SHA-256",
         "gh release download vX.Y.Z",
-        "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\"",
+        "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\"",
+        "release-assets-smoke-summary.md",
+        "不要把它单独当作 adoption proof",
         "manifest checksum",
         "`share-summary.md`、`scorecard.md`、`recommendations.md`",
         "不要把 checksum claim 回填进公开 release story",
@@ -1164,7 +1168,9 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "`release-assets-manifest.json`",
         "`release-assets-summary.md`",
         "gh release download vX.Y.Z",
-        "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\"",
+        "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\"",
+        "release-assets-smoke-summary.md",
+        "not as standalone adoption proof",
         "manifest checksums",
         "do not imply checksum coverage for that release",
         "`share-summary.md`, then `scorecard.md`, then `recommendations.md`"
@@ -1269,13 +1275,15 @@ async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[
         "pnpm release:assets:manifest -- --out dist/release-assets-manifest.json",
         "pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json",
         "--summary-out dist/release-assets-summary.md",
-        "pnpm release:assets:smoke -- --dir dist",
+        "pnpm release:assets:smoke -- --dir dist --work-dir dist/release-assets-smoke-check --summary-out dist/release-assets-smoke-summary.md",
         "cat dist/release-assets-summary.md >> \"$GITHUB_STEP_SUMMARY\"",
+        "cat dist/release-assets-smoke-summary.md >> \"$GITHUB_STEP_SUMMARY\"",
         "`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums",
         "`release-assets-summary.md`: read the verified asset table",
         "dist/release-assets-manifest.json dist/release-assets-summary.md --clobber",
         "dist/release-assets-manifest.json",
-        "dist/release-assets-summary.md"
+        "dist/release-assets-summary.md",
+        "dist/release-assets-smoke-summary.md"
       ]
     },
     {
@@ -1297,7 +1305,11 @@ async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[
         "runReleaseAssetsSmokeCheck",
         "runReleaseAssetsManifest",
         "runDemoFixtureArtifactCheck",
+        "formatReleaseAssetsSmokeSummary",
+        "summaryOutPath",
+        "Release asset smoke check passed",
         "release-assets-summary.md",
+        "release-assets-smoke-summary.md",
         "answerlens-demo-audit.tar.gz",
         "answerlens-site.tar.gz",
         "share-summary.md",
@@ -1311,8 +1323,10 @@ async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[
       snippets: [
         "Release Distribution workflow summary",
         "Release asset manifest verified",
+        "Release asset smoke check passed",
         "release-assets-summary.md",
-        "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\"",
+        "release-assets-smoke-summary.md",
+        "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\"",
         "before reusing downloaded release assets"
       ]
     }

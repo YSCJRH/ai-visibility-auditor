@@ -52,8 +52,10 @@ gh release download vX.Y.Z \
   --pattern release-assets-manifest.json \
   --pattern release-assets-summary.md \
   --dir "$assets_dir"
-corepack pnpm release:assets:smoke -- --dir "$assets_dir"
+corepack pnpm release:assets:smoke -- --dir "$assets_dir" --summary-out "$assets_dir/release-assets-smoke-summary.md"
 ```
+
+`release-assets-smoke-summary.md` 只能作为维护者 review 下载包的证据。不要把它单独当作 adoption proof；它只说明这组下载的 release assets 通过了本地完整性和 artifact 顺序检查。
 
 如果某个 release 早于 `release-assets-manifest.json` 或 `release-assets-summary.md`，不要把 checksum claim 回填进公开 release story；只检查已有 assets，并把这个缺口记录为 release metadata 历史。
 

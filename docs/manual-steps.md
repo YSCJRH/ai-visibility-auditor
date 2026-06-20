@@ -47,8 +47,10 @@ gh release download vX.Y.Z \
   --pattern release-assets-manifest.json \
   --pattern release-assets-summary.md \
   --dir "$assets_dir"
-corepack pnpm release:assets:smoke -- --dir "$assets_dir"
+corepack pnpm release:assets:smoke -- --dir "$assets_dir" --summary-out "$assets_dir/release-assets-smoke-summary.md"
 ```
+
+Use `release-assets-smoke-summary.md` as maintainer review evidence for the downloaded bundle. Do not upload it as adoption proof by itself; it only says the downloaded release assets passed local integrity and artifact-order checks.
 
 If a release predates `release-assets-manifest.json` or `release-assets-summary.md`, do not backfill a checksum claim into the public release story; inspect the available assets and record the gap as release metadata history.
 
