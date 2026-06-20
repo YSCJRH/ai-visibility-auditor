@@ -320,11 +320,11 @@ function checkPublicClaims(file: string, text: string, findings: Finding[]): voi
     }
 
     if (
-      /(npm\s+(install|i)\s+@answerlens\/cli|pnpm\s+add\s+@answerlens\/cli|yarn\s+add\s+@answerlens\/cli|@answerlens\/cli.{0,80}\b(cli\s+)?installs?\b|\b(cli\s+)?installs?\b.{0,80}@answerlens\/cli)/i.test(
+      /(npm\s+(install|i|exec|x)\s+@answerlens\/cli|npx\s+@answerlens\/cli|pnpm\s+(add|dlx|exec)\s+@answerlens\/cli|yarn\s+(add|dlx)\s+@answerlens\/cli|bunx\s+@answerlens\/cli|@answerlens\/cli.{0,80}\b(cli\s+)?installs?\b|\b(cli\s+)?installs?\b.{0,80}@answerlens\/cli)/i.test(
         normalized
       )
     ) {
-      findings.push(finding("public-npm-install-claim", file, index, "Do not promote @answerlens/cli as an npm install path until the public registry package is visible."));
+      findings.push(finding("public-npm-install-claim", file, index, "Do not promote @answerlens/cli as an npm install, npx, or package-runner path until the public registry package is visible."));
     }
 
     if (/yscjrh\.github\.io\/robots\.txt/i.test(normalized) || (/robots\.txt/i.test(normalized) && /(host-level|host-wide|whole host|controls the host|控制整个|控制 host)/i.test(normalized))) {
