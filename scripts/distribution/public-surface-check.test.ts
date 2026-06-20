@@ -308,6 +308,35 @@ test("public-surface-check rejects release snapshot CI without an authenticated 
   assert.ok(ruleIds.includes("release-snapshot-freshness-gate"));
 });
 
+test("public-surface-check rejects release snapshot CI without a strict main gate", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/ci.yml",
+    [
+      "steps:",
+      "  - uses: actions/checkout@v5",
+      "  - uses: actions/setup-node@v5",
+      "  - uses: actions/github-script@v8",
+      "  - uses: actions/upload-artifact@v6",
+      "  - name: Check release snapshot (release PR)",
+      "    if: github.event_name == 'pull_request'",
+      "    run: pnpm release:snapshot:check -- --allow-planned-latest",
+      "    env:",
+      "      GITHUB_TOKEN: ${{ github.token }}"
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const strictGateFinding = findings.find(
+    (finding) =>
+      finding.ruleId === "release-snapshot-freshness-gate" &&
+      finding.message.includes("Check release snapshot (main)")
+  );
+
+  assert.ok(strictGateFinding);
+});
+
 test("public-surface-check rejects release surfaces without asset checklist boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, "docs/manual-steps.md", `Use the reviewed release tag YSCJRH/ai-visibility-auditor@${STABLE_TAG}.\n`);
@@ -463,6 +492,7 @@ test("public-surface-check rejects release asset docs without downloaded manifes
       "Run corepack pnpm release:snapshot:refresh -- --write after GitHub publishes the release.",
       "Run corepack pnpm release:snapshot:check -- --allow-planned-latest during the release PR.",
       "Run corepack pnpm release:snapshot:check after refreshing the snapshot.",
+      "main push uses strict mode.",
       "Use the helper to replace guessed fields such as published_at with GitHub metadata.",
       "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, `release-assets-summary.md`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`."
     ].join("\n")
@@ -968,6 +998,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "Run corepack pnpm release:snapshot:refresh -- --write after GitHub publishes the release.",
       "Run corepack pnpm release:snapshot:check -- --allow-planned-latest during the release PR.",
       "Run corepack pnpm release:snapshot:check after refreshing the snapshot.",
+      "main push uses strict mode.",
       "Use the helper to replace guessed fields such as published_at with GitHub metadata.",
       "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, `release-assets-summary.md`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
       "Run gh release download vX.Y.Z with release-assets-summary.md before corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\".",
@@ -1062,7 +1093,23 @@ async function createPublicSurfaceFixture(): Promise<string> {
   await writeFixtureFile(
     rootDir,
     ".github/workflows/ci.yml",
-    "steps:\n  - uses: actions/checkout@v5\n  - uses: actions/setup-node@v5\n  - uses: actions/github-script@v8\n  - uses: actions/upload-artifact@v6\n  - run: pnpm release:snapshot:check -- --allow-planned-latest\n    env:\n      GITHUB_TOKEN: ${{ github.token }}\n"
+    [
+      "steps:",
+      "  - uses: actions/checkout@v5",
+      "  - uses: actions/setup-node@v5",
+      "  - uses: actions/github-script@v8",
+      "  - uses: actions/upload-artifact@v6",
+      "  - name: Check release snapshot (release PR)",
+      "    if: github.event_name == 'pull_request'",
+      "    run: pnpm release:snapshot:check -- --allow-planned-latest",
+      "    env:",
+      "      GITHUB_TOKEN: ${{ github.token }}",
+      "  - name: Check release snapshot (main)",
+      "    if: github.event_name != 'pull_request'",
+      "    run: pnpm release:snapshot:check",
+      "    env:",
+      "      GITHUB_TOKEN: ${{ github.token }}"
+    ].join("\n")
   );
   await writeFixtureFile(
     rootDir,
