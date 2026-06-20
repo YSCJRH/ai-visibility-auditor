@@ -27,7 +27,14 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm public:check
-      - run: pnpm release:snapshot:check -- --allow-planned-latest
+      - name: Check release snapshot (release PR)
+        if: github.event_name == 'pull_request'
+        run: pnpm release:snapshot:check -- --allow-planned-latest
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Check release snapshot (main)
+        if: github.event_name != 'pull_request'
+        run: pnpm release:snapshot:check
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - run: pnpm demo:fixture

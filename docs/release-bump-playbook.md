@@ -30,6 +30,8 @@ During the release PR, use the planned-latest mode so CI can verify the prepared
 corepack pnpm release:snapshot:check -- --allow-planned-latest
 ```
 
+Keep planned-latest mode scoped to release PRs; main push uses strict mode so an unreleased planned snapshot cannot sit on `main` after the release handoff.
+
 ## Release PR Scope
 
 A release bump PR should update these surfaces together:
