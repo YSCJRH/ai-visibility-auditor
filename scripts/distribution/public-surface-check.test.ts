@@ -682,6 +682,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       artifactOrderText(),
       "不承诺排名，不抓取消费级 AI UI。",
       "![AnswerLens starter packet preview](assets/starter-packet-preview.svg)",
+      "[repo 内演示 walkthrough](docs/zh/demo-report.md)",
       "使用 Adopter kit checklist 和 PR review packet，说明哪些 raw payloads 不能公开。",
       `用 ${SHOW_AND_TELL_DISCUSSION_URL} 分享 first-run story。`
     ].join("\n")
@@ -801,6 +802,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
   );
   await writeFixtureFile(rootDir, "action.yml", artifactOrderText());
   await writeFixtureFile(rootDir, "docs/demo-report.md", `${artifactOrderText()}\nShare first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.`);
+  await writeFixtureFile(rootDir, "docs/zh/demo-report.md", `${artifactOrderText()}\n用 ${SHOW_AND_TELL_DISCUSSION_URL} 分享 first-run story。`);
   await writeFixtureFile(rootDir, "docs/shareable-summary.md", shareLayerContractText());
   await writeFixtureFile(
     rootDir,

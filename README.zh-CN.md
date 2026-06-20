@@ -23,7 +23,8 @@ AnswerLens 是一个面向产品网站的命令行优先 AI 可见性审计器�
 
 1. [打开在线演示报告](https://yscjrh.github.io/ai-visibility-auditor/zh/examples/static-good/index.html)
    先看到摘要、评分卡和修复清单放在一起是什么样。
-2. [运行 60 秒示例站点演示](README.md#run-the-60-second-fixture-demo)
+   如果你正在查看没有启用 Pages 的 fork 或副本，请用 [repo 内演示 walkthrough](docs/zh/demo-report.md)。
+2. [运行 60 秒示例站点演示](docs/zh/demo-report.md)
    在本地复现同一组报告，让命令路径变得具体。
 3. [运行 5 分钟真实站点审计](docs/zh/quickstart.md)
    先用一个公开产品站点试跑，再去接 CI。
@@ -64,6 +65,7 @@ AnswerLens 是一个面向产品网站的命令行优先 AI 可见性审计器�
 
 ## 关键文档
 
+- [演示报告 walkthrough](docs/zh/demo-report.md)
 - [真实站点 5 分钟 quickstart](docs/zh/quickstart.md)
 - [GitHub Action 接入](docs/zh/github-action.md)
 - [模型运行时配置](docs/zh/model-runtime.md)
