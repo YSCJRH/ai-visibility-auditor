@@ -639,9 +639,10 @@ async function checkReviewPacketOutputContracts(rootDir: string, findings: Findi
       });
       continue;
     }
+    const normalizedText = normalizeNewlines(text);
 
     for (const snippet of surface.snippets) {
-      if (!text.includes(snippet)) {
+      if (!normalizedText.includes(normalizeNewlines(snippet))) {
         findings.push({
           ruleId: "review-packet-output-contract",
           path: surface.path,
@@ -650,6 +651,10 @@ async function checkReviewPacketOutputContracts(rootDir: string, findings: Findi
       }
     }
   }
+}
+
+function normalizeNewlines(text: string): string {
+  return text.replace(/\r\n/g, "\n");
 }
 
 async function checkStarterAdopterKitBoundary(rootDir: string, findings: Finding[]): Promise<void> {

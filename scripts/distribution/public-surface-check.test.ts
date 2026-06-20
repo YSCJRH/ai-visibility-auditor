@@ -583,6 +583,25 @@ test("public-surface-check rejects output contract surfaces without share-summar
   assert.ok(ruleIds.includes("review-packet-output-contract"));
 });
 
+test("public-surface-check accepts CRLF output contract surfaces", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "docs/concepts/ci-for-ai-discoverability.md",
+    [
+      "# CI for AI Discoverability",
+      "- `share-summary.md` for job summaries",
+      "- `scorecard.md` for readiness",
+      "- `recommendations.md` for backlog items",
+      "- `pr-snippet.md` for PR review"
+    ].join("\r\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+
+  assert.deepEqual(findings, []);
+});
+
 test("public-surface-check rejects Action docs without first-CI PR packet boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
