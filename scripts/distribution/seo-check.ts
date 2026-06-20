@@ -395,6 +395,11 @@ function checkReleasePageContract(
     "release-assets-summary.md",
     "release-assets-smoke-summary.md",
     "Release review path",
+    "starter-bundle.md",
+    "examples/consumer-repo",
+    "first-run story",
+    "Show and tell",
+    "raw provider payloads",
     "standalone adoption proof"
   ]) {
     if (!text.includes(snippet)) {

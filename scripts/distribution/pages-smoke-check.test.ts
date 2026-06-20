@@ -39,9 +39,9 @@ test("pages-smoke-check reports missing snippets and unreadable routes", async (
     }
   });
 
-  assert.equal(findings.length, 19);
+  assert.equal(findings.length, 24);
   assert.equal(findings.filter((finding) => finding.ruleId === "pages-live-route").length, 1);
-  assert.equal(findings.filter((finding) => finding.ruleId === "pages-live-snippet").length, 18);
+  assert.equal(findings.filter((finding) => finding.ruleId === "pages-live-snippet").length, 23);
   assert.ok(findings.some((finding) => /\/releases\/$/.test(finding.url) && finding.message.includes("en/releases/")));
   assert.ok(findings.some((finding) => /\/en\/releases\/$/.test(finding.url) && finding.message.includes("release-assets-summary.md")));
   assert.ok(findings.some((finding) => /\/zh\/releases\/$/.test(finding.url) && finding.ruleId === "pages-live-route"));
@@ -68,6 +68,11 @@ function pageForUrl(url: string): string {
       "release-assets-summary.md",
       "release-assets-smoke-summary.md",
       "Release review path",
+      "starter-bundle.md",
+      "examples/consumer-repo",
+      "first-run story template",
+      "Show and tell Discussion form",
+      "raw provider payloads",
       "standalone adoption proof",
       "share-summary.md",
       "scorecard.md",
@@ -82,6 +87,11 @@ function pageForUrl(url: string): string {
       "release-assets-summary.md",
       "release-assets-smoke-summary.md",
       "Release review path",
+      "starter-bundle.md",
+      "examples/consumer-repo",
+      "first-run story template",
+      "Show and tell Discussion form",
+      "raw provider payloads",
       "standalone adoption proof",
       "share-summary.md",
       "scorecard.md",

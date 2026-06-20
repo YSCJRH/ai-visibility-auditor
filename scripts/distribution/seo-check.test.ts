@@ -183,6 +183,11 @@ test("seo-check rejects release pages without the smoke summary review path", as
       .replaceAll("release-assets-summary.md", "release-assets-summary-omitted.md")
       .replaceAll("release-assets-smoke-summary.md", "release-assets-smoke-summary-omitted.md")
       .replaceAll("Release review path", "Review path omitted")
+      .replaceAll("starter-bundle.md", "starter omitted")
+      .replaceAll("examples/consumer-repo", "consumer repo omitted")
+      .replaceAll("first-run story", "first run omitted")
+      .replaceAll("Show and tell", "show omitted")
+      .replaceAll("raw provider payloads", "raw payload boundary omitted")
       .replaceAll("standalone adoption proof", "proof boundary omitted"),
     "utf8"
   );
@@ -200,6 +205,11 @@ test("seo-check rejects release pages without the smoke summary review path", as
   assert.ok(messages.some((message) => message.includes("release-assets-summary.md")));
   assert.ok(messages.some((message) => message.includes("release-assets-smoke-summary.md")));
   assert.ok(messages.some((message) => message.includes("Release review path")));
+  assert.ok(messages.some((message) => message.includes("starter-bundle.md")));
+  assert.ok(messages.some((message) => message.includes("examples/consumer-repo")));
+  assert.ok(messages.some((message) => message.includes("first-run story")));
+  assert.ok(messages.some((message) => message.includes("Show and tell")));
+  assert.ok(messages.some((message) => message.includes("raw provider payloads")));
   assert.ok(messages.some((message) => message.includes("standalone adoption proof")));
 });
 
@@ -434,10 +444,10 @@ function page(args: PageArgs): string {
 
 function releasePageBody(locale: "en" | "zh-CN"): string {
   if (locale === "zh-CN") {
-    return `<p><a href="https://github.com/example/project/releases/tag/${VERSION}">打开最新发布 ${VERSION}</a></p><h2>release 下载 检查清单</h2><p>CLI tarball；如果 <code>npm view @answerlens/cli</code> 返回 <code>404</code>，继续使用 release assets 或本地 checkout。</p><p><code>answerlens-demo-audit.tar.gz</code>、<code>answerlens-site.tar.gz</code>、<code>release-assets-manifest.json</code> 和 <code>release-assets-summary.md</code></p><p>下载后检查 <code>release-assets-smoke-summary.md</code> 的 <code>Release review path</code>：先看 <code>release-assets-summary.md</code>，再看 <code>share-summary.md</code>、<code>scorecard.md</code>、<code>recommendations.md</code>。</p><p>不要把 smoke summary 当作 standalone adoption proof。</p><p>每次都按同一顺序审阅报告：<code>share-summary.md</code>，然后 <code>scorecard.md</code>，然后 <code>recommendations.md</code>。</p>`;
+    return `<p><a href="https://github.com/example/project/releases/tag/${VERSION}">打开最新发布 ${VERSION}</a></p><h2>release 下载 检查清单</h2><p>CLI tarball；如果 <code>npm view @answerlens/cli</code> 返回 <code>404</code>，继续使用 release assets 或本地 checkout。</p><p><code>answerlens-demo-audit.tar.gz</code>、<code>answerlens-site.tar.gz</code>、<code>release-assets-manifest.json</code> 和 <code>release-assets-summary.md</code></p><p>下载后检查 <code>release-assets-smoke-summary.md</code> 的 <code>Release review path</code>：先看 <code>release-assets-summary.md</code>，再看 <code>share-summary.md</code>、<code>scorecard.md</code>、<code>recommendations.md</code>。</p><p>release-assets-summary.md 包含 starter-bundle.md、examples/consumer-repo、first-run story 和 Show and tell 入口。</p><p>不要公开 raw provider payloads。不要把 smoke summary 当作 standalone adoption proof。</p><p>每次都按同一顺序审阅报告：<code>share-summary.md</code>，然后 <code>scorecard.md</code>，然后 <code>recommendations.md</code>。</p>`;
   }
 
-  return `<p><a href="https://github.com/example/project/releases/tag/${VERSION}">Open latest release ${VERSION}</a></p><h2>Release asset checklist</h2><p>CLI tarball; if <code>npm view @answerlens/cli</code> returns <code>404</code>, keep release assets or a local checkout.</p><p><code>answerlens-demo-audit.tar.gz</code>, <code>answerlens-site.tar.gz</code>, <code>release-assets-manifest.json</code>, and <code>release-assets-summary.md</code></p><p>After downloading, check <code>release-assets-smoke-summary.md</code> for its <code>Release review path</code>: open <code>release-assets-summary.md</code>, then <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p><p>Do not treat the smoke summary as standalone adoption proof.</p><p>Review reports in order: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`;
+  return `<p><a href="https://github.com/example/project/releases/tag/${VERSION}">Open latest release ${VERSION}</a></p><h2>Release asset checklist</h2><p>CLI tarball; if <code>npm view @answerlens/cli</code> returns <code>404</code>, keep release assets or a local checkout.</p><p><code>answerlens-demo-audit.tar.gz</code>, <code>answerlens-site.tar.gz</code>, <code>release-assets-manifest.json</code>, and <code>release-assets-summary.md</code></p><p>After downloading, check <code>release-assets-smoke-summary.md</code> for its <code>Release review path</code>: open <code>release-assets-summary.md</code>, then <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p><p>release-assets-summary.md includes the starter-bundle.md, examples/consumer-repo, first-run story, and Show and tell handoff.</p><p>Do not publish raw provider payloads. Do not treat the smoke summary as standalone adoption proof.</p><p>Review reports in order: <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p>`;
 }
 
 function breadcrumb(home: string, current: string): unknown {

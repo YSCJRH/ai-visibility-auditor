@@ -835,7 +835,7 @@ test("public-surface-check rejects release and Pages surfaces without direct Sho
       "const safeNextStep = 'Safe next step: if authorized, use the first-run story template and Show and tell Discussion form.';",
       "const rawCopy = 'raw/** is excluded by default';",
       "const boundaryCopy = 'No consumer AI UI scraping. No ranking or answer-placement guarantee.';",
-      "const releaseChecklist = 'Release asset checklist answerlens-demo-audit.tar.gz answerlens-site.tar.gz share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code> npm view @answerlens/cli';"
+      "const releaseChecklist = 'Release asset checklist answerlens-demo-audit.tar.gz answerlens-site.tar.gz share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code> starter-bundle.md handoff examples/consumer-repo first-run story template Show and tell Discussion form raw provider payloads npm view @answerlens/cli';"
     ].join("\n")
   );
 
@@ -1492,7 +1492,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "const safeNextStep = 'Safe next step: if authorized, use the first-run story template and Show and tell Discussion form.';",
       "const rawCopy = 'raw/** is excluded by default';",
       "const boundaryCopy = 'No consumer AI UI scraping. No ranking or answer-placement guarantee.';",
-      "const releaseChecklist = 'Release asset checklist answerlens-demo-audit.tar.gz answerlens-site.tar.gz share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code> npm view @answerlens/cli';",
+      "const releaseChecklist = 'Release asset checklist answerlens-demo-audit.tar.gz answerlens-site.tar.gz share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code> starter-bundle.md handoff examples/consumer-repo first-run story template Show and tell Discussion form raw provider payloads npm view @answerlens/cli';",
       `const firstRunDiscussion = "${SHOW_AND_TELL_DISCUSSION_URL}";`
     ].join("\n")
   );

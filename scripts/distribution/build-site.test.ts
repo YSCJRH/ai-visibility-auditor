@@ -412,6 +412,11 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(releases, /release-assets-summary\.md/);
   assert.match(releases, /release-assets-smoke-summary\.md/);
   assert.match(releases, /Release review path/);
+  assert.match(releases, /starter-bundle\.md handoff/);
+  assert.match(releases, /examples\/consumer-repo/);
+  assert.match(releases, /first-run story template/);
+  assert.match(releases, /Show and tell Discussion form/);
+  assert.match(releases, /raw provider payloads/);
   assert.match(releases, /standalone adoption proof/);
   assert.match(releases, /npm view @answerlens\/cli/);
   assert.match(releases, /discussions\/new\?category=show-and-tell/);
@@ -426,6 +431,11 @@ test("build-site writes indexable pages and metadata", async () => {
   assert.match(zhReleases, /release-assets-summary\.md/);
   assert.match(zhReleases, /release-assets-smoke-summary\.md/);
   assert.match(zhReleases, /Release review path/);
+  assert.match(zhReleases, /starter-bundle\.md handoff/);
+  assert.match(zhReleases, /examples\/consumer-repo/);
+  assert.match(zhReleases, /first-run story template/);
+  assert.match(zhReleases, /Show and tell Discussion form/);
+  assert.match(zhReleases, /raw provider payloads/);
   assert.match(zhReleases, /standalone adoption proof/);
   assert.match(zhReleases, /discussions\/new\?category=show-and-tell/);
   assert.match(zhReleases, /AnswerLens v0\.3\.2 延续/);
