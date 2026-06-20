@@ -139,6 +139,21 @@ const VISUAL_SHARE_PACKET_SURFACES = [
   }
 ];
 
+const REVIEW_PACKET_OUTPUT_CONTRACT_SURFACES = [
+  {
+    path: "README.md",
+    snippets: ["- `share-summary.md`\n- `scorecard.md`\n- `recommendations.md`\n- `pr-snippet.md`"]
+  },
+  {
+    path: "docs/concepts/ci-for-ai-discoverability.md",
+    snippets: ["- `share-summary.md` for job summaries\n- `scorecard.md` for readiness\n- `recommendations.md` for backlog items\n- `pr-snippet.md` for PR review"]
+  },
+  {
+    path: "docs/search-console.md",
+    snippets: ["including `share-summary.*`, `scorecard.md`, `recommendations.md`"]
+  }
+];
+
 const STABLE_RELEASE_SURFACES: Array<{ path: string; snippets: (stableTag: string) => string[] }> = [
   {
     path: ".github/workflows/release-distribution.yml",
@@ -210,6 +225,7 @@ export async function runPublicSurfaceCheck(options: PublicSurfaceCheckOptions =
   await checkFirstRunDiscussionRouting(rootDir, findings);
   await checkShareLayerPropagationBoundary(rootDir, findings);
   await checkVisualSharePacketBoundary(rootDir, findings);
+  await checkReviewPacketOutputContracts(rootDir, findings);
   await checkStarterAdopterKitBoundary(rootDir, findings);
   await checkReleasePagesRefresh(rootDir, findings);
   await checkPagesPostdeploySmoke(rootDir, findings);
@@ -606,6 +622,32 @@ async function checkVisualSharePacketBoundary(rootDir: string, findings: Finding
         path: surface.path,
         message: "Public visual assets must keep the artifact order: share-summary.md, scorecard.md, recommendations.md."
       });
+    }
+  }
+}
+
+async function checkReviewPacketOutputContracts(rootDir: string, findings: Finding[]): Promise<void> {
+  for (const surface of REVIEW_PACKET_OUTPUT_CONTRACT_SURFACES) {
+    let text: string;
+    try {
+      text = await readFile(path.join(rootDir, surface.path), "utf8");
+    } catch (error) {
+      findings.push({
+        ruleId: "review-packet-output-contract",
+        path: surface.path,
+        message: `Unable to read review-packet output contract surface: ${error instanceof Error ? error.message : String(error)}`
+      });
+      continue;
+    }
+
+    for (const snippet of surface.snippets) {
+      if (!text.includes(snippet)) {
+        findings.push({
+          ruleId: "review-packet-output-contract",
+          path: surface.path,
+          message: `Output contract surfaces must keep the review packet share-summary-first: ${snippet}`
+        });
+      }
     }
   }
 }
