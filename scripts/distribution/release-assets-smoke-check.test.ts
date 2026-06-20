@@ -59,6 +59,16 @@ test("release-assets-smoke-check rejects a release asset summary without checksu
   assert.match(finding.message, /Asset \| Size \| SHA-256/);
 });
 
+test("release-assets-smoke-check rejects a release asset summary without adopter handoff", async () => {
+  const fixture = await createReleaseAssetsFixture({ brokenReleaseSummaryMissingAdopterHandoff: true });
+
+  const findings = await runReleaseAssetsSmokeCheck({ assetsDir: fixture.assetsDir });
+  const finding = findings.find((item) => item.ruleId === "release-asset-summary");
+
+  assert.ok(finding);
+  assert.match(finding.message, /first-run story template|starter bundle|raw provider payloads/);
+});
+
 test("release-assets-smoke-check writes a release review summary on success", async () => {
   const fixture = await createReleaseAssetsFixture();
   const summaryPath = path.join(fixture.rootDir, "release-assets-smoke-summary.md");
@@ -74,6 +84,7 @@ test("release-assets-smoke-check writes a release review summary on success", as
   assert.match(summary, /raw provider payloads/);
   assert.match(summary, /release-assets-manifest\.json/);
   assert.match(summary, /release-assets-summary\.md/);
+  assert.match(summary, /adopter handoff and public sharing boundaries/);
   assert.match(summary, /answerlens-cli-\*\.tgz/);
   assert.match(summary, /package README public-claim boundary/);
   assert.match(summary, /answerlens-demo-audit\.tar\.gz/);
@@ -137,6 +148,7 @@ async function createReleaseAssetsFixture(
   options: {
     brokenCliReadme?: boolean;
     brokenDemoBundle?: boolean;
+    brokenReleaseSummaryMissingAdopterHandoff?: boolean;
     brokenReleaseSummaryMissingChecksumHeader?: boolean;
     brokenReleaseSummaryMissingCli?: boolean;
     brokenSiteBundle?: boolean;
@@ -187,6 +199,11 @@ async function createReleaseAssetsFixture(
   if (options.brokenReleaseSummaryMissingChecksumHeader === true) {
     await removeLinesContaining(path.join(assetsDir, "release-assets-summary.md"), "| Asset |");
     await removeLinesContaining(path.join(assetsDir, "release-assets-summary.md"), "| --- |");
+  }
+  if (options.brokenReleaseSummaryMissingAdopterHandoff === true) {
+    await removeLinesContaining(path.join(assetsDir, "release-assets-summary.md"), "starter bundle");
+    await removeLinesContaining(path.join(assetsDir, "release-assets-summary.md"), "first-run story template");
+    await removeLinesContaining(path.join(assetsDir, "release-assets-summary.md"), "raw provider payloads");
   }
 
   return { rootDir, assetsDir };

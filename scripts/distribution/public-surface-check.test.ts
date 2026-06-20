@@ -568,6 +568,27 @@ test("public-surface-check rejects release smoke summaries without a review path
   assert.ok(reviewPathFinding);
 });
 
+test("public-surface-check rejects release asset summary generators without adopter handoff", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  const manifestPath = path.join(rootDir, "scripts/distribution/release-assets-manifest.ts");
+  const manifestScript = await readFile(manifestPath, "utf8");
+  await writeFixtureFile(
+    rootDir,
+    "scripts/distribution/release-assets-manifest.ts",
+    manifestScript
+      .replace("const starter = 'starter-bundle.md examples/consumer-repo';\n", "")
+      .replace("const firstRun = 'first-run story template Show and tell Discussion form';\n", "")
+      .replace("const safe = 'API keys, private analytics, or raw provider payloads';\n", "")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const handoffFinding = findings.find(
+    (finding) => finding.ruleId === "release-asset-manifest-gate" && finding.message.includes("starter-bundle.md")
+  );
+
+  assert.ok(handoffFinding);
+});
+
 test("public-surface-check rejects release workflows without a release body review path", async () => {
   const rootDir = await createPublicSurfaceFixture();
   const workflowPath = path.join(rootDir, ".github/workflows/release-distribution.yml");
@@ -1196,6 +1217,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "Run gh release download vX.Y.Z with release-assets-summary.md before corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\".",
       "Use release-assets-smoke-summary.md not as standalone adoption proof.",
       "After the smoke run, confirm its `Release review path` line says to open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
+      "Open `release-assets-summary.md` first; it should also carry the starter bundle, examples/consumer-repo, first-run story, and Show and tell handoff for safe reuse.",
       "The smoke command verifies manifest checksums before reusing downloaded release assets.",
       "If an older release does not have release-assets-manifest.json or release-assets-summary.md, do not imply checksum coverage for that release.",
       "In the Release Distribution workflow summary, review the Release asset manifest verified and Release asset smoke check passed sections before reusing downloaded release assets.",
@@ -1219,6 +1241,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\"",
       "release-assets-smoke-summary.md",
       "After the smoke run, check the `Release review path` line in `release-assets-smoke-summary.md`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
+      "The generated release-assets-summary.md should also point to the starter bundle, examples/consumer-repo, and safe first-run story path.",
       "not upload it as adoption proof by itself",
       "manifest checksums",
       "Open by opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
@@ -1242,6 +1265,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\"",
       "release-assets-smoke-summary.md",
       "跑完 smoke command 后，检查 `release-assets-smoke-summary.md` 里的 `Release review path`：先打开 `release-assets-summary.md`，再看 demo audit 的 `share-summary.md`、`scorecard.md`、`recommendations.md`。",
+      "生成的 release-assets-summary.md 还应该指向 starter bundle、examples/consumer-repo 和 safe first-run story path。",
       "不要把它单独当作 adoption proof",
       "manifest checksum",
       "`share-summary.md`、`scorecard.md`、`recommendations.md`",
@@ -1346,6 +1370,10 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "const demo = 'answerlens-demo-audit.tar.gz';",
       "const site = 'answerlens-site.tar.gz';",
       "const boundary = 'do not present npm as activated';",
+      "const review = 'Release review path';",
+      "const starter = 'starter-bundle.md examples/consumer-repo';",
+      "const firstRun = 'first-run story template Show and tell Discussion form';",
+      "const safe = 'API keys, private analytics, or raw provider payloads';",
       "function formatReleaseAssetsSummary() { return 'Release asset manifest verified'; }"
     ].join("\n")
   );
@@ -1364,6 +1392,9 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "const smokeSummary = 'release-assets-smoke-summary.md';",
       "const demoBundle = 'answerlens-demo-audit.tar.gz';",
       "const siteBundle = 'answerlens-site.tar.gz';",
+      "const handoff = 'adopter handoff and public sharing boundaries';",
+      "const firstRun = 'first-run story template';",
+      "const safe = 'API keys, private analytics, or raw provider payloads';",
       "const order = 'share-summary.md scorecard.md recommendations.md';",
       "const npmBoundary = 'npm view @answerlens/cli';"
     ].join("\n")
@@ -1419,7 +1450,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "      - run: echo \"`release-assets-smoke-summary.md` is kept in the workflow summary and internal artifact as maintainer review evidence; do not treat it as standalone adoption proof\"",
       "      - run: echo \"`Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`\"",
       "      - run: echo \"`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums\"",
-      "      - run: echo \"`release-assets-summary.md`: read the verified asset table\"",
+      "      - run: echo \"`release-assets-summary.md`: read the verified asset table and adopter handoff\"",
       "      - run: gh release upload \"$RELEASE_TAG\" dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz dist/release-assets-manifest.json dist/release-assets-summary.md --clobber",
       "      - uses: actions/upload-artifact@v6",
       "        with:",

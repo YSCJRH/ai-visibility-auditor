@@ -52,6 +52,15 @@ test("release-assets-manifest writes and verifies release asset checksums", asyn
     assert.match(summary, /\| `answerlens-cli-1\.2\.3\.tgz` \| 11 B \| `[a-f0-9]{64}` \|/);
     assert.match(summary, /Review order: `share-summary\.md`, then `scorecard\.md`, then `recommendations\.md`/);
     assert.match(summary, /do not present npm as activated/);
+    assert.match(summary, /## Release review path/);
+    assert.match(summary, /Open `release-assets-summary\.md`, then the demo audit `share-summary\.md`, then `scorecard\.md`, then `recommendations\.md`\./);
+    assert.match(summary, /starter-bundle\.md/);
+    assert.match(summary, /examples\/consumer-repo/);
+    assert.match(summary, /first-run story template/);
+    assert.match(summary, /Show and tell Discussion form/);
+    assert.match(summary, /API keys, private analytics, or raw provider payloads/);
+    assert.match(summary, /does not scrape consumer AI UIs/);
+    assert.match(summary, /does not prove rankings or answer placement/);
   } finally {
     process.chdir(previousCwd);
   }
@@ -159,6 +168,7 @@ test("release-assets-manifest CLI accepts summary-out with pnpm-style separator"
     const summary = await readFile(path.join(root, "dist", "release-assets-summary.md"), "utf8");
     assert.match(summary, /Release asset manifest verified/);
     assert.match(summary, /answerlens-cli-1\.2\.3\.tgz/);
+    assert.match(summary, /first-run story template/);
   } finally {
     process.chdir(previousCwd);
   }
