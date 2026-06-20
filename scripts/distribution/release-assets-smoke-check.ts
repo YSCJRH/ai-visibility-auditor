@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, readFile, readdir, rm, stat } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -17,6 +17,14 @@ export type ReleaseAssetsSmokeOptions = {
   assetsDir?: string;
   workDir?: string;
   keepWorkDir?: boolean;
+  summaryOutPath?: string;
+};
+
+export type ReleaseAssetsSmokeSummary = {
+  assetsDir: string;
+  checkedAt: string;
+  artifactReviewOrder: ["share-summary.md", "scorecard.md", "recommendations.md"];
+  checks: string[];
 };
 
 const execFileAsync = promisify(execFile);
@@ -88,7 +96,45 @@ export async function runReleaseAssetsSmokeCheck(
     }
   }
 
+  if (options.summaryOutPath && findings.length === 0) {
+    const summaryPath = path.resolve(options.summaryOutPath);
+    await mkdir(path.dirname(summaryPath), { recursive: true });
+    await writeFile(summaryPath, formatReleaseAssetsSmokeSummary(buildSmokeSummary(assetsDir)), "utf8");
+  }
+
   return findings;
+}
+
+function buildSmokeSummary(assetsDir: string): ReleaseAssetsSmokeSummary {
+  return {
+    assetsDir: displayPath(assetsDir),
+    checkedAt: new Date().toISOString(),
+    artifactReviewOrder: ["share-summary.md", "scorecard.md", "recommendations.md"],
+    checks: [
+      "verified release-assets-manifest.json checksums against downloaded files",
+      "checked release-assets-summary.md boundary text",
+      "unpacked answerlens-demo-audit.tar.gz and validated the first-run packet",
+      "checked answerlens-site.tar.gz release and demo entrypoints",
+      "confirmed a versioned answerlens-cli-*.tgz is present for pinned local CLI runs while npm is not visible"
+    ]
+  };
+}
+
+export function formatReleaseAssetsSmokeSummary(summary: ReleaseAssetsSmokeSummary): string {
+  return [
+    "## Release asset smoke check passed",
+    "",
+    `- Assets directory: \`${summary.assetsDir}\``,
+    `- Checked at: ${summary.checkedAt}`,
+    `- Review order: \`${summary.artifactReviewOrder[0]}\`, then \`${summary.artifactReviewOrder[1]}\`, then \`${summary.artifactReviewOrder[2]}\``,
+    "- npm boundary: if `npm view @answerlens/cli` returns `404`, keep release assets or a local checkout as the public path; do not present npm as activated.",
+    "- Public sharing boundary: do not attach raw provider payloads to public release reviews, PRs, issues, or Discussions.",
+    "",
+    "| Check | Result |",
+    "| --- | --- |",
+    ...summary.checks.map((check) => `| ${check} | pass |`),
+    ""
+  ].join("\n");
 }
 
 async function requireFile(filePath: string, ruleId: string, findings: ReleaseAssetsSmokeFinding[]): Promise<boolean> {
@@ -349,12 +395,19 @@ function parseArgs(argv: string[]): ReleaseAssetsSmokeOptions {
       index += 1;
       continue;
     }
+    if (token === "--summary-out") {
+      options.summaryOutPath = requiredValue(argv, index);
+      index += 1;
+      continue;
+    }
     if (token === "--keep-work-dir") {
       options.keepWorkDir = true;
       continue;
     }
     if (token === "--help" || token === "-h") {
-      console.log("Usage: node --experimental-strip-types scripts/distribution/release-assets-smoke-check.ts --dir <downloaded-assets-dir>");
+      console.log(
+        "Usage: node --experimental-strip-types scripts/distribution/release-assets-smoke-check.ts --dir <downloaded-assets-dir> [--summary-out release-assets-smoke-summary.md]"
+      );
       process.exit(0);
     }
     throw new Error(`Unknown argument: ${token}`);

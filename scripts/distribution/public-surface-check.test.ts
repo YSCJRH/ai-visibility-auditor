@@ -434,14 +434,20 @@ test("public-surface-check rejects release workflows without unpacked demo bundl
   await writeFixtureFile(
     rootDir,
     ".github/workflows/release-distribution.yml",
-    workflow.replace("      - run: pnpm release:assets:smoke -- --dir dist\n", "")
+    workflow
+      .replace("      - run: |\n", "      - run: echo \"smoke summary omitted\"\n")
+      .replace(
+        "          pnpm release:assets:smoke -- --dir dist --work-dir dist/release-assets-smoke-check --summary-out dist/release-assets-smoke-summary.md\n",
+        ""
+      )
+      .replace("          cat dist/release-assets-smoke-summary.md >> \"$GITHUB_STEP_SUMMARY\"\n", "")
   );
 
   const findings = await runPublicSurfaceCheck({ rootDir });
   const demoBundleFinding = findings.find(
     (finding) =>
       finding.ruleId === "release-asset-manifest-gate" &&
-      finding.message.includes("pnpm release:assets:smoke -- --dir dist")
+      finding.message.includes("pnpm release:assets:smoke -- --dir dist --work-dir dist/release-assets-smoke-check --summary-out dist/release-assets-smoke-summary.md")
   );
 
   assert.ok(demoBundleFinding);
@@ -962,10 +968,11 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "Run corepack pnpm release:snapshot:check after refreshing the snapshot.",
       "Use the helper to replace guessed fields such as published_at with GitHub metadata.",
       "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, `release-assets-summary.md`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
-      "Run gh release download vX.Y.Z with release-assets-summary.md before corepack pnpm release:assets:smoke -- --dir \"$assets_dir\".",
+      "Run gh release download vX.Y.Z with release-assets-summary.md before corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\".",
+      "Use release-assets-smoke-summary.md not as standalone adoption proof.",
       "The smoke command verifies manifest checksums before reusing downloaded release assets.",
       "If an older release does not have release-assets-manifest.json or release-assets-summary.md, do not imply checksum coverage for that release.",
-      "In the Release Distribution workflow summary, review the Release asset manifest verified table before reusing downloaded release assets."
+      "In the Release Distribution workflow summary, review the Release asset manifest verified and Release asset smoke check passed sections before reusing downloaded release assets."
     ].join("\n")
   );
   await writeFixtureFile(
@@ -981,7 +988,9 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "release-assets-summary.md",
       "SHA-256",
       "gh release download vX.Y.Z",
-      "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\"",
+      "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\"",
+      "release-assets-smoke-summary.md",
+      "not upload it as adoption proof by itself",
       "manifest checksums",
       "Open by opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
       "If a release predates release-assets-manifest.json or release-assets-summary.md, do not backfill a checksum claim.",
@@ -1001,7 +1010,9 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "release-assets-summary.md",
       "SHA-256",
       "gh release download vX.Y.Z",
-      "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\"",
+      "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\"",
+      "release-assets-smoke-summary.md",
+      "不要把它单独当作 adoption proof",
       "manifest checksum",
       "`share-summary.md`、`scorecard.md`、`recommendations.md`",
       "不要把 checksum claim 回填进公开 release story",
@@ -1089,9 +1100,12 @@ async function createPublicSurfaceFixture(): Promise<string> {
     "scripts/distribution/release-assets-smoke-check.ts",
     [
       "export async function runReleaseAssetsSmokeCheck() {}",
+      "export function formatReleaseAssetsSmokeSummary() { return 'Release asset smoke check passed'; }",
       "const manifest = 'runReleaseAssetsManifest';",
       "const demo = 'runDemoFixtureArtifactCheck';",
+      "const option = 'summaryOutPath';",
       "const summary = 'release-assets-summary.md';",
+      "const smokeSummary = 'release-assets-smoke-summary.md';",
       "const demoBundle = 'answerlens-demo-audit.tar.gz';",
       "const siteBundle = 'answerlens-site.tar.gz';",
       "const order = 'share-summary.md scorecard.md recommendations.md';",
@@ -1141,7 +1155,9 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "      - run: echo \"`answerlens-site.tar.gz`\"",
       "      - run: pnpm release:assets:manifest -- --out dist/release-assets-manifest.json dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz",
       "      - run: pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json --summary-out dist/release-assets-summary.md",
-      "      - run: pnpm release:assets:smoke -- --dir dist",
+      "      - run: |",
+      "          pnpm release:assets:smoke -- --dir dist --work-dir dist/release-assets-smoke-check --summary-out dist/release-assets-smoke-summary.md",
+      "          cat dist/release-assets-smoke-summary.md >> \"$GITHUB_STEP_SUMMARY\"",
       "      - run: cat dist/release-assets-summary.md >> \"$GITHUB_STEP_SUMMARY\"",
       "      - run: echo \"`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums\"",
       "      - run: echo \"`release-assets-summary.md`: read the verified asset table\"",
@@ -1151,6 +1167,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "          path: |",
       "            dist/release-assets-manifest.json",
       "            dist/release-assets-summary.md",
+      "            dist/release-assets-smoke-summary.md",
       "      - run: echo \"If `npm view @answerlens/cli` returns `404`, keep release assets or local checkout as the public path\"",
       `      - run: echo \"Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.\"`,
       "      - run: gh workflow run pages.yml --ref main"

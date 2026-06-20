@@ -103,7 +103,9 @@ jobs:
           pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json --summary-out dist/release-assets-summary.md
           cat dist/release-assets-summary.md >> "$GITHUB_STEP_SUMMARY"
       - name: Smoke check release assets
-        run: pnpm release:assets:smoke -- --dir dist --work-dir dist/release-assets-smoke-check
+        run: |
+          pnpm release:assets:smoke -- --dir dist --work-dir dist/release-assets-smoke-check --summary-out dist/release-assets-smoke-summary.md
+          cat dist/release-assets-smoke-summary.md >> "$GITHUB_STEP_SUMMARY"
       - name: Write release notes
         run: |
           cat <<'EOF' > dist/release-notes.md
@@ -223,4 +225,5 @@ jobs:
             dist/answerlens-site.tar.gz
             dist/release-assets-manifest.json
             dist/release-assets-summary.md
+            dist/release-assets-smoke-summary.md
             dist/site
