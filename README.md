@@ -70,7 +70,7 @@ corepack pnpm install
 corepack pnpm demo:fixture
 ```
 
-That command audits the local fixture in [examples/fixtures/static-good](examples/fixtures/static-good) and writes outputs to [runs/static-good](runs/static-good).
+That command audits the local fixture in [examples/fixtures/static-good](examples/fixtures/static-good) and writes outputs to [runs/static-good](runs/static-good). It also fails if the first-run packet is missing `share-summary.md`, `scorecard.md`, `recommendations.md`, `pr-snippet.md`, `run.json`, `index.html`, or `site-audit.json`.
 
 Inside the demo artifact set, `https://fixture.local` is the stable fixture hostname. It keeps the example crawl reproducible and is not the AnswerLens product site URL.
 
