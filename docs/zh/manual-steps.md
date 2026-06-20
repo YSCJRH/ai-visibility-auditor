@@ -53,6 +53,9 @@ gh release download vX.Y.Z \
   --pattern release-assets-summary.md \
   --dir "$assets_dir"
 corepack pnpm release:assets:manifest -- --verify "$assets_dir/release-assets-manifest.json"
+mkdir -p "$assets_dir/demo-audit-check"
+tar -xzf "$assets_dir/answerlens-demo-audit.tar.gz" -C "$assets_dir/demo-audit-check"
+node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out "$assets_dir/demo-audit-check/runs/static-good"
 ```
 
 如果某个 release 早于 `release-assets-manifest.json` 或 `release-assets-summary.md`，不要把 checksum claim 回填进公开 release story；只检查已有 assets，并把这个缺口记录为 release metadata 历史。

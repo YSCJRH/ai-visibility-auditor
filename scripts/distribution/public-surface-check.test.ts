@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { runPublicSurfaceCheck } from "./public-surface-check.ts";
@@ -365,6 +365,9 @@ test("public-surface-check rejects release workflows without manifest job summar
       "      - run: echo \"answerlens-cli-*.tgz\"",
       "      - run: echo \"`answerlens-demo-audit.tar.gz`\"",
       "      - run: echo \"`answerlens-site.tar.gz`\"",
+      "      - run: mkdir -p dist/release-demo-audit-check",
+      "      - run: tar -xzf dist/answerlens-demo-audit.tar.gz -C dist/release-demo-audit-check",
+      "      - run: node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out dist/release-demo-audit-check/runs/static-good",
       "      - run: pnpm release:assets:manifest -- --out dist/release-assets-manifest.json dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz",
       "      - run: pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json",
       "      - run: echo \"`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums\"",
@@ -422,6 +425,31 @@ test("public-surface-check rejects release workflows that do not upload the summ
   const ruleIds = findings.map((finding) => finding.ruleId);
 
   assert.ok(ruleIds.includes("release-asset-manifest-gate"));
+});
+
+test("public-surface-check rejects release workflows without unpacked demo bundle validation", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  const workflowPath = path.join(rootDir, ".github/workflows/release-distribution.yml");
+  const workflow = await readFile(workflowPath, "utf8");
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/release-distribution.yml",
+    workflow
+      .replace("      - run: tar -xzf dist/answerlens-demo-audit.tar.gz -C dist/release-demo-audit-check\n", "")
+      .replace(
+        "      - run: node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out dist/release-demo-audit-check/runs/static-good\n",
+        ""
+      )
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const demoBundleFinding = findings.find(
+    (finding) =>
+      finding.ruleId === "release-asset-manifest-gate" &&
+      finding.message.includes("scripts/distribution/demo-fixture-artifact-check.ts --out dist/release-demo-audit-check/runs/static-good")
+  );
+
+  assert.ok(demoBundleFinding);
 });
 
 test("public-surface-check rejects release asset docs without downloaded manifest verification", async () => {
@@ -939,6 +967,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "Use the helper to replace guessed fields such as published_at with GitHub metadata.",
       "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, `release-assets-summary.md`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
       "Run gh release download vX.Y.Z with release-assets-summary.md before corepack pnpm release:assets:manifest -- --verify.",
+      "Run node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out after unpacking the release demo audit bundle.",
       "If an older release does not have release-assets-manifest.json or release-assets-summary.md, do not imply checksum coverage for that release.",
       "In the Release Distribution workflow summary, review the Release asset manifest verified table before reusing downloaded release assets."
     ].join("\n")
@@ -957,6 +986,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "SHA-256",
       "gh release download vX.Y.Z",
       "corepack pnpm release:assets:manifest -- --verify",
+      "node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out",
       "Open by opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
       "If a release predates release-assets-manifest.json or release-assets-summary.md, do not backfill a checksum claim.",
       "If `npm view @answerlens/cli` returns `404`, do not present npm as activated."
@@ -976,6 +1006,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "SHA-256",
       "gh release download vX.Y.Z",
       "corepack pnpm release:assets:manifest -- --verify",
+      "node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out",
       "`share-summary.md`、`scorecard.md`、`recommendations.md`",
       "不要把 checksum claim 回填进公开 release story",
       "如果 `npm view @answerlens/cli` 返回 `404`，不要把 npm 描述成已激活。"
@@ -1098,6 +1129,9 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "      - run: echo \"answerlens-cli-*.tgz\"",
       "      - run: echo \"`answerlens-demo-audit.tar.gz`\"",
       "      - run: echo \"`answerlens-site.tar.gz`\"",
+      "      - run: mkdir -p dist/release-demo-audit-check",
+      "      - run: tar -xzf dist/answerlens-demo-audit.tar.gz -C dist/release-demo-audit-check",
+      "      - run: node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out dist/release-demo-audit-check/runs/static-good",
       "      - run: pnpm release:assets:manifest -- --out dist/release-assets-manifest.json dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz",
       "      - run: pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json --summary-out dist/release-assets-summary.md",
       "      - run: cat dist/release-assets-summary.md >> \"$GITHUB_STEP_SUMMARY\"",

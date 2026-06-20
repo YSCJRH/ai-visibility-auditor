@@ -1130,6 +1130,7 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "SHA-256",
         "gh release download vX.Y.Z",
         "corepack pnpm release:assets:manifest -- --verify",
+        "scripts/distribution/demo-fixture-artifact-check.ts --out",
         "opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
         "do not backfill a checksum claim",
         "If `npm view @answerlens/cli` returns `404`, do not present npm as activated"
@@ -1163,6 +1164,7 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "`release-assets-summary.md`",
         "gh release download vX.Y.Z",
         "corepack pnpm release:assets:manifest -- --verify",
+        "scripts/distribution/demo-fixture-artifact-check.ts --out",
         "do not imply checksum coverage for that release",
         "`share-summary.md`, then `scorecard.md`, then `recommendations.md`"
       ]
@@ -1250,6 +1252,9 @@ async function checkReleaseAssetManifestGate(rootDir: string, findings: Finding[
         "pnpm release:assets:manifest -- --out dist/release-assets-manifest.json",
         "pnpm release:assets:manifest -- --verify dist/release-assets-manifest.json",
         "--summary-out dist/release-assets-summary.md",
+        "mkdir -p dist/release-demo-audit-check",
+        "tar -xzf dist/answerlens-demo-audit.tar.gz -C dist/release-demo-audit-check",
+        "scripts/distribution/demo-fixture-artifact-check.ts --out dist/release-demo-audit-check/runs/static-good",
         "cat dist/release-assets-summary.md >> \"$GITHUB_STEP_SUMMARY\"",
         "`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums",
         "`release-assets-summary.md`: read the verified asset table",
