@@ -1673,8 +1673,9 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           ${renderPanel("Release asset checklist", "What to download", `<p>Use release assets as the second public front door after the demo, fixture, real-site audit, and Action path make sense.</p><ul>${renderList([
             "<strong>CLI tarball</strong>: use the versioned package tarball when you need a pinned local CLI before npm is visible.",
             "<strong>answerlens-demo-audit.tar.gz</strong>: unpack the fixture report and review <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.",
-            "<strong>answerlens-site.tar.gz</strong>: inspect the compiled Pages bundle when you need the exact docs, examples, starter, and release pages from that tag."
-          ])}</ul><p>If <code>npm view @answerlens/cli</code> returns <code>404</code>, keep using release assets or a local checkout; do not present npm as activated.</p>`)}
+            "<strong>answerlens-site.tar.gz</strong>: inspect the compiled Pages bundle when you need the exact docs, examples, starter, and release pages from that tag.",
+            "<strong>release-assets-manifest.json</strong> and <strong>release-assets-summary.md</strong>: verify downloaded asset sizes, checksums, and the human-readable asset table before reusing tarballs."
+          ])}</ul><p>After downloading, run the release asset smoke check from a local checkout and read <code>release-assets-smoke-summary.md</code>. Its <code>Release review path</code> should point you to <code>release-assets-summary.md</code>, then the demo audit <code>share-summary.md</code>, then <code>scorecard.md</code>, then <code>recommendations.md</code>.</p><p>Use the smoke summary as maintainer review evidence, not as standalone adoption proof.</p><p>If <code>npm view @answerlens/cli</code> returns <code>404</code>, keep using release assets or a local checkout; do not present npm as activated.</p>`)}
           ${renderReleaseMetadataPanel("en")}
         </section>
         <section class="section grid">${renderReleaseCards("en")}</section>`,
@@ -1684,8 +1685,9 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           ${renderPanel("release assets 检查清单", "下载什么", `<p>把 release assets 当作第二个公开入口：先看演示、跑 fixture、审计真实站点、理解 Action 路径，再下载固定版本资源。</p><ul>${renderList([
             "<strong>CLI tarball</strong>：npm package 可见之前，用版本化 tarball 跑固定版本 CLI。",
             "<strong>answerlens-demo-audit.tar.gz</strong>：解压 fixture 报告，并按 <code>share-summary.md</code>、<code>scorecard.md</code>、<code>recommendations.md</code> 的顺序审阅。",
-            "<strong>answerlens-site.tar.gz</strong>：需要核对某个 tag 对应的 docs、examples、starter 和 release 页面时，查看编译后的 Pages bundle。"
-          ])}</ul><p>如果 <code>npm view @answerlens/cli</code> 返回 <code>404</code>，继续使用 release assets 或本地 checkout；不要把 npm 描述成已激活。</p>`)}
+            "<strong>answerlens-site.tar.gz</strong>：需要核对某个 tag 对应的 docs、examples、starter 和 release 页面时，查看编译后的 Pages bundle。",
+            "<strong>release-assets-manifest.json</strong> 和 <strong>release-assets-summary.md</strong>：复用 tarball 前，先核对下载文件大小、checksum 和可读的 asset table。"
+          ])}</ul><p>下载后，在本地 checkout 里运行 release asset smoke check，并读取 <code>release-assets-smoke-summary.md</code>。其中的 <code>Release review path</code> 应该指向 <code>release-assets-summary.md</code>，然后是 demo audit 的 <code>share-summary.md</code>、<code>scorecard.md</code>、<code>recommendations.md</code>。</p><p>smoke summary 只能作为维护者 review 证据，不要把它当作 standalone adoption proof。</p><p>如果 <code>npm view @answerlens/cli</code> 返回 <code>404</code>，继续使用 release assets 或本地 checkout；不要把 npm 描述成已激活。</p>`)}
           ${renderReleaseMetadataPanel("zh-CN")}
         </section>
         <section class="section grid">${renderReleaseCards("zh-CN")}</section>`

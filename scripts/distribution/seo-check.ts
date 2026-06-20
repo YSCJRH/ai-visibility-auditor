@@ -388,7 +388,15 @@ function checkReleasePageContract(
     findings.push(finding("release-page-latest-tag", file, `Release page must show the latest stable tag ${latestTag}.`));
   }
 
-  for (const snippet of ["answerlens-demo-audit.tar.gz", "answerlens-site.tar.gz"]) {
+  for (const snippet of [
+    "answerlens-demo-audit.tar.gz",
+    "answerlens-site.tar.gz",
+    "release-assets-manifest.json",
+    "release-assets-summary.md",
+    "release-assets-smoke-summary.md",
+    "Release review path",
+    "standalone adoption proof"
+  ]) {
     if (!text.includes(snippet)) {
       findings.push(finding("release-page-asset-checklist", file, `Release page asset checklist is missing ${snippet}.`));
     }
