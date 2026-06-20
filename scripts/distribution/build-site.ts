@@ -988,6 +988,7 @@ async function copyLocalizedRun(sourceDir: string, targetDir: string, locale: Lo
 
 function renderLocaleRedirectPage(siteUrl: string, route: string): string {
   const fallback = new URL(localizePath(route, "en"), siteUrl).href;
+  const zhFallback = new URL(localizePath(route, "zh-CN"), siteUrl).href;
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -995,18 +996,24 @@ function renderLocaleRedirectPage(siteUrl: string, route: string): string {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="refresh" content="0; url=${escapeHtml(fallback)}" />
     <link rel="canonical" href="${escapeHtml(fallback)}" />
+    <link rel="alternate" hreflang="en" href="${escapeHtml(fallback)}" />
+    <link rel="alternate" hreflang="zh-CN" href="${escapeHtml(zhFallback)}" />
     <script>
       (function () {
         var stored = window.localStorage.getItem(${JSON.stringify(LOCALE_STORAGE_KEY)});
         var preferred = stored || (navigator.languages && navigator.languages[0]) || navigator.language || "en";
-        var target = /^zh/i.test(preferred) ? ${JSON.stringify(new URL(localizePath(route, "zh-CN"), siteUrl).href)} : ${JSON.stringify(fallback)};
+        var target = /^zh/i.test(preferred) ? ${JSON.stringify(zhFallback)} : ${JSON.stringify(fallback)};
         window.location.replace(target);
       })();
     </script>
     <title>AnswerLens locale redirect</title>
   </head>
   <body>
-    <p><a href="${escapeHtml(fallback)}">Continue</a></p>
+    <p>Continue to AnswerLens:</p>
+    <ul>
+      <li><a href="${escapeHtml(fallback)}">Continue in English</a></li>
+      <li><a href="${escapeHtml(zhFallback)}">继续中文</a></li>
+    </ul>
   </body>
 </html>`;
 }
