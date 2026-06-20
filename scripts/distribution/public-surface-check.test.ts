@@ -93,6 +93,50 @@ test("public-surface-check rejects local absolute paths in public contribution s
   assert.ok(ruleIds.includes("public-local-absolute-path"));
 });
 
+test("public-surface-check rejects broken local links in adoption Markdown", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "docs/demo-report.md",
+    [
+      artifactOrderText(),
+      `Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.`,
+      "Continue with [missing quickstart](missing-quickstart.md)."
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const linkFinding = findings.find((finding) => finding.ruleId === "public-markdown-link-target");
+
+  assert.equal(linkFinding?.path, "docs/demo-report.md:3");
+  assert.match(linkFinding?.message ?? "", /missing-quickstart\.md/);
+});
+
+test("public-surface-check allows generated run output links in adoption Markdown", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "README.md",
+    [
+      "# AnswerLens",
+      artifactOrderText(),
+      "No ranking guarantees and no consumer AI UI scraping.",
+      "![AnswerLens starter packet preview](assets/starter-packet-preview.svg)",
+      "Use the Adopter kit checklist and PR review packet to show which artifact to open and which raw payloads stay private.",
+      "Fixture output: [runs/static-good](runs/static-good).",
+      "- `share-summary.md`",
+      "- `scorecard.md`",
+      "- `recommendations.md`",
+      "- `pr-snippet.md`",
+      `Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.`
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+
+  assert.equal(findings.find((finding) => finding.ruleId === "public-markdown-link-target"), undefined);
+});
+
 test("public-surface-check rejects runtime secrets, artifact order drift, and missing audit/eval key boundary", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, ".github/answerlens/runtime.yaml", "runtime:\n  api_key: sk-testsecretvalue123\n");
