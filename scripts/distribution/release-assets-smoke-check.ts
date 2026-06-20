@@ -29,6 +29,11 @@ export type ReleaseAssetsSmokeSummary = {
 };
 
 const execFileAsync = promisify(execFile);
+const DEFAULT_ARTIFACT_REVIEW_ORDER: ReleaseAssetsSmokeSummary["artifactReviewOrder"] = [
+  "share-summary.md",
+  "scorecard.md",
+  "recommendations.md"
+];
 
 const REQUIRED_ASSET_FILES = [
   "answerlens-demo-audit.tar.gz",
@@ -111,7 +116,7 @@ function buildSmokeSummary(assetsDir: string): ReleaseAssetsSmokeSummary {
   return {
     assetsDir: displayPath(assetsDir),
     checkedAt: new Date().toISOString(),
-    artifactReviewOrder: ["share-summary.md", "scorecard.md", "recommendations.md"],
+    artifactReviewOrder: DEFAULT_ARTIFACT_REVIEW_ORDER,
     checks: [
       "verified release-assets-manifest.json checksums against downloaded files",
       "checked release-assets-summary.md boundary text",
@@ -129,6 +134,7 @@ export function formatReleaseAssetsSmokeSummary(summary: ReleaseAssetsSmokeSumma
     "",
     `- Assets directory: \`${summary.assetsDir}\``,
     `- Checked at: ${summary.checkedAt}`,
+    `- Release review path: ${formatReleaseReviewPath(summary.artifactReviewOrder)}`,
     `- Review order: \`${summary.artifactReviewOrder[0]}\`, then \`${summary.artifactReviewOrder[1]}\`, then \`${summary.artifactReviewOrder[2]}\``,
     "- npm boundary: if `npm view @answerlens/cli` returns `404`, keep release assets or a local checkout as the public path; do not present npm as activated.",
     "- Public sharing boundary: do not attach raw provider payloads to public release reviews, PRs, issues, or Discussions.",
@@ -138,6 +144,10 @@ export function formatReleaseAssetsSmokeSummary(summary: ReleaseAssetsSmokeSumma
     ...summary.checks.map((check) => `| ${check} | pass |`),
     ""
   ].join("\n");
+}
+
+function formatReleaseReviewPath(artifactReviewOrder: ReleaseAssetsSmokeSummary["artifactReviewOrder"]): string {
+  return `Open \`release-assets-summary.md\`, then the demo audit \`${artifactReviewOrder[0]}\`, then \`${artifactReviewOrder[1]}\`, then \`${artifactReviewOrder[2]}\`.`;
 }
 
 async function requireFile(filePath: string, ruleId: string, findings: ReleaseAssetsSmokeFinding[]): Promise<boolean> {
@@ -495,7 +505,7 @@ function requiredValue(argv: string[], index: number): string {
 async function main(): Promise<void> {
   const findings = await runReleaseAssetsSmokeCheck(parseArgs(process.argv.slice(2)));
   if (findings.length === 0) {
-    console.log("Release asset smoke check passed. Open release-assets-summary.md, then the demo audit share-summary.md, scorecard.md, and recommendations.md.");
+    console.log(`Release asset smoke check passed. ${formatReleaseReviewPath(DEFAULT_ARTIFACT_REVIEW_ORDER)}`);
     return;
   }
 
