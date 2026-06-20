@@ -125,7 +125,8 @@ jobs:
 
           - CLI tarball: use the versioned `answerlens-cli-*.tgz` package for pinned local CLI runs before npm is visible
           - `answerlens-demo-audit.tar.gz`: unpack the fixture report and open `share-summary.md`, then `scorecard.md`, then `recommendations.md`
-          - The Release Distribution workflow runs `pnpm release:assets:smoke -- --dir dist` before uploading release assets
+          - The Release Distribution workflow runs `pnpm release:assets:smoke -- --dir dist --work-dir dist/release-assets-smoke-check --summary-out dist/release-assets-smoke-summary.md` before uploading release assets
+          - `release-assets-smoke-summary.md` is kept in the workflow summary and internal artifact as maintainer review evidence; do not treat it as standalone adoption proof
           - `answerlens-site.tar.gz`: inspect the compiled Pages bundle for docs, examples, starter, and release pages at this tag
           - `release-assets-manifest.json`: verify asset sizes and SHA-256 checksums before reusing downloaded release assets
           - `release-assets-summary.md`: read the verified asset table before forwarding or reusing downloaded release assets
