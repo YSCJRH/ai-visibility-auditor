@@ -1200,6 +1200,8 @@ async function checkReleaseAssetChecklistBoundary(rootDir: string, findings: Fin
         "gh release download vX.Y.Z",
         "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\"",
         "release-assets-smoke-summary.md",
+        "Release review path",
+        "open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`",
         "not as standalone adoption proof",
         "manifest checksums",
         "do not imply checksum coverage for that release",
