@@ -539,6 +539,27 @@ test("public-surface-check rejects release asset docs without downloaded manifes
   assert.ok(ruleIds.includes("release-asset-checklist-boundary"));
 });
 
+test("public-surface-check rejects release playbooks without the smoke summary review path", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  const playbookPath = path.join(rootDir, "docs/release-bump-playbook.md");
+  const playbook = await readFile(playbookPath, "utf8");
+  await writeFixtureFile(
+    rootDir,
+    "docs/release-bump-playbook.md",
+    playbook.replace(
+      "After the smoke run, confirm its `Release review path` line says to open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
+      ""
+    )
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const reviewPathFinding = findings.find(
+    (finding) => finding.ruleId === "release-asset-checklist-boundary" && finding.message.includes("Release review path")
+  );
+
+  assert.ok(reviewPathFinding);
+});
+
 test("public-surface-check rejects stable version drift across release and adoption surfaces", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, "apps/cli/package.json", JSON.stringify({ name: "@answerlens/cli", version: "0.3.7" }, null, 2));
@@ -1038,6 +1059,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "Include a release asset checklist with CLI tarball, `answerlens-demo-audit.tar.gz`, `answerlens-site.tar.gz`, `release-assets-manifest.json`, `release-assets-summary.md`, and `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
       "Run gh release download vX.Y.Z with release-assets-summary.md before corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\".",
       "Use release-assets-smoke-summary.md not as standalone adoption proof.",
+      "After the smoke run, confirm its `Release review path` line says to open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
       "The smoke command verifies manifest checksums before reusing downloaded release assets.",
       "If an older release does not have release-assets-manifest.json or release-assets-summary.md, do not imply checksum coverage for that release.",
       "In the Release Distribution workflow summary, review the Release asset manifest verified and Release asset smoke check passed sections before reusing downloaded release assets."
