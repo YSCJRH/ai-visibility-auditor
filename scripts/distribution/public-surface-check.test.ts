@@ -517,6 +517,27 @@ test("public-surface-check rejects release smoke summaries without a review path
   assert.ok(reviewPathFinding);
 });
 
+test("public-surface-check rejects release workflows without a release body review path", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  const workflowPath = path.join(rootDir, ".github/workflows/release-distribution.yml");
+  const workflow = await readFile(workflowPath, "utf8");
+  await writeFixtureFile(
+    rootDir,
+    ".github/workflows/release-distribution.yml",
+    workflow.replace(
+      '      - run: echo "`Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`"\n',
+      ""
+    )
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const reviewPathFinding = findings.find(
+    (finding) => finding.ruleId === "release-asset-manifest-gate" && finding.message.includes("Release review path")
+  );
+
+  assert.ok(reviewPathFinding);
+});
+
 test("public-surface-check rejects release asset docs without downloaded manifest verification", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -1294,6 +1315,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "      - run: cat dist/release-assets-summary.md >> \"$GITHUB_STEP_SUMMARY\"",
       "      - run: echo \"The Release Distribution workflow runs `pnpm release:assets:smoke -- --dir dist --work-dir dist/release-assets-smoke-check --summary-out dist/release-assets-smoke-summary.md` before uploading release assets\"",
       "      - run: echo \"`release-assets-smoke-summary.md` is kept in the workflow summary and internal artifact as maintainer review evidence; do not treat it as standalone adoption proof\"",
+      "      - run: echo \"`Release review path`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`\"",
       "      - run: echo \"`release-assets-manifest.json`: verify asset sizes and SHA-256 checksums\"",
       "      - run: echo \"`release-assets-summary.md`: read the verified asset table\"",
       "      - run: gh release upload \"$RELEASE_TAG\" dist/packages/*.tgz dist/answerlens-demo-audit.tar.gz dist/answerlens-site.tar.gz dist/release-assets-manifest.json dist/release-assets-summary.md --clobber",
