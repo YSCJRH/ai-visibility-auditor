@@ -5,6 +5,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { runDemoFixtureArtifactCheck } from "./demo-fixture-artifact-check.ts";
+import { findPublicClaimFindings } from "./public-surface-check.ts";
 import { runReleaseAssetsManifest } from "./release-assets-manifest.ts";
 
 export type ReleaseAssetsSmokeFinding = {
@@ -77,7 +78,7 @@ export async function runReleaseAssetsSmokeCheck(
   for (const file of REQUIRED_ASSET_FILES) {
     await requireFile(path.join(assetsDir, file), "release-asset-file", findings);
   }
-  await requireCliTarball(assetsDir, findings);
+  const cliTarballPath = await requireCliTarball(assetsDir, findings);
 
   await verifyManifest(assetsDir, findings);
   await verifySummary(assetsDir, findings);
@@ -88,6 +89,7 @@ export async function runReleaseAssetsSmokeCheck(
   const shouldCleanup = !options.keepWorkDir;
 
   try {
+    await verifyCliTarball(cliTarballPath, workDir, findings);
     await verifyDemoAuditBundle(assetsDir, workDir, findings);
     await verifySiteBundle(assetsDir, workDir, findings);
   } finally {
@@ -113,6 +115,7 @@ function buildSmokeSummary(assetsDir: string): ReleaseAssetsSmokeSummary {
     checks: [
       "verified release-assets-manifest.json checksums against downloaded files",
       "checked release-assets-summary.md boundary text",
+      "unpacked answerlens-cli-*.tgz and checked the package README public-claim boundary",
       "unpacked answerlens-demo-audit.tar.gz and validated the first-run packet",
       "checked answerlens-site.tar.gz release and demo entrypoints",
       "confirmed a versioned answerlens-cli-*.tgz is present for pinned local CLI runs while npm is not visible"
@@ -155,17 +158,18 @@ async function requireFile(filePath: string, ruleId: string, findings: ReleaseAs
   return false;
 }
 
-async function requireCliTarball(assetsDir: string, findings: ReleaseAssetsSmokeFinding[]): Promise<void> {
+async function requireCliTarball(assetsDir: string, findings: ReleaseAssetsSmokeFinding[]): Promise<string | null> {
   const directories = [assetsDir, path.join(assetsDir, "packages")];
-  try {
-    for (const directory of directories) {
+  for (const directory of directories) {
+    try {
       const entries = await readdir(directory, { withFileTypes: true });
-      if (entries.some((entry) => entry.isFile() && /^answerlens-cli-.+\.tgz$/.test(entry.name))) {
-        return;
+      const cliTarball = entries.find((entry) => entry.isFile() && /^answerlens-cli-.+\.tgz$/.test(entry.name));
+      if (cliTarball) {
+        return path.join(directory, cliTarball.name);
       }
+    } catch {
+      // Try the next release asset layout.
     }
-  } catch {
-    // Fall through to one targeted missing-CLI finding.
   }
 
   findings.push({
@@ -173,6 +177,7 @@ async function requireCliTarball(assetsDir: string, findings: ReleaseAssetsSmoke
     path: displayPath(path.join(assetsDir, "answerlens-cli-*.tgz")),
     message: "Downloaded release assets must include the versioned CLI tarball."
   });
+  return null;
 }
 
 async function verifyManifest(assetsDir: string, findings: ReleaseAssetsSmokeFinding[]): Promise<void> {
@@ -246,6 +251,66 @@ async function verifyDemoAuditBundle(
       message: finding.message
     });
   }
+}
+
+async function verifyCliTarball(
+  cliTarballPath: string | null,
+  workDir: string,
+  findings: ReleaseAssetsSmokeFinding[]
+): Promise<void> {
+  if (!cliTarballPath) {
+    return;
+  }
+
+  const extractDir = path.join(workDir, "cli");
+  if (!(await extractTarball(cliTarballPath, extractDir, "release-cli-tarball", findings))) {
+    return;
+  }
+
+  const readmePath = await findCliPackageReadme(extractDir);
+  if (!readmePath) {
+    findings.push({
+      ruleId: "release-cli-tarball-readme",
+      path: displayPath(cliTarballPath),
+      message: "CLI tarball must include the package README.md that release users will inspect before npm is visible."
+    });
+    return;
+  }
+
+  let readme: string;
+  try {
+    readme = await readFile(readmePath, "utf8");
+  } catch (error) {
+    findings.push({
+      ruleId: "release-cli-tarball-readme",
+      path: displayPath(readmePath),
+      message: `Unable to read CLI package README.md from tarball: ${errorMessage(error)}`
+    });
+    return;
+  }
+
+  for (const finding of findPublicClaimFindings("README.md", readme)) {
+    findings.push({
+      ruleId: "release-cli-tarball-readme",
+      path: `${displayPath(cliTarballPath)}:${finding.path}`,
+      message: `CLI package README.md must keep public claim boundaries for downloaded release assets: ${finding.message}`
+    });
+  }
+}
+
+async function findCliPackageReadme(extractDir: string): Promise<string | null> {
+  const candidates = [path.join(extractDir, "package", "README.md"), path.join(extractDir, "README.md")];
+  for (const candidate of candidates) {
+    try {
+      const stats = await stat(candidate);
+      if (stats.isFile()) {
+        return candidate;
+      }
+    } catch {
+      // Try the next common package archive shape.
+    }
+  }
+  return null;
 }
 
 async function verifySiteBundle(

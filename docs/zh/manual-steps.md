@@ -41,7 +41,7 @@
 4. `release-assets-manifest.json`，用于在复用 tarball 之前校验已下载文件的大小和 SHA-256 checksum。
 5. `release-assets-summary.md`，用于读取可转发的 verified asset table；它可以进入 release review，但不暴露 raw provider payloads。
 
-对于同时包含 `release-assets-manifest.json` 和 `release-assets-summary.md` 的 release，把 manifest、summary 和所有 assets 下载到同一个目录，然后在本地 checkout 中运行 smoke command。它会校验 manifest checksum、检查 `release-assets-summary.md`、解压 demo audit bundle、确认 `share-summary.md`、`scorecard.md`、`recommendations.md` 的阅读顺序，并检查编译后站点的 release 入口：
+对于同时包含 `release-assets-manifest.json` 和 `release-assets-summary.md` 的 release，把 manifest、summary 和所有 assets 下载到同一个目录，然后在本地 checkout 中运行 smoke command。它会校验 manifest checksum、检查 `release-assets-summary.md`、解压 CLI tarball 并检查 package README 的 npm 边界、解压 demo audit bundle、确认 `share-summary.md`、`scorecard.md`、`recommendations.md` 的阅读顺序，并检查编译后站点的 release 入口：
 
 ```bash
 assets_dir="$(mktemp -d)"
@@ -55,7 +55,7 @@ gh release download vX.Y.Z \
 corepack pnpm release:assets:smoke -- --dir "$assets_dir" --summary-out "$assets_dir/release-assets-smoke-summary.md"
 ```
 
-`release-assets-smoke-summary.md` 只能作为维护者 review 下载包的证据。不要把它单独当作 adoption proof；它只说明这组下载的 release assets 通过了本地完整性和 artifact 顺序检查。
+`release-assets-smoke-summary.md` 只能作为维护者 review 下载包的证据。不要把它单独当作 adoption proof；它只说明这组下载的 release assets 通过了本地完整性、package README 边界和 artifact 顺序检查。
 
 如果某个 release 早于 `release-assets-manifest.json` 或 `release-assets-summary.md`，不要把 checksum claim 回填进公开 release story；只检查已有 assets，并把这个缺口记录为 release metadata 历史。
 
