@@ -27,7 +27,7 @@
 - [ ] No ranking, traffic, or answer-surface placement guarantee is added.
 - [ ] Readiness, VAVR, and CPS are described as diagnostic signals, not platform rankings.
 - [ ] No fake proof, unauthorized adoption claim, customer proof, star count, download count, or growth percentage is added.
-- [ ] No `npm install @answerlens/cli` copy is added unless the public npm package is visible.
+- [ ] No `npm install`, `npx`, `pnpm dlx`, or equivalent `@answerlens/cli` package-runner copy is added unless the public npm package is visible.
 - [ ] Secrets remain in environment variables or GitHub secrets, not `runtime.yaml`, docs, starter configs, or public summaries.
 
 ## AnswerLens share summary

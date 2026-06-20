@@ -17,7 +17,7 @@ test("public-surface-check passes a minimal compliant public surface", async () 
   assert.deepEqual(findings, []);
 });
 
-test("public-surface-check rejects public overclaims, fake proof, premature npm install copy, robots drift, and workflow major drift", async () => {
+test("public-surface-check rejects public overclaims, fake proof, premature npm package copy, robots drift, and workflow major drift", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
     rootDir,
@@ -28,6 +28,8 @@ test("public-surface-check rejects public overclaims, fake proof, premature npm 
       "AnswerLens supports consumer AI UI scraping for proof.",
       "Customers love the aggregateRating, testimonial, download count, and star count proof.",
       "Install it with npm install @answerlens/cli.",
+      "Run it with npx @answerlens/cli audit.",
+      "Try pnpm dlx @answerlens/cli audit.",
       "The project robots.txt controls the host-level yscjrh.github.io/robots.txt behavior."
     ].join("\n")
   );
@@ -40,6 +42,7 @@ test("public-surface-check rejects public overclaims, fake proof, premature npm 
   assert.ok(ruleIds.includes("public-consumer-ui-scraping"));
   assert.ok(ruleIds.includes("public-fake-proof"));
   assert.ok(ruleIds.includes("public-npm-install-claim"));
+  assert.ok(findings.filter((finding) => finding.ruleId === "public-npm-install-claim").length >= 3);
   assert.ok(ruleIds.includes("public-robots-host-claim"));
   assert.ok(ruleIds.includes("workflow-action-major"));
 });
