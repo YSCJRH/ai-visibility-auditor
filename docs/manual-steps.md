@@ -48,6 +48,9 @@ gh release download vX.Y.Z \
   --pattern release-assets-summary.md \
   --dir "$assets_dir"
 corepack pnpm release:assets:manifest -- --verify "$assets_dir/release-assets-manifest.json"
+mkdir -p "$assets_dir/demo-audit-check"
+tar -xzf "$assets_dir/answerlens-demo-audit.tar.gz" -C "$assets_dir/demo-audit-check"
+node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out "$assets_dir/demo-audit-check/runs/static-good"
 ```
 
 If a release predates `release-assets-manifest.json` or `release-assets-summary.md`, do not backfill a checksum claim into the public release story; inspect the available assets and record the gap as release metadata history.

@@ -93,6 +93,9 @@ gh release download vX.Y.Z \
   --pattern release-assets-summary.md \
   --dir "$assets_dir"
 corepack pnpm release:assets:manifest -- --verify "$assets_dir/release-assets-manifest.json"
+mkdir -p "$assets_dir/demo-audit-check"
+tar -xzf "$assets_dir/answerlens-demo-audit.tar.gz" -C "$assets_dir/demo-audit-check"
+node --experimental-strip-types scripts/distribution/demo-fixture-artifact-check.ts --out "$assets_dir/demo-audit-check/runs/static-good"
 npm view @answerlens/cli version --json --fetch-timeout=5000 --fetch-retries=0
 corepack pnpm public:check
 corepack pnpm release:snapshot:refresh -- --write
@@ -101,7 +104,7 @@ corepack pnpm build:site
 corepack pnpm seo:check
 ```
 
-Open `release-assets-summary.md` first when you only need the human-readable checksum table; run the manifest verification command before reusing tarballs. In the Release Distribution workflow summary, review the `Release asset manifest verified` table before reusing downloaded release assets.
+Open `release-assets-summary.md` first when you only need the human-readable checksum table; run the manifest verification command and the unpacked demo audit check before reusing tarballs. In the Release Distribution workflow summary, review the `Release asset manifest verified` table before reusing downloaded release assets.
 
 If `release:snapshot:refresh -- --write` changes `scripts/distribution/releases-snapshot.json`, review the diff and ship a small truth-sync PR before making new Pages or release claims. If npm still returns `E404`, do not add npm install copy. If an older release does not have `release-assets-manifest.json` or `release-assets-summary.md`, do not imply checksum coverage for that release. Record trusted publishing or `NPM_TOKEN` as a manual step.
 
