@@ -68,6 +68,7 @@ test("release-assets-smoke-check writes a release review summary on success", as
   assert.deepEqual(findings, []);
   const summary = await readFile(summaryPath, "utf8");
   assert.match(summary, /## Release asset smoke check passed/);
+  assert.match(summary, /Release review path: Open `release-assets-summary\.md`, then the demo audit `share-summary\.md`, then `scorecard\.md`, then `recommendations\.md`\./);
   assert.match(summary, /Review order: `share-summary\.md`, then `scorecard\.md`, then `recommendations\.md`/);
   assert.match(summary, /do not present npm as activated/);
   assert.match(summary, /raw provider payloads/);
@@ -112,6 +113,7 @@ test("release-assets-smoke-check CLI accepts pnpm-style separator", async () => 
   ]);
 
   assert.match(stdout, /Release asset smoke check passed/);
+  assert.match(stdout, /Open `release-assets-summary\.md`, then the demo audit `share-summary\.md`, then `scorecard\.md`, then `recommendations\.md`\./);
   assert.match(await readFile(summaryPath, "utf8"), /Release asset smoke check passed/);
 });
 
@@ -124,6 +126,7 @@ test("formatReleaseAssetsSmokeSummary preserves public boundaries", () => {
   });
 
   assert.match(summary, /downloaded-assets/);
+  assert.match(summary, /Release review path: Open `release-assets-summary\.md`, then the demo audit `share-summary\.md`, then `scorecard\.md`, then `recommendations\.md`\./);
   assert.match(summary, /share-summary\.md`, then `scorecard\.md`, then `recommendations\.md/);
   assert.match(summary, /npm view @answerlens\/cli/);
   assert.match(summary, /do not present npm as activated/);
