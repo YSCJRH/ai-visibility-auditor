@@ -71,6 +71,9 @@ test("release-assets-smoke-check writes a release review summary on success", as
   assert.match(summary, /Review order: `share-summary\.md`, then `scorecard\.md`, then `recommendations\.md`/);
   assert.match(summary, /do not present npm as activated/);
   assert.match(summary, /raw provider payloads/);
+  assert.match(summary, /release-assets-manifest\.json/);
+  assert.match(summary, /release-assets-summary\.md/);
+  assert.match(summary, /answerlens-cli-\*\.tgz/);
   assert.match(summary, /package README public-claim boundary/);
   assert.match(summary, /answerlens-demo-audit\.tar\.gz/);
   assert.match(summary, /answerlens-site\.tar\.gz/);
