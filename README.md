@@ -30,10 +30,12 @@ Start with the report, not a setup guide:
    Try one public product site before you wire CI.
 4. [Add the GitHub Action](docs/github-action.md)
    Move the same report set into pull requests, artifact uploads, and `GITHUB_STEP_SUMMARY`.
+5. [Download latest release assets](https://github.com/YSCJRH/ai-visibility-auditor/releases/latest)
+   Use the versioned handoff when you want a tarball, demo audit bundle, or compiled site bundle; open `release-assets-summary.md` first, then the demo audit `share-summary.md`, `scorecard.md`, and `recommendations.md`.
 
 Across every step, keep the report order fixed: `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
 
-If you already know you want CI, the Action docs remain public, but the easiest path is still demo -> sample site -> real site -> Action.
+If you already know you want CI, the Action docs remain public, but the easiest path is still demo -> sample site -> real site -> Action -> release assets when you need a versioned handoff.
 
 For safe sharing and first-run feedback, keep [trust and safety](docs/trust-and-safety.md) and the [first-run story template](docs/first-run-story.md) beside the report.
 

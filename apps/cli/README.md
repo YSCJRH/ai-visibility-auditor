@@ -2,6 +2,8 @@
 
 `@answerlens/cli` is the publish-ready package for AnswerLens.
 
+Until the public npm package is visible, use the versioned GitHub release tarball or a local checkout for CLI runs.
+
 AnswerLens is a CLI-first AI visibility auditor for product websites.
 
 Core behaviors:

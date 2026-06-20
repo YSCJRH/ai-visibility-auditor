@@ -891,7 +891,7 @@ function renderLayout(siteUrl: string, page: PageSpec, updatedAt: string, locale
       .ctaLinkSecondary{background:#ffffff;color:var(--accent-strong);box-shadow:none}
       .ctaLinkSecondary:hover{border-color:rgba(15,118,110,.44);background:#f1f8f5}
       .journey{padding:0}
-      .stepGrid{display:grid;gap:14px;grid-template-columns:repeat(4,minmax(0,1fr));list-style:none;margin:0;padding:0}
+      .stepGrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));list-style:none;margin:0;padding:0}
       .journeyStep{display:grid;gap:10px;align-content:start;min-height:230px;padding:20px;border:1px solid var(--line);border-radius:8px;background:var(--surface);box-shadow:var(--shadow)}
       .journeyStep h3{margin:0;font-size:1.05rem;line-height:1.25}
       .journeyStep p{margin:0;color:var(--muted)}
@@ -949,8 +949,7 @@ function localeIndexPath(outDir: string, route: string, locale: Locale): string 
 }
 
 async function copyLocalizedRun(sourceDir: string, targetDir: string, locale: Locale): Promise<void> {
-  await rm(targetDir, { recursive: true, force: true });
-  await cp(sourceDir, targetDir, { recursive: true, force: true });
+  await copyPublicRun(sourceDir, targetDir);
 
   if (locale === "en") {
     return;
@@ -984,6 +983,15 @@ async function copyLocalizedRun(sourceDir: string, targetDir: string, locale: Lo
   } catch {
     // ignore when the localized HTML report has not been emitted
   }
+}
+
+async function copyPublicRun(sourceDir: string, targetDir: string): Promise<void> {
+  await rm(targetDir, { recursive: true, force: true });
+  await cp(sourceDir, targetDir, {
+    recursive: true,
+    force: true,
+    filter: (source) => !path.relative(sourceDir, source).split(path.sep).includes("raw")
+  });
 }
 
 function renderLocaleRedirectPage(siteUrl: string, route: string): string {
@@ -1123,10 +1131,8 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
   await mkdir(path.join(outDir, "en"), { recursive: true });
   await mkdir(path.join(outDir, "zh"), { recursive: true });
   await cp(path.resolve("assets"), path.join(outDir, "assets"), { recursive: true, force: true });
-  await rm(path.join(outDir, "examples", "static-good"), { recursive: true, force: true });
-  await rm(path.join(outDir, "starter", "example-run"), { recursive: true, force: true });
-  await cp(demoRunDir, path.join(outDir, "examples", "static-good"), { recursive: true, force: true });
-  await cp(consumerRunDir, path.join(outDir, "starter", "example-run"), { recursive: true, force: true });
+  await copyPublicRun(demoRunDir, path.join(outDir, "examples", "static-good"));
+  await copyPublicRun(consumerRunDir, path.join(outDir, "starter", "example-run"));
   await copyLocalizedRun(demoRunDir, path.join(outDir, "en", "examples", "static-good"), "en");
   await copyLocalizedRun(demoRunDir, path.join(outDir, "zh", "examples", "static-good"), "zh-CN");
   await copyLocalizedRun(consumerRunDir, path.join(outDir, "en", "starter", "example-run"), "en");
@@ -1495,12 +1501,13 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           </div>
         </section>
         <section class="section journey">
-          <div class="sectionHeader"><p class="eyebrow">Try it in this order</p><h2>See the output before setup, then run one real page.</h2><p>Start with a finished report, recreate it locally, run one public product site, and add GitHub Actions only after the report is worth reviewing again.</p></div>
+          <div class="sectionHeader"><p class="eyebrow">Try it in this order</p><h2>See the output before setup, then run one real page.</h2><p>Start with a finished report, recreate it locally, run one public product site, add GitHub Actions only after the report is worth reviewing again, and use release assets when you need a versioned handoff.</p></div>
           <ol class="stepGrid">
             ${renderJourneyStep("1", "Open the demo report", "Inspect the finished HTML report, summary, scorecard, and recommendations before installing anything.", new URL("examples/static-good/index.html", siteUrl).href, "Open demo")}
             ${renderJourneyStep("2", "Run the sample site", "Recreate the same output locally so the command and report files are familiar before you use your own URL.", `${REPO_URL}#run-the-60-second-fixture-demo`, "Run sample")}
             ${renderJourneyStep("3", "Audit one public site", "Run the quickstart against one product page set and read the summary before changing copy or wiring CI.", repoBlob("docs/quickstart.md"), "Open quickstart")}
             ${renderJourneyStep("4", "Add the Action", "Move the same report set into pull requests with the pinned starter workflow.", repoBlob("docs/github-action.md"), "Open Action docs")}
+            ${renderJourneyStep("5", "Reuse release assets", "Use the latest release as a versioned handoff. Open release-assets-summary.md before forwarding tarballs or demo bundles.", releases[0]?.html_url ?? new URL("releases/", siteUrl).href, "Open release")}
           </ol>
         </section>
         <section class="section grid">
@@ -1541,12 +1548,13 @@ export async function buildSite(options: BuildSiteOptions = {}): Promise<void> {
           </div>
         </section>
         <section class="section journey">
-          <div class="sectionHeader"><p class="eyebrow">按这个顺序试用</p><h2>先看输出，再设置；然后跑一个真实页面。</h2><p>先看一份完成的报告，在本地复现一次，再审计一个公开产品站点；只有当报告值得反复审阅时，再接入 GitHub Action。</p></div>
+          <div class="sectionHeader"><p class="eyebrow">按这个顺序试用</p><h2>先看输出，再设置；然后跑一个真实页面。</h2><p>先看一份完成的报告，在本地复现一次，再审计一个公开产品站点；只有当报告值得反复审阅时，再接入 GitHub Action；需要固定版本交接时，再使用 release assets。</p></div>
           <ol class="stepGrid">
             ${renderJourneyStep("1", "打开演示报告", "先看完成后的 HTML 报告、摘要、评分卡和修复建议，不需要安装任何东西。", new URL("examples/static-good/index.html", siteUrl).href, "打开演示")}
             ${renderJourneyStep("2", "运行示例站点", "在本地复现同一组输出，先熟悉命令和报告文件，再换成自己的网址。", `${REPO_URL}#run-the-60-second-fixture-demo`, "运行示例")}
             ${renderJourneyStep("3", "审计一个公开站点", "用 quickstart 跑一组公开产品页面，先读摘要，再决定是否改文案或接 CI。", repoBlob("docs/zh/quickstart.md"), "打开 quickstart")}
             ${renderJourneyStep("4", "添加 Action", "用固定版本的 starter workflow，把同一组报告放进 PR 审阅。", repoBlob("docs/zh/github-action.md"), "打开 Action 文档")}
+            ${renderJourneyStep("5", "复用发布资源", "把最新 release 当作固定版本交接包。转发 tarball 或 demo bundle 前，先打开 release-assets-summary.md。", releases[0]?.html_url ?? new URL("releases/", siteUrl).href, "打开发布页")}
           </ol>
         </section>
         <section class="section grid">

@@ -30,13 +30,15 @@ AnswerLens 是一个面向产品网站的命令行优先 AI 可见性审计器�
    先用一个公开产品站点试跑，再去接 CI。
 4. [添加 GitHub Action](docs/zh/github-action.md)
    把同一组报告放进 PR、产物上传和 `GITHUB_STEP_SUMMARY`。
+5. [下载最新发布资源](https://github.com/YSCJRH/ai-visibility-auditor/releases/latest)
+   需要固定版本 tarball、demo audit bundle 或编译站点 bundle 时使用；先打开 `release-assets-summary.md`，再看 demo audit 的 `share-summary.md`、`scorecard.md`、`recommendations.md`。
 
 每一步都保持同样的报告顺序：`share-summary.md`，然后 `scorecard.md`，最后 `recommendations.md`。
 第一次 CI 接入 PR 可以沿用 [starter bundle](docs/starter-bundle.md) 里的 `Adopter kit checklist` 和 `PR review packet`，让队友知道先看哪份 artifact，以及哪些 raw payloads 不能公开。
 
 ![AnswerLens starter packet preview](assets/starter-packet-preview.svg)
 
-如果你一开始就知道自己要接 CI，Action 文档当然仍然公开可用；但最容易完成的首次路径仍然是：演示报告 -> 示例站点 -> 真实站点 -> Action。
+如果你一开始就知道自己要接 CI，Action 文档当然仍然公开可用；但最容易完成的首次路径仍然是：演示报告 -> 示例站点 -> 真实站点 -> Action -> 需要固定版本交接时再用发布资源。
 
 ## 你会得到什么
 
