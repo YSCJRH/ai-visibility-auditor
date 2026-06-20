@@ -560,6 +560,27 @@ test("public-surface-check rejects release playbooks without the smoke summary r
   assert.ok(reviewPathFinding);
 });
 
+test("public-surface-check rejects manual steps without the smoke summary review path", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  const manualStepsPath = path.join(rootDir, "docs/manual-steps.md");
+  const manualSteps = await readFile(manualStepsPath, "utf8");
+  await writeFixtureFile(
+    rootDir,
+    "docs/manual-steps.md",
+    manualSteps.replace(
+      "After the smoke run, check the `Release review path` line in `release-assets-smoke-summary.md`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
+      ""
+    )
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const reviewPathFinding = findings.find(
+    (finding) => finding.ruleId === "release-asset-checklist-boundary" && finding.message.includes("Release review path")
+  );
+
+  assert.ok(reviewPathFinding);
+});
+
 test("public-surface-check rejects stable version drift across release and adoption surfaces", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(rootDir, "apps/cli/package.json", JSON.stringify({ name: "@answerlens/cli", version: "0.3.7" }, null, 2));
@@ -1080,6 +1101,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "gh release download vX.Y.Z",
       "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\"",
       "release-assets-smoke-summary.md",
+      "After the smoke run, check the `Release review path` line in `release-assets-smoke-summary.md`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
       "not upload it as adoption proof by itself",
       "manifest checksums",
       "Open by opening `share-summary.md`, then `scorecard.md`, then `recommendations.md`.",
@@ -1102,6 +1124,7 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "gh release download vX.Y.Z",
       "corepack pnpm release:assets:smoke -- --dir \"$assets_dir\" --summary-out \"$assets_dir/release-assets-smoke-summary.md\"",
       "release-assets-smoke-summary.md",
+      "跑完 smoke command 后，检查 `release-assets-smoke-summary.md` 里的 `Release review path`：先打开 `release-assets-summary.md`，再看 demo audit 的 `share-summary.md`、`scorecard.md`、`recommendations.md`。",
       "不要把它单独当作 adoption proof",
       "manifest checksum",
       "`share-summary.md`、`scorecard.md`、`recommendations.md`",

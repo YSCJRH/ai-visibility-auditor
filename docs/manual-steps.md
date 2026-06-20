@@ -52,6 +52,8 @@ corepack pnpm release:assets:smoke -- --dir "$assets_dir" --summary-out "$assets
 
 Use `release-assets-smoke-summary.md` as maintainer review evidence for the downloaded bundle. Do not upload it as adoption proof by itself; it only says the downloaded release assets passed local integrity, package README boundary, and artifact-order checks.
 
+After the smoke run, check the `Release review path` line in `release-assets-smoke-summary.md`: open `release-assets-summary.md`, then the demo audit `share-summary.md`, then `scorecard.md`, then `recommendations.md`.
+
 If a release predates `release-assets-manifest.json` or `release-assets-summary.md`, do not backfill a checksum claim into the public release story; inspect the available assets and record the gap as release metadata history.
 
 If `npm view @answerlens/cli` returns `404`, do not present npm as activated. Keep release assets and local checkout as the public install/download path until the registry package is visible.

@@ -57,6 +57,8 @@ corepack pnpm release:assets:smoke -- --dir "$assets_dir" --summary-out "$assets
 
 `release-assets-smoke-summary.md` 只能作为维护者 review 下载包的证据。不要把它单独当作 adoption proof；它只说明这组下载的 release assets 通过了本地完整性、package README 边界和 artifact 顺序检查。
 
+跑完 smoke command 后，检查 `release-assets-smoke-summary.md` 里的 `Release review path`：先打开 `release-assets-summary.md`，再看 demo audit 的 `share-summary.md`、`scorecard.md`、`recommendations.md`。
+
 如果某个 release 早于 `release-assets-manifest.json` 或 `release-assets-summary.md`，不要把 checksum claim 回填进公开 release story；只检查已有 assets，并把这个缺口记录为 release metadata 历史。
 
 如果 `npm view @answerlens/cli` 返回 `404`，不要把 npm 描述成已激活。继续把 release assets 和本地 checkout 作为公开下载与运行路径，直到 registry package 可见。
