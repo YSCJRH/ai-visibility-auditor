@@ -112,6 +112,45 @@ test("public-surface-check rejects broken local links in adoption Markdown", asy
   assert.match(linkFinding?.message ?? "", /missing-quickstart\.md/);
 });
 
+test("public-surface-check rejects broken local heading anchors in adoption Markdown", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "docs/demo-report.md",
+    [
+      "# Demo report",
+      artifactOrderText(),
+      `Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.`,
+      "Continue with [missing section](#missing-section)."
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const linkFinding = findings.find((finding) => finding.ruleId === "public-markdown-link-target");
+
+  assert.equal(linkFinding?.path, "docs/demo-report.md:4");
+  assert.match(linkFinding?.message ?? "", /#missing-section/);
+});
+
+test("public-surface-check allows valid local heading anchors in adoption Markdown", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "docs/demo-report.md",
+    [
+      "# Demo report",
+      "## Next steps",
+      artifactOrderText(),
+      `Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.`,
+      "Continue with [next steps](#next-steps)."
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+
+  assert.equal(findings.find((finding) => finding.ruleId === "public-markdown-link-target"), undefined);
+});
+
 test("public-surface-check allows generated run output links in adoption Markdown", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(

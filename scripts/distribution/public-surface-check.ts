@@ -370,6 +370,8 @@ function checkLocalAbsolutePaths(file: string, text: string, findings: Finding[]
 }
 
 async function checkMarkdownLinkTargets(rootDir: string, findings: Finding[]): Promise<void> {
+  const markdownAnchorCache = new Map<string, Set<string>>();
+
   for (const relativePath of MARKDOWN_LINK_SURFACES) {
     const absolutePath = path.join(rootDir, relativePath);
     let text: string;
@@ -388,20 +390,28 @@ async function checkMarkdownLinkTargets(rootDir: string, findings: Finding[]): P
     for (const [index, line] of lines.entries()) {
       for (const match of line.matchAll(/!?\[[^\]\n]*\]\((<[^>\n]+>|[^)\s]+)(?:\s+["'][^"']*["'])?\)/g)) {
         const href = match[1].trim().replace(/^<|>$/g, "");
-        const targetHref = href.split("#", 1)[0].split("?", 1)[0];
-        if (!targetHref || href.startsWith("#") || /^[a-z][a-z0-9+.-]*:/i.test(href)) {
+        if (!href || /^[a-z][a-z0-9+.-]*:/i.test(href)) {
+          continue;
+        }
+
+        const [hrefWithoutHash, rawHash] = href.split("#", 2);
+        const targetHref = hrefWithoutHash.split("?", 1)[0];
+        const anchorHref = rawHash?.split("?", 1)[0] ?? "";
+        if (!targetHref && !anchorHref) {
           continue;
         }
 
         let decodedHref = targetHref;
+        let decodedAnchor = anchorHref;
         try {
-          decodedHref = decodeURIComponent(targetHref);
+          decodedHref = targetHref ? decodeURIComponent(targetHref) : "";
+          decodedAnchor = anchorHref ? decodeURIComponent(anchorHref).toLowerCase() : "";
         } catch {
           findings.push(finding("public-markdown-link-target", relativePath, index, `Unable to decode local Markdown link ${href}.`));
           continue;
         }
 
-        const targetPath = path.resolve(path.dirname(absolutePath), decodedHref);
+        const targetPath = decodedHref ? path.resolve(path.dirname(absolutePath), decodedHref) : absolutePath;
         const relativeTarget = path.relative(rootDir, targetPath);
         if (relativeTarget.startsWith("..") || path.isAbsolute(relativeTarget)) {
           findings.push(finding("public-markdown-link-target", relativePath, index, `Local Markdown link ${href} points outside the repository.`));
@@ -423,10 +433,62 @@ async function checkMarkdownLinkTargets(rootDir: string, findings: Finding[]): P
               `Local Markdown link ${href} must point to an existing repository file or directory.`
             )
           );
+          continue;
+        }
+
+        if (decodedAnchor && /\.md$/i.test(targetPath)) {
+          let anchors = markdownAnchorCache.get(targetPath);
+          if (!anchors) {
+            anchors = markdownHeadingAnchors(await readFile(targetPath, "utf8"));
+            markdownAnchorCache.set(targetPath, anchors);
+          }
+          if (!anchors.has(decodedAnchor)) {
+            findings.push(
+              finding(
+                "public-markdown-link-target",
+                relativePath,
+                index,
+                `Local Markdown link ${href} must point to an existing heading anchor in ${path.relative(rootDir, targetPath).split(path.sep).join("/")}.`
+              )
+            );
+          }
         }
       }
     }
   }
+}
+
+function markdownHeadingAnchors(text: string): Set<string> {
+  const anchors = new Set<string>();
+  const counts = new Map<string, number>();
+  for (const line of text.split(/\r?\n/)) {
+    const match = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
+    if (!match) {
+      continue;
+    }
+
+    const base = githubMarkdownAnchor(match[2]);
+    if (!base) {
+      continue;
+    }
+
+    const count = counts.get(base) ?? 0;
+    counts.set(base, count + 1);
+    anchors.add(count === 0 ? base : `${base}-${count}`);
+  }
+  return anchors;
+}
+
+function githubMarkdownAnchor(heading: string): string {
+  return heading
+    .trim()
+    .replace(/<[^>]*>/g, "")
+    .replace(/`([^`]*)`/g, "$1")
+    .replace(/&amp;/g, "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .trim()
+    .replace(/\s+/g, "-");
 }
 
 function checkActionMajors(file: string, text: string, findings: Finding[]): void {
