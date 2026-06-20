@@ -37,7 +37,7 @@ Additional columns are ignored.
 - `search-console-summary.md`
 - `search-console-pages.json`
 
-It also writes the normal audit baseline artifacts, including `site-audit.json`, `scorecard.md`, `recommendations.md`, `share-summary.*`, and `run.json`.
+It also writes the normal audit baseline artifacts, including `share-summary.*`, `scorecard.md`, `recommendations.md`, `site-audit.json`, and `run.json`.
 
 ## Non-goals
 

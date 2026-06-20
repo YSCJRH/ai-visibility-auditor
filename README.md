@@ -331,17 +331,17 @@ It also generates IndexNow helper artifacts for the current audited key pages. T
 
 `audit` writes:
 
+- `share-summary.md`
+- `scorecard.md`
+- `recommendations.md`
+- `pr-snippet.md`
+- `index.html`
+- `run.json`
 - `site-audit.json`
 - `issues.json`
-- `recommendations.md`
-- `scorecard.md`
-- `index.html`
 - `normalized-pages.json`
 - `competitor-diff.md`
-- `share-summary.md`
 - `share-summary.json`
-- `pr-snippet.md`
-- `run.json`
 
 `eval` and `manual-import` additionally write:
 

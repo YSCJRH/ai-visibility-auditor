@@ -14,11 +14,11 @@ Instead of asking whether a site "does AI SEO," AnswerLens asks whether a produc
 
 ## Why it belongs in CI
 
-AI discoverability can regress when teams ship docs changes, redesign pages, remove internal links, or move proof content into JavaScript-heavy surfaces. Running AnswerLens in CI turns those changes into reviewable artifacts:
+AI discoverability can regress when teams ship docs changes, redesign pages, remove internal links, or move proof content into JavaScript-heavy surfaces. Running AnswerLens in CI turns those changes into a review packet that starts with the forwardable summary:
 
+- `share-summary.md` for job summaries
 - `scorecard.md` for readiness
 - `recommendations.md` for backlog items
-- `share-summary.md` for job summaries
 - `pr-snippet.md` for PR review
 
 ## Non-goals

@@ -563,6 +563,26 @@ test("public-surface-check rejects visual assets without a share-summary-first p
   assert.ok(ruleIds.includes("visual-share-packet-boundary"));
 });
 
+test("public-surface-check rejects output contract surfaces without share-summary-first review packets", async () => {
+  const rootDir = await createPublicSurfaceFixture();
+  await writeFixtureFile(
+    rootDir,
+    "docs/concepts/ci-for-ai-discoverability.md",
+    [
+      "# CI for AI Discoverability",
+      "- `scorecard.md` for readiness",
+      "- `recommendations.md` for backlog items",
+      "- `share-summary.md` for job summaries",
+      "- `pr-snippet.md` for PR review"
+    ].join("\n")
+  );
+
+  const findings = await runPublicSurfaceCheck({ rootDir });
+  const ruleIds = findings.map((finding) => finding.ruleId);
+
+  assert.ok(ruleIds.includes("review-packet-output-contract"));
+});
+
 test("public-surface-check rejects Action docs without first-CI PR packet boundaries", async () => {
   const rootDir = await createPublicSurfaceFixture();
   await writeFixtureFile(
@@ -628,6 +648,10 @@ async function createPublicSurfaceFixture(): Promise<string> {
       "No ranking guarantees and no consumer AI UI scraping.",
       "![AnswerLens starter packet preview](assets/starter-packet-preview.svg)",
       "Use the Adopter kit checklist and PR review packet to show which artifact to open and which raw payloads stay private.",
+      "- `share-summary.md`",
+      "- `scorecard.md`",
+      "- `recommendations.md`",
+      "- `pr-snippet.md`",
       `Share first runs with ${SHOW_AND_TELL_DISCUSSION_URL}.`
     ].join("\n")
   );
@@ -1057,6 +1081,22 @@ async function createPublicSurfaceFixture(): Promise<string> {
     ].join("\n")
   );
   await writeFixtureFile(rootDir, "docs/trust-and-safety.md", artifactOrderText());
+  await writeFixtureFile(
+    rootDir,
+    "docs/concepts/ci-for-ai-discoverability.md",
+    [
+      "# CI for AI Discoverability",
+      "- `share-summary.md` for job summaries",
+      "- `scorecard.md` for readiness",
+      "- `recommendations.md` for backlog items",
+      "- `pr-snippet.md` for PR review"
+    ].join("\n")
+  );
+  await writeFixtureFile(
+    rootDir,
+    "docs/search-console.md",
+    "It also writes the normal audit baseline artifacts, including `share-summary.*`, `scorecard.md`, `recommendations.md`, `site-audit.json`, and `run.json`."
+  );
   await writeFixtureFile(
     rootDir,
     "docs/self-dogfood-log.md",
